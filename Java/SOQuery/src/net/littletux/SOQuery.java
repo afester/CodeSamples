@@ -3,16 +3,12 @@ package net.littletux;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 class Item {
    private int badge_id;
@@ -75,7 +71,7 @@ public class SOQuery {
    public static void main(String[] args) throws IOException {
       URL url = new URL("http://api.stackexchange.com/2.1/badges?order=desc&sort=rank&site=stackoverflow");
       HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-      System.setProperty("http.proxyHost",  "emea-proxy.uk.oracle.com");
+      System.setProperty("http.proxyHost",  "proxy.sample.com");
 
       conn.connect();
       System.out.println("RC:" + conn.getResponseCode());      // 200
