@@ -11,23 +11,6 @@ public class Badge {
    private String award_count;
    private String badge_type;
    private String link;
-/*
-   private Badge(
-         int badge_id,
-         String rank,
-         String name,
-         String award_count,
-         String badge_type,
-         String link) {
-
-     this.badge_id = badge_id;
-     this.rank = rank;
-     this.name = name;
-     this.award_count = award_count;
-     this.badge_type = badge_type;
-     this.link = link;
-   }
-*/
 
    public String toString() {
       String result = "\nbadge_id: " + badge_id +

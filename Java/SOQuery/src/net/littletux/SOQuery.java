@@ -1,14 +1,28 @@
 package net.littletux;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class SOQuery {
 
@@ -24,12 +38,27 @@ public class SOQuery {
 	}
 
 
-	public void dumpBadges() throws IOException {
-		// Execute the query
-		URL url = new URL(
-				"http://api.stackexchange.com/2.1/badges?order=desc&sort=rank&site=stackoverflow");
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+	public URL createQuery(String method, Map<String,String> params) throws MalformedURLException {
+		String baseurl = "http://api.stackexchange.com/2.1/" + method + "?site=stackoverflow";
 
+		for (Map.Entry<String,String> param : params.entrySet()) {
+			String part = param.getKey() + "=" + param.getValue();
+			baseurl = baseurl + "&" + part;
+		}
+
+		URL url = new URL(baseurl);
+		return url;
+	}
+
+	public URL createQuery(String method) throws MalformedURLException {
+		return createQuery(method, new HashMap<String,String>());
+	}
+
+/*
+	public Object executeQuery1(URL url, Type clz) throws IOException {
+
+		// Execute the query
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.connect();
 		System.out.println("RC:" + conn.getResponseCode()); // 200
 		System.out.println("RM:" + conn.getResponseMessage()); // "OK"
@@ -45,16 +74,126 @@ public class SOQuery {
 
 		// deserialize the JSON response
 		Gson gson = new Gson();
-		Object res = gson.fromJson(result.toString(), Badges.class);
-		System.err.println(res);
+		return gson.fromJson(result.toString(), clz);
+	}
+*/
+	public <T> T executeQuery(URL url, Type clz) throws IOException {
+
+		// Execute the query
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.connect();
+		System.out.println("RC:" + conn.getResponseCode()); // 200
+		System.out.println("RM:" + conn.getResponseMessage()); // "OK"
+
+		StringBuffer result = new StringBuffer();
+		String line = "";
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				conn.getInputStream()));
+		while ((line = br.readLine()) != null) {
+			result.append(line + "\n");
+		}
+		br.close();
+
+		// deserialize the JSON response
+		Gson gson = new Gson();
+		return gson.fromJson(result.toString(), clz);
+	}
+/*
+	public <T> T executeQuery2(URL url) throws IOException {
+		// Execute the query
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.connect();
+		System.out.println("RC:" + conn.getResponseCode()); // 200
+		System.out.println("RM:" + conn.getResponseMessage()); // "OK"
+
+		StringBuffer result = new StringBuffer();
+		String line = "";
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				conn.getInputStream()));
+		while ((line = br.readLine()) != null) {
+			result.append(line + "\n");
+		}
+		br.close();
+
+		// deserialize the JSON response
+		Gson gson = new Gson();
+		Type dataType = new TypeToken<T>(){}.getType();
+		System.err.println(dataType);
+		return gson.fromJson(result.toString(), dataType);
+	}
+*/
+	public void dumpBadges() throws IOException {
+		
+		int page = 1;
+
+		Map<String,String> params = new HashMap<>();
+		params.put("pagesize",  "100");
+		params.put("order", "desc");
+		params.put("sort",  "rank");
+
+		boolean hasMore = true;
+		while(hasMore) {
+			URL url = createQuery("badges", params);
+			Type dataType = new TypeToken<CommonWrapper<Badge>>(){}.getType();
+			CommonWrapper<Badge> b = executeQuery(url, dataType);
+
+			System.err.println(b);
+			System.err.println(b.getItems().size());
+
+			hasMore = b.hasMore();
+			page++;
+			params.put("page",  "" + page);
+		}
 	}
 
+	public void dumpUser() throws IOException {
+		URL url = createQuery("users/1611055");
+		Type dataType = new TypeToken<CommonWrapper<User>>(){}.getType();
+		CommonWrapper<User> u = executeQuery(url, dataType);
 
-	public static void main(String[] args) {
+		System.err.println(u);
+		System.err.println(u.getItems().size());
+	}
+
+	public static void main(String[] args) throws IOException {
+		List selectedRowKeys = null;
+		if (selectedRowKeys != null || selectedRowKeys.size() > 0) {
+			System.out.println("Hello");
+		}
+/*		String rank = null; // card.substring(0,1);
+	    //String suit = card.substring(1);
+	    String cards = "A23456789TJQKDHSCl";
+	    String[] name = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King","Diamonds","Hearts","Spades","Clubs"};
+	    String c ="";
+	    for(int a = 0, b = 1; a<cards.length()-1; b=a+1, a++){
+	        if(rank==cards.substring(a,b)){
+	            c+=name[a];
+	        }
+
+
+	    }
+	    system.out.println(c);
+	    /*
+		byte[] buffer = {1,2,3,4,5};
+		InputStream is = new ByteArrayInputStream(buffer);
+
+		byte[] chunk = new byte[2];
+		while(is.available() > 0) {
+			int count = is.read(chunk);
+			if (count == chunk.length) {
+				System.out.println(Arrays.toString(chunk));
+			} else {
+				byte[] rest = new byte[count];
+				System.arraycopy(chunk, 0, rest, 0, count);
+				System.out.println(Arrays.toString(rest));
+			} 
+		}
+/*		
 		SOQuery soq = new SOQuery();
 
 		try {
 			soq.dumpBadges();
+			//soq.dumpUser();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
