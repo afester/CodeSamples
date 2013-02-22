@@ -1,25 +1,15 @@
 package net.littletux;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Scanner;
+import java.util.zip.GZIPInputStream;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -27,7 +17,7 @@ import com.google.gson.reflect.TypeToken;
 public class SOQuery {
 
 	public SOQuery() {
-		try {
+/*		try {
 			// Load additional system properties.
 			System.getProperties().load(new FileInputStream("soquery.properties"));
 		} catch (FileNotFoundException e) {
@@ -35,7 +25,7 @@ public class SOQuery {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
+*/	}
 
 
 	public URL createQuery(String method, Map<String,String> params) throws MalformedURLException {
@@ -45,7 +35,7 @@ public class SOQuery {
 			String part = param.getKey() + "=" + param.getValue();
 			baseurl = baseurl + "&" + part;
 		}
-
+System.err.println(baseurl);
 		URL url = new URL(baseurl);
 		return url;
 	}
@@ -82,21 +72,26 @@ public class SOQuery {
 		// Execute the query
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.connect();
-		System.out.println("RC:" + conn.getResponseCode()); // 200
+		System.out.println("RC:" + conn.getResponseCode());    // 200
 		System.out.println("RM:" + conn.getResponseMessage()); // "OK"
+		System.out.println("TYPE:" + conn.getContentType());
+		
+		// NOTE: Content is compressed by default.
+		// Some proxies decompress and deliver uncompressed content.
+		System.out.println("ENC:" + conn.getContentEncoding());
 
-		StringBuffer result = new StringBuffer();
-		String line = "";
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-				conn.getInputStream()));
-		while ((line = br.readLine()) != null) {
-			result.append(line + "\n");
+		InputStream content = conn.getInputStream(); // InputStream
+		if (conn.getContentEncoding().equals("gzip")) {
+			content = new GZIPInputStream(content);
 		}
-		br.close();
+		String result = new Scanner(content, "UTF-8").useDelimiter("\\A").next();
+		content.close();
+
+		// System.err.println(result);
 
 		// deserialize the JSON response
 		Gson gson = new Gson();
-		return gson.fromJson(result.toString(), clz);
+		return gson.fromJson(result, clz);
 	}
 /*
 	public <T> T executeQuery2(URL url) throws IOException {
@@ -155,40 +150,8 @@ public class SOQuery {
 		System.err.println(u.getItems().size());
 	}
 
-	public static void main(String[] args) throws IOException {
-		List selectedRowKeys = null;
-		if (selectedRowKeys != null || selectedRowKeys.size() > 0) {
-			System.out.println("Hello");
-		}
-/*		String rank = null; // card.substring(0,1);
-	    //String suit = card.substring(1);
-	    String cards = "A23456789TJQKDHSCl";
-	    String[] name = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King","Diamonds","Hearts","Spades","Clubs"};
-	    String c ="";
-	    for(int a = 0, b = 1; a<cards.length()-1; b=a+1, a++){
-	        if(rank==cards.substring(a,b)){
-	            c+=name[a];
-	        }
-
-
-	    }
-	    system.out.println(c);
-	    /*
-		byte[] buffer = {1,2,3,4,5};
-		InputStream is = new ByteArrayInputStream(buffer);
-
-		byte[] chunk = new byte[2];
-		while(is.available() > 0) {
-			int count = is.read(chunk);
-			if (count == chunk.length) {
-				System.out.println(Arrays.toString(chunk));
-			} else {
-				byte[] rest = new byte[count];
-				System.arraycopy(chunk, 0, rest, 0, count);
-				System.out.println(Arrays.toString(rest));
-			} 
-		}
-/*		
+	public static void main(String[] args) {
+		
 		SOQuery soq = new SOQuery();
 
 		try {
