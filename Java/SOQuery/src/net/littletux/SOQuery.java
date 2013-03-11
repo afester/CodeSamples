@@ -1,5 +1,7 @@
 package net.littletux;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -17,7 +19,7 @@ import com.google.gson.reflect.TypeToken;
 public class SOQuery {
 
 	public SOQuery() {
-/*		try {
+		try {
 			// Load additional system properties.
 			System.getProperties().load(new FileInputStream("soquery.properties"));
 		} catch (FileNotFoundException e) {
@@ -25,7 +27,7 @@ public class SOQuery {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-*/	}
+	}
 
 
 	public URL createQuery(String method, Map<String,String> params) throws MalformedURLException {
@@ -81,7 +83,8 @@ System.err.println(baseurl);
 		System.out.println("ENC:" + conn.getContentEncoding());
 
 		InputStream content = conn.getInputStream(); // InputStream
-		if (conn.getContentEncoding().equals("gzip")) {
+		String encoding = conn.getContentEncoding();
+		if (encoding != null && encoding.equals("gzip")) {
 			content = new GZIPInputStream(content);
 		}
 		String result = new Scanner(content, "UTF-8").useDelimiter("\\A").next();
