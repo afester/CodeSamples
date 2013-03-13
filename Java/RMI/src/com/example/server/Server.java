@@ -1,5 +1,6 @@
 package com.example.server;
 
+import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -32,6 +33,17 @@ public class Server implements StringServer {
     * @param args
     */
    public static void main(String[] args) {
+	   System.setProperty("java.security.policy","serversecurity.policy");
+
+	   /*
+	    * "If an RMI program does not install a security manager, RMI will not download classes 
+	    * (other than from the local class path) for objects received as arguments or return 
+	    * values of remote method invocations. This restriction ensures that the operations performed 
+	    * by downloaded code are subject to a security policy."
+	    */
+	  if (System.getSecurityManager() == null) {
+          System.setSecurityManager(new SecurityManager());
+      }
       System.out.println("Server is running ...");
 
       String name = "StringServer";
