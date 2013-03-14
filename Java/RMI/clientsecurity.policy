@@ -1,3 +1,10 @@
+// http://download.java.net/jdk8/docs/technotes/guides/security/PolicyFiles.html
+
 grant codeBase "file:bin/-" {
-    permission java.security.AllPermission;
+  // http://download.java.net/jdk7/archive/b123/docs/api/java/net/SocketPermission.html
+  // The host is expressed as a DNS name, as a numerical IP address, 
+  // or as "localhost" (for the local machine). 
+  // The wildcard "*" may be included once in a DNS name host specification. 
+  // If it is included, it must be in the leftmost position, as in "*.sun.com".
+  permission java.net.SocketPermission "*", "connect, resolve";
 };

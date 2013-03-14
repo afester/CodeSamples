@@ -1,3 +1,5 @@
+// http://download.java.net/jdk8/docs/technotes/guides/security/PolicyFiles.html
+
 grant codeBase "file:bin/-" {
-    permission java.security.AllPermission;
+  permission java.net.SocketPermission "*", "accept";
 };
