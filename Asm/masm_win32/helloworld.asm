@@ -1,4 +1,4 @@
-		.386				; 386 Processor Instruction Set
+		.586				; Pentium Processor Instruction Set
 		.model flat,stdcall		; Flat memory model and stdcall method
 
 		.data
