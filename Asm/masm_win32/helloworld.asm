@@ -15,8 +15,6 @@ MsgLen		equ     $-Message
 		extrn  ExitProcess@4 : PROC
 
 _main		PROC
-		hlt
-
 		; DWORD  bytes;    
 		mov     ebp, esp
 		sub     esp, 4
