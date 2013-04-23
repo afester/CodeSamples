@@ -5,28 +5,27 @@
 #include <iostream>
 #include <ostream>
 
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <sys/times.h>
+
+
 using namespace std;
 
-#include <time.h>
-#include <stdio.h>
-#include <unistd.h>
-
-#include <windows.h>
-
 class TickCounter {
-	typedef DWORD interval_type;
+	typedef clock_t interval_type;
 	interval_type m_start;
 	interval_type m_end;
-
 public:
 	inline void start() {
-		m_start = ::GetTickCount();
+           struct tms dummy;
+           m_start = times(&dummy);
 	}
 	 
 	inline void stop() {
-		m_end = ::GetTickCount();
+           struct tms dummy;
+           m_end = times(&dummy);
 	}
-
 	inline interval_type get_period_count() const {
 		return static_cast<interval_type>(m_end - m_start);
 	}
@@ -43,68 +42,42 @@ public:
 		return get_period_count() * interval_type(1000);
 	}
 };
-
-ostream& operator<<(ostream& o, TickCounter tc) {
-	o << "Ticks: " << tc.get_period_count();
-	return o;
-}
-
-
+ 
+ostream& operator<<(ostream& o, TickCounter tc);
 
 class ProcessTimeCounter {
-	FILETIME kernelStart;
-	FILETIME kernelEnd;
-	FILETIME userStart;
-	FILETIME userEnd;
+    struct rusage startValue;
+    struct rusage endValue;
 
 public:
 	inline void start() {
-		FILETIME discard1;
-		FILETIME discard2;
-		::GetProcessTimes(::GetCurrentProcess(), &discard1, &discard2, &kernelStart, &userStart);
+            getrusage(RUSAGE_SELF, &startValue);
 	}
 
 	inline void stop() {
-		FILETIME discard1;
-		FILETIME discard2;
-		::GetProcessTimes(::GetCurrentProcess(), &discard1, &discard2, &kernelEnd, &userEnd);
+            getrusage(RUSAGE_SELF, &endValue);
 	}
 
     /**
      * @return The number of microseconds the process spent executing kernel code
      */
 	unsigned int getKernelTime() {
-		ULARGE_INTEGER kernelStartCalc;
-		kernelStartCalc.LowPart = kernelStart.dwLowDateTime;
-		kernelStartCalc.HighPart = kernelStart.dwHighDateTime;
-		ULARGE_INTEGER kernelEndCalc;
-		kernelEndCalc.LowPart = kernelEnd.dwLowDateTime;
-		kernelEndCalc.HighPart = kernelEnd.dwHighDateTime;
-
-		return (kernelEndCalc.QuadPart - kernelStartCalc.QuadPart);
+            struct timeval result;
+            timersub(&endValue.ru_stime, &startValue.ru_stime, &result);
+	    return result.tv_sec * 1000000 + result.tv_usec;
 	}
 
     /**
      * @return The number of microseconds the process spent executing user code
      */
 	unsigned int getUserTime() {
-		ULARGE_INTEGER userStartCalc;
-		userStartCalc.LowPart = userStart.dwLowDateTime;
-		userStartCalc.HighPart = userStart.dwHighDateTime;
-		ULARGE_INTEGER userEndCalc;
-		userEndCalc.LowPart = userEnd.dwLowDateTime;
-		userEndCalc.HighPart = userEnd.dwHighDateTime;
-
-		return (userEndCalc.QuadPart - userStartCalc.QuadPart) / 10;
+            struct timeval result;
+            timersub(&endValue.ru_utime, &startValue.ru_utime, &result);
+	    return result.tv_sec * 1000000 + result.tv_usec;
 	}
 };
 
-
-ostream& operator<<(ostream& o, ProcessTimeCounter pt) {
-	o << "CPU Time: kernel=" << pt.getKernelTime() << "us (" << pt.getKernelTime()/1000 << "ms), user=" 
-                             << pt.getUserTime() << "us (" << pt.getUserTime()/1000 << "ms)";
-	return o;
-}
+ostream& operator<<(ostream& o, ProcessTimeCounter tc);
 
 /*
 class HiresCounter {
@@ -112,33 +85,25 @@ class HiresCounter {
 */
 
 class RealTimeCounter {
-	FILETIME realStart;
-	FILETIME realEnd;
-
+     struct timeval realStart;
+     struct timeval realEnd;
 public:
 	inline void start() {
-        GetSystemTimeAsFileTime(&realStart);
+        gettimeofday(&realStart, NULL);
 	}
 
 	inline void stop() {
-        GetSystemTimeAsFileTime(&realEnd);
+        gettimeofday(&realEnd, NULL);
 	}
 
 	unsigned int getRealTime() {
-		ULARGE_INTEGER realStartCalc;
-		realStartCalc.LowPart = realStart.dwLowDateTime;
-		realStartCalc.HighPart = realStart.dwHighDateTime;
-		ULARGE_INTEGER realEndCalc;
-		realEndCalc.LowPart = realEnd.dwLowDateTime;
-		realEndCalc.HighPart = realEnd.dwHighDateTime;
-
-		return (realEndCalc.QuadPart - realStartCalc.QuadPart) / 10;
+            struct timeval result;
+            timersub(&realEnd, &realStart, &result);
+	    return result.tv_sec * 1000000 + result.tv_usec;
 	}
 };
 
-ostream& operator<<(ostream& o, RealTimeCounter rt) {
-	o << "Real Time: " << rt.getRealTime() << "us (" << rt.getRealTime()/1000 << "ms)";
-	return o;
-}
+ostream& operator<<(ostream& o, RealTimeCounter tc);
+
 
 #endif

@@ -16,7 +16,8 @@ int main() {
 	p1.start();
     r1.start();
 
-	for (int i = 0;  i < 1650;  i++) 
+	//for (int i = 0;  i < 1650;  i++) 
+	for (int i = 0;  i < 880;  i++) 
         for (int j = 0;  j < 100000;  j++) { int x = i + j; f(x); }
 	usleep(500000);
 
