@@ -1,0 +1,14 @@
+CFLAGS=-pedantic -Wall
+OBJECTS=Win32Profile.o TestProfile.o
+
+all: $(OBJECTS)
+	g++ -o TestProfile $(OBJECTS)
+
+.cpp.o:
+	g++ -c $(CFLAGS) $< -o $@
+
+Win32Profile.o: Win32Profile.h
+TestProfile.o: Win32Profile.h
+
+clean:
+	rm *.o TestProfile.exe

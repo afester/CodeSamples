@@ -1,15 +1,5 @@
-CFLAGS=-pedantic -Wall
-#OBJECTS=Win32Profile.o TestProfile.o
-OBJECTS=UnixProfile.o TestProfile.o
-
-all: $(OBJECTS)
-	g++ -o TestProfile $(OBJECTS)
-
-.cpp.o:
-	g++ -c $(CFLAGS) $< -o $@
-
-UnixProfile.o: UnixProfile.h
-TestProfile.o: UnixProfile.h
-
-clean:
-	rm *.o TestProfile.exe
+ifeq ($(MSYSTEM),MINGW32)
+include Makefile.win32
+else
+include Makefile.unix
+endif
