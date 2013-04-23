@@ -1,3 +1,6 @@
+#ifndef __WIN32_PROFILE_H__
+#define __WIN32_PROFILE_H__
+
 #include <iostream>
 #include <ostream>
 
@@ -40,11 +43,7 @@ public:
 	}
 };
 
-ostream& operator<<(ostream& o, TickCounter tc) {
-	o << "Ticks: " << tc.get_period_count();
-	return o;
-}
-
+ostream& operator<<(ostream& o, TickCounter tc);
 
 
 class ProcessTimeCounter {
@@ -96,11 +95,7 @@ public:
 };
 
 
-ostream& operator<<(ostream& o, ProcessTimeCounter pt) {
-	o << "CPU Time: kernel=" << pt.getKernelTime() << "us (" << pt.getKernelTime()/1000 << "ms), user=" 
-                             << pt.getUserTime() << "us (" << pt.getUserTime()/1000 << "ms)";
-	return o;
-}
+ostream& operator<<(ostream& o, ProcessTimeCounter pt);
 
 /*
 class HiresCounter {
@@ -132,33 +127,6 @@ public:
 	}
 };
 
-ostream& operator<<(ostream& o, RealTimeCounter rt) {
-	o << "Real Time: " << rt.getRealTime() << "us (" << rt.getRealTime()/1000 << "ms)";
-	return o;
-}
+ostream& operator<<(ostream& o, RealTimeCounter rt);
 
-
-void f(int x) {
-}
-
-int main() {
-	TickCounter c1;
-	ProcessTimeCounter p1;
-	RealTimeCounter r1;
-
-	c1.start();
-	p1.start();
-    r1.start();
-
-	//for (int i = 0;  i < 3300;  i++) 
-    //    for (int j = 0;  j < 100000;  j++) { int x = i + j; f(x); }
-	usleep(999999);
-
-	c1.stop();
-	p1.stop();
-    r1.stop();
-
-	std::cerr << c1 << std::endl;
-	std::cerr << p1 << std::endl;
-	std::cerr << r1 << std::endl;
-}
+#endif

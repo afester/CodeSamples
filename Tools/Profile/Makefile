@@ -1,14 +1,11 @@
 CFLAGS=-pedantic -Wall
-OBJECTS=Profile.o
+OBJECTS=Win32Profile.o TestProfile.o
 
 all: $(OBJECTS)
-	g++ -o Profile $(OBJECTS)
+	g++ -o TestProfile $(OBJECTS)
 
 .cpp.o:
 	g++ -c $(CFLAGS) $< -o $@
 
 clean:
-	rm *.o Profile.exe
-
-asm:
-	g++ -S $(CFLAGS) Profile.cpp
+	rm *.o TestProfile.exe
