@@ -5,6 +5,7 @@
 
 #include "SortAlgorithm.h"
 #include "Quicksort.h"
+#include "Simplesort.h"
 
 
 using namespace std;
@@ -134,40 +135,6 @@ void BraindeadSort::doSort() {
     
     unsortedArray = sortedArray;
 }
-
-
-class SimpleSort : public SortAlgorithm {
-public:
-    SimpleSort();
-
-protected:
-    virtual void doSort();
-};
-
-SimpleSort::SimpleSort() : SortAlgorithm("SimpleSort") {
-}
-
-/**
- * SimpleSort sorting algorithm (in-place sorting):
- *  - Search the next value in the unsorted array
- *  - exchange values in the unsorted array
- *  - start from scratch
- *
- *  - Time complexity: O(n^2)
- *  - Space complexity: O(n)
- */
-void SimpleSort::doSort() {
-    for (int i = 0;  i < unsortedArray.size();  i++) {
-	for (int idx = 0;  idx < unsortedArray.size();  idx++) {
-	    if (unsortedArray[idx] > unsortedArray[i]) {
-		string temp = unsortedArray[idx];
-		unsortedArray[idx] = unsortedArray[i];
-		unsortedArray[i] = temp;
-	    }
-        }
-    }
-}
-
 
 int main() {
     BraindeadSort sort1;
