@@ -4,8 +4,10 @@
 #include <iterator>
 
 #include "SortAlgorithm.h"
-#include "Quicksort.h"
+
+#include "Braindeadsort.h"
 #include "Simplesort.h"
+#include "Quicksort.h"
 
 
 using namespace std;
@@ -93,48 +95,6 @@ void SortAlgorithm::run() {
     cerr << "  AFTER : " << unsortedArray << std::endl;
 }
 
-
-class BraindeadSort : public SortAlgorithm {
-public:
-    BraindeadSort();
-
-protected:
-    virtual void doSort();
-};
-
-
-BraindeadSort::BraindeadSort() : SortAlgorithm("BraindeadSort") {
-}
-
-/**
- * Brain-dead sorting algorithm:
- *  - Search the next value in the unsorted array
- *  - push this value into the sorted array
- *  - start from scratch
- *
- *  - Time complexity: O(n^2)
- *  - Space complexity: O(2n)
- */
-void BraindeadSort::doSort() {
-    vector<string> sortedArray;
-
-    string prev;
-    for (int i = 0;  i < unsortedArray.size();  i++) {
-
-	// Find the smallest element which is still larger than the previous element
-	string current;
-	for (int idx = 0;  idx < unsortedArray.size();  idx++) {
-	    if (unsortedArray[idx] > prev && (current == "" || unsortedArray[idx] < current)) {
-		current = unsortedArray[idx];
-	    }
-        }
-        sortedArray.push_back(current);
-
-        prev = current;
-    }
-    
-    unsortedArray = sortedArray;
-}
 
 int main() {
     BraindeadSort sort1;
