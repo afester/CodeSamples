@@ -19,8 +19,8 @@ SimpleSort::SimpleSort() : SortAlgorithm("SimpleSort") {
  *  - Space complexity: O(n)
  */
 void SimpleSort::doSort() {
-    for (int i = 0;  i < unsortedArray.size();  i++) {
-	for (int idx = 0;  idx < unsortedArray.size();  idx++) {
+    for (vector<string>::size_type i = 0;  i < unsortedArray.size();  i++) {
+	for (vector<string>::size_type idx = 0;  idx < unsortedArray.size();  idx++) {
 	    if (unsortedArray[idx] > unsortedArray[i]) {
 		string temp = unsortedArray[idx];
 		unsortedArray[idx] = unsortedArray[i];

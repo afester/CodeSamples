@@ -1,5 +1,11 @@
-all:
-	g++ -o SortAlgorithms SortAlgorithm.cpp Braindeadsort.cpp Simplesort.cpp Quicksort.cpp
+CFLAGS=-pedantic -Wall
+OBJECTS=SortAlgorithm.o Braindeadsort.o Simplesort.o Quicksort.o
+
+all: $(OBJECTS)
+	g++ -o SortAlgorithms $(OBJECTS)
+
+.cpp.o:
+	g++ $(CFLAGS) -c $< -o $@
 	
 clean:
-	rm SortAlgorithms.exe
+	rm *.o SortAlgorithms.exe

@@ -20,11 +20,11 @@ void BraindeadSort::doSort() {
     vector<string> sortedArray;
 
     string prev;
-    for (int i = 0;  i < unsortedArray.size();  i++) {
+    for (vector<string>::size_type i = 0;  i < unsortedArray.size();  i++) {
 
 	// Find the smallest element which is still larger than the previous element
 	string current;
-	for (int idx = 0;  idx < unsortedArray.size();  idx++) {
+	for (vector<string>::size_type idx = 0;  idx < unsortedArray.size();  idx++) {
 	    if (unsortedArray[idx] > prev && (current == "" || unsortedArray[idx] < current)) {
 		current = unsortedArray[idx];
 	    }
