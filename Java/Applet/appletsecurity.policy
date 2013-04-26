@@ -11,5 +11,6 @@ grant codeBase "file:/c:/Users/afester/Projects/CodeSamples/Java/Applet/build/cl
   // Also, an asterisk may appear at the end of the name, following a ".", or 
   // by itself, to signify a wildcard match. For example: "java.*" or "*" is 
   // valid, "*java" or "a*b" is not valid.
-  permission java.util.PropertyPermission "*", "read,write";  
+  permission java.util.PropertyPermission "*", "read,write";
+  permission java.awt.AWTPermission "accessClipboard";  
 };
