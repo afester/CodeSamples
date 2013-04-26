@@ -1,0 +1,15 @@
+// NOTE: 
+// * Copy this file to ${HOME}/.java.policy
+// * Make sure to adjust the codeBase URL to match the proper path
+
+// http://download.java.net/jdk8/docs/technotes/guides/security/PolicyFiles.html
+
+grant codeBase "file:/c:/Users/afester/Projects/CodeSamples/Java/Applet/build/classes/-" {
+  // http://download.java.net/jdk7/archive/b123/docs/api/java/util/PropertyPermission.html
+  // The name is the name of the property ("java.home", "os.name", etc). The 
+  // naming convention follows the hierarchical property naming convention. 
+  // Also, an asterisk may appear at the end of the name, following a ".", or 
+  // by itself, to signify a wildcard match. For example: "java.*" or "*" is 
+  // valid, "*java" or "a*b" is not valid.
+  permission java.util.PropertyPermission "*", "read,write";  
+};

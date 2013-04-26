@@ -12,14 +12,14 @@
 
       window.onload = function(e){
          applet = document.getElementById("sampleApplet");
-         applet.width = window.innerWidth - 5; 
-         applet.height = window.innerHeight - 5;
+         applet.width = window.innerWidth - 25; 
+         applet.height = window.innerHeight - 25;
       }
 
       window.onresize = function() {
     	 applet = document.getElementById("sampleApplet");
-    	 applet.width = window.innerWidth - 5;
-    	 applet.height = window.innerHeight - 5;
+    	 applet.width = window.innerWidth - 25;
+    	 applet.height = window.innerHeight - 25;
       }
     </script>
 
@@ -34,10 +34,10 @@
          **a consistent way to deploy Java applets across browsers on all platforms.**
     -->
     <applet id="sampleApplet" code = "com.example.SampleApplet.class"
-            codebase = "file:///C:/Users/afester/Projects/CodeSamples/Java/Applet/build/classes/" 
+            codebase = "../build/classes/" 
             alt = "Sample applet"
             name = "sampleApplet"
-            width = "640" height = "480" vspace="0" hspace="0">
+            width = "640" height = "480" vspace="10" hspace="10">
         <param name="sampleParam" value="sampleValue" />
     </applet>
 
