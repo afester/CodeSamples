@@ -1,6 +1,8 @@
 #ifndef __WIN32_PROFILE_H__
 #define __WIN32_PROFILE_H__
 
+#ifdef __cplusplus
+
 #include <iostream>
 #include <ostream>
 
@@ -128,5 +130,71 @@ public:
 };
 
 ostream& operator<<(ostream& o, RealTimeCounter rt);
+
+#else
+
+#include <time.h>
+#include <stdio.h>
+#include <unistd.h>
+
+#include <windows.h>
+
+typedef struct _ProcessTimeCounter {
+   FILETIME kernelStart;
+   FILETIME kernelEnd;
+   FILETIME userStart;
+   FILETIME userEnd;
+}ProcessTimeCounter;
+
+void ProcessTimeCounter_start(ProcessTimeCounter* obj) {
+   FILETIME discard1;
+   FILETIME discard2;
+   GetProcessTimes(GetCurrentProcess(), &discard1, &discard2, &obj->kernelStart, &obj->userStart);
+}
+
+void ProcessTimeCounter_stop(ProcessTimeCounter* obj) {
+   FILETIME discard1;
+   FILETIME discard2;
+   GetProcessTimes(GetCurrentProcess(), &discard1, &discard2, &obj->kernelEnd, &obj->userEnd);
+}
+
+unsigned int ProcessTimeCounter_getKernelTime(ProcessTimeCounter* obj) {
+   ULARGE_INTEGER kernelStartCalc;
+   ULARGE_INTEGER kernelEndCalc;
+
+   kernelStartCalc.LowPart = obj->kernelStart.dwLowDateTime;
+   kernelStartCalc.HighPart = obj->kernelStart.dwHighDateTime;
+   kernelEndCalc.LowPart = obj->kernelEnd.dwLowDateTime;
+   kernelEndCalc.HighPart = obj->kernelEnd.dwHighDateTime;
+
+   return (kernelEndCalc.QuadPart - kernelStartCalc.QuadPart);
+}
+
+unsigned int ProcessTimeCounter_getUserTime(ProcessTimeCounter* obj) {
+   ULARGE_INTEGER userStartCalc;
+   ULARGE_INTEGER userEndCalc;
+
+   userStartCalc.LowPart = obj->userStart.dwLowDateTime;
+   userStartCalc.HighPart = obj->userStart.dwHighDateTime;
+   userEndCalc.LowPart = obj->userEnd.dwLowDateTime;
+   userEndCalc.HighPart = obj->userEnd.dwHighDateTime;
+
+   return (userEndCalc.QuadPart - userStartCalc.QuadPart) / 10;
+}
+
+const char* ProcessTimeCounter_toString(ProcessTimeCounter* obj) {
+   static const char* format = "CPU Time: kernel=%dus (%dms), user=%dus (%dms)";
+   unsigned int kernelTime = ProcessTimeCounter_getKernelTime(obj);
+   unsigned int userTime = ProcessTimeCounter_getUserTime(obj);
+
+   char checkSize = 0;
+   int size = snprintf(&checkSize, sizeof(checkSize), format, kernelTime, kernelTime/1000, userTime, userTime/1000) + 1;
+
+   char* result = calloc(size, sizeof(char));
+   snprintf(result, size, format, kernelTime, kernelTime/1000, userTime, userTime/1000);
+   return result;
+}
+
+#endif
 
 #endif
