@@ -1,0 +1,4 @@
+* To disassemble a binary file, use
+
+    objdump -d -Mintel fileName
+
