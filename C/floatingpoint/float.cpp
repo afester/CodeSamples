@@ -1,0 +1,249 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+
+using namespace std;
+
+
+void hexprint(const void* array, size_t size) {
+   const unsigned char* data = (const unsigned char*) array;
+   for(int i = 0;  i < size;  i++) {
+      printf("%02x ", data[i]);
+   }
+}
+
+
+
+class PureFloat {
+
+   static const unsigned int BIT24 = 0x00800000;
+
+   union FloatUni {
+      float f;
+      struct {
+         unsigned int m : 23;	/* mantisse */
+         unsigned int e : 8;	/* exponent */
+         unsigned int s : 1;	/* sign */
+      } b;
+   };
+
+   FloatUni val;
+
+public:
+    PureFloat(float value = 0.0);
+
+    PureFloat(int e, int m);
+
+    float value() const;
+
+    int e() const;
+    
+    int m() const;
+
+    static PureFloat normalized(unsigned int resultMant, int newExp);
+
+    void dumpInfo() const;
+    
+    void dumpScientific() const;
+    
+    friend PureFloat operator+(const PureFloat& s1, const PureFloat& s2);
+
+    friend PureFloat operator-(const PureFloat& s1, const PureFloat& s2);
+
+    friend PureFloat operator*(const PureFloat& s1, const PureFloat& s2);
+
+    friend PureFloat operator/(const PureFloat& s1, const PureFloat& s2);
+};
+
+
+PureFloat::PureFloat(float aFloat) {
+    val.f = aFloat;
+}
+
+PureFloat::PureFloat(int e, int m) {
+    val.b.s = 0; // TODO!
+    val.b.e = e;
+    val.b.m = m;
+}
+
+float PureFloat::value() const {
+    return val.f;
+}
+
+int PureFloat::e() const {
+    return val.b.e;
+}
+
+int PureFloat::m() const {
+    return val.b.m;
+}
+
+void PureFloat::dumpInfo() const {
+    printf("  Value: %f\n", val.f);
+    printf("  Dump : ");
+    hexprint(&val.f, sizeof(val.f));
+    printf("\n  Sign : %d\n", val.b.s);
+    printf("  Exp  : %d\n", val.b.e);
+    printf("  Mant.: %d\n", val.b.m);
+    printf("                       %d-127\n", val.b.e);
+    printf("  %c(1 + %f) * 2\n",  val.b.s ? '-' : ' ', (float) val.b.m * 0.00000011920928955078125);
+    printf("= %c(1 + %f) * %d\n", val.b.s ? '-' : ' ', (float) val.b.m * 0.00000011920928955078125, 1 << (val.b.e - 127));
+    printf("= %c%f\n",      val.b.s ? '-' : ' ', (float) (1.0 + val.b.m * 0.00000011920928955078125) * (1 << (val.b.e - 127)));
+}
+
+
+void PureFloat::dumpScientific() const {
+    printf("                       %d-127\n", val.b.e);
+    printf("  %c%f * 2\n",  val.b.s ? '-' : ' ', 1.0+val.b.m * 0.00000011920928955078125);
+}
+
+
+PureFloat PureFloat::normalized(unsigned int resultMant, int newExp) {
+    while( (resultMant & 0xFF000000) != 0) {
+        newExp++;
+	resultMant >>= 1;
+    }
+    return PureFloat(newExp, resultMant & 0x007FFFFF);
+}
+
+
+PureFloat operator+(const PureFloat& s1, const PureFloat& s2) {
+    PureFloat X = s1;
+    PureFloat Y = s2;
+
+    // For sake of argument, assume the exponent in Y is less than or equal to the exponent in X
+    if (s2.e() > s1.e()) {
+	X = s2;
+	Y = s1;
+    }
+
+    // Step 1: calculate same number as s2, but with same exponent as s1,
+    // by adjusting the mantissa and the exponent
+    int eDiff = X.e() - Y.e();
+    int newExp = Y.e() + eDiff;
+    unsigned int newMant = (Y.m() | PureFloat::BIT24) >> eDiff;
+
+    // Step 2: add the mantissa from s1 to the adjusted mantissa of s2
+    unsigned int resultMant = (X.m() | PureFloat::BIT24) + newMant;
+    
+    // Step 3: create the result by normalizing the result mantissa and exponent
+    PureFloat result = PureFloat::normalized(resultMant, newExp);
+
+    return result;
+}
+
+
+PureFloat operator-(const PureFloat& s1, const PureFloat& s2) {
+    PureFloat X = s1;
+    PureFloat Y = s2;
+
+    // For sake of argument, assume the exponent in Y is less than or equal to the exponent in X
+    if (s2.e() > s1.e()) {
+	X = s2;
+	Y = s1;
+    }
+
+    // Step 1: calculate same number as s2, but with same exponent as s1,
+    // by adjusting the mantissa and the exponent
+    int eDiff = X.e() - Y.e();
+    int newExp = Y.e() + eDiff;
+    unsigned int newMant = (Y.m() | PureFloat::BIT24) >> eDiff;
+
+    // Step 2: add the mantissa from s1 to the adjusted mantissa of s2
+    unsigned int resultMant = (X.m() | PureFloat::BIT24) - newMant;
+    
+    // Step 3: create the result by normalizing the result mantissa and exponent
+    PureFloat result = PureFloat::normalized(resultMant, newExp);
+
+    return result;
+}
+
+
+PureFloat operator*(const PureFloat& s1, const PureFloat& s2) {
+    // First, convert the two representations to scientific notation. Thus, we explicitly represent the hidden 1. 
+    unsigned int Xm = s1.m() | PureFloat::BIT24;
+    unsigned int Ym = s2.m() | PureFloat::BIT24;
+    
+    // Let x be the exponent of X. Let y be the exponent of Y. 
+    // The resulting exponent (call it z) is the sum of the two exponents. z may need to be adjusted after the next step. 
+    int z = ((s1.e() - 127) + (s2.e() - 127)) + 127;
+
+    // Multiply the mantissa of X to the mantissa of Y. Call this result m. 
+    unsigned int m = ((unsigned long long) Xm * Ym) >> 23;
+
+    // If m is does not have a single 1 left of the radix point, then adjust the radix point so it does, and adjust the exponent z to compensate. 
+    PureFloat result = PureFloat::normalized(m, z);
+
+    // Add the sign bits, mod 2, to get the sign of the resulting multiplication.
+
+    // Convert back to the one byte floating point representation, truncating bits if needed.
+
+    return result;
+
+}
+
+
+PureFloat operator/(const PureFloat& s1, const PureFloat& s2) {
+    // First, convert the two representations to scientific notation. Thus, we explicitly represent the hidden 1. 
+    unsigned int Xm = s1.m() | PureFloat::BIT24;
+    unsigned int Ym = s2.m() | PureFloat::BIT24;
+    
+    // Let x be the exponent of X. Let y be the exponent of Y. 
+    // The resulting exponent (call it z) is the sum of the two exponents. z may need to be adjusted after the next step. 
+    int z = ((s1.e() - 127) - (s2.e() - 127)) + 127;
+
+    // divide  the mantissa of X to the mantissa of Y. Call this result m. 
+    unsigned int m = ((unsigned long long) Xm / Ym) >> 23;
+
+    // If m is does not have a single 1 left of the radix point, then adjust the radix point so it does, and adjust the exponent z to compensate. 
+    PureFloat result = PureFloat::normalized(m, z);
+
+    // Add the sign bits, mod 2, to get the sign of the resulting multiplication.
+
+    // Convert back to the one byte floating point representation, truncating bits if needed.
+
+    return result;
+}
+
+
+ostream& operator<<(ostream& o, const PureFloat& pf) {
+    o.unsetf ( std::ios::floatfield );                // floatfield not set
+    o.precision(7);
+    o << pf.value();
+    return o;
+}
+
+
+int main() {
+    PureFloat f1(42.987654321);
+    PureFloat f2(1.0);
+    PureFloat f3(2.21);
+    PureFloat f4(155.43);
+    PureFloat f5(123.234);
+    PureFloat f6(0.0005);
+    PureFloat f7(2.0);
+
+    PureFloat res = f1 + f2;
+    std::cerr << f1 << " + " << f2 << " = " << res << std::endl;
+
+    res = f4 + f3;
+    std::cerr << f4 << " + " << f3 << " = " << res << std::endl;
+
+    res = f3 + f4;
+    std::cerr << f3 << " + " << f4 << " = " << res << std::endl;
+
+    res = f5 + f6;
+    std::cerr << f5 << " + " << f6 << " = " << res << std::endl;
+    
+    res = f5 - f6;
+    std::cerr << f5 << " - " << f6 << " = " << res << std::endl;
+
+    res = f3 * f3;
+    std::cerr << f3 << " * " << f3 << " = " << res << std::endl;
+
+    res = f5 * f5;
+    std::cerr << f5 << " * " << f5 << " = " << res << std::endl;
+
+    res = f2 / f7;
+    std::cerr << f2 << " / " << f7 << " = " << res << std::endl;
+}
