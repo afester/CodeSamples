@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <iostream>
 
 using namespace std;
@@ -36,22 +36,45 @@ public:
 
     float value() const;
 
+    /**
+     * @return The biased (original) exponent.
+     */
     int e() const;
-    
-    int m() const;
+
+    /**
+     * @return The normalized mantissa (means, with the 24th bit set)
+     */
+    unsigned int m() const;
 
     static PureFloat normalized(unsigned int resultMant, int newExp);
 
     void dumpInfo() const;
     
     void dumpScientific() const;
-    
+
+    /**
+     * @return A string representaion of this floating point number.
+     */
+    string toString() const;
+
+    /**
+     * Adds two floating point numbers.
+     */
     friend PureFloat operator+(const PureFloat& s1, const PureFloat& s2);
 
+    /**
+     * Subtracts two floating point numbers.
+     */
     friend PureFloat operator-(const PureFloat& s1, const PureFloat& s2);
 
+    /**
+     * Multiplies two floating point numbers.
+     */
     friend PureFloat operator*(const PureFloat& s1, const PureFloat& s2);
 
+    /**
+     * Divides two floating point numbers.
+     */
     friend PureFloat operator/(const PureFloat& s1, const PureFloat& s2);
 };
 
@@ -74,8 +97,8 @@ int PureFloat::e() const {
     return val.b.e;
 }
 
-int PureFloat::m() const {
-    return val.b.m;
+unsigned int PureFloat::m() const {
+    return val.b.m | PureFloat::BIT24;
 }
 
 void PureFloat::dumpInfo() const {
@@ -107,25 +130,68 @@ PureFloat PureFloat::normalized(unsigned int resultMant, int newExp) {
 }
 
 
+// http://www.ragestorm.net/blogs/?p=57
+// Base algorithm to convert an IEEE754 floating point number into a string.
+// very small numbers and very large numbers are not supported yet.
+string PureFloat::toString() const {
+    char buffer[(sizeof(int)*8+1)];
+    string result = "";
+
+    // 1. Get sign, exponent and (normalized) mantissa
+    unsigned int sign = val.b.s;
+    unsigned int exp = val.b.e - 127;
+    unsigned int man = val.b.m;
+    man |= BIT24;
+
+    // 2. Start with minus sign if value is negative
+    if (sign) {
+        result = "-";
+    }
+
+    unsigned int number = 0;
+
+    // 3. Convert the integer part
+    number = man >> (23 - exp);
+    result.append(itoa(number, buffer, 10));
+
+    // 4. Convert the fractional part
+    unsigned int frac = man & ((1 << (23-exp)) - 1);
+    if (frac != 0) {
+        result.append(".");
+
+        unsigned int base = 1 << (23 - exp);
+        int c = 0;
+        while (frac != 0 && c++ < 6) {
+            frac *= 10;
+            number = frac / base;
+            result.append(itoa(number, buffer, base));
+            frac %= base;
+        }
+    }
+
+    return result;
+}
+
+
 PureFloat operator+(const PureFloat& s1, const PureFloat& s2) {
     PureFloat X = s1;
     PureFloat Y = s2;
 
-    // For sake of argument, assume the exponent in Y is less than or equal to the exponent in X
+    // Make sure that the exponent in Y is less than or equal to the exponent in X
     if (s2.e() > s1.e()) {
-	X = s2;
-	Y = s1;
+        X = s2;
+        Y = s1;
     }
 
     // Step 1: calculate same number as s2, but with same exponent as s1,
     // by adjusting the mantissa and the exponent
     int eDiff = X.e() - Y.e();
     int newExp = Y.e() + eDiff;
-    unsigned int newMant = (Y.m() | PureFloat::BIT24) >> eDiff;
+    unsigned int newMant = Y.m() >> eDiff;
 
     // Step 2: add the mantissa from s1 to the adjusted mantissa of s2
-    unsigned int resultMant = (X.m() | PureFloat::BIT24) + newMant;
-    
+    unsigned int resultMant = X.m() + newMant;
+
     // Step 3: create the result by normalizing the result mantissa and exponent
     PureFloat result = PureFloat::normalized(resultMant, newExp);
 
@@ -137,20 +203,20 @@ PureFloat operator-(const PureFloat& s1, const PureFloat& s2) {
     PureFloat X = s1;
     PureFloat Y = s2;
 
-    // For sake of argument, assume the exponent in Y is less than or equal to the exponent in X
+    // Make sure that the exponent in Y is less than or equal to the exponent in X
     if (s2.e() > s1.e()) {
-	X = s2;
-	Y = s1;
+        X = s2;
+        Y = s1;
     }
 
     // Step 1: calculate same number as s2, but with same exponent as s1,
     // by adjusting the mantissa and the exponent
     int eDiff = X.e() - Y.e();
     int newExp = Y.e() + eDiff;
-    unsigned int newMant = (Y.m() | PureFloat::BIT24) >> eDiff;
+    unsigned int newMant = Y.m() >> eDiff;
 
     // Step 2: add the mantissa from s1 to the adjusted mantissa of s2
-    unsigned int resultMant = (X.m() | PureFloat::BIT24) - newMant;
+    unsigned int resultMant = X.m() - newMant;
     
     // Step 3: create the result by normalizing the result mantissa and exponent
     PureFloat result = PureFloat::normalized(resultMant, newExp);
@@ -161,8 +227,8 @@ PureFloat operator-(const PureFloat& s1, const PureFloat& s2) {
 
 PureFloat operator*(const PureFloat& s1, const PureFloat& s2) {
     // First, convert the two representations to scientific notation. Thus, we explicitly represent the hidden 1. 
-    unsigned int Xm = s1.m() | PureFloat::BIT24;
-    unsigned int Ym = s2.m() | PureFloat::BIT24;
+    unsigned int Xm = s1.m();
+    unsigned int Ym = s2.m();
     
     // Let x be the exponent of X. Let y be the exponent of Y. 
     // The resulting exponent (call it z) is the sum of the two exponents. z may need to be adjusted after the next step. 
@@ -185,8 +251,8 @@ PureFloat operator*(const PureFloat& s1, const PureFloat& s2) {
 
 PureFloat operator/(const PureFloat& s1, const PureFloat& s2) {
     // First, convert the two representations to scientific notation. Thus, we explicitly represent the hidden 1. 
-    unsigned int Xm = s1.m() | PureFloat::BIT24;
-    unsigned int Ym = s2.m() | PureFloat::BIT24;
+    unsigned int Xm = s1.m();
+    unsigned int Ym = s2.m();
     
     // Let x be the exponent of X. Let y be the exponent of Y. 
     // The resulting exponent (call it z) is the sum of the two exponents. z may need to be adjusted after the next step. 
@@ -207,9 +273,7 @@ PureFloat operator/(const PureFloat& s1, const PureFloat& s2) {
 
 
 ostream& operator<<(ostream& o, const PureFloat& pf) {
-    o.unsetf ( std::ios::floatfield );                // floatfield not set
-    o.precision(7);
-    o << pf.value();
+    o << pf.toString();
     return o;
 }
 
@@ -220,8 +284,11 @@ int main() {
     PureFloat f3(2.21);
     PureFloat f4(155.43);
     PureFloat f5(123.234);
-    PureFloat f6(0.0005);
+    PureFloat f6(0.05);
     PureFloat f7(2.0);
+
+    string str = f1.toString();
+    cerr << str << endl;
 
     PureFloat res = f1 + f2;
     std::cerr << f1 << " + " << f2 << " = " << res << std::endl;
@@ -246,4 +313,5 @@ int main() {
 
     res = f2 / f7;
     std::cerr << f2 << " / " << f7 << " = " << res << std::endl;
+    f3.dumpInfo();
 }

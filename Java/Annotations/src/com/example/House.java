@@ -1,3 +1,4 @@
+package com.example;
 public interface House {
     @Deprecated
     void open();
