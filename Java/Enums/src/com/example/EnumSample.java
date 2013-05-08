@@ -4,6 +4,10 @@ import java.util.Arrays;
 
 public class EnumSample {
 
+   private Integer getIndex() {
+      return 7;
+   }
+   
 	public static void main(String[] args) {
 		System.out.println("enum as array:");
 		System.out.println("   " + Arrays.toString(Color.values()) + "\n");
@@ -26,6 +30,28 @@ public class EnumSample {
 		}catch(IllegalArgumentException iae) {
 			System.out.println("   \"" + color2 + "\" not found in enum.");
 		}
-		
+
+
+		// Sample of mapping an int to an enum:
+
+		EnumSample service = new EnumSample();
+
+		switch(Index.valueOf(service.getIndex())) {
+		   case ONE : System.out.println("ONE"); break;
+		   case TWO : System.out.println("TWO"); break;
+		   case INVALID : System.out.println("INVALID"); break;
+		   
+         case REG:
+            break;
+            
+         case THREE:
+            break;
+            
+         case ZERO:
+            break;
+            
+         default:
+            break;
+		}
 	}
 }
