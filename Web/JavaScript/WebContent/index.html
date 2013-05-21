@@ -1,5 +1,9 @@
+<!DOCTYPE html>
+
+<!--
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+-->
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
@@ -13,11 +17,71 @@
     function myFunction() {
         alert("Hello World")
     }
-    </script>
-  
-    <p><button onclick="myFunction()">Alert Box</button></p>
 
+    function getFormula() {
+    	var result = formula.value;
+
+    	result = result.replace("sin", "Math.sin");
+    	result = result.replace("cos", "Math.cos");
+    	result = result.replace("tan", "Math.tan");
+
+    	return result;
+    }
+    
+    function calculate() {
+        var theFormula = getFormula();
+    	var context = canvas.getContext('2d');
+
+        canvas.width = canvas.width; // seems not to work on all browsers, see
+        // http://stackoverflow.com/questions/2142535/how-to-clear-the-canvas-for-redrawing
+        // context.clearRect(0, 0, canvas.width, canvas.height); // However, this did not work for me ...
+
+        context.moveTo(10, 10);
+        context.lineTo(10, 470);    // Y axis
+        context.lineTo(630, 470);   // X axis
+
+        for (var y=470;y> 10;y -= 40) { 
+            context.moveTo(5, y); context.lineTo(15, y);
+        }
+
+        for (var x=10;x < 630;x += 40) { 
+            context.moveTo(x, 465); context.lineTo(x, 475);
+        }
+
+        context.stroke();
+
+        scale = (10 - 0) / 620;
+
+        var x = 0;
+        y = eval(theFormula);
+        if (y == Infinity) {
+        	y = 1000
+        }
+        ypos = 470 - (y / scale);
+        context.moveTo(10, ypos);
+
+        for (var x = scale;  x < 10;  x += scale) {
+        	y = eval(theFormula);
+
+        	xpos = 10 + x / scale;
+        	ypos = 470 - (y / scale);
+
+        	context.lineTo(xpos, ypos);
+        }
+        context.stroke();
+    }
+    </script>
+
+    <p><button onclick="myFunction()">Alert Box</button></p>
     <p><a href="" onclick="myFunction()">Alert Box</a></p>
 
+    <hr/>
+
+    <p><label>Formula: </label><input id="formula" value="2*sin(x)+2" /></p>
+    <p><label>Start: </label><input id="start" value="0" /></p>
+    <p><label>Stop: </label><input id="stop" value="10" /></p>
+    <p><button onclick="calculate()">Show graph</button></p>
+
+    <canvas id="canvas" width="640" height="480" style="background:lightgray"></canvas> 
   </body>
 </html>
