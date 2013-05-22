@@ -27,20 +27,33 @@
 
     	return result;
     }
-    
-    function calculate() {
-        var theFormula = getFormula();
-    	var context = canvas.getContext('2d');
 
-        canvas.width = canvas.width; // seems not to work on all browsers, see
-        // http://stackoverflow.com/questions/2142535/how-to-clear-the-canvas-for-redrawing
-        // context.clearRect(0, 0, canvas.width, canvas.height); // However, this did not work for me ...
+    function updateValues() {
+    	var xRange = toX.value - fromX.value;
+    	var yHalfRange = (xRange * 460) / (2 * 620);
 
-        context.moveTo(10, 10);
-        context.lineTo(10, 470);    // Y axis
-        context.lineTo(630, 470);   // X axis
+    	fromY.childNodes[0].data = -yHalfRange;  // note: child node must exist!
+    	toY.childNodes[0].data = yHalfRange;     // note: child node must exist!
 
-        for (var y=470;y> 10;y -= 40) { 
+    	startX = parseFloat(fromX.value);
+        stopX = toX.value;
+        
+        scalePerPixel = (stopX - startX) / 620;
+        
+        x0pos = -startX / scalePerPixel + 10;
+        y0pos = -fromY.childNodes[0].data / scalePerPixel + 10;
+    }
+
+
+    function drawAxis() {
+        context.moveTo(x0pos, 0);
+        context.lineTo(x0pos, 470);    // Y axis
+        context.moveTo(10, y0pos);
+        context.lineTo(630, y0pos);   // X axis
+
+        // draw the y scale
+        for (var y = 470; y > 10;y -= 40) {
+            context.strokeText("X", 0, y + 3);
             context.moveTo(5, y); context.lineTo(15, y);
         }
 
@@ -49,22 +62,36 @@
         }
 
         context.stroke();
+    }
 
-        scale = (10 - 0) / 620;
+    function calculate() {
+    	updateValues();
 
-        var x = 0;
+        var theFormula = getFormula();
+    	context = canvas.getContext('2d');
+
+        canvas.width = canvas.width; // seems not to work on all browsers, see
+        // http://stackoverflow.com/questions/2142535/how-to-clear-the-canvas-for-redrawing
+        // context.clearRect(0, 0, canvas.width, canvas.height); // However, this did not work for me ...
+
+        drawAxis();
+
+        // draw the graph
+        var x = startX;
         y = eval(theFormula);
         if (y == Infinity) {
-        	y = 1000
+        	y = 1000;
         }
-        ypos = 470 - (y / scale);
-        context.moveTo(10, ypos);
+        xpos = x0pos + x / scalePerPixel;
+        ypos = y0pos - y / scalePerPixel;
+        context.moveTo(xpos, ypos);
+        x += scalePerPixel;
 
-        for (var x = scale;  x < 10;  x += scale) {
+        for (var x = startX + scalePerPixel;  x < stopX;  x += scalePerPixel) {
         	y = eval(theFormula);
 
-        	xpos = 10 + x / scale;
-        	ypos = 470 - (y / scale);
+            xpos = x0pos + x / scalePerPixel;
+        	ypos = y0pos - y / scalePerPixel;
 
         	context.lineTo(xpos, ypos);
         }
@@ -77,9 +104,11 @@
 
     <hr/>
 
-    <p><label>Formula: </label><input id="formula" value="2*sin(x)+2" /></p>
-    <p><label>Start: </label><input id="start" value="0" /></p>
-    <p><label>Stop: </label><input id="stop" value="10" /></p>
+    <!-- <p><label>Formula: </label><input id="formula" value="2*sin(x)+2" /></p> -->
+    <p><label>Formula: </label><input id="formula" value="2*sin(x)" /></p>
+    <p><label>X axis: from: </label><input id="fromX" value="-3.15" /><label>to: </label><input id="toX" value="6.3" /></p>
+    <p><label>Y axis: from: </label> <label id="fromY">0</label> <label>to: </label> <label id="toY">0</label></p>
+
     <p><button onclick="calculate()">Show graph</button></p>
 
     <canvas id="canvas" width="640" height="480" style="background:lightgray"></canvas> 
