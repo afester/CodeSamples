@@ -11,7 +11,7 @@
       <title>JavaScript samples</title>
   </head>
 
-  <body>
+  <body onload="initialize();">
   
     <script>
     function getFormula() {
@@ -37,7 +37,7 @@
         
 
         scalePerPixel = (stopX - startX) / 620;
-        
+
         x0pos = -startX / scalePerPixel + 10;
         y0pos = -fromY.childNodes[0].data / scalePerPixel + 10;
     }
@@ -113,18 +113,24 @@
     }
 
     function calculate() {
-    	updateValues();
-
         theFormula = getFormula();
-    	context = canvas.getContext('2d');
-
+        drawGraph();
+    }
+    
+    function reset() {
+        updateValues();
         canvas.width = canvas.width; // seems not to work on all browsers, see
         // http://stackoverflow.com/questions/2142535/how-to-clear-the-canvas-for-redrawing
         // context.clearRect(0, 0, canvas.width, canvas.height); // However, this did not work for me ...
 
         drawAxis();
-        drawGraph();
     }
+
+    function initialize() {
+    	context = canvas.getContext('2d');
+    	reset();
+    }
+
     </script>
 
     <p><button onclick="myFunction()">Alert Box</button></p>
@@ -133,12 +139,15 @@
     <hr/>
 
     <!-- <p><label>Formula: </label><input id="formula" value="2*sin(x)+2" /></p> -->
-    <p><label>Formula: </label><input id="formula" value="2*sin(x)" /></p>
-    <p><label>X axis: from: </label><input id="fromX" value="-3.15" /><label>to: </label><input id="toX" value="6.3" /></p>
+    <p><label>f(x) = </label><input id="formula" value="2*sin(x)" />
+       <button onclick="calculate()">Draw graph</button></p>
+
+    <p><label>X axis: from: </label><input id="fromX" value="-3.15" />
+       <label>to: </label><input id="toX" value="6.3" />
+       <button onclick="reset()">Reset</button></p>
+
     <p><label>Y axis: from: </label> <label id="fromY">0</label> <label>to: </label> <label id="toY">0</label></p>
 
-    <p><button onclick="calculate()">Show graph</button></p>
-
-    <canvas id="canvas" width="640" height="480" style="background:lightgray"></canvas> 
+    <canvas onload="reset()" id="canvas" width="640" height="480" style="background:lightgray"></canvas> 
   </body>
 </html>
