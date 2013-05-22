@@ -14,10 +14,6 @@
   <body>
   
     <script>
-    function myFunction() {
-        alert("Hello World")
-    }
-
     function getFormula() {
     	var result = formula.value;
 
@@ -30,14 +26,16 @@
 
     function updateValues() {
     	var xRange = toX.value - fromX.value;
-    	var yHalfRange = (xRange * 460) / (2 * 620);
+    	startY = -(xRange * 460) / (2 * 620);
+    	stopY = -startY;
 
-    	fromY.childNodes[0].data = -yHalfRange;  // note: child node must exist!
-    	toY.childNodes[0].data = yHalfRange;     // note: child node must exist!
+    	fromY.childNodes[0].data = startY;  // note: child node must exist!
+    	toY.childNodes[0].data = stopY;     // note: child node must exist!
 
     	startX = parseFloat(fromX.value);
         stopX = toX.value;
         
+
         scalePerPixel = (stopX - startX) / 620;
         
         x0pos = -startX / scalePerPixel + 10;
@@ -51,23 +49,73 @@
         context.moveTo(10, y0pos);
         context.lineTo(630, y0pos);   // X axis
 
+        // TODO:  Fix tick calculation!
+        var mag = 620 / 20 * scalePerPixel;
+        if (mag > 50) {
+            tick = 1000;
+        } else if (mag > 5) {
+            tick = 100;
+        } else if (mag > 0.5) {
+            tick = 10;
+        } else if (mag > 0.05) {
+            tick = 1;
+        } else if (mag > 0.005) {
+            tick = 0.1;
+        } else {
+            alert("INVALID SCALE!")    // TODO ...
+        }
+
         // draw the y scale
-        for (var y = 470; y > 10;y -= 40) {
-            context.strokeText("X", 0, y + 3);
-            context.moveTo(5, y); context.lineTo(15, y);
+        for (var y = -tick; y > startY; y -= tick) {
+        	ypos = y0pos - y / scalePerPixel;
+        	context.moveTo(x0pos - 5, ypos); context.lineTo(x0pos + 5, ypos);
+        }
+        for (var y = tick; y < stopY; y += tick) {
+            // context.strokeText("X", 0, y + 3);
+            ypos = y0pos - y / scalePerPixel;
+            context.moveTo(x0pos - 5, ypos); context.lineTo(x0pos + 5, ypos);
         }
 
-        for (var x=10;x < 630;x += 40) { 
-            context.moveTo(x, 465); context.lineTo(x, 475);
+        // draw the x scale
+        for (var x = -tick; x > startX; x -= tick) {
+            xpos = x0pos + x / scalePerPixel;
+            context.moveTo(xpos, y0pos - 5); context.lineTo(xpos, y0pos + 5);
+        }
+        for (var x = tick; x < stopX; x += tick) {
+        	xpos = x0pos + x / scalePerPixel;
+            context.moveTo(xpos, y0pos - 5); context.lineTo(xpos, y0pos + 5);
         }
 
+        context.stroke();
+    }
+
+    function drawGraph() {
+        // draw the graph
+        var x = startX;
+        y = eval(theFormula);
+        if (y == Infinity) {
+            y = 1000;
+        }
+        xpos = x0pos + x / scalePerPixel;
+        ypos = y0pos - y / scalePerPixel;
+        context.moveTo(xpos, ypos);
+        x += scalePerPixel;
+    
+        for (var x = startX + scalePerPixel;  x < stopX;  x += scalePerPixel) {
+            y = eval(theFormula);
+    
+            xpos = x0pos + x / scalePerPixel;
+            ypos = y0pos - y / scalePerPixel;
+    
+            context.lineTo(xpos, ypos);
+        }
         context.stroke();
     }
 
     function calculate() {
     	updateValues();
 
-        var theFormula = getFormula();
+        theFormula = getFormula();
     	context = canvas.getContext('2d');
 
         canvas.width = canvas.width; // seems not to work on all browsers, see
@@ -75,27 +123,7 @@
         // context.clearRect(0, 0, canvas.width, canvas.height); // However, this did not work for me ...
 
         drawAxis();
-
-        // draw the graph
-        var x = startX;
-        y = eval(theFormula);
-        if (y == Infinity) {
-        	y = 1000;
-        }
-        xpos = x0pos + x / scalePerPixel;
-        ypos = y0pos - y / scalePerPixel;
-        context.moveTo(xpos, ypos);
-        x += scalePerPixel;
-
-        for (var x = startX + scalePerPixel;  x < stopX;  x += scalePerPixel) {
-        	y = eval(theFormula);
-
-            xpos = x0pos + x / scalePerPixel;
-        	ypos = y0pos - y / scalePerPixel;
-
-        	context.lineTo(xpos, ypos);
-        }
-        context.stroke();
+        drawGraph();
     }
     </script>
 
