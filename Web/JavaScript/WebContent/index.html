@@ -29,8 +29,8 @@
     	startY = -(xRange * 460) / (2 * 620);
     	stopY = -startY;
 
-    	fromY.childNodes[0].data = startY;  // note: child node must exist!
-    	toY.childNodes[0].data = stopY;     // note: child node must exist!
+    	fromY.childNodes[0].data = Math.round(startY * 100) / 100;  // note: child node must exist!
+    	toY.childNodes[0].data = Math.round(stopY * 100) / 100;     // note: child node must exist!
 
     	startX = parseFloat(fromX.value);
         stopX = toX.value;
@@ -67,25 +67,46 @@
             alert("INVALID SCALE!")    // TODO ...
         }
 
+        // alert(context.font);
+
         // draw the y scale
         for (var y = -tick; y > startY; y -= tick) {
         	ypos = y0pos - y / scalePerPixel;
         	context.moveTo(x0pos - 5, ypos); context.lineTo(x0pos + 5, ypos);
+
+        	var value = Math.round(y * 10) / 10;
+
+        	//var textMetrics = context.measureText(value);
+        	//var boxWidth = textMetrics.actualBoundingBoxLeft + textMetrics.actualBoundingBoxRight;
+        	//alert(textMetrics.actualBoundingBoxLeft + "," + textMetrics.actualBoundingBoxRight + "," +
+        	//      textMetrics.fontBoundingBoxAscent  +","+ textMetrics.fontBoundingBoxDescent + ","+
+        	//      textMetrics.width + "," + textMetrics.height);
+        	//var boxHeight = textMetrics.actualBoundingBoxAscent  + textMetrics.actualBoundingBoxDescent;
+            //context.strokeText(value, x0pos - boxWidth, ypos + boxHeight/2);
+        	context.strokeText(value, x0pos - 15, ypos + 3);
         }
         for (var y = tick; y < stopY; y += tick) {
-            // context.strokeText("X", 0, y + 3);
             ypos = y0pos - y / scalePerPixel;
             context.moveTo(x0pos - 5, ypos); context.lineTo(x0pos + 5, ypos);
+
+            var value = Math.round(y * 10) / 10;
+            context.strokeText(value, x0pos - 15, ypos + 3);
         }
 
         // draw the x scale
         for (var x = -tick; x > startX; x -= tick) {
             xpos = x0pos + x / scalePerPixel;
             context.moveTo(xpos, y0pos - 5); context.lineTo(xpos, y0pos + 5);
+
+            var value = Math.round(x * 10) / 10
+            context.strokeText(value, xpos - 5, y0pos + 15);
         }
         for (var x = tick; x < stopX; x += tick) {
         	xpos = x0pos + x / scalePerPixel;
             context.moveTo(xpos, y0pos - 5); context.lineTo(xpos, y0pos + 5);
+
+            var value = Math.round(x * 10) / 10
+            context.strokeText(value, xpos - 5, y0pos + 15);
         }
 
         context.stroke();
@@ -124,54 +145,72 @@
     
     function reset() {
         updateValues();
+
         canvas.width = canvas.width; // seems not to work on all browsers, see
         // http://stackoverflow.com/questions/2142535/how-to-clear-the-canvas-for-redrawing
         // context.clearRect(0, 0, canvas.width, canvas.height); // However, this did not work for me ...
+        context.font = '12px arial,sans-serif';
 
         drawAxis();
     }
 
     function initialize() {
+    	
+    	// create global variables for the elements we want to access.
+    	// Not all browsers support the global element variables, especially not
+    	// in HTML5 mode.
+        formula = document.getElementById("_formula");
+        graphColor = document.getElementById("_graphColor");
+        fromX = document.getElementById("_fromX");
+        toX = document.getElementById("_toX");
+        fromY = document.getElementById("_fromY");
+        toY = document.getElementById("_toY");
+        canvas = document.getElementById("_canvas"); 
+
     	context = canvas.getContext('2d');
     	reset();
     }
 
     </script>
 
-    <p><button onclick="myFunction()">Alert Box</button></p>
-    <p><a href="" onclick="myFunction()">Alert Box</a></p>
+    <table>
 
-    <hr/>
+      <tr>
+        <td><label>f(x) = </label><input id="_formula" value="2*sin(x)" /></td>
+        <td><label>Color: </label><select id="_graphColor" name="graphColor">
+                                     <option value="aqua">Aqua</option>
+                                     <option value="black">Black</option>
+                                     <option value="blue">Blue</option>
+                                     <option value="fuchsia">Fuchsia</option>
+                                     <option value="gray">Gray</option>
+                                     <option value="green">Green</option>
+                                     <option value="lime">Lime</option>
+                                     <option value="maroon">Maroon</option>
+                                     <option value="navy">Navy</option>
+                                     <option value="olive">Olive</option>
+                                     <option value="purple">Purple</option>
+                                     <option value="red">Red</option>
+                                     <option value="silver">Silver</option>
+                                     <option value="teal">Teal</option>
+                                     <option value="white">White</option>
+                                     <option value="yellow">Yellow</option>
+                                   </select></td>
+        <td><button onclick="calculate()">Draw graph</button></td>
+      </tr>
 
-    <!-- <p><label>Formula: </label><input id="formula" value="2*sin(x)+2" /></p> -->
-    <p><label>f(x) = </label><input id="formula" value="2*sin(x)" />
-       <label>Color: </label>
-       <select id="graphColor" name="graphColor">
-         <option value="aqua">Aqua</option>
-         <option value="black">Black</option>
-         <option value="blue">Blue</option>
-         <option value="fuchsia">Fuchsia</option>
-         <option value="gray">Gray</option>
-         <option value="green">Green</option>
-         <option value="lime">Lime</option>
-         <option value="maroon">Maroon</option>
-         <option value="navy">Navy</option>
-         <option value="olive">Olive</option>
-         <option value="purple">Purple</option>
-         <option value="red">Red</option>
-         <option value="silver">Silver</option>
-         <option value="teal">Teal</option>
-         <option value="white">White</option>
-         <option value="yellow">Yellow</option>
-       </select>
-       <button onclick="calculate()">Draw graph</button></p>
+      <tr>
+        <td><label>X axis: from: </label><input id="_fromX" value="-3.15" /></td>
+        <td><label>to: </label><input id="_toX" value="6.3" /></td>
+        <td><button onclick="reset()">Reset</button></td>
+      </tr>
 
-    <p><label>X axis: from: </label><input id="fromX" value="-3.15" />
-       <label>to: </label><input id="toX" value="6.3" />
-       <button onclick="reset()">Reset</button></p>
+      <tr>    
+        <td><label>Y axis: from: </label> <label id="_fromY">0</label></td>
+        <td><label>to: </label> <label id="_toY">0</label></td>
+      </tr>
 
-    <p><label>Y axis: from: </label> <label id="fromY">0</label> <label>to: </label> <label id="toY">0</label></p>
+    </table>
 
-    <canvas onload="reset()" id="canvas" width="640" height="480" style="background:lightgray"></canvas> 
+    <canvas id="_canvas" width="640" height="480" style="background:lightgray"></canvas> 
   </body>
 </html>
