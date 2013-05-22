@@ -44,6 +44,8 @@
 
 
     function drawAxis() {
+    	context.beginPath();
+    	
         context.moveTo(x0pos, 0);
         context.lineTo(x0pos, 470);    // Y axis
         context.moveTo(10, y0pos);
@@ -90,6 +92,9 @@
     }
 
     function drawGraph() {
+    	context.beginPath();
+    	context.strokeStyle = graphColor.value;
+
         // draw the graph
         var x = startX;
         y = eval(theFormula);
@@ -100,7 +105,7 @@
         ypos = y0pos - y / scalePerPixel;
         context.moveTo(xpos, ypos);
         x += scalePerPixel;
-    
+
         for (var x = startX + scalePerPixel;  x < stopX;  x += scalePerPixel) {
             y = eval(theFormula);
     
@@ -140,6 +145,25 @@
 
     <!-- <p><label>Formula: </label><input id="formula" value="2*sin(x)+2" /></p> -->
     <p><label>f(x) = </label><input id="formula" value="2*sin(x)" />
+       <label>Color: </label>
+       <select id="graphColor" name="graphColor">
+         <option value="aqua">Aqua</option>
+         <option value="black">Black</option>
+         <option value="blue">Blue</option>
+         <option value="fuchsia">Fuchsia</option>
+         <option value="gray">Gray</option>
+         <option value="green">Green</option>
+         <option value="lime">Lime</option>
+         <option value="maroon">Maroon</option>
+         <option value="navy">Navy</option>
+         <option value="olive">Olive</option>
+         <option value="purple">Purple</option>
+         <option value="red">Red</option>
+         <option value="silver">Silver</option>
+         <option value="teal">Teal</option>
+         <option value="white">White</option>
+         <option value="yellow">Yellow</option>
+       </select>
        <button onclick="calculate()">Draw graph</button></p>
 
     <p><label>X axis: from: </label><input id="fromX" value="-3.15" />
