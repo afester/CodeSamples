@@ -1,16 +1,26 @@
 @CHARSET "ISO-8859-1";
 
+html, body {
+	height: 100%;
+}
+
 body {
 	background: #C9E6FF;
 }
 
-#_canvas {
+#_leftColumn {
+    /*background-color: #00ff00; /* DEBUG */
+
+    height: 100%;
+    width: 700px;
+    float: left;
 }
 
 #_graph {
-    height: 100%;
+    /*background-color: #ffff00; /* DEBUG */
+
+	height: 480px;
     width: 640px;
-    float: left;
 
     background-color : #ffffff;
     padding: 10px 10px 0px 5px;
@@ -20,7 +30,7 @@ body {
 }
 
 #_legend {
+	/*background-color: #ff0000; /* DEBUG */
+
     height: 100%;
-    width: 150px;
-    float: right; 
 }
