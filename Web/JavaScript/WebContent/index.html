@@ -14,8 +14,12 @@
   <body onload="initialize();">
   
     <script>
+    
+    // the global function graph view object
+    var FGV = {}
+
     function getFormula() {
-    	var result = formula.value;
+    	var result = FGV.formula.value;
 
     	result = result.replace("sin", "Math.sin");
     	result = result.replace("cos", "Math.cos");
@@ -25,37 +29,23 @@
     }
 
     function updateValues() {
-    	var xRange = toX.value - fromX.value;
-    	startY = -(xRange * 460) / (2 * 620);
-    	stopY = -startY;
+    	var xRange = FGV.toX.value - FGV.fromX.value;
+    	FGV.startY = -(xRange * 460) / (2 * 620);
+    	FGV.stopY = -FGV.startY;
 
-    	fromY.childNodes[0].data = Math.round(startY * 100) / 100;  // note: child node must exist!
-    	toY.childNodes[0].data = Math.round(stopY * 100) / 100;     // note: child node must exist!
+    	FGV.fromY.childNodes[0].data = Math.round(FGV.startY * 100) / 100;  // note: child node must exist!
+    	FGV.toY.childNodes[0].data = Math.round(FGV.stopY * 100) / 100;     // note: child node must exist!
 
-    	startX = parseFloat(fromX.value);
-        stopX = toX.value;
-        
+    	FGV.startX = parseFloat(FGV.fromX.value);
+        FGV.stopX = parseFloat(FGV.toX.value);
 
-        scalePerPixel = (stopX - startX) / 620;
+        FGV.scalePerPixel = (FGV.stopX - FGV.startX) / 620;
 
-        x0pos = -startX / scalePerPixel + 10;
-        y0pos = -fromY.childNodes[0].data / scalePerPixel + 10;
-    }
-
-
-    function drawAxis() {
-    	context.beginPath();
-        context.strokeStyle = "black";
-        context.lineWidth = 1;
-        context.setLineDash(new Array());
-
-        context.moveTo(x0pos, 0);
-        context.lineTo(x0pos, 470);    // Y axis
-        context.moveTo(10, y0pos);
-        context.lineTo(630, y0pos);   // X axis
+        x0pos = -FGV.startX / FGV.scalePerPixel + 10;
+        y0pos = -FGV.startY / FGV.scalePerPixel + 10;
 
         // TODO:  Fix tick calculation!
-        var mag = 620 / 20 * scalePerPixel;
+        var mag = 620 / 20 * FGV.scalePerPixel;
         if (mag > 50) {
             tick = 1000;
         } else if (mag > 5) {
@@ -69,13 +59,30 @@
         } else {
             alert("INVALID SCALE!")    // TODO ...
         }
+    }
 
-        // alert(context.font);
+
+    /**
+     * Draws the axis including the ticks. 
+     */
+    function drawAxis() {
+    	// set the axis visual properties
+    	FGV.context.beginPath();
+    	FGV.context.strokeStyle = "black";
+    	FGV.context.lineWidth = 1;
+    	FGV.context.setLineDash(new Array());
+
+    	// draw the axis lines
+    	FGV.context.moveTo(x0pos, 0);
+    	FGV.context.lineTo(x0pos, 470);    // Y axis
+    	FGV.context.moveTo(10, y0pos);
+    	FGV.context.lineTo(630, y0pos);    // X axis
 
         // draw the y scale
-        for (var y = -tick; y > startY; y -= tick) {
-        	ypos = y0pos - y / scalePerPixel;
-        	context.moveTo(x0pos - 5, ypos); context.lineTo(x0pos + 5, ypos);
+        for (var y = -tick; y > FGV.startY; y -= tick) {
+        	var ypos = y0pos - y / FGV.scalePerPixel;
+        	FGV.context.moveTo(x0pos - 5, ypos); 
+        	FGV.context.lineTo(x0pos + 5, ypos);
 
         	var value = Math.round(y * 10) / 10;
 /*
@@ -87,71 +94,77 @@
         	var boxHeight = textMetrics.actualBoundingBoxAscent  + textMetrics.actualBoundingBoxDescent;
             context.strokeText(value, x0pos - boxWidth, ypos + boxHeight/2);
 */
-        	context.strokeText(value, x0pos - 15, ypos + 3);
+            FGV.context.strokeText(value, x0pos - 15, ypos + 3);
         }
-        for (var y = tick; y < stopY; y += tick) {
-            ypos = y0pos - y / scalePerPixel;
-            context.moveTo(x0pos - 5, ypos); context.lineTo(x0pos + 5, ypos);
+        for (var y = tick; y < FGV.stopY; y += tick) {
+            var ypos = y0pos - y / FGV.scalePerPixel;
+            FGV.context.moveTo(x0pos - 5, ypos); 
+            FGV.context.lineTo(x0pos + 5, ypos);
 
             var value = Math.round(y * 10) / 10;
-            context.strokeText(value, x0pos - 15, ypos + 3);
+            FGV.context.strokeText(value, x0pos - 15, ypos + 3);
         }
 
-        // context.lineWidth = 0.5;
         // draw the x scale
-        for (var x = -tick; x > startX; x -= tick) {
-            xpos = x0pos + x / scalePerPixel;
-            context.moveTo(xpos, y0pos - 5); context.lineTo(xpos, y0pos + 5);
+        for (var x = -tick; x > FGV.startX; x -= tick) {
+            var xpos = x0pos + x / FGV.scalePerPixel;
+            FGV.context.moveTo(xpos, y0pos - 5); 
+            FGV.context.lineTo(xpos, y0pos + 5);
 
             var value = Math.round(x * 10) / 10
-            context.strokeText(value, xpos - 5, y0pos + 15);
+            FGV.context.strokeText(value, xpos - 5, y0pos + 15);
         }
-        for (var x = tick; x < stopX; x += tick) {
-        	xpos = x0pos + x / scalePerPixel;
-            context.moveTo(xpos, y0pos - 5); context.lineTo(xpos, y0pos + 5);
+        for (var x = tick; x < FGV.stopX; x += tick) {
+        	var xpos = x0pos + x / FGV.scalePerPixel;
+        	FGV.context.moveTo(xpos, y0pos - 5); 
+        	FGV.context.lineTo(xpos, y0pos + 5);
 
             var value = Math.round(x * 10) / 10
-            context.strokeText(value, xpos - 5, y0pos + 15);
+            FGV.context.strokeText(value, xpos - 5, y0pos + 15);
         }
 
-        context.stroke();
+        FGV.context.stroke();
     }
 
+    /**
+     * Draw all graphs which are currently defined.
+     */
     function drawGraph(theGraph) {
-    	context.beginPath();
-    	context.strokeStyle = theGraph.color;
-    	context.lineWidth = 1;
-        context.setLineDash(new Array());
+    	FGV.context.beginPath();
+    	FGV.context.strokeStyle = theGraph.color;
+    	FGV.context.lineWidth = 1;
+    	FGV.context.setLineDash(new Array());
 
         // draw the graph
-        var x = startX;
-        y = eval(theGraph.formula);
+        var x = FGV.startX;
+        var y = eval(theGraph.formula);
         if (y == Infinity) {
             y = 1000;
         }
-        xpos = x0pos + x / scalePerPixel;
-        ypos = y0pos - y / scalePerPixel;
-        context.moveTo(xpos, ypos);
-        x += scalePerPixel;
 
-        for (var x = startX + scalePerPixel;  x < stopX;  x += scalePerPixel) {
-            y = eval(theGraph.formula);
+        var xpos = x0pos + x / FGV.scalePerPixel;
+        var ypos = y0pos - y / FGV.scalePerPixel;
+        FGV.context.moveTo(xpos, ypos);
+
+        x += FGV.scalePerPixel;
+        for (  ;  x < FGV.stopX;  x += FGV.scalePerPixel) {
+            var y = eval(theGraph.formula);
     
-            xpos = x0pos + x / scalePerPixel;
-            ypos = y0pos - y / scalePerPixel;
-    
-            context.lineTo(xpos, ypos);
+            var xpos = x0pos + x / FGV.scalePerPixel;
+            var ypos = y0pos - y / FGV.scalePerPixel;
+            FGV.context.lineTo(xpos, ypos);
         }
-        context.stroke();
+        FGV.context.stroke();
     }
+
 
     function addGraph() {
     	
     	var graph = {
     			"formula" : getFormula(),
-    			"color"   : graphColor.value 
+    			"color"   : FGV.graphColor.value 
     	}
-    	graphs.push(graph);
+    	FGV.graphs.push(graph);
         drawGraph(graph);
     }
 
@@ -163,55 +176,67 @@
 
 
     function clearDiagram() {
-        graphs = new Array();
+        FGV.graphs = new Array();
         renderScene();
     }
 
 
     function renderScene() {
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        FGV.context.clearRect(0, 0, FGV.canvas.width, FGV.canvas.height);
 
         drawAxis();
 
-        for (var i = 0; i < graphs.length; i++) {
-            drawGraph(graphs[i]);
+        for (var i = 0; i < FGV.graphs.length; i++) {
+            drawGraph(FGV.graphs[i]);
         }
     }
 
+
     function onMouseMove(evt) {
-    	  mouseXpos = evt.clientX - canvas.offsetLeft;
-    	  // ypos = evt.clientY - canvas.offsetTop;
+    	  var mouseXpos = evt.clientX - FGV.canvas.offsetLeft;
+    	  var mouseYpos = evt.clientY - FGV.canvas.offsetTop;
 
     	  renderScene();
-    	  context.beginPath();
-    	  context.strokeStyle = "red";
-    	  context.lineWidth = 0.5;
-    	  context.setLineDash(new Array(8, 2));
-    	  context.moveTo(mouseXpos, 0);
-    	  context.lineTo(mouseXpos, 480);
-    	  context.stroke();
+
+    	  // set visual properties for the cross
+    	  FGV.context.beginPath();
+    	  FGV.context.strokeStyle = "red";
+    	  FGV.context.lineWidth = 0.5;
+    	  FGV.context.setLineDash(new Array(8, 2));
+
+    	  // draw the cross
+    	  FGV.context.moveTo(mouseXpos, 0);
+    	  FGV.context.lineTo(mouseXpos, 480);
+    	  FGV.context.moveTo(0, mouseYpos);
+    	  FGV.context.lineTo(640, mouseYpos);
+    	  FGV.context.stroke();
+    }
+    
+
+    function onMouseOut(evt) {
+    	renderScene();
     }
 
+
     function initialize() {
-    	
     	// create global variables for the elements we want to access.
     	// Not all browsers support the global element variables, especially not
     	// in HTML5 mode.
-        formula = document.getElementById("_formula");
-        graphColor = document.getElementById("_graphColor");
-        fromX = document.getElementById("_fromX");
-        toX = document.getElementById("_toX");
-        fromY = document.getElementById("_fromY");
-        toY = document.getElementById("_toY");
-        canvas = document.getElementById("_canvas"); 
+        FGV.formula = document.getElementById("_formula");
+        FGV.graphColor = document.getElementById("_graphColor");
+        FGV.fromX = document.getElementById("_fromX");
+        FGV.toX = document.getElementById("_toX");
+        FGV.fromY = document.getElementById("_fromY");
+        FGV.toY = document.getElementById("_toY");
+        FGV.canvas = document.getElementById("_canvas"); 
 
-        canvas.onmousemove = onMouseMove;
-    	context = canvas.getContext('2d');
-        context.font = '8pt arial,sans-serif';
+        FGV.canvas.onmousemove = onMouseMove;
+        FGV.canvas.onmouseout = onMouseOut;
+        FGV.context = FGV.canvas.getContext('2d');
+        FGV.context.font = '8pt arial,sans-serif';
 
-        graphs = new Array();
+        FGV.graphs = new Array();
     	reset();
-
     }
 
     </script>
@@ -219,7 +244,8 @@
     <table>
 
       <tr>
-        <td><label>f(x) = </label><input id="_formula" value="2*sin(x)" /></td>
+        <!--  <td><label>f(x) = </label><input id="_formula" value="2*sin(x)" /></td> -->
+        <td><label>f(x) = </label><input id="_formula" value="x + 3*Math.pow(x,2) + Math.pow(x, 3) - 1" /></td>
         <td><label>Color: </label><select id="_graphColor" name="graphColor">
                                      <option value="aqua">Aqua</option>
                                      <option value="black">Black</option>
@@ -244,7 +270,7 @@
 
       <tr>
         <td><label>X axis: from: </label><input id="_fromX" value="-3.15" /></td>
-        <td><label>to: </label><input id="_toX" value="6.3" /></td>
+        <td><label>to: </label>          <input id="_toX" value="6.3" /></td>
         <td><button onclick="reset()">Apply</button></td>
       </tr>
 
