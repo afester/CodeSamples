@@ -78,14 +78,15 @@
         	context.moveTo(x0pos - 5, ypos); context.lineTo(x0pos + 5, ypos);
 
         	var value = Math.round(y * 10) / 10;
-
-        	//var textMetrics = context.measureText(value);
-        	//var boxWidth = textMetrics.actualBoundingBoxLeft + textMetrics.actualBoundingBoxRight;
-        	//alert(textMetrics.actualBoundingBoxLeft + "," + textMetrics.actualBoundingBoxRight + "," +
-        	//      textMetrics.fontBoundingBoxAscent  +","+ textMetrics.fontBoundingBoxDescent + ","+
-        	//      textMetrics.width + "," + textMetrics.height);
-        	//var boxHeight = textMetrics.actualBoundingBoxAscent  + textMetrics.actualBoundingBoxDescent;
-            //context.strokeText(value, x0pos - boxWidth, ypos + boxHeight/2);
+/*
+        	var textMetrics = context.measureText(value);
+        	var boxWidth = textMetrics.actualBoundingBoxLeft + textMetrics.actualBoundingBoxRight;
+        	alert(textMetrics.actualBoundingBoxLeft + "," + textMetrics.actualBoundingBoxRight + "," +
+        	      textMetrics.fontBoundingBoxAscent  +","+ textMetrics.fontBoundingBoxDescent + ","+
+        	      textMetrics.width + "," + textMetrics.height);
+        	var boxHeight = textMetrics.actualBoundingBoxAscent  + textMetrics.actualBoundingBoxDescent;
+            context.strokeText(value, x0pos - boxWidth, ypos + boxHeight/2);
+*/
         	context.strokeText(value, x0pos - 15, ypos + 3);
         }
         for (var y = tick; y < stopY; y += tick) {
@@ -116,15 +117,15 @@
         context.stroke();
     }
 
-    function drawGraph(theFunction) {
+    function drawGraph(theGraph) {
     	context.beginPath();
-    	context.strokeStyle = graphColor.value;
+    	context.strokeStyle = theGraph.color;
     	context.lineWidth = 1;
         context.setLineDash(new Array());
 
         // draw the graph
         var x = startX;
-        y = eval(theFunction);
+        y = eval(theGraph.formula);
         if (y == Infinity) {
             y = 1000;
         }
@@ -134,7 +135,7 @@
         x += scalePerPixel;
 
         for (var x = startX + scalePerPixel;  x < stopX;  x += scalePerPixel) {
-            y = eval(theFunction);
+            y = eval(theGraph.formula);
     
             xpos = x0pos + x / scalePerPixel;
             ypos = y0pos - y / scalePerPixel;
@@ -145,15 +146,20 @@
     }
 
     function addGraph() {
-    	var formula = getFormula();
-        functions.push(formula);
-        drawGraph(formula);
+    	
+    	var graph = {
+    			"formula" : getFormula(),
+    			"color"   : graphColor.value 
+    	}
+    	graphs.push(graph);
+
+        drawGraph(graph);
     }
 
     function reset() {
         updateValues();
 
-        functions = new Array();
+        graphs = new Array();
 
         //canvas.width = canvas.width; // seems not to work on all browsers, see
         // http://stackoverflow.com/questions/2142535/how-to-clear-the-canvas-for-redrawing
@@ -167,8 +173,8 @@
 
         drawAxis();
 
-        for (var i = 0; i < functions.length; i++) {
-            drawGraph(functions[i]);
+        for (var i = 0; i < graphs.length; i++) {
+            drawGraph(graphs[i]);
         }
     }
 
@@ -204,7 +210,7 @@
         context.font = '8pt arial,sans-serif';
     	reset();
 
-    	functions = new Array();
+        graphs = new Array();
     }
 
     </script>
