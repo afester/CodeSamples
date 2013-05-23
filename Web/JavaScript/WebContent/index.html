@@ -152,21 +152,21 @@
     			"color"   : graphColor.value 
     	}
     	graphs.push(graph);
-
         drawGraph(graph);
     }
 
+
     function reset() {
         updateValues();
-
-        graphs = new Array();
-
-        //canvas.width = canvas.width; // seems not to work on all browsers, see
-        // http://stackoverflow.com/questions/2142535/how-to-clear-the-canvas-for-redrawing
-        context.clearRect(0, 0, canvas.width, canvas.height);
-
-        drawAxis();
+        renderScene();
     }
+
+
+    function clearDiagram() {
+        graphs = new Array();
+        renderScene();
+    }
+
 
     function renderScene() {
         context.clearRect(0, 0, canvas.width, canvas.height);
@@ -208,9 +208,10 @@
         canvas.onmousemove = onMouseMove;
     	context = canvas.getContext('2d');
         context.font = '8pt arial,sans-serif';
-    	reset();
 
         graphs = new Array();
+    	reset();
+
     }
 
     </script>
@@ -238,12 +239,13 @@
                                      <option value="yellow">Yellow</option>
                                    </select></td>
         <td><button onclick="addGraph()">Add</button></td>
+        <td><button onclick="clearDiagram()">Clear</button></td>
       </tr>
 
       <tr>
         <td><label>X axis: from: </label><input id="_fromX" value="-3.15" /></td>
         <td><label>to: </label><input id="_toX" value="6.3" /></td>
-        <td><button onclick="reset()">Reset</button></td>
+        <td><button onclick="reset()">Apply</button></td>
       </tr>
 
       <tr>    
