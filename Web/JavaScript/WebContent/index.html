@@ -45,7 +45,10 @@
 
     function drawAxis() {
     	context.beginPath();
-    	
+        context.strokeStyle = "black";
+        context.lineWidth = 1;
+        context.setLineDash(new Array());
+
         context.moveTo(x0pos, 0);
         context.lineTo(x0pos, 470);    // Y axis
         context.moveTo(10, y0pos);
@@ -112,13 +115,15 @@
         context.stroke();
     }
 
-    function drawGraph() {
+    function drawGraph(theFunction) {
     	context.beginPath();
     	context.strokeStyle = graphColor.value;
+    	context.lineWidth = 1;
+        context.setLineDash(new Array());
 
         // draw the graph
         var x = startX;
-        y = eval(theFormula);
+        y = eval(theFunction);
         if (y == Infinity) {
             y = 1000;
         }
@@ -128,7 +133,7 @@
         x += scalePerPixel;
 
         for (var x = startX + scalePerPixel;  x < stopX;  x += scalePerPixel) {
-            y = eval(theFormula);
+            y = eval(theFunction);
     
             xpos = x0pos + x / scalePerPixel;
             ypos = y0pos - y / scalePerPixel;
@@ -138,20 +143,47 @@
         context.stroke();
     }
 
-    function calculate() {
-        theFormula = getFormula();
-        drawGraph();
+    function addGraph() {
+    	var formula = getFormula();
+        functions.push(formula);
+        drawGraph(formula);
     }
-    
+
     function reset() {
         updateValues();
 
-        canvas.width = canvas.width; // seems not to work on all browsers, see
+        functions = new Array();
+
+        //canvas.width = canvas.width; // seems not to work on all browsers, see
         // http://stackoverflow.com/questions/2142535/how-to-clear-the-canvas-for-redrawing
-        // context.clearRect(0, 0, canvas.width, canvas.height); // However, this did not work for me ...
-        context.font = '12px arial,sans-serif';
+        context.clearRect(0, 0, canvas.width, canvas.height);
 
         drawAxis();
+    }
+
+    function renderScene() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawAxis();
+
+        for (var i = 0; i < functions.length; i++) {
+            drawGraph(functions[i]);
+        }
+    }
+
+    function onMouseMove(evt) {
+    	  mouseXpos = evt.clientX - canvas.offsetLeft;
+    	  // ypos = evt.clientY - canvas.offsetTop;
+
+    	  renderScene();
+    	  context.beginPath();
+    	  context.strokeStyle = "red";
+    	  context.lineWidth = 1;
+    	  
+    	  //context.setLineDash(new Array(127, 255));
+    	  context.moveTo(mouseXpos, 0);
+    	  context.lineTo(mouseXpos, 480);
+    	  context.stroke();
     }
 
     function initialize() {
@@ -167,8 +199,12 @@
         toY = document.getElementById("_toY");
         canvas = document.getElementById("_canvas"); 
 
+        canvas.onmousemove = onMouseMove;
     	context = canvas.getContext('2d');
+        context.font = '16px arial,sans-serif';
     	reset();
+
+    	functions = new Array();
     }
 
     </script>
@@ -195,7 +231,7 @@
                                      <option value="white">White</option>
                                      <option value="yellow">Yellow</option>
                                    </select></td>
-        <td><button onclick="calculate()">Draw graph</button></td>
+        <td><button onclick="addGraph()">Draw graph</button></td>
       </tr>
 
       <tr>
