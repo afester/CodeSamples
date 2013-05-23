@@ -96,6 +96,7 @@
             context.strokeText(value, x0pos - 15, ypos + 3);
         }
 
+        // context.lineWidth = 0.5;
         // draw the x scale
         for (var x = -tick; x > startX; x -= tick) {
             xpos = x0pos + x / scalePerPixel;
@@ -178,9 +179,8 @@
     	  renderScene();
     	  context.beginPath();
     	  context.strokeStyle = "red";
-    	  context.lineWidth = 1;
-    	  
-    	  //context.setLineDash(new Array(127, 255));
+    	  context.lineWidth = 0.5;
+    	  context.setLineDash(new Array(8, 2));
     	  context.moveTo(mouseXpos, 0);
     	  context.lineTo(mouseXpos, 480);
     	  context.stroke();
@@ -201,7 +201,7 @@
 
         canvas.onmousemove = onMouseMove;
     	context = canvas.getContext('2d');
-        context.font = '16px arial,sans-serif';
+        context.font = '8pt arial,sans-serif';
     	reset();
 
     	functions = new Array();
@@ -231,7 +231,7 @@
                                      <option value="white">White</option>
                                      <option value="yellow">Yellow</option>
                                    </select></td>
-        <td><button onclick="addGraph()">Draw graph</button></td>
+        <td><button onclick="addGraph()">Add</button></td>
       </tr>
 
       <tr>
