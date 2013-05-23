@@ -1,0 +1,26 @@
+@CHARSET "ISO-8859-1";
+
+body {
+	background: #C9E6FF;
+}
+
+#_canvas {
+}
+
+#_graph {
+    height: 100%;
+    width: 640px;
+    float: left;
+
+    background-color : #ffffff;
+    padding: 10px 10px 0px 5px;
+    border-style: ridge;    
+    border-color: lightgray;
+    border-width: 4px;
+}
+
+#_legend {
+    height: 100%;
+    width: 150px;
+    float: right; 
+}
