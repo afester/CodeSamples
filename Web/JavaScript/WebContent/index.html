@@ -12,7 +12,7 @@
   </head>
 
   <body onload="initialize();">
-  
+
     <script>
     
     // the global function graph view object
@@ -41,8 +41,8 @@
 
         FGV.scalePerPixel = (FGV.stopX - FGV.startX) / 620;
 
-        x0pos = -FGV.startX / FGV.scalePerPixel + 10;
-        y0pos = -FGV.startY / FGV.scalePerPixel + 10;
+        FGV.x0pos = -FGV.startX / FGV.scalePerPixel + 10;
+        FGV.y0pos = -FGV.startY / FGV.scalePerPixel + 10;
 
         // TODO:  Fix tick calculation!
         var mag = 620 / 20 * FGV.scalePerPixel;
@@ -73,16 +73,28 @@
     	FGV.context.setLineDash(new Array());
 
     	// draw the axis lines
-    	FGV.context.moveTo(x0pos, 0);
-    	FGV.context.lineTo(x0pos, 470);    // Y axis
-    	FGV.context.moveTo(10, y0pos);
-    	FGV.context.lineTo(630, y0pos);    // X axis
+
+    	// Y axis
+    	FGV.context.moveTo(FGV.x0pos, 470);
+    	FGV.context.lineTo(FGV.x0pos, 0);
+        FGV.context.lineTo(FGV.x0pos - 5, 10);
+        FGV.context.lineTo(FGV.x0pos + 5, 10);
+        FGV.context.lineTo(FGV.x0pos, 0);
+        FGV.context.strokeText("Y", FGV.x0pos - 15, 12);
+    	
+        // X axis
+    	FGV.context.moveTo(10, FGV.y0pos);
+    	FGV.context.lineTo(640, FGV.y0pos);
+    	FGV.context.lineTo(630, FGV.y0pos - 5);
+    	FGV.context.lineTo(630, FGV.y0pos + 5);
+        FGV.context.lineTo(640, FGV.y0pos);
+        FGV.context.strokeText("X", 630, FGV.y0pos + 20);
 
         // draw the y scale
         for (var y = -tick; y > FGV.startY; y -= tick) {
-        	var ypos = y0pos - y / FGV.scalePerPixel;
-        	FGV.context.moveTo(x0pos - 5, ypos); 
-        	FGV.context.lineTo(x0pos + 5, ypos);
+        	var ypos = FGV.y0pos - y / FGV.scalePerPixel;
+        	FGV.context.moveTo(FGV.x0pos - 5, ypos); 
+        	FGV.context.lineTo(FGV.x0pos + 5, ypos);
 
         	var value = Math.round(y * 10) / 10;
 /*
@@ -92,38 +104,39 @@
         	      textMetrics.fontBoundingBoxAscent  +","+ textMetrics.fontBoundingBoxDescent + ","+
         	      textMetrics.width + "," + textMetrics.height);
         	var boxHeight = textMetrics.actualBoundingBoxAscent  + textMetrics.actualBoundingBoxDescent;
-            context.strokeText(value, x0pos - boxWidth, ypos + boxHeight/2);
+            context.strokeText(value, FGV.x0pos - boxWidth, ypos + boxHeight/2);
 */
-            FGV.context.strokeText(value, x0pos - 15, ypos + 3);
+            FGV.context.strokeText(value, FGV.x0pos - 15, ypos + 3);
         }
         for (var y = tick; y < FGV.stopY; y += tick) {
-            var ypos = y0pos - y / FGV.scalePerPixel;
-            FGV.context.moveTo(x0pos - 5, ypos); 
-            FGV.context.lineTo(x0pos + 5, ypos);
+            var ypos = FGV.y0pos - y / FGV.scalePerPixel;
+            FGV.context.moveTo(FGV.x0pos - 5, ypos); 
+            FGV.context.lineTo(FGV.x0pos + 5, ypos);
 
             var value = Math.round(y * 10) / 10;
-            FGV.context.strokeText(value, x0pos - 15, ypos + 3);
+            FGV.context.strokeText(value, FGV.x0pos - 15, ypos + 3);
         }
 
         // draw the x scale
         for (var x = -tick; x > FGV.startX; x -= tick) {
-            var xpos = x0pos + x / FGV.scalePerPixel;
-            FGV.context.moveTo(xpos, y0pos - 5); 
-            FGV.context.lineTo(xpos, y0pos + 5);
+            var xpos = FGV.x0pos + x / FGV.scalePerPixel;
+            FGV.context.moveTo(xpos, FGV.y0pos - 5); 
+            FGV.context.lineTo(xpos, FGV.y0pos + 5);
 
             var value = Math.round(x * 10) / 10
-            FGV.context.strokeText(value, xpos - 5, y0pos + 15);
+            FGV.context.strokeText(value, xpos - 5, FGV.y0pos + 15);
         }
         for (var x = tick; x < FGV.stopX; x += tick) {
-        	var xpos = x0pos + x / FGV.scalePerPixel;
-        	FGV.context.moveTo(xpos, y0pos - 5); 
-        	FGV.context.lineTo(xpos, y0pos + 5);
+        	var xpos = FGV.x0pos + x / FGV.scalePerPixel;
+        	FGV.context.moveTo(xpos, FGV.y0pos - 5); 
+        	FGV.context.lineTo(xpos, FGV.y0pos + 5);
 
             var value = Math.round(x * 10) / 10
-            FGV.context.strokeText(value, xpos - 5, y0pos + 15);
+            FGV.context.strokeText(value, xpos - 5, FGV.y0pos + 15);
         }
 
-        FGV.context.stroke();
+        FGV.context.fill(); // ????? Probably not quite  correct, but it works ...
+        FGV.context.stroke();   // still required!!!!
     }
 
     /**
@@ -142,16 +155,16 @@
             y = 1000;
         }
 
-        var xpos = x0pos + x / FGV.scalePerPixel;
-        var ypos = y0pos - y / FGV.scalePerPixel;
+        var xpos = FGV.x0pos + x / FGV.scalePerPixel;
+        var ypos = FGV.y0pos - y / FGV.scalePerPixel;
         FGV.context.moveTo(xpos, ypos);
 
         x += FGV.scalePerPixel;
         for (  ;  x < FGV.stopX;  x += FGV.scalePerPixel) {
             var y = eval(theGraph.formula);
     
-            var xpos = x0pos + x / FGV.scalePerPixel;
-            var ypos = y0pos - y / FGV.scalePerPixel;
+            var xpos = FGV.x0pos + x / FGV.scalePerPixel;
+            var ypos = FGV.y0pos - y / FGV.scalePerPixel;
             FGV.context.lineTo(xpos, ypos);
         }
         FGV.context.stroke();
@@ -210,6 +223,10 @@
     	  FGV.context.moveTo(0, mouseYpos);
     	  FGV.context.lineTo(640, mouseYpos);
     	  FGV.context.stroke();
+
+    	  // update position values
+    	  FGV.curXposNode.data = Math.round(((mouseXpos - FGV.x0pos) * FGV.scalePerPixel)*100)/100;
+          FGV.curYposNode.data = Math.round(((FGV.y0pos - mouseYpos) * FGV.scalePerPixel)*100)/100;
     }
     
 
@@ -229,7 +246,10 @@
         FGV.fromY = document.getElementById("_fromY");
         FGV.toY = document.getElementById("_toY");
         FGV.canvas = document.getElementById("_canvas"); 
+        FGV.curXposNode = document.getElementById("_curXpos").childNodes[0];
+        FGV.curYposNode = document.getElementById("_curYpos").childNodes[0];
 
+        
         FGV.canvas.onmousemove = onMouseMove;
         FGV.canvas.onmouseout = onMouseOut;
         FGV.context = FGV.canvas.getContext('2d');
@@ -281,6 +301,11 @@
 
     </table>
 
-    <canvas id="_canvas" width="640" height="480" style="background:lightgray"></canvas> 
+    <canvas id="_canvas" width="640" height="480" style="background:lightgray"></canvas>
+
+    <p>
+        <label>X:</label> <label id="_curXpos">0</label>
+        <label>Y: </label> <label id="_curYpos">0</label>
+    </p>
   </body>
 </html>
