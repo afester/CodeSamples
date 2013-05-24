@@ -247,14 +247,14 @@
     	  FGV.context.stroke();
 
     	  // update position values
-    	  FGV.curXposNode.data = Math.round(((mouseXpos - FGV.x0pos) * FGV.scalePerPixel)*100)/100;
-          FGV.curYposNode.data = Math.round(((FGV.y0pos - mouseYpos) * FGV.scalePerPixel)*100)/100;
+    	  FGV.curXposNode.value = Math.round(((mouseXpos - FGV.x0pos) * FGV.scalePerPixel)*100)/100;
+          FGV.curYposNode.value = Math.round(((FGV.y0pos - mouseYpos) * FGV.scalePerPixel)*100)/100;
     }
     
 
     function onMouseOut(evt) {
-        FGV.curXposNode.data = 'n/a';
-        FGV.curYposNode.data = 'n/a';
+        FGV.curXposNode.value = 'n/a';
+        FGV.curYposNode.value = 'n/a';
     	renderScene();
     }
 
@@ -270,8 +270,8 @@
         FGV.fromY = document.getElementById("_fromY");
         FGV.toY = document.getElementById("_toY");
         FGV.canvas = document.getElementById("_canvas"); 
-        FGV.curXposNode = document.getElementById("_curXpos").childNodes[0];
-        FGV.curYposNode = document.getElementById("_curYpos").childNodes[0];
+        FGV.curXposNode = document.getElementById("_curXpos");
+        FGV.curYposNode = document.getElementById("_curYpos");
         FGV.legendTable = document.getElementById("_legendTable");
 
         FGV.canvas.onmousemove = onMouseMove;
@@ -293,26 +293,34 @@
 
     <!-- The left column, with a fixed width  -->
     <div id="_leftColumn">
+    
+      <!-- The function diagram -->
       <div id="_graph">
         <canvas id="_canvas" width="640" height="480"></canvas>
+      </div>
+
+      <!-- The control panel to define the axis scale -->
+      <div id="_controlPanel">
 
         <table>
-    
           <tr>
-            <td>X axis: <input id="_fromX" value="-3.15" /></td>
-            <td>to <input id="_toX" value="6.3" />
+            <td>X axis:</td>
+            <td><input size="10" id="_fromX" value="-3.15" /></td>
+            <td>to <input size="10" id="_toX" value="6.3" />
                    <button onclick="reset()">Apply</button></td>
           </tr>
 
           <tr>
-            <td>Y axis: <input readonly="readonly" id="_fromY" value="0" /></td>
-            <td>to <input readonly="readonly" id="_toY" value="0" /> (calculated from X axis)</td>
+            <td>Y axis:</td>
+            <td><input size="10" readonly="readonly" id="_fromY" value="0" /></td>
+            <td>to <input size="10" readonly="readonly" id="_toY" value="0" /> (calculated from X axis)</td>
           </tr>
-
+  
           <tr>
-            <td>Crosshair: x = <label id="_curXpos">0</label>&nbsp;&nbsp;&nbsp;&nbsp;y = <label id="_curYpos">0</label></td>
+            <td>Crosshair:</td>
+            <td>x = <input size="5" readonly="readonly" id="_curXpos" value="n/a" /></td>
+            <td>y = <input size="5" readonly="readonly" id="_curYpos" value="n/a" /></td>
           </tr>
-
         </table>
 
       </div>
@@ -321,32 +329,33 @@
     <!-- The right column, with a flexible width  -->
     <div id="_rightColumn">
     
+      <!-- The legend with a list of all shown functions -->
       <div id="_legend">Function graphs:<table id="_legendTable"></table>
       </div>
 
       <hr/>
 
-      <p><label>f(x) = </label><input size="40" id="_formula" value="x + 3*pow(x, 2) + pow(x, 3) - 1" /></p>
+      <p><label>f(x)&nbsp;=&nbsp;</label><input size="40" id="_formula" value="x + 3*pow(x, 2) + pow(x, 3) - 1" /></p>
       <p><label>Color: </label><select id="_graphColor" name="graphColor">
-                                     <option value="aqua">Aqua</option>
-                                     <option value="black">Black</option>
-                                     <option value="blue">Blue</option>
-                                     <option value="fuchsia">Fuchsia</option>
-                                     <option value="gray">Gray</option>
-                                     <option value="green">Green</option>
-                                     <option value="lime">Lime</option>
-                                     <option value="maroon">Maroon</option>
-                                     <option value="navy">Navy</option>
-                                     <option value="olive">Olive</option>
-                                     <option value="purple">Purple</option>
-                                     <option value="red">Red</option>
-                                     <option value="silver">Silver</option>
-                                     <option value="teal">Teal</option>
-                                     <option value="white">White</option>
-                                     <option value="yellow">Yellow</option>
-                                   </select></p>
-        <button onclick="addGraph()">Add</button>
-        <button onclick="clearDiagram()">Clear all</button>
+                                   <option value="aqua">Aqua</option>
+                                   <option value="black">Black</option>
+                                   <option value="blue">Blue</option>
+                                   <option value="fuchsia">Fuchsia</option>
+                                   <option value="gray">Gray</option>
+                                   <option value="green">Green</option>
+                                   <option value="lime">Lime</option>
+                                   <option value="maroon">Maroon</option>
+                                   <option value="navy">Navy</option>
+                                   <option value="olive">Olive</option>
+                                   <option value="purple">Purple</option>
+                                   <option value="red">Red</option>
+                                   <option value="silver">Silver</option>
+                                   <option value="teal">Teal</option>
+                                   <option value="white">White</option>
+                                   <option value="yellow">Yellow</option>
+                                 </select></p>
+      <button onclick="addGraph()">Add</button>
+      <button onclick="clearDiagram()">Clear all</button>
 
     </div>
 

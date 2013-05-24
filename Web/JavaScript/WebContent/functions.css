@@ -2,6 +2,7 @@
 
 html, body {
 	height: 100%;
+	font: 10pt sans-serif;
 }
 
 body {
@@ -52,10 +53,19 @@ body {
     padding-left: 10px;
 }
 
+#_controlPanel {
+	padding: 10px;
+}
+
 input:FOCUS {
     background-color: #ffffe0;
 }
 
 input[readonly=readonly] {
 	background-color: lightgray;
+}
+
+button {
+    background-image: -webkit-linear-gradient(#fff3e2 0%, #ffac38 100%);
+    background-image: -moz-linear-gradient(#fff3e2 0%, #ffac38 100%);
 }
