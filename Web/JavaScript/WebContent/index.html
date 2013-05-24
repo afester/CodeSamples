@@ -1,10 +1,5 @@
 <!DOCTYPE html>
 
-<!--
-<?xml version="1.0" encoding="ISO-8859-1" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
--->
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
@@ -19,12 +14,12 @@
     // the global function graph view object
     var FGV = {}
 
-    function getFormula() {
-    	var result = FGV.formula.value;
+    function convertFormula(formula) {
 
-    	result = result.replace("sin", "Math.sin");
-    	result = result.replace("cos", "Math.cos");
-    	result = result.replace("tan", "Math.tan");
+    	result = formula.replace(/sin/g, "Math.sin");
+    	result = result.replace(/cos/g, "Math.cos");
+    	result = result.replace(/tan/g, "Math.tan");
+        result = result.replace(/pow/g, "Math.pow");
 
     	return result;
     }
@@ -34,8 +29,8 @@
     	FGV.startY = -(xRange * 460) / (2 * 620);
     	FGV.stopY = -FGV.startY;
 
-    	FGV.fromY.childNodes[0].data = Math.round(FGV.startY * 100) / 100;  // note: child node must exist!
-    	FGV.toY.childNodes[0].data = Math.round(FGV.stopY * 100) / 100;     // note: child node must exist!
+    	FGV.fromY.value = Math.round(FGV.startY * 100) / 100;
+    	FGV.toY.value = Math.round(FGV.stopY * 100) / 100;
 
     	FGV.startX = parseFloat(FGV.fromX.value);
         FGV.stopX = parseFloat(FGV.toX.value);
@@ -172,13 +167,39 @@
     }
 
 
+    function addLegendEntry(graph) {
+    	var tr = document.createElement('tr');
+    	var td = document.createElement('td');
+    	tr.appendChild(td);
+
+    	// create a text node containing the function name, colored in the graph's color
+    	var font = document.createElement('font');
+    	font.setAttribute('color', graph.color);
+    	var fnNameNode = document.createTextNode('f' + FGV.graphs.length + '(x) = ');
+        font.appendChild(fnNameNode);
+
+    	// create a text node containing the actual function
+        var fnTextNode = document.createTextNode(graph.text);
+
+        td.appendChild(font);
+        td.appendChild(fnTextNode);
+
+        FGV.legendTable.appendChild(tr);
+    }
+
+
     function addGraph() {
-    	
+
+        var formula = FGV.formula.value;
+
     	var graph = {
-    			"formula" : getFormula(),
+                "text"    : formula,
+    			"formula" : convertFormula(formula),
     			"color"   : FGV.graphColor.value 
     	}
+
     	FGV.graphs.push(graph);
+    	addLegendEntry(graph);
         drawGraph(graph);
     }
 
@@ -232,6 +253,8 @@
     
 
     function onMouseOut(evt) {
+        FGV.curXposNode.data = 'n/a';
+        FGV.curYposNode.data = 'n/a';
     	renderScene();
     }
 
@@ -249,8 +272,8 @@
         FGV.canvas = document.getElementById("_canvas"); 
         FGV.curXposNode = document.getElementById("_curXpos").childNodes[0];
         FGV.curYposNode = document.getElementById("_curYpos").childNodes[0];
+        FGV.legendTable = document.getElementById("_legendTable");
 
-        
         FGV.canvas.onmousemove = onMouseMove;
         FGV.canvas.onmouseout = onMouseOut;
         FGV.context = FGV.canvas.getContext('2d');
@@ -261,19 +284,50 @@
         if (!FGV.context.setLineDash) {
             FGV.context.setLineDash = function () {}
         }
-        
+
         FGV.graphs = new Array();
     	reset();
     }
 
     </script>
 
-    <table>
+    <!-- The left column, with a fixed width  -->
+    <div id="_leftColumn">
+      <div id="_graph">
+        <canvas id="_canvas" width="640" height="480"></canvas>
 
-      <tr>
-        <!--  <td><label>f(x) = </label><input id="_formula" value="2*sin(x)" /></td> -->
-        <td><label>f(x) = </label><input id="_formula" value="x + 3*Math.pow(x,2) + Math.pow(x, 3) - 1" /></td>
-        <td><label>Color: </label><select id="_graphColor" name="graphColor">
+        <table>
+    
+          <tr>
+            <td>X axis: <input id="_fromX" value="-3.15" /></td>
+            <td>to <input id="_toX" value="6.3" />
+                   <button onclick="reset()">Apply</button></td>
+          </tr>
+
+          <tr>
+            <td>Y axis: <input readonly="readonly" id="_fromY" value="0" /></td>
+            <td>to <input readonly="readonly" id="_toY" value="0" /> (calculated from X axis)</td>
+          </tr>
+
+          <tr>
+            <td>Crosshair: x = <label id="_curXpos">0</label>&nbsp;&nbsp;&nbsp;&nbsp;y = <label id="_curYpos">0</label></td>
+          </tr>
+
+        </table>
+
+      </div>
+    </div>
+
+    <!-- The right column, with a flexible width  -->
+    <div id="_rightColumn">
+    
+      <div id="_legend">Function graphs:<table id="_legendTable"></table>
+      </div>
+
+      <hr/>
+
+      <p><label>f(x) = </label><input size="40" id="_formula" value="x + 3*pow(x, 2) + pow(x, 3) - 1" /></p>
+      <p><label>Color: </label><select id="_graphColor" name="graphColor">
                                      <option value="aqua">Aqua</option>
                                      <option value="black">Black</option>
                                      <option value="blue">Blue</option>
@@ -290,39 +344,10 @@
                                      <option value="teal">Teal</option>
                                      <option value="white">White</option>
                                      <option value="yellow">Yellow</option>
-                                   </select></td>
-        <td><button onclick="addGraph()">Add</button></td>
-        <td><button onclick="clearDiagram()">Clear</button></td>
-      </tr>
+                                   </select></p>
+        <button onclick="addGraph()">Add</button>
+        <button onclick="clearDiagram()">Clear all</button>
 
-      <tr>
-        <td><label>X axis: from: </label><input id="_fromX" value="-3.15" /></td>
-        <td><label>to: </label>          <input id="_toX" value="6.3" /></td>
-        <td><button onclick="reset()">Apply</button></td>
-      </tr>
-
-      <tr>    
-        <td><label>Y axis: from: </label> <label id="_fromY">0</label></td>
-        <td><label>to: </label> <label id="_toY">0</label></td>
-      </tr>
-
-    </table>
-
-    <div id="_leftColumn">
-      <div id="_graph">
-        <canvas id="_canvas" width="640" height="480"></canvas>
-        <label>X:</label> <label id="_curXpos">0</label>
-        <label>Y: </label> <label id="_curYpos">0</label>
-      </div>
-    </div>
-
-    <div id="_legend">
-      <table>
-        <tr><td>sqrt(x)</td><td><select id="_graphColor2" name="graphColor2"></select></td></tr>
-        <tr><td>sqrt(x)</td><td><select id="_graphColor2" name="graphColor2"></select></td></tr>
-        <tr><td>sqrt(x)</td><td><select id="_graphColor2" name="graphColor2"></select></td></tr>
-        <tr><td>sqrt(x)</td><td><select id="_graphColor2" name="graphColor2"></select></td></tr>
-      </table>
     </div>
 
   </body>

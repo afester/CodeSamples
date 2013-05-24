@@ -5,7 +5,9 @@ html, body {
 }
 
 body {
-	background: #C9E6FF;
+	background: #ffffff;
+	background-image: -webkit-linear-gradient(#ffffff 0%, #e0e0e0 100%);
+	background-image: -moz-linear-gradient(#ffffff 0%, #e0e0e0 100%);
 }
 
 #_leftColumn {
@@ -24,13 +26,36 @@ body {
 
     background-color : #ffffff;
     padding: 10px 10px 0px 5px;
-    border-style: ridge;    
-    border-color: lightgray;
-    border-width: 4px;
+    margin: 10px;
+
+    -moz-box-shadow:     0 0 40px rgba(0, 0, 0, .5);
+    -webkit-box-shadow:  0 0 40px rgba(0, 0, 0, .5);
+    -goog-ms-box-shadow: 0 0 40px rgba(0, 0, 0, .5);
+    box-shadow:          0 0 40px rgba(0, 0, 0, .5);
+
+    border-style: solid;    
+    border-color: #a0a0a0;
+    border-width: 1px;
 }
 
-#_legend {
+#_rightColumn {
 	/*background-color: #ff0000; /* DEBUG */
 
     height: 100%;
+}
+
+#_legend {
+    padding-top: 10px;
+}
+
+#_legendTable {
+    padding-left: 10px;
+}
+
+input:FOCUS {
+    background-color: #ffffe0;
+}
+
+input[readonly=readonly] {
+	background-color: lightgray;
 }
