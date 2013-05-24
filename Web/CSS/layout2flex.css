@@ -1,0 +1,19 @@
+@CHARSET "ISO-8859-1";
+
+html, body {
+	height: 100%;
+}
+
+#left {
+    background-color: #ffff00;
+
+	height: 100%;
+    width: 150px;       /* Width of left column */
+    float: left;
+}
+
+#content {
+    background-color: #0000ff;
+
+	height: 100%;
+}
