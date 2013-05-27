@@ -29,13 +29,13 @@ body {
     padding: 10px 10px 0px 5px;
     margin: 10px;
 
-    -moz-box-shadow:     0 0 40px rgba(0, 0, 0, .5);
-    -webkit-box-shadow:  0 0 40px rgba(0, 0, 0, .5);
-    -goog-ms-box-shadow: 0 0 40px rgba(0, 0, 0, .5);
-    box-shadow:          0 0 40px rgba(0, 0, 0, .5);
+    -moz-box-shadow:     10px 10px 15px 0 #555;
+    -webkit-box-shadow:  10px 10px 15px 0 #555;
+    -goog-ms-box-shadow: 10px 10px 15px 0 #555;
+    box-shadow:          10px 10px 15px 0 #555;
 
     border-style: solid;    
-    border-color: #a0a0a0;
+    border-color: #e0e0e0;
     border-width: 1px;
 }
 
@@ -68,4 +68,15 @@ input[readonly=readonly] {
 button {
     background-image: -webkit-linear-gradient(#fff3e2 0%, #ffac38 100%);
     background-image: -moz-linear-gradient(#fff3e2 0%, #ffac38 100%);
+
+    border-style: solid;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    border-color: orange;
+    border-width: 1px;
+}
+
+button:HOVER {
+	background-image: none;
+	background-color: #fff3e2;
 }

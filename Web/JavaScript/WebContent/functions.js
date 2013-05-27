@@ -10,9 +10,12 @@ function convertFormula(formula) {
 	result = result.replace(/cos/g, "Math.cos");
 	result = result.replace(/tan/g, "Math.tan");
     result = result.replace(/pow/g, "Math.pow");
+    result = result.replace(/log/g, "Math.log");
+    result = result.replace(/exp/g, "Math.exp");
 
 	return result;
 }
+
 
 function updateValues() {
 	var xRange = FGV.toX.value - FGV.fromX.value;
@@ -30,20 +33,14 @@ function updateValues() {
     FGV.x0pos = -FGV.startX / FGV.scalePerPixel + 10;
     FGV.y0pos = -FGV.startY / FGV.scalePerPixel + 10;
 
-    // TODO:  Fix tick calculation!
-    var mag = 620 / 20 * FGV.scalePerPixel;
-    if (mag > 50) {
-        tick = 1000;
-    } else if (mag > 5) {
-        tick = 100;
-    } else if (mag > 0.5) {
-        tick = 10;
-    } else if (mag > 0.05) {
-        tick = 1;
-    } else if (mag > 0.005) {
-        tick = 0.1;
-    } else {
-        alert("INVALID SCALE!");    // TODO ...
+    // calculate the distance for each tick
+    tick = 20 * FGV.scalePerPixel;
+    if (tick < 0.1) {
+    	tick = 0.1;
+    } else if (tick < 0.5) {
+    	tick = 0.5;
+    } else if (tick < 1.0) {
+    	tick = 1.0;
     }
 }
 
@@ -67,7 +64,7 @@ function drawAxis() {
     FGV.context.lineTo(FGV.x0pos + 5, 10);
     FGV.context.lineTo(FGV.x0pos, 0);
     FGV.context.strokeText("Y", FGV.x0pos - 15, 12);
-	
+
     // X axis
 	FGV.context.moveTo(10, FGV.y0pos);
 	FGV.context.lineTo(640, FGV.y0pos);
@@ -83,16 +80,8 @@ function drawAxis() {
     	FGV.context.lineTo(FGV.x0pos + 5, ypos);
 
     	var value = Math.round(y * 10) / 10;
-/*
-        	var textMetrics = context.measureText(value);
-        	var boxWidth = textMetrics.actualBoundingBoxLeft + textMetrics.actualBoundingBoxRight;
-        	alert(textMetrics.actualBoundingBoxLeft + "," + textMetrics.actualBoundingBoxRight + "," +
-        	      textMetrics.fontBoundingBoxAscent  +","+ textMetrics.fontBoundingBoxDescent + ","+
-        	      textMetrics.width + "," + textMetrics.height);
-        	var boxHeight = textMetrics.actualBoundingBoxAscent  + textMetrics.actualBoundingBoxDescent;
-            context.strokeText(value, FGV.x0pos - boxWidth, ypos + boxHeight/2);
-*/
-        FGV.context.strokeText(value, FGV.x0pos - 15, ypos + 3);
+    	var textWidth = FGV.context.measureText(value).width;
+        FGV.context.fillText(value, FGV.x0pos - textWidth - 7, ypos + 3);
     }
     for (var y = tick; y < FGV.stopY; y += tick) {
         var ypos = FGV.y0pos - y / FGV.scalePerPixel;
@@ -100,7 +89,8 @@ function drawAxis() {
         FGV.context.lineTo(FGV.x0pos + 5, ypos);
 
         var value = Math.round(y * 10) / 10;
-        FGV.context.strokeText(value, FGV.x0pos - 15, ypos + 3);
+    	var textWidth = FGV.context.measureText(value).width;
+        FGV.context.fillText(value, FGV.x0pos - textWidth - 7, ypos + 3);
     }
 
     // draw the x scale
@@ -110,7 +100,8 @@ function drawAxis() {
         FGV.context.lineTo(xpos, FGV.y0pos + 5);
 
         var value = Math.round(x * 10) / 10;
-        FGV.context.strokeText(value, xpos - 5, FGV.y0pos + 15);
+    	var textWidth = FGV.context.measureText(value).width;
+        FGV.context.fillText(value, xpos - textWidth / 2, FGV.y0pos + 15);
     }
     for (var x = tick; x < FGV.stopX; x += tick) {
     	var xpos = FGV.x0pos + x / FGV.scalePerPixel;
@@ -118,7 +109,8 @@ function drawAxis() {
     	FGV.context.lineTo(xpos, FGV.y0pos + 5);
 
         var value = Math.round(x * 10) / 10;
-        FGV.context.strokeText(value, xpos - 5, FGV.y0pos + 15);
+    	var textWidth = FGV.context.measureText(value).width;
+        FGV.context.fillText(value, xpos - textWidth / 2, FGV.y0pos + 15);
     }
 
     FGV.context.fill(); // ????? Probably not quite  correct, but it works ...
@@ -158,6 +150,15 @@ function drawGraph(theGraph) {
 
 
 function addLegendEntry(graph) {
+	// Get the legend table and add it if it does not exist yet
+    var table = document.getElementById("_legendTable");
+    if (!table) {
+    	table = document.createElement('table');
+    	table.setAttribute('id', '_legendTable');
+        FGV.legendDiv.appendChild(table);
+    }
+
+    // Append a new table row as the legend entry
 	var tr = document.createElement('tr');
 	var td = document.createElement('td');
 	tr.appendChild(td);
@@ -174,35 +175,27 @@ function addLegendEntry(graph) {
     td.appendChild(font);
     td.appendChild(fnTextNode);
 
-    FGV.legendTable.appendChild(tr);
+    table.appendChild(tr);
 }
 
 
-function addGraph() {
-
-    var formula = FGV.formula.value;
+/**
+ * Adds a graph to the graph array and to the legend, but does not 
+ * draw the graph yet.
+ *
+ * @param formula	The function to add.
+ * @param color		The color for the function graph.
+ */
+function addGraphFor(formula, color) {
 
 	var graph = {
             "text"    : formula,
 			"formula" : convertFormula(formula),
-			"color"   : FGV.graphColor.value 
+			"color"   : color 
 	};
 
 	FGV.graphs.push(graph);
 	addLegendEntry(graph);
-    drawGraph(graph);
-}
-
-
-function reset() {
-    updateValues();
-    renderScene();
-}
-
-
-function clearDiagram() {
-    FGV.graphs = new Array();
-    renderScene();
 }
 
 
@@ -249,6 +242,10 @@ function onMouseOut(evt) {
 }
 
 
+/**
+ * Event function for the "onload" event. This function is called when the
+ * page has been loaded.
+ */
 function initialize() {
 	// create global variables for the elements we want to access.
 	// Not all browsers support the global element variables, especially not
@@ -262,7 +259,7 @@ function initialize() {
     FGV.canvas = document.getElementById("_canvas"); 
     FGV.curXposNode = document.getElementById("_curXpos");
     FGV.curYposNode = document.getElementById("_curYpos");
-    FGV.legendTable = document.getElementById("_legendTable");
+    FGV.legendDiv= document.getElementById("_legend");
 
     FGV.canvas.onmousemove = onMouseMove;
     FGV.canvas.onmouseout = onMouseOut;
@@ -275,6 +272,45 @@ function initialize() {
         FGV.context.setLineDash = function () {};
     }
 
-    FGV.graphs = new Array();
+    FGV.graphs = [];
+
+    // Some sample graphs, especially for debugging purposes
+    addGraphFor("2*sin(x)", "red");
+    addGraphFor("log(x)", "blue");
+    addGraphFor("exp(x)", "green");
+    addGraphFor("x + 3*pow(x, 2) + pow(x, 3) - 1", "maroon");
+
 	reset();
+}
+
+
+/**
+ * Action function for the "Add" button.
+ */
+function addGraph() {
+	addGraphFor(FGV.formula.value, FGV.graphColor.value);
+    renderScene(); // drawGraph(graph);
+}
+
+
+/**
+ * Action function for the "Apply" button on the X axis.
+ */
+function reset() {
+    updateValues();
+    renderScene();
+}
+
+
+/**
+ * Action function for the "Clear all" button.
+ */
+function clearDiagram() {
+	// remove the legend table
+    var table = document.getElementById("_legendTable");
+    if (table) {
+    	table.parentNode.removeChild(table);
+    }
+    FGV.graphs = [];
+    renderScene();
 }
