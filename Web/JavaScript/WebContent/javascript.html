@@ -22,14 +22,16 @@
     <title>JavaScript s</title>
   </head>
 
-  <body onload="debugConsole.initialize();">
+  <body id="_body" onload="debugConsole.initialize();">
     <textarea readonly="readonly" wrap="off" id="_textArea" cols="80" rows="25"></textarea>
     <p><button id="_clearButton" onclick="debugConsole.clear()">Clear Console</button></p>
 
     <h1>Samples to execute:</h1>
-    <p><button id="_dumpSample" onclick="dumpAction()">Dump objects</button>
-       <button id="_functionSample" onclick="functionAction()">Function objects</button>
-       <button id="_otherSample" onclick="otherAction()">Other sample</button></p>
+    <p><button onclick="dumpAction()">Dump objects</button>
+       <button onclick="functionAction()">Function objects</button>
+       <button onclick="exceptionAction()">Exceptions sample</button>
+       <button onclick="traverseDOMAction()">Show DOM tree</button></p>
+       <button onclick="colorSampleAction()">Color sample</button></p>
   </body>
 
 </html>
