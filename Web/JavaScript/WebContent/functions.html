@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!--
+ This work is licensed under the Creative Commons Attribution 3.0 Unported
+ License. To view a copy of this license, visit
+ http://creativecommons.org/licenses/by/3.0/ or send a letter to Creative
+ Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
+-->
+
+<html>
   <head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
       <link rel="stylesheet" type="text/css" href="functions.css">
@@ -12,7 +19,7 @@
 
     <!-- The left column, with a fixed width  -->
     <div id="_leftColumn">
-    
+
       <!-- The function diagram -->
       <div id="_graph">
         <canvas id="_canvas" width="640" height="480"></canvas>
@@ -26,7 +33,7 @@
             <td>X axis:</td>
             <td><input size="10" id="_fromX" value="-3.15" /></td>
             <td>to <input size="10" id="_toX" value="6.3" />
-                   <button onclick="reset()">Apply</button></td>
+                   <button onclick="applyAction()">Apply</button></td>
           </tr>
 
           <tr>
@@ -53,7 +60,11 @@
 
       <hr/>
 
-      <p><label>f(x)&nbsp;=&nbsp;</label><input size="40" id="_formula" value="x + 3*pow(x, 2) + pow(x, 3) - 1" /></p>
+      <p id="_functionInput">
+        <label>f(x)&nbsp;=&nbsp;</label>
+        <input size="40" id="_formula" value="" autofocus="autofocus" />
+      </p>
+
       <p><label>Color: </label><select id="_graphColor" name="graphColor">
                                    <option value="aqua">Aqua</option>
                                    <option value="black">Black</option>
@@ -72,8 +83,8 @@
                                    <option value="white">White</option>
                                    <option value="yellow">Yellow</option>
                                  </select></p>
-      <button onclick="addGraph()">Add</button>
-      <button onclick="clearDiagram()">Clear all</button>
+      <button onclick="addAction()">Add</button>
+      <button onclick="clearAction()">Clear all</button>
 
     </div>
 

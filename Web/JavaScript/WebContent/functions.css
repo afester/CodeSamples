@@ -1,5 +1,12 @@
 @CHARSET "ISO-8859-1";
 
+/**
+ * This work is licensed under the Creative Commons Attribution 3.0 Unported
+ * License. To view a copy of this license, visit
+ * http://creativecommons.org/licenses/by/3.0/ or send a letter to Creative
+ * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
+ */
+
 html, body {
 	height: 100%;
 	font: 10pt sans-serif;
@@ -19,15 +26,20 @@ body {
     float: left;
 }
 
+#_canvas {
+    /* background-color: #ffff00; /* DEBUG */
+}
+
+/* grapher div */
 #_graph {
-    /*background-color: #ffff00; /* DEBUG */
+    /* background-color: #ffff00; /* DEBUG */
 
 	height: 480px;
     width: 640px;
 
     background-color : #ffffff;
-    padding: 10px 10px 0px 5px;
-    margin: 10px;
+    padding: 10px;      /* distance to the embedded canvas */
+    margin: 10px;       /* distance to the enclosing element */
 
     -moz-box-shadow:     10px 10px 15px 0 #555;
     -webkit-box-shadow:  10px 10px 15px 0 #555;
@@ -51,6 +63,11 @@ body {
 
 #_legendTable {
     padding-left: 10px;
+    font: italic 11pt serif
+}
+
+#_functionInput {
+    font: italic 11pt serif
 }
 
 #_controlPanel {

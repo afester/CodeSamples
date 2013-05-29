@@ -1,52 +1,127 @@
-
-
+/**
+ * This work is licensed under the Creative Commons Attribution 3.0 Unported
+ * License. To view a copy of this license, visit
+ * http://creativecommons.org/licenses/by/3.0/ or send a letter to Creative
+ * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
+ */
 
 // the global function graph view object
 var FGV = {};
 
+/**
+ * Convert a formula as entered by the user into an JavaScript expression
+ * TODO: Use a real parser. 
+ *
+ * @param formula	The formula to convert (e.g. "sin(x)"
+ * @returns			The corresponding JavaScript expression (e.g. "Math.sin(x)"
+ */
 function convertFormula(formula) {
+	result = formula;
 
-	result = formula.replace(/sin/g, "Math.sin");
+	result = result.replace(/sin/g, "Math.sin");
 	result = result.replace(/cos/g, "Math.cos");
 	result = result.replace(/tan/g, "Math.tan");
+
     result = result.replace(/pow/g, "Math.pow");
     result = result.replace(/log/g, "Math.log");
     result = result.replace(/exp/g, "Math.exp");
+
+    result = result.replace(/sqrt/g, "Math.sqrt");
 
 	return result;
 }
 
 
+/**
+ * Updates the graph view parameters from the X axis range entered by the user.
+ */
 function updateValues() {
-	var xRange = FGV.toX.value - FGV.fromX.value;
-	FGV.startY = -(xRange * 460) / (2 * 620);
+	// get the x axis range as entered by the user
+	FGV.startX = parseFloat(FGV.fromX.value);
+    FGV.stopX = parseFloat(FGV.toX.value);
+	var xRange = FGV.stopX - FGV.startX;
+
+	// calculate graph parameters with the assumption that there is enough space
+	// for the y axis scale
+    FGV.paddingLeft = 0;
+    
+	// auto-calculate the Y axis range
+	FGV.startY = -(xRange * FGV.canvas.height) / (2 * FGV.canvas.width);
 	FGV.stopY = -FGV.startY;
 
+	// calculate the scale factor
+    FGV.scalePerPixel = (FGV.stopX - FGV.startX) / FGV.canvas.width;
+
+    // calculate the position of the origin point
+    FGV.x0pos = -FGV.startX / FGV.scalePerPixel;
+    FGV.y0pos = -FGV.startY / FGV.scalePerPixel;
+
+    // recalculate graph parameters with a left padding if there is not enough 
+    // space for the y axis scale
+    if (FGV.x0pos < 30) {
+    	// calculate graph parameters and reserve space for the y axis scale
+    	FGV.paddingLeft = 30 - FGV.x0pos;
+
+    	// auto-calculate the Y axis range
+    	FGV.startY = -(xRange * FGV.canvas.height) / (2 * (FGV.canvas.width - FGV.paddingLeft));
+    	FGV.stopY = -FGV.startY;
+
+    	// calculate the scale factor
+        FGV.scalePerPixel = (FGV.stopX - FGV.startX) / (FGV.canvas.width - FGV.paddingLeft);
+
+        // calculate the position of the origin point
+        FGV.x0pos = -FGV.startX / FGV.scalePerPixel + FGV.paddingLeft;
+        FGV.y0pos = -FGV.startY / FGV.scalePerPixel;
+    }
+
+    // update Y range scale as shown on the UI
 	FGV.fromY.value = Math.round(FGV.startY * 100) / 100;
 	FGV.toY.value = Math.round(FGV.stopY * 100) / 100;
 
-	FGV.startX = parseFloat(FGV.fromX.value);
-    FGV.stopX = parseFloat(FGV.toX.value);
-
-    FGV.scalePerPixel = (FGV.stopX - FGV.startX) / 620;
-
-    FGV.x0pos = -FGV.startX / FGV.scalePerPixel + 10;
-    FGV.y0pos = -FGV.startY / FGV.scalePerPixel + 10;
-
     // calculate the distance for each tick
-    tick = 20 * FGV.scalePerPixel;
-    if (tick < 0.1) {
-    	tick = 0.1;
-    } else if (tick < 0.5) {
-    	tick = 0.5;
-    } else if (tick < 1.0) {
-    	tick = 1.0;
+    FGV.tick = 20 * FGV.scalePerPixel;
+    if (FGV.tick < 0.1) {
+    	FGV.tick = 0.1;
+    } else if (FGV.tick < 0.5) {
+    	FGV.tick = 0.5;
+    } else if (FGV.tick < 1.0) {
+    	FGV.tick = 1.0;
     }
 }
 
 
 /**
- * Draws the axis including the ticks. 
+ * Draws a tick on the Y axis.
+ */
+function drawYTick(y) {
+	var ypos = FGV.y0pos - y / FGV.scalePerPixel;
+	if (ypos > 20) {	// do not draw a tick nearby the end of the axis!
+		FGV.context.moveTo(FGV.x0pos - 5, ypos); 
+		FGV.context.lineTo(FGV.x0pos + 5, ypos);
+	
+		var value = Math.round(y * 10) / 10;
+		var textWidth = FGV.context.measureText(value).width;
+	    FGV.context.fillText(value, FGV.x0pos - textWidth - 7, ypos + 3);
+	}
+}
+
+
+/**
+ * Draws a tick on the X axis.
+ */
+function drawXTick(x) {
+    var xpos = FGV.x0pos + x / FGV.scalePerPixel;
+    FGV.context.moveTo(xpos, FGV.y0pos - 5); 
+    FGV.context.lineTo(xpos, FGV.y0pos + 5);
+
+    var value = Math.round(x * 10) / 10;
+	var textWidth = FGV.context.measureText(value).width;
+    FGV.context.fillText(value, xpos - textWidth / 2, FGV.y0pos + 15);
+}
+
+
+/**
+ * Draws the axes including the ticks. 
  */
 function drawAxis() {
 	// set the axis visual properties
@@ -58,67 +133,53 @@ function drawAxis() {
 	// draw the axis lines
 
 	// Y axis
-	FGV.context.moveTo(FGV.x0pos, 470);
+	FGV.context.moveTo(FGV.x0pos, FGV.canvas.height);
 	FGV.context.lineTo(FGV.x0pos, 0);
-    FGV.context.lineTo(FGV.x0pos - 5, 10);
-    FGV.context.lineTo(FGV.x0pos + 5, 10);
-    FGV.context.lineTo(FGV.x0pos, 0);
-    FGV.context.strokeText("Y", FGV.x0pos - 15, 12);
 
     // X axis
-	FGV.context.moveTo(10, FGV.y0pos);
-	FGV.context.lineTo(640, FGV.y0pos);
-	FGV.context.lineTo(630, FGV.y0pos - 5);
-	FGV.context.lineTo(630, FGV.y0pos + 5);
-    FGV.context.lineTo(640, FGV.y0pos);
-    FGV.context.strokeText("X", 630, FGV.y0pos + 20);
+	FGV.context.moveTo(FGV.paddingLeft, FGV.y0pos);
+	FGV.context.lineTo(FGV.canvas.width, FGV.y0pos);
 
     // draw the y scale
-    for (var y = -tick; y > FGV.startY; y -= tick) {
-    	var ypos = FGV.y0pos - y / FGV.scalePerPixel;
-    	FGV.context.moveTo(FGV.x0pos - 5, ypos); 
-    	FGV.context.lineTo(FGV.x0pos + 5, ypos);
-
-    	var value = Math.round(y * 10) / 10;
-    	var textWidth = FGV.context.measureText(value).width;
-        FGV.context.fillText(value, FGV.x0pos - textWidth - 7, ypos + 3);
+    for (var y = -FGV.tick; y > FGV.startY; y -= FGV.tick) {	// negative axis
+    	drawYTick(y);
     }
-    for (var y = tick; y < FGV.stopY; y += tick) {
-        var ypos = FGV.y0pos - y / FGV.scalePerPixel;
-        FGV.context.moveTo(FGV.x0pos - 5, ypos); 
-        FGV.context.lineTo(FGV.x0pos + 5, ypos);
-
-        var value = Math.round(y * 10) / 10;
-    	var textWidth = FGV.context.measureText(value).width;
-        FGV.context.fillText(value, FGV.x0pos - textWidth - 7, ypos + 3);
+    for (var y = FGV.tick; y < FGV.stopY; y += FGV.tick) {		// positive axis
+    	drawYTick(y);
     }
 
     // draw the x scale
-    for (var x = -tick; x > FGV.startX; x -= tick) {
-        var xpos = FGV.x0pos + x / FGV.scalePerPixel;
-        FGV.context.moveTo(xpos, FGV.y0pos - 5); 
-        FGV.context.lineTo(xpos, FGV.y0pos + 5);
-
-        var value = Math.round(x * 10) / 10;
-    	var textWidth = FGV.context.measureText(value).width;
-        FGV.context.fillText(value, xpos - textWidth / 2, FGV.y0pos + 15);
+    for (var x = -FGV.tick; x > FGV.startX; x -= FGV.tick) {	// negative axis
+    	drawXTick(x);
     }
-    for (var x = tick; x < FGV.stopX; x += tick) {
-    	var xpos = FGV.x0pos + x / FGV.scalePerPixel;
-    	FGV.context.moveTo(xpos, FGV.y0pos - 5); 
-    	FGV.context.lineTo(xpos, FGV.y0pos + 5);
-
-        var value = Math.round(x * 10) / 10;
-    	var textWidth = FGV.context.measureText(value).width;
-        FGV.context.fillText(value, xpos - textWidth / 2, FGV.y0pos + 15);
+    for (var x = FGV.tick; x < FGV.stopX; x += FGV.tick) {		// positive axis
+    	drawXTick(x);
     }
 
-    FGV.context.fill(); // ????? Probably not quite  correct, but it works ...
-    FGV.context.stroke();   // still required!!!!
+    FGV.context.stroke();
+
+	// Y axis arrow
+	FGV.context.moveTo(FGV.x0pos, 0);
+    FGV.context.lineTo(FGV.x0pos - 5, 10);
+    FGV.context.lineTo(FGV.x0pos + 5, 10);
+    FGV.context.lineTo(FGV.x0pos, 0);
+    FGV.context.strokeText("Y", FGV.x0pos  + FGV.paddingLeft - 15, 10);
+
+	// X axis arrow
+	FGV.context.moveTo(FGV.canvas.width, FGV.y0pos);
+	FGV.context.lineTo(FGV.canvas.width - 10, FGV.y0pos - 5);
+	FGV.context.lineTo(FGV.canvas.width - 10, FGV.y0pos + 5);
+    FGV.context.lineTo(FGV.canvas.width, FGV.y0pos);
+    FGV.context.strokeText("X", FGV.canvas.width - 10, FGV.y0pos + 20);
+
+    FGV.context.fill();
 }
 
+
 /**
- * Draw all graphs which are currently defined.
+ * Draws a specific graph.
+ *
+ * @param theGraph The graph object to draw.
  */
 function drawGraph(theGraph) {
 	FGV.context.beginPath();
@@ -145,10 +206,17 @@ function drawGraph(theGraph) {
         var ypos = FGV.y0pos - y / FGV.scalePerPixel;
         FGV.context.lineTo(xpos, ypos);
     }
+
     FGV.context.stroke();
 }
 
 
+/**
+ * Adds an entry to the graph legend.
+ *
+ * @param graph The graph object which contains the color, the text and
+ *              the JavaScript function of the graph
+ */
 function addLegendEntry(graph) {
 	// Get the legend table and add it if it does not exist yet
     var table = document.getElementById("_legendTable");
@@ -164,10 +232,21 @@ function addLegendEntry(graph) {
 	tr.appendChild(td);
 
 	// create a text node containing the function name, colored in the graph's color
+	// <font color="red">f<sub>1</sub>(x) = </font>	
 	var font = document.createElement('font');
 	font.setAttribute('color', graph.color);
-	var fnNameNode = document.createTextNode('f' + FGV.graphs.length + '(x) = ');
-    font.appendChild(fnNameNode);
+
+	// "f"
+	font.appendChild(document.createTextNode('f'));
+
+	// <sub>n</sub>
+	var subScript = document.createElement('sub');
+	var fnIndex = document.createTextNode("" + FGV.graphs.length);
+	subScript.appendChild(fnIndex);
+	font.appendChild(subScript);
+
+	// "(x) =" 
+	font.appendChild(document.createTextNode('(x) = '));
 
 	// create a text node containing the actual function
     var fnTextNode = document.createTextNode(graph.text);
@@ -186,7 +265,7 @@ function addLegendEntry(graph) {
  * @param formula	The function to add.
  * @param color		The color for the function graph.
  */
-function addGraphFor(formula, color) {
+function addGraph(formula, color) {
 
 	var graph = {
             "text"    : formula,
@@ -199,6 +278,9 @@ function addGraphFor(formula, color) {
 }
 
 
+/**
+ * Redraws the complete canvas.
+ */
 function renderScene() {
     FGV.context.clearRect(0, 0, FGV.canvas.width, FGV.canvas.height);
 
@@ -210,6 +292,12 @@ function renderScene() {
 }
 
 
+/**
+ * Event function for the canvas mouse move events.
+ * Updates the crosshair coordinates when the mouse moves.
+ *
+ * @param evt The event object
+ */
 function onMouseMove(evt) {
 	  var mouseXpos = evt.clientX - FGV.canvas.offsetLeft;
 	  var mouseYpos = evt.clientY - FGV.canvas.offsetTop;
@@ -224,9 +312,9 @@ function onMouseMove(evt) {
 
 	  // draw the cross
 	  FGV.context.moveTo(mouseXpos, 0);
-	  FGV.context.lineTo(mouseXpos, 480);
+	  FGV.context.lineTo(mouseXpos, FGV.canvas.height);
 	  FGV.context.moveTo(0, mouseYpos);
-	  FGV.context.lineTo(640, mouseYpos);
+	  FGV.context.lineTo(FGV.canvas.width, mouseYpos);
 	  FGV.context.stroke();
 
 	  // update position values
@@ -235,6 +323,13 @@ function onMouseMove(evt) {
 }
 
 
+/**
+ * Event function for the canvas mouse out events.
+ * Whenever the mouse leaves the canvas, the crosshair is removed and 
+ * the crosshair coordinates are set to "n/a". 
+ *
+ * @param evt The event object
+ */
 function onMouseOut(evt) {
     FGV.curXposNode.value = 'n/a';
     FGV.curYposNode.value = 'n/a';
@@ -275,28 +370,29 @@ function initialize() {
     FGV.graphs = [];
 
     // Some sample graphs, especially for debugging purposes
-    addGraphFor("2*sin(x)", "red");
-    addGraphFor("log(x)", "blue");
-    addGraphFor("exp(x)", "green");
-    addGraphFor("x + 3*pow(x, 2) + pow(x, 3) - 1", "maroon");
+    addGraph("2*sin(x)", "red");
+    addGraph("log(x)", "blue");
+    addGraph("exp(x)", "green");
+    addGraph("x + 3*pow(x, 2) + pow(x, 3) - 1", "maroon");
 
-	reset();
+    updateValues();
+    renderScene();
 }
 
 
 /**
  * Action function for the "Add" button.
  */
-function addGraph() {
-	addGraphFor(FGV.formula.value, FGV.graphColor.value);
-    renderScene(); // drawGraph(graph);
+function addAction() {
+	addGraph(FGV.formula.value, FGV.graphColor.value);
+    renderScene();
 }
 
 
 /**
  * Action function for the "Apply" button on the X axis.
  */
-function reset() {
+function applyAction() {
     updateValues();
     renderScene();
 }
@@ -305,7 +401,7 @@ function reset() {
 /**
  * Action function for the "Clear all" button.
  */
-function clearDiagram() {
+function clearAction() {
 	// remove the legend table
     var table = document.getElementById("_legendTable");
     if (table) {
