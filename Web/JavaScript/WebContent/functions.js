@@ -289,17 +289,19 @@ function getTrNode(event) {
 }
 
 
-
-
 function commitEdit(event) {
    var trNode = getTrNode(event);
    var row = parseFloat(trNode.getAttribute('data-row'));
 
+   // get values from the UI
    var inputField = document.getElementByXpath('//*[@id="_legendTable"]/tr['+(row+1)+']/td[3]/input');
    var formula = inputField.value;  
+   var colorField = document.getElementByXpath('//*[@id="_legendTable"]/tr['+(row+1)+']/td[4]/select');
 
+   // set new values
    FGV.graphs[row].text = formula;
    FGV.graphs[row].formula = convertFormula(formula);
+   FGV.graphs[row].color = colorField.value; 
 
    setRowNoEdit(row);
    renderScene();
@@ -336,30 +338,32 @@ function setRowEdit(editIndex) {
    var formulaCell = rowNode.childNodes[2];
    var colorCell = rowNode.childNodes[3];
 
+   var graph = FGV.graphs[editIndex];
+   
    firstButtonCell.innerHTML = '<button onclick="cancelEdit()"><img src="cancel.png" /></button>';
    secondButtonCell.innerHTML = '<button onclick="commitEdit()"><img src="check_mark.png" /></button>';
-   formulaCell.innerHTML = '<font color="' + FGV.graphs[editIndex].color + '">f<sub>'+ FGV.graphs[editIndex].index + 
+   formulaCell.innerHTML = '<font color="' + graph.color + '">f<sub>'+ graph.index + 
                            '</sub>(x) = </font>' +
-                           '<input onkeypress="keyPressed()" size="40" value="' + FGV.graphs[editIndex].text + '" autofocus="autofocus" />';
-   colorCell.innerHTML = '<select>'
-                                +'<option value="aqua">Aqua</option>'
-                                +'<option value="black">Black</option>'
-                                +'<option value="blue">Blue</option>'
-                                +'<option value="fuchsia">Fuchsia</option>'
-                                +'<option value="gray">Gray</option>'
-                                +'<option value="green">Green</option>'
-                                +'<option value="lime">Lime</option>'
-                                +'<option value="maroon">Maroon</option>'
-                                +'<option value="navy">Navy</option>'
-                                +'<option value="olive">Olive</option>'
-                                +'<option value="purple">Purple</option>'
-                                +'<option value="red">Red</option>'
-                                +'<option value="silver">Silver</option>'
-                                +'<option value="teal">Teal</option>'
-                                +'<option value="white">White</option>'
-                                +'<option value="yellow">Yellow</option>'
-                           +'</select>';
-   
+                           '<input onkeypress="keyPressed()" size="40" value="' + graph.text + '" autofocus="autofocus" />';
+
+   // create the color selector drop down
+   var colors = ['aqua', 'black', 'blue', 'fuchsia', 'gray', 'green',
+                 'lime', 'maroon', 'navy', 'olive', 'purple', 'red',
+                 'silver', 'teal', 'white', 'yellow'];
+
+   var htmlCode = '<select>';
+   for (var idx = 0;  idx < colors.length;  idx++) {
+      color = colors[idx];
+      colorName = color.charAt(0).toUpperCase() + color.slice(1);
+      if (color == graph.color) {
+         htmlCode = htmlCode + '<option selected value="' + color + '">' + colorName + '</option>';
+      } else {
+         htmlCode = htmlCode + '<option value="' + color + '">' + colorName + '</option>';
+      }
+   }
+   htmlCode = htmlCode + '</select>';
+   colorCell.innerHTML = htmlCode;
+
    FGV.graphs[editIndex].isError = false;
 }
 
