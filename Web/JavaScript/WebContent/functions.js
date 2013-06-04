@@ -8,6 +8,13 @@
 // the global function graph view object
 var FGV = {};
 
+
+document.getElementByXpath = function (path) {
+   return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+};
+
+
+
 /**
  * Convert a formula as entered by the user into an JavaScript expression 
  * TODO: Use a real parser.
@@ -176,14 +183,11 @@ function drawAxis() {
 }
 
 
-function getElementByXpath(path) {
-   return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-}
 
 
 function setError(theGraph, theException) {
-   var errorText = getElementByXpath('//*[@id="_legendTable"]/tr['+ (theGraph.index+1) +']/td/font[2]/text()');
-   errorText.data = '\u00a0\u00a0\u00a0Error: ' + theException;
+   var errorText = document.getElementByXpath('//*[@id="_legendTable"]/tr['+ (theGraph.index+1) +']/td[3]/font[2]');
+   errorText.innerHTML = '\u00a0\u00a0\u00a0Error: ' + theException;
 
 /*   
    var table = document.getElementById("_legendTable");
@@ -237,11 +241,158 @@ function drawGraph(theGraph) {
 
 
 /**
+ * Removes a graph.
+ */
+function removeGraph(event) {
+   var trNode = getTrNode(event);
+   var deleteIndex = parseFloat(trNode.getAttribute('data-row'));
+
+   // remove graph from graphs array
+   for ( var i = deleteIndex; i < FGV.graphs.length - 1; i++) {
+      FGV.graphs[i] = FGV.graphs[i + 1];
+      FGV.graphs[i].index = i;
+   }
+   FGV.graphs.pop();
+
+   // recreate the legend table
+   removeLegend();
+   for ( var i in FGV.graphs) {
+      addLegendEntry(FGV.graphs[i]);
+   }
+
+   // redraw the graphs
+   renderScene();
+}
+
+
+/**
+ * @param event
+ * @return The &lt;tr&gt; element which contains the source element of the event 
+ */
+function getTrNode(event) {
+   // retrieve the row number to delete
+   if (!event) {
+      event = window.event; // Older versions of IE use a global reference and not an argument.
+   }
+   var trNode = (event.target || event.srcElement); // DOM uses 'target'; older versions of IE use 'srcElement'
+   while(trNode && trNode.tagName != 'TR') {
+      trNode = trNode.parentNode;
+   }
+   
+   return trNode;
+}
+
+
+
+
+function commitEdit(event) {
+   var trNode = getTrNode(event);
+   var row = parseFloat(trNode.getAttribute('data-row'));
+
+   var inputField = document.getElementByXpath('//*[@id="_legendTable"]/tr['+(row+1)+']/td[3]/input');
+   var formula = inputField.value;  
+
+   FGV.graphs[row].text = formula;
+   FGV.graphs[row].formula = convertFormula(formula);
+
+   setRowNoEdit(row);
+   renderScene();
+}
+
+
+function cancelEdit(event) {
+   var trNode = getTrNode(event);
+   var row = parseFloat(trNode.getAttribute('data-row'));
+
+   setRowNoEdit(row);
+   renderScene();
+}
+
+
+function keyPressed(event) {
+   // retrieve the key code if the pressed key
+   if (!event) {
+      event = window.event; // Older versions of IE use a global reference and not an argument.
+   }
+   var keyCode = (event.keyCode || event.which); // DOM uses 'target'; older versions of IE use 'srcElement'
+
+   if (keyCode == 13) {
+      commitEdit(event);
+   }
+}
+
+
+function setRowEdit(editIndex) {
+   // retrieve the tr element and the necessary cells
+   var rowNode =  document.getElementByXpath('//*[@id="_legendTable"]/tr[' + (editIndex + 1) + ']');
+   var firstButtonCell = rowNode.childNodes[0];
+   var secondButtonCell = rowNode.childNodes[1];
+   var formulaCell = rowNode.childNodes[2];
+   var colorCell = rowNode.childNodes[3];
+
+   firstButtonCell.innerHTML = '<button onclick="cancelEdit()"><img src="cancel.png" /></button>';
+   secondButtonCell.innerHTML = '<button onclick="commitEdit()"><img src="check_mark.png" /></button>';
+   formulaCell.innerHTML = '<font color="' + FGV.graphs[editIndex].color + '">f<sub>'+ FGV.graphs[editIndex].index + 
+                           '</sub>(x) = </font>' +
+                           '<input onkeypress="keyPressed()" size="40" value="' + FGV.graphs[editIndex].text + '" autofocus="autofocus" />';
+   colorCell.innerHTML = '<select>'
+                                +'<option value="aqua">Aqua</option>'
+                                +'<option value="black">Black</option>'
+                                +'<option value="blue">Blue</option>'
+                                +'<option value="fuchsia">Fuchsia</option>'
+                                +'<option value="gray">Gray</option>'
+                                +'<option value="green">Green</option>'
+                                +'<option value="lime">Lime</option>'
+                                +'<option value="maroon">Maroon</option>'
+                                +'<option value="navy">Navy</option>'
+                                +'<option value="olive">Olive</option>'
+                                +'<option value="purple">Purple</option>'
+                                +'<option value="red">Red</option>'
+                                +'<option value="silver">Silver</option>'
+                                +'<option value="teal">Teal</option>'
+                                +'<option value="white">White</option>'
+                                +'<option value="yellow">Yellow</option>'
+                           +'</select>';
+}
+
+
+function setRowNoEdit(rowNumber) {
+   // retrieve the tr element and the necessary cells
+   var rowNode =  document.getElementByXpath('//*[@id="_legendTable"]/tr[' + (rowNumber + 1) + ']');
+   var firstButtonCell = rowNode.childNodes[0];
+   var secondButtonCell = rowNode.childNodes[1];
+   var formulaCell = rowNode.childNodes[2];
+   var colorCell = rowNode.childNodes[3];
+
+   // set an edit button and a delete button
+   firstButtonCell.innerHTML = '<button onclick="editGraph()"><img src="pencil.png" /></button>';
+   secondButtonCell.innerHTML = '<button onclick="removeGraph()"><img src="delete.png" /></button>';
+
+   var graph = FGV.graphs[rowNumber]; 
+   formulaCell.innerHTML = '<font color="'+graph.color + '">f<sub>'+ graph.index + 
+                           '</sub>(x) = </font>' + graph.text + '<font color="red"></font>';
+   
+   colorCell.innerHTML = "";
+}
+
+
+/**
+ * Edits a graph.
+ */
+function editGraph(event) {
+   var trNode = getTrNode(event);
+   var row = parseFloat(trNode.getAttribute('data-row'));
+
+   // set row into edit mode
+   setRowEdit(row);
+}
+
+
+/**
  * Adds an entry to the graph legend.
  * 
- * @param graph
- *           The graph object which contains the color, the text and the
- *           JavaScript function of the graph
+ * @param graph The graph object which contains the color, the text and the
+ *              JavaScript function of the graph.
  */
 function addLegendEntry(graph) {
    // Get the legend table and add it if it does not exist yet
@@ -254,42 +405,24 @@ function addLegendEntry(graph) {
 
    // Append a new table row as the legend entry
    var tr = document.createElement('tr');
+   tr.setAttribute('data-row', graph.index);
+
+   // Create the cells for buttons and for the formula
+   var editTd = document.createElement('td');
+   tr.appendChild(editTd);    // first button
+
+   var deleteTd = document.createElement('td');
+   tr.appendChild(deleteTd);  // second button
+
    var td = document.createElement('td');
-   tr.appendChild(td);
+   tr.appendChild(td);        // formula
 
-   // create a text node containing the function name, colored in the graph's
-   // color
-   // <font color="red">f<sub>1</sub>(x) = </font>
-   var font = document.createElement('font');
-   font.setAttribute('color', graph.color);
-
-   // "f"
-   font.appendChild(document.createTextNode('f'));
-
-   // <sub>n</sub>
-   var subScript = document.createElement('sub');
-   var fnIndex = document.createTextNode("" + graph.index);
-   subScript.appendChild(fnIndex);
-   font.appendChild(subScript);
-
-   // "(x) ="
-   font.appendChild(document.createTextNode('(x) = '));
-
-   // create a text node containing the actual function
-   var fnTextNode = document.createTextNode(graph.text);
-
-   // create a text node which can display an error message
-   var errorFont = document.createElement('font');
-   errorFont.setAttribute('color', 'red');
-
-   var errorText = document.createTextNode("");
-   errorFont.appendChild(errorText);
-
-   td.appendChild(font);
-   td.appendChild(fnTextNode);
-   td.appendChild(errorFont);
+   var td = document.createElement('td');
+   tr.appendChild(td);        // color
 
    table.appendChild(tr);
+
+   setRowNoEdit(graph.index);
 }
 
 
@@ -381,8 +514,8 @@ function initialize() {
    // create global variables for the elements we want to access.
    // Not all browsers support the global element variables, especially not
    // in HTML5 mode.
-   FGV.formula = document.getElementById("_formula");
-   FGV.graphColor = document.getElementById("_graphColor");
+//   FGV.formula = document.getElementById("_formula");
+//   FGV.graphColor = document.getElementById("_graphColor");
    FGV.fromX = document.getElementById("_fromX");
    FGV.toX = document.getElementById("_toX");
    FGV.fromY = document.getElementById("_fromY");
@@ -421,8 +554,10 @@ function initialize() {
  * Action function for the "Add" button.
  */
 function addAction() {
-   addGraph(FGV.formula.value, FGV.graphColor.value);
-   renderScene();
+   addGraph('', 'aqua');
+
+   // set row into edit mode
+   setRowEdit(FGV.graphs.length - 1);
 }
 
 
@@ -435,15 +570,20 @@ function applyAction() {
 }
 
 
+function removeLegend() {
+   var table = document.getElementById("_legendTable");
+   if (table) {
+      table.parentNode.removeChild(table);
+   }
+}
+
+
 /**
  * Action function for the "Clear all" button.
  */
 function clearAction() {
    // remove the legend table
-   var table = document.getElementById("_legendTable");
-   if (table) {
-      table.parentNode.removeChild(table);
-   }
+   removeLegend();
    FGV.graphs = [];
    renderScene();
 }

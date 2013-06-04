@@ -1,0 +1,20 @@
+delete.png:
+	http://www.iconfinder.com/icondetails/37519/16/can_delete_trash_icon
+	Free for commercial use
+	Alexey Egorov - http://burlesck.livejournal.com
+
+pencil.png:
+	http://www.iconfinder.com/icondetails/62239/24/pencil_icon
+	Creative Commons (Attribution-Share Alike 3.0 Unported)
+	The Working Group - http://blog.twg.ca
+
+cancel.png:
+	http://www.iconfinder.com/icondetails/101941/48/cancel_icon
+	Free for commercial use
+	Windowswiki - http://metro.windowswiki.info/mi/
+
+
+check_mark.png:
+	http://www.iconfinder.com/icondetails/94981/43/check_mark_icon
+	Creative Commons Attribution 3.0 Unported (CC BY 3.0) (read me)
+	Webalys - http://www.webalys.com/
