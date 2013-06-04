@@ -205,6 +205,11 @@ function setError(theGraph, theException) {
  * @param theGraph  The graph object to draw.
  */
 function drawGraph(theGraph) {
+   // do not draw the graph if it is in an error state
+   if (theGraph.isError) {
+      return;
+   }
+
    FGV.context.beginPath();
    FGV.context.strokeStyle = theGraph.color;
    FGV.context.lineWidth = 1;
@@ -217,6 +222,7 @@ function drawGraph(theGraph) {
       y = eval(theGraph.formula);
    } catch(e) {
       setError(theGraph, e);
+      theGraph.isError = true;
       return;
    }
    if (y == Infinity) {
@@ -353,6 +359,8 @@ function setRowEdit(editIndex) {
                                 +'<option value="white">White</option>'
                                 +'<option value="yellow">Yellow</option>'
                            +'</select>';
+   
+   FGV.graphs[editIndex].isError = false;
 }
 
 
@@ -436,10 +444,11 @@ function addLegendEntry(graph) {
 function addGraph(formula, color) {
 
    var graph = {
-      "index" : FGV.graphs.length,
-      "text" : formula,
-      "formula" : convertFormula(formula),
-      "color" : color
+      'index' : FGV.graphs.length,
+      'text' : formula,
+      'formula' : convertFormula(formula),
+      'color' : color,
+      'isError' : false
    };
 
    FGV.graphs.push(graph);
@@ -514,8 +523,6 @@ function initialize() {
    // create global variables for the elements we want to access.
    // Not all browsers support the global element variables, especially not
    // in HTML5 mode.
-//   FGV.formula = document.getElementById("_formula");
-//   FGV.graphColor = document.getElementById("_graphColor");
    FGV.fromX = document.getElementById("_fromX");
    FGV.toX = document.getElementById("_toX");
    FGV.fromY = document.getElementById("_fromY");
