@@ -48,12 +48,37 @@
             <td><input size="10" readonly="readonly" id="_fromY" value="0" /></td>
             <td>to <input size="10" readonly="readonly" id="_toY" value="0" /> (calculated from X axis)</td>
           </tr>
-  
+
           <tr>
             <td>Crosshair:</td>
             <td>x = <input size="5" readonly="readonly" id="_curXpos" value="n/a" /></td>
             <td>y = <input size="5" readonly="readonly" id="_curYpos" value="n/a" /></td>
           </tr>
+        </table>
+
+        <hr/>
+        Parametric functions:
+
+        <table>
+
+          <tr>
+            <td>t = <input size="5" id="_curT" value="0" />
+              <button onclick="applyParameter()">Apply</button>
+            </td>
+          </tr>
+
+        </table>
+
+        <table>
+          <tr>
+            <td>Animation:</td>
+            <td>From t = <input size="5" id="_fromT" value="0" /></td>
+            <td>to<input size="5" id="_toT" value="1" /></td>
+            <td>dt = <input size="5" id="_curDT" value="0.1" /></td>
+            <td><button onclick="startAnimation()">Start</button>
+                <button onclick="stopAnimation()">Stop</button></td>
+          </tr>
+
         </table>
 
       </div>

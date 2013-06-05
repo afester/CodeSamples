@@ -131,7 +131,7 @@ var legendTable = {
          // set new values
          graph.text = formula;
          graph.formula = convertFormula(formula);
-         graph.color = colorField.value; 
+         graph.color = colorField.value;
 
          this.setRowNoEdit(row);
          renderScene();
@@ -439,6 +439,7 @@ function drawGraph(theGraph) {
 
    // draw the graph
    var x = FGV.startX;
+   var t = FGV.t;     // time parameter - for parametric functions
    var y = 0;
    try {
       y = eval(theGraph.formula);
@@ -565,6 +566,10 @@ function initialize() {
    FGV.curXposNode = document.getElementById("_curXpos");
    FGV.curYposNode = document.getElementById("_curYpos");
    FGV.legendDiv = document.getElementById("_legend");
+   FGV.curTNode = document.getElementById("_curT");
+   FGV.curDTNode = document.getElementById("_curDT");
+   FGV.fromTNode = document.getElementById("_fromT");
+   FGV.toTNode = document.getElementById("_toT");
 
    FGV.canvas.onmousemove = onMouseMove;
    FGV.canvas.onmouseout = onMouseOut;
@@ -579,12 +584,15 @@ function initialize() {
    }
 
    FGV.graphs = [];
+   FGV.dt = 0;
+   FGV.t = 0;
+   FGV.animate = false;
 
    // Some sample graphs, especially for debugging purposes
-   addGraph("2*sin(x)", "red");
-   addGraph("log(X)", "blue");
-   addGraph("exp(x)", "green");
-   addGraph("x + 3*pow(x, 2) + pow(x, 3) - 1", "maroon");
+   addGraph("2*sin(x+2*t)", "red");
+   addGraph("log(X)+t", "blue");
+   addGraph("exp(x+t)", "green");
+   addGraph("x + 3*pow(x-t, 2) + pow(x, 3) - 1", "maroon");
 
    updateValues();
    renderScene();
@@ -620,4 +628,73 @@ function clearAction() {
    legendTable.removeLegend();
    FGV.graphs = [];
    renderScene();
+}
+
+
+/**
+ * Action function for the "Apply" button of the parameter for parametric 
+ * functions.
+ */
+function applyParameter() {
+   FGV.t = parseFloat(FGV.curTNode.value);
+   renderScene();
+}
+
+
+
+
+/**
+ * Action function for the "Start" button to start the animation of parametric
+ * functions.
+ */
+function startAnimation() {
+
+   var step = function () {
+      if (FGV.animate == true) {
+         // calculate next value
+         FGV.t = FGV.t + FGV.dt;
+
+         // check if value still in range - if end is reached, reset parameter
+         if (FGV.dt < 0) {
+            if (FGV.t <= FGV.stopT) {
+               //FGV.animate = false;
+               FGV.t = parseFloat(FGV.fromTNode.value);
+            }
+         } else {
+            if (FGV.t >= FGV.stopT) {
+               //FGV.animate = false;
+               FGV.t = parseFloat(FGV.fromTNode.value);
+            }
+         }
+
+         // Update UI
+         FGV.curTNode.value = Math.round(FGV.t * 100) / 100;
+         renderScene();
+
+         // schedule next step
+         setTimeout(step, 100);
+      }
+  };
+
+  // initialize values from user input
+  FGV.dt = parseFloat(FGV.curDTNode.value);
+  FGV.t = parseFloat(FGV.fromTNode.value);
+  FGV.stopT = parseFloat(FGV.toTNode.value);
+  FGV.animate = true;
+
+  // Update UI
+  FGV.curTNode.value = Math.round(FGV.t * 100) / 100;
+  renderScene();
+
+  // schedule next step
+  setTimeout(step, 100);
+}
+
+
+/**
+ * Action function for the "Stop" button to stopthe animation of parametric
+ * functions.
+ */
+function stopAnimation() {
+   FGV.animate = false;
 }
