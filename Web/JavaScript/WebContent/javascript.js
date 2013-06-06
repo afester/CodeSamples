@@ -312,3 +312,25 @@ function colorSampleAction() {
   var coloredNode = document.getElementById('_textArea');
   fade(coloredNode);
 }
+
+
+function arraySampleAction() {
+   var a = [1, 2, 3];
+   dumpObject("a", a);
+   
+   a[1] = a[2];
+   dumpObject("a", a);
+   
+  
+   var a1 = [ {name: "first"}, {name: "second"}, {name: "third"}];
+   dumpObject("a1", a1);
+   a1[1] = a1[2];
+   dumpObject("a1", a1);
+
+
+   var a2 = [ {name: "first"}, {name: "second"}, {name: "third"}, {name: "fourth"}];
+   for (var i = 1;  i < a2.length - 1;  i++) {
+      a2[i] = a2[i+1];
+   }
+   dumpObject("a2", a2);
+}
