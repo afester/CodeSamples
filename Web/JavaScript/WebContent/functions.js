@@ -99,8 +99,6 @@ var legendTable = {
          }
          htmlCode = htmlCode + '</select>';
          colorCell.innerHTML = htmlCode;
-
-         graph.isError = false;
       },
 
       /**
@@ -132,6 +130,7 @@ var legendTable = {
          graph.text = formula;
          graph.formula = convertFormula(formula);
          graph.color = colorField.value;
+         graph.isError = false;
 
          this.setRowNoEdit(row);
          renderScene();
@@ -195,12 +194,14 @@ var legendTable = {
          for ( var i = row; i < FGV.graphs.length - 1; i++) {
             FGV.graphs[i] = FGV.graphs[i + 1];
             FGV.graphs[i].index = i;
+            FGV.graphs[i].isError = false;
          }
          FGV.graphs.pop();
 
          // recreate the legend table
          this.removeLegend();
          for ( var i in FGV.graphs) {
+            FGV.graphs[i].isError = false;
             this.addLegendEntry(FGV.graphs[i]);
          }
 
@@ -483,7 +484,11 @@ function addGraph(formula, color) {
       'text' : formula,
       'formula' : convertFormula(formula),
       'color' : color,
-      'isError' : false
+      'isError' : false,
+
+      toString : function() {
+         return 'Graph[' + this.index + ', "' + this.text + '", ' + this.color + ', ' + this.isError + ']';
+      }
    };
 
    FGV.graphs.push(graph);
@@ -495,12 +500,38 @@ function addGraph(formula, color) {
  * Redraws the complete canvas.
  */
 function renderScene() {
+   // clear the canvas
    FGV.context.clearRect(0, 0, FGV.canvas.width, FGV.canvas.height);
 
+   // draw the axes
    drawAxis();
 
+   // draw the graphs
    for ( var i = 0; i < FGV.graphs.length; i++) {
       drawGraph(FGV.graphs[i]);
+   }
+
+   // draw the crosshair
+   if (FGV.mouseXpos != -1 && FGV.mouseYpos != -1) {
+      // set visual properties for the cross
+      FGV.context.beginPath();
+      FGV.context.strokeStyle = "red";
+      FGV.context.lineWidth = 0.5;
+      FGV.context.setLineDash([ 8, 2 ]);
+   
+      // draw the cross
+      FGV.context.moveTo(FGV.mouseXpos, 0);
+      FGV.context.lineTo(FGV.mouseXpos, FGV.canvas.height);
+      FGV.context.moveTo(0, FGV.mouseYpos);
+      FGV.context.lineTo(FGV.canvas.width, FGV.mouseYpos);
+      FGV.context.stroke();
+   
+      // update position values
+      FGV.curXposNode.value = Math.round(((FGV.mouseXpos - FGV.x0pos) * FGV.scalePerPixel) * 100) / 100;
+      FGV.curYposNode.value = Math.round(((FGV.y0pos - FGV.mouseYpos) * FGV.scalePerPixel) * 100) / 100;
+   } else {
+      FGV.curXposNode.value = 'n/a';
+      FGV.curYposNode.value = 'n/a';
    }
 }
 
@@ -512,27 +543,10 @@ function renderScene() {
  * @param evt The event object
  */
 function onMouseMove(evt) {
-   var mouseXpos = evt.clientX - FGV.canvas.offsetLeft;
-   var mouseYpos = evt.clientY - FGV.canvas.offsetTop;
+   FGV.mouseXpos = evt.clientX - FGV.canvas.offsetLeft;
+   FGV.mouseYpos = evt.clientY - FGV.canvas.offsetTop;
 
    renderScene();
-
-   // set visual properties for the cross
-   FGV.context.beginPath();
-   FGV.context.strokeStyle = "red";
-   FGV.context.lineWidth = 0.5;
-   FGV.context.setLineDash([ 8, 2 ]);
-
-   // draw the cross
-   FGV.context.moveTo(mouseXpos, 0);
-   FGV.context.lineTo(mouseXpos, FGV.canvas.height);
-   FGV.context.moveTo(0, mouseYpos);
-   FGV.context.lineTo(FGV.canvas.width, mouseYpos);
-   FGV.context.stroke();
-
-   // update position values
-   FGV.curXposNode.value = Math.round(((mouseXpos - FGV.x0pos) * FGV.scalePerPixel) * 100) / 100;
-   FGV.curYposNode.value = Math.round(((FGV.y0pos - mouseYpos) * FGV.scalePerPixel) * 100) / 100;
 }
 
 
@@ -544,8 +558,9 @@ function onMouseMove(evt) {
  * @param evt  The event object
  */
 function onMouseOut(evt) {
-   FGV.curXposNode.value = 'n/a';
-   FGV.curYposNode.value = 'n/a';
+   FGV.mouseXpos = -1;
+   FGV.mouseYpos = -1;
+
    renderScene();
 }
 
@@ -575,6 +590,10 @@ function initialize() {
    FGV.canvas.onmouseout = onMouseOut;
    FGV.context = FGV.canvas.getContext('2d');
    FGV.context.font = '8pt arial,sans-serif';
+
+   FGV.animationRate = 40;    // animation refresh rate in ms
+   FGV.mouseXpos = -1;        // X mouse position for crosshair
+   FGV.mouseYpos = -1;        // Y mouse position for crosshair
 
    // Not all browsers support setLineDash!
    // http://www.rgraph.net/blog/2013/january/html5-canvas-dashed-lines.html
@@ -641,6 +660,48 @@ function applyParameter() {
 }
 
 
+function nextStep() {
+   // calculate next value
+   FGV.t = FGV.t + FGV.dt;
+
+   // check if value still in range - if end is reached, reset parameter
+   if (FGV.dt < 0) {
+      if (FGV.t <= FGV.stopT) {
+         //FGV.animate = false;
+         FGV.t = parseFloat(FGV.fromTNode.value);
+      }
+   } else {
+      if (FGV.t >= FGV.stopT) {
+         //FGV.animate = false;
+         FGV.t = parseFloat(FGV.fromTNode.value);
+      }
+   }
+
+   // Update UI
+   FGV.curTNode.value = Math.round(FGV.t * 100) / 100;
+   renderScene();
+}
+
+
+function previousStep() {
+   // calculate previous value
+   FGV.t = FGV.t - FGV.dt;
+
+   // check if value still in range - if start is reached, reset parameter
+   if (FGV.dt < 0) {
+      if (FGV.t >= FGV.startT) {
+         FGV.t = parseFloat(FGV.toTNode.value);
+      }
+   } else {
+      if (FGV.t <= FGV.startT) {
+         FGV.t = parseFloat(FGV.toTNode.value);
+      }
+   }
+
+   // Update UI
+   FGV.curTNode.value = Math.round(FGV.t * 100) / 100;
+   renderScene();
+}
 
 
 /**
@@ -651,35 +712,19 @@ function startAnimation() {
 
    var step = function () {
       if (FGV.animate == true) {
-         // calculate next value
-         FGV.t = FGV.t + FGV.dt;
-
-         // check if value still in range - if end is reached, reset parameter
-         if (FGV.dt < 0) {
-            if (FGV.t <= FGV.stopT) {
-               //FGV.animate = false;
-               FGV.t = parseFloat(FGV.fromTNode.value);
-            }
-         } else {
-            if (FGV.t >= FGV.stopT) {
-               //FGV.animate = false;
-               FGV.t = parseFloat(FGV.fromTNode.value);
-            }
-         }
-
-         // Update UI
-         FGV.curTNode.value = Math.round(FGV.t * 100) / 100;
-         renderScene();
+         nextStep();
 
          // schedule next step
-         setTimeout(step, 100);
+         setTimeout(step, FGV.animationRate);
       }
   };
 
   // initialize values from user input
   FGV.dt = parseFloat(FGV.curDTNode.value);
-  FGV.t = parseFloat(FGV.fromTNode.value);
+  FGV.startT = parseFloat(FGV.fromTNode.value);
   FGV.stopT = parseFloat(FGV.toTNode.value);
+
+  FGV.t = FGV.startT;
   FGV.animate = true;
 
   // Update UI
@@ -687,14 +732,42 @@ function startAnimation() {
   renderScene();
 
   // schedule next step
-  setTimeout(step, 100);
+  setTimeout(step, FGV.animationRate);
 }
 
 
 /**
- * Action function for the "Stop" button to stopthe animation of parametric
+ * Action function for the "Stop" button to stop the animation of parametric
  * functions.
  */
 function stopAnimation() {
    FGV.animate = false;
+}
+
+
+/**
+ * Action function for the "Increment" button to advance to the next frame.
+ */
+function next() {
+   // initialize values from user input
+   FGV.dt = parseFloat(FGV.curDTNode.value);
+   FGV.startT = parseFloat(FGV.fromTNode.value);
+   FGV.stopT = parseFloat(FGV.toTNode.value);
+   FGV.animate = false;
+
+   nextStep();
+}
+
+
+/**
+ * Action function for the "Decrement" button to go back to the previous frame.
+ */
+function previous() {
+   // initialize values from user input
+   FGV.dt = parseFloat(FGV.curDTNode.value);
+   FGV.startT = parseFloat(FGV.fromTNode.value);
+   FGV.stopT = parseFloat(FGV.toTNode.value);
+   FGV.animate = false;
+
+   previousStep();
 }
