@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+    <link href="applet.css" rel="stylesheet" type="text/css" />
+    <title>Applet test</title>
+
+    <script type="text/javascript">
+
+      window.onload = function(e){
+         applet = document.getElementById("sampleApplet");
+         applet.width = window.innerWidth - 25; 
+         applet.height = window.innerHeight - 25;
+      }
+
+      window.onresize = function() {
+    	 applet = document.getElementById("sampleApplet");
+    	 applet.width = window.innerWidth - 25;
+    	 applet.height = window.innerHeight - 25;
+      }
+    </script>
+
+  </head>
+
+  <body>
+    <!-- Note: The HTML specification states that the applet tag is deprecated, 
+         and that you should use the object tag instead. However, the specification 
+         is vague about how browsers should implement the object tag to support 
+         Java applets, and browser support is currently inconsistent. 
+         **Oracle therefore recommends that you continue to use the applet tag as   ** 
+         **a consistent way to deploy Java applets across browsers on all platforms.**
+    -->
+    <applet id="sampleApplet" code = "com.example.SampleApplet.class"
+            codebase="./classes/"
+            alt = "Sample applet"
+            name = "sampleApplet"
+            width = "640" height = "480" vspace="10" hspace="10">
+        <param name="sampleParam" value="sampleValue" />
+    </applet>
+
+  </body>
+</html>
