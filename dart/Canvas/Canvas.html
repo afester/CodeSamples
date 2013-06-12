@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Editor</title>
+    <link rel="stylesheet" href="Canvas.css">
+  </head>
+
+  <body>
+
+  	<form id="">
+  		<input id="loadButton" type="button" value="Load" />
+  		<input id="saveButton" type="button" value="Save" />
+  		<input id="alignLeftButton" type="button" value="Left" />
+  		<input id="alignBlockButton" type="button" value="Block" />
+  		<input id="alignRightButton" type="button" value="Right" />
+  		<input id="boldButton" type="button" value="Bold" />
+  		<input id="italicButton" type="button" value="Italic" />
+  		<input id="underlineButton" type="button" value="Underline" />
+  		<input id="orderedListButton" type="button" value="Ordered List" />
+  		<input id="unorderedListButton" type="button" value="Unordered List" />
+  		<input id="indentButton" type="button" value="Indent" />
+  		<input id="outdentButton" type="button" value="Outdent" />
+  	</form>
+  
+  	<canvas id="editor-area" width="800" height="800">
+  	This text is displayed if your browser does not support HTML5 Canvas.
+  	</canvas>
+  
+  	<div style="background:black;color:green">
+  		<pre id="result"></pre>
+  	</div>
+
+    <script type="application/dart" src="Canvas.dart"></script>
+    <script src="dart.js"></script>
+  </body>
+</html>

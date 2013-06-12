@@ -1,35 +1,36 @@
 <!DOCTYPE html>
+
 <html>
   <head>
     <meta charset="utf-8">
     <title>Editor</title>
     <link rel="stylesheet" href="Editor.css">
   </head>
-  <body>
-
-	<form id="">
-		<input class="toolbutton" id="loadButton" type="button" title="Load document" />
-		<input class="toolbutton" id="saveButton" type="button" title="Save document" />
-		<input class="toolbutton" id="alignLeftButton" type="button" title="Align paragraph left" />
-		<input class="toolbutton" id="alignBlockButton" type="button" title="Justify paragraph alignment" />
-		<input class="toolbutton" id="alignRightButton" type="button" title="Align paragraph right" />
-		<input class="toolbutton" id="boldButton" type="button" title="Bold text" />
-		<input class="toolbutton" id="italicButton" type="button" title="Italic text" />
-		<input class="toolbutton" id="underlineButton" type="button" title="Underline text" />
-		<input class="toolbutton" id="orderedListButton" type="button" title="Change paragraph to ordered list item" />
-		<input class="toolbutton" id="unorderedListButton" type="button" title="Change paragraph to unordered list item" />
-		<input class="toolbutton" id="indentButton" type="button" title="Increase indent of current paragraph" />
-		<input class="toolbutton" id="outdentButton" type="button" title="Decrease indent of current paragraph" />
-		<input class="toolbutton" id="undoButton" type="button" title="Undo last action" />
-		<input class="toolbutton" id="redoButton" type="button" title="Redo last undone action" />
-		<input class="toolbutton" id="pilcrowButton" type="button" title="Show paragraph markers" />
-	</form>
-
+ 
+  <body>   
+  	<form id="">
+  		<input class="toolbutton" id="loadButton" type="button" title="Load document" />
+  		<input class="toolbutton" id="saveButton" type="button" title="Save document" />
+  		<input class="toolbutton" id="alignLeftButton" type="button" title="Align paragraph left" />
+  		<input class="toolbutton" id="alignBlockButton" type="button" title="Justify paragraph alignment" />
+  		<input class="toolbutton" id="alignRightButton" type="button" title="Align paragraph right" />
+  		<input class="toolbutton" id="boldButton" type="button" title="Bold text" />
+  		<input class="toolbutton" id="italicButton" type="button" title="Italic text" />
+  		<input class="toolbutton" id="underlineButton" type="button" title="Underline text" />
+  		<input class="toolbutton" id="orderedListButton" type="button" title="Change paragraph to ordered list item" />
+  		<input class="toolbutton" id="unorderedListButton" type="button" title="Change paragraph to unordered list item" />
+  		<input class="toolbutton" id="indentButton" type="button" title="Increase indent of current paragraph" />
+  		<input class="toolbutton" id="outdentButton" type="button" title="Decrease indent of current paragraph" />
+  		<input class="toolbutton" id="undoButton" type="button" title="Undo last action" />
+  		<input class="toolbutton" id="redoButton" type="button" title="Redo last undone action" />
+  		<input class="toolbutton" id="pilcrowButton" type="button" title="Show paragraph markers" />
+  	</form>
+  
     <div id="editor-area"></div>
-
-	<div style="background:black;color:green">
-		<pre id="result"></pre>
-	</div>
+  
+  	<div style="background:black;color:green">
+  		<pre id="result"></pre>
+  	</div>
 
     <script type="application/dart" src="Editor.dart"></script>
     <script src="dart.js"></script>

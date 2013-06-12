@@ -70,7 +70,7 @@ void main() {
     <p class="code">Paragraph in code format</p>""";
 */
     var editorPane = query('#editor-area');
-    editorPane.innerHTML = contents;
+    editorPane.innerHtml = contents;
   });
 
   var saveButton = query('#saveButton');
