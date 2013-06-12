@@ -1,0 +1,92 @@
+body {
+  background-color: #F8F8F8;
+/*  font-family: 'Open Sans', sans-serif;
+  font-size: 24px;
+  font-weight: normal;
+  line-height: 1.2em;*/
+  margin: 15px;
+}
+
+p {
+  color: #ff;
+}
+
+p.code {
+  font-family: 'Courier';
+}
+
+h1:after, p:after, div:after {
+  content: "¶";
+}
+
+.toolbutton {
+	width: 30px;
+	height: 30px;
+	background-position:center;
+	background-repeat:no-repeat;
+}
+
+#loadButton {
+	background-image: url('images/document_load.png');
+}
+#saveButton {
+	background-image: url('images/document_save.png');
+}
+#alignLeftButton {
+	background-image: url('images/text_align_left.png');
+}
+#alignBlockButton {
+	background-image: url('images/text_align_justify.png');
+}
+#alignRightButton {
+	background-image: url('images/text_align_right.png');
+}
+#boldButton {
+	background-image: url('images/text_bold.png');
+}
+#italicButton {
+	background-image: url('images/text_italic.png');
+}
+#underlineButton {
+	background-image: url('images/text_underline.png');
+}
+#orderedListButton {
+	background-image: url('images/text_list_numbers.png');
+}
+#unorderedListButton {
+	background-image: url('images/text_list_bullets.png');
+}
+#indentButton {
+	background-image: url('images/format_indent_more.png');
+}
+#outdentButton {
+	background-image: url('images/format_indent_less.png');
+}
+#undoButton {
+	background-image: url('images/undo.png');
+}
+#redoButton {
+	background-image: url('images/redo.png');
+}
+#pilcrowButton {
+	background-image: url('images/pilcrow.png');
+}
+
+#editor-area {
+  width: 100%;
+  height: 400px;
+  position: relative;
+  border: 1px solid #ccc;
+  background-color: #fff;
+}
+
+
+form {
+  margin: 1em;
+}
+
+#button {
+  width: 6em;
+  margin-bottom: 1em;
+}
+
