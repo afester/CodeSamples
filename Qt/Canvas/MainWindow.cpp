@@ -14,12 +14,22 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     // Add a simple drawing canvas to the main window
-    Canvas* canvas = new Canvas(ui->centralwidget, 320, 240);
+    canvas = new Canvas(ui->centralwidget, 320, 240);
     ui->verticalLayout->addWidget(canvas);
 
-    canvas->drawLine(10, 10, 100, 100);
+    QObject::connect(ui->actionLine, SIGNAL(triggered()), this, SLOT(actionLine()));
+    QObject::connect(ui->actionCircle, SIGNAL(triggered()), this, SLOT(actionCircle()));
 }
 
 MainWindow::~MainWindow() {
     delete ui;
+}
+
+
+void MainWindow::actionLine() {
+    canvas->drawLine(10, 10, 100, 100);
+}
+
+void MainWindow::actionCircle() {
+    canvas->drawEllipse(100, 100, 50, 50);
 }

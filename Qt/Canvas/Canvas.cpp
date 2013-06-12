@@ -11,16 +11,23 @@
 #include <QPainter>
 
 Canvas::Canvas(QWidget* parent, int width, int height) : QLabel(parent), pixmap(QPixmap(width, height)) {
-    pixmap.fill(Qt::white);
+    setPixmap(pixmap);
 
-    thePainter = new QPainter(&pixmap);
+    const QPixmap* labelPixmap = pixmap();
+    labelPixmap->fill(Qt::white);
+
+    thePainter = new QPainter(labelPixmap);
     thePainter->setRenderHints(QPainter::Antialiasing, true);
     thePainter->setPen(Qt::black);
 
-    setPixmap(pixmap);
 }
 
 void Canvas::drawLine(int x1, int y1, int x2, int y2) {
     thePainter->drawLine(x1, y1, x2, y2);
-    setPixmap(pixmap);
+//    setPixmap(pixmap);
+}
+
+void Canvas::drawEllipse(int x, int y, int w, int h) {
+    thePainter->drawEllipse(x, y, w, h);
+//    setPixmap(pixmap);
 }

@@ -8,6 +8,7 @@
 #include <QMainWindow>
 
 class Ui_MainWindow;
+class Canvas;
 
 class MainWindow : public QMainWindow {
         Q_OBJECT
@@ -18,4 +19,10 @@ public:
         ~MainWindow();
 
         Ui_MainWindow* ui;
+        Canvas* canvas;
+
+public slots:
+	void actionLine();
+	void actionCircle();
+
 };
