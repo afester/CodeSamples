@@ -5,13 +5,18 @@
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
 
-#include <QLabel>
+#include <QWidget>
+#include <QPixmap>
 
 class QPainter;
+class QPaintEvent;
 
-class Canvas : public QLabel {
+class Canvas : public QWidget {
 	QPainter* thePainter;
 	QPixmap pixmap;
+
+protected:
+	void paintEvent(QPaintEvent * event);
 
 public:
 	Canvas(QWidget* parent, int width, int height);
