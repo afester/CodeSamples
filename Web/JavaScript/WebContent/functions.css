@@ -18,6 +18,13 @@ body {
 	background-image: -moz-linear-gradient(#ffffff 0%, #e0e0e0 100%);
 }
 
+noscript div {
+    background-color: #ff0000;
+    font: bold 12pt sans-serif;
+    color: white;
+    padding: 4px;
+}
+
 #_leftColumn {
     /*background-color: #00ff00; /* DEBUG */
 

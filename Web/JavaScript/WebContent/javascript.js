@@ -333,4 +333,23 @@ function arraySampleAction() {
       a2[i] = a2[i+1];
    }
    dumpObject("a2", a2);
+   
+   
+   var someArray = ['a', 'b', 'c'];
+   debugConsole.writeln('Array length:' + someArray.length);
+   someArray[5] = 'e';
+   debugConsole.writeln('Array length:' + someArray.length + ',' + someArray[3]);
+   debugConsole.writeln('=========================');
+
+   var someArray2 = ['a', 'b', 'c', 'd', 'e'];
+   debugConsole.writeln('someArray2: ' + someArray2);
+   
+   var someArray3 = someArray2.slice(1, 3);
+   debugConsole.writeln('someArray2.slice(1, 3): ' + someArray3);
+
+   debugConsole.writeln('someArray2: ' + someArray2);
+
+   var someArray4 = someArray2.splice(2, 1);
+   debugConsole.writeln('someArray2.splice(2, 1): ' + someArray4);
+   debugConsole.writeln('someArray2: ' + someArray2 + '(' + someArray2.length + ')');
 }
