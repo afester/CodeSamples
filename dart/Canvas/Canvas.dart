@@ -3,12 +3,12 @@ import 'dart:html';
 void main() {
   CanvasElement editorArea = query('#editor-area');
   CanvasRenderingContext2D context = editorArea.getContext('2d');
-  context.scale(2,2);
+  //context.scale(2,2);
 //  context.fillStyle = 'red';
 //  context.borderStyle = 'black';
 //  context.fillRect(30, 30, 50, 50);
 //  context.rect(50, 50, 50, 50);
-  context.font = "10pt Sans";
+  context.font = "10pt arial,sans-serif";
 //  context.strokeText("Hello World", 100, 100);
   context.fillText("Lorem <b>ipsum</b> dolor sit amet, consectetur adipiscing elit. Integer pellentesque posuere facilisis. Aenean eu dolor ante, ac blandit nisl. Nullam iaculis sollicitudin nisl, sed pretium diam tristique eget. Cras quam nisi, tristique ac ultricies eget, fermentum nec felis. Duis elementum ultrices metus ac pharetra. Phasellus molestie imperdiet dolor ut facilisis. Nam accumsan ullamcorper velit ac auctor. Nam quis velit magna. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce eget libero magna. Praesent auctor, diam egestas pharetra euismod, lectus metus condimentum eros, vitae faucibus urna lorem ac tortor. Vivamus scelerisque urna in purus sollicitudin ultrices. Curabitur adipiscing posuere magna non varius. Cras varius, orci pharetra aliquam scelerisque, lorem erat feugiat augue, in suscipit est diam placerat lectus.",
                     0, 10);

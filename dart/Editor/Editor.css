@@ -15,7 +15,7 @@ p.code {
   font-family: 'Courier';
 }
 
-h1:after, p:after, div:after {
+h1:after, p:after {
   content: "¶";
 }
 

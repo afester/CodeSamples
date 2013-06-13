@@ -16,11 +16,22 @@ void main() {
   */
   editorArea.onKeyDown.listen( (KeyboardEvent event) {
     if (event.keyCode == 13) {
+     // window.alert("RETURN");
+
       Selection sel = window.getSelection();
       Range r = sel.getRangeAt(0);
-      Element el = new ParagraphElement();
+      //DocumentFragment df = r.createContextualFragment("</p><p>");
+
+      // Element el = new ParagraphElement();
+      //r.insertNode(df);
+      Node n = r.startContainer;
+      while(n.nodeType != 1) {
+        n = n.parentNode;
+      }
+      window.alert(n.tagName);
+/*      
 //      el.innerHTML = "Hello World";
-      log(el.innerHtml);
+//      log(el.innerHtml);
       DocumentFragment frag = document.createDocumentFragment();
       var node, lastNode;
       node = el.$dom_firstChild;
@@ -30,7 +41,7 @@ void main() {
       }
 
       r.insertNode(frag);
-
+*/
 /*      
       Node node = r.startContainer;
 //      log(node.hasChildNodes().toString());
@@ -54,6 +65,7 @@ void main() {
 //      ParagraphElement pNode = new ParagraphElement();
 //      Range range = window.getSelection().getRangeAt(0);
 //      range.insertNode(pNode);
+
       event.preventDefault();
     }
   });
