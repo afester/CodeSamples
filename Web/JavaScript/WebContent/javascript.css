@@ -9,11 +9,19 @@
 
 body {
 	background-color: #303030;
+	font: 10pt sans-serif;
 }
 
 h1 {
     color: white;
     font-size: 14pt;
+}
+
+noscript div {
+	background-color: #ff0000;
+	font: bold 12pt sans-serif;
+	color: white;
+	padding: 4px;
 }
 
 textarea {

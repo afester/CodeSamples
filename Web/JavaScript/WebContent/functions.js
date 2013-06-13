@@ -709,6 +709,9 @@ function previousStep() {
  * functions.
  */
 function startAnimation() {
+   if (FGV.animate == true) {
+      return;
+   }
 
    var step = function () {
       if (FGV.animate == true) {
