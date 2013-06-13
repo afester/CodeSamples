@@ -1,5 +1,27 @@
 #include "Array2D.h"
 
+template <class T>
+Array2D<T>::Row::Row() : rowData(0), columnCount(0) {
+
+}
+
+
+template <class T>
+Array2D<T>::Row::Row(T* data, size_t columns) : rowData(data), columnCount(columns) {
+}
+
+
+template <class T>
+T& Array2D<T>::Row::operator[](size_t column) {
+
+	if (column >= columnCount) {
+		std::cerr << "Array out of bounds: column " << column << " > " << columnCount-1;
+		abort();
+	}
+
+	return rowData[column];
+}
+
 
 template <class T>
 Array2D<T>::Array2D(size_t rows, size_t columns) : rowCount(rows), columnCount(columns) {
@@ -31,15 +53,14 @@ size_t Array2D<T>::columns() {
 	return columnCount;
 }
 
-
 template <class T>
-Row<T> Array2D<T>::operator[](size_t row) {
+typename Array2D<T>::Row Array2D<T>::operator[](size_t row) {
 	if (row >= rowCount) {
 		std::cerr << "Array out of bounds: row " << row << " > " << rowCount-1;
 		abort();
 	}
 
-	return Row<T>(&array[row * rowCount], columnCount);
+	return Array2D<T>::Row(&array[row * rowCount], columnCount);
 }
 
 
