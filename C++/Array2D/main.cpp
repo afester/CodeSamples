@@ -3,16 +3,6 @@
 
 #include "Array2D.h"
 
-class X {
-	int value;
-
-};
-
-X& sample() {
-	X x;
-	return x;
-}
-
 int main() {
 //	 Row<int> x;     // Disallow construction
 //	 Row<int> x(0);  // Disallow construction
@@ -26,9 +16,12 @@ int main() {
     // check uninitialized elements
     std::cerr << array.at(1, 1) << std::endl;
 
+    // print the array
+    std::cerr << array.toString() << std::endl;
+
     // check array out of bounds
-    std::cerr << array.at(11, 11) << std::endl;
-    std::cerr << array[11][11] << std::endl;
+    std::cerr << array.at(8, 10) << std::endl;
+    std::cerr << array[9][11] << std::endl;
 
     // check array copy construction - not currently allowed!
 //    {
