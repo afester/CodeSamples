@@ -1,10 +1,7 @@
 #ifndef __ARRAY_2D_H__
 #define __ARRAY_2D_H__
 
-#include <iostream>
-#include <cstddef>
-#include <stdlib.h>
-#include <sstream>
+#include <string>
 
 template <class T>
 class Array2D {

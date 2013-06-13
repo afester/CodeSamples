@@ -1,5 +1,9 @@
 #include "Array2D.h"
 
+#include <iostream>
+#include <stdlib.h>
+#include <sstream>
+
 template <class T>
 Array2D<T>::Row::Row() : rowData(0), columnCount(0) {
 
