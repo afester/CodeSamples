@@ -35,10 +35,11 @@
     -->
     <applet id="sampleApplet" code = "com.example.SampleApplet.class"
             codebase="./jars/"
-            archive="sampleApplet.jar"
+            archive="sampleApplet_s.jar"
             alt = "Sample applet"
             name = "sampleApplet"
             width = "640" height = "480" vspace="10" hspace="10">
+        <param name="permissions" value="all-privileges" />
         <param name="sampleParam" value="sampleValue" />
     </applet>
 

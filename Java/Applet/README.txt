@@ -1,3 +1,71 @@
+Deployment on Tomcat
+====================
+
+NOTE: The WEB-INF sub directory is not part of the document root - therefore its
+contents are not served! 
+
+This sample applet supports various deployment scenarios:
+
+* Local - just open the index.html or one of the from*.html files through a 
+  file:// URL in the browser. The applet might have the permission to run or not,
+  depending on the security settings.
+  
+* Served through an application server
+
+  Deploy the application on a J2EE application server (test platform was 
+  Tomcat 7) and open http://localhost:8080/Applet. This shows the index.html
+  where different launch mechanism can be selected:
+
+  Run Applet from the class files - directly loads the applet's class files from
+                                    the "classes" directory.
+  
+  Run Applet from a jar file - loads the unsigned applet jar file from the "jars"
+                               directory. 
+
+  Run Applet from a signed jar file inside the sandbox - loads the signed applet
+                               jar file from the "jars" directory, but still runs
+                               the applet with restricted permissions in the sandbox
+  
+  Run Applet from a signed jar file outside the sandbox - loads the signed applet
+                               jar file from the "jars" directory, and grants
+                               all permissions to the applet (applet runs outside
+                               of the sandbox)
+
+Self-signing the jar file
+=========================
+
+    Creating the key pair
+    =====================
+    
+    $ keytool -genkey -alias signFiles -keystore mykeys.dat
+    Enter keystore password: mykeys
+    Re-enter new password: mykeys
+    What is your first and last name?
+      [Unknown]:  Example
+    What is the name of your organizational unit?
+      [Unknown]:  example
+    What is the name of your organization?
+      [Unknown]:  Example inc.
+    What is the name of your City or Locality?
+      [Unknown]:  Sampletown
+    What is the name of your State or Province?
+      [Unknown]:  Sample
+    What is the two-letter country code for this unit?
+      [Unknown]:  ex
+    Is CN=Example, OU=example, O=Example inc., L=Sampletown, ST=Sample, C=ex correct?
+      [no]:  yes
+    
+    Enter key password for <signFiles>
+            (RETURN if same as keystore password): codesigning
+    Re-enter new password: codesigning
+    
+    
+    Signing the jar file (done through the ant script)
+    ==================================================
+    
+    $ jarsigner -keystore mykeys.dat -signedjar sampleApplet_s.jar sampleApplet.jar signFiles 
+
+
 Caching
 =======
 
