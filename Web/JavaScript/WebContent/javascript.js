@@ -352,4 +352,81 @@ function arraySampleAction() {
    var someArray4 = someArray2.splice(2, 1);
    debugConsole.writeln('someArray2.splice(2, 1): ' + someArray4);
    debugConsole.writeln('someArray2: ' + someArray2 + '(' + someArray2.length + ')');
+
+   debugConsole.writeln('\narray.concat()\n=======================================================');
+   var array1 = [16, 4, 13, 5];
+   var array2 = [2, 21, 7];
+   var array3 = array1.concat(array2, 'Hello', 'World');
+   debugConsole.writeln('   array1: ' + array1);
+   debugConsole.writeln('   array2: ' + array2);
+   debugConsole.writeln('   array3: ' + array3);
+   
+   debugConsole.writeln('\narray.join()\n=======================================================');
+   var result = array3.join('|');
+   debugConsole.writeln('   array3: ' + result);
+   
+   debugConsole.writeln('\narray.push()\n=======================================================');
+   array3.push('Moon', 'Sun');
+   debugConsole.writeln('   array3: ' + array3);
+
+   debugConsole.writeln('\narray.pop()\n=======================================================');
+   array3.pop();
+   debugConsole.writeln('   array3: ' + array3);
+   
+   debugConsole.writeln('\narray.reverse()\n=======================================================');
+   array3.reverse();
+   debugConsole.writeln('   array3: ' + array3);
+   
+   debugConsole.writeln('\narray.shift()\n=======================================================');
+   array3.shift();
+   debugConsole.writeln('   array3: ' + array3);
+
+   debugConsole.writeln('\narray.unshift()\n=======================================================');
+   array3.unshift(42);
+   debugConsole.writeln('   array3: ' + array3);
+
+   debugConsole.writeln('\narray.slice()\n=======================================================');
+   var array4 = array3.slice(3, 8);
+   debugConsole.writeln('   array3: ' + array3);
+   debugConsole.writeln('   array4: ' + array4);
+   
+   debugConsole.writeln('\narray.sort()\n=======================================================');
+   array4.sort();
+   debugConsole.writeln('   array4: ' + array4);
+   array4.sort(function (a, b) {
+      return a - b;
+   });
+   debugConsole.writeln('   array4: ' + array4);
+   
+   debugConsole.writeln('\narray.splice()\n=======================================================');
+   array4.splice(2, 2, 'Moon');
+   debugConsole.writeln('   array4: ' + array4);
+  
+   
+   
+}
+
+
+function regexpSampleAction() {
+   var parseUrl = /^(?:([A-Za-z]+):)?(\/{0,3})([0-9.\-A-Za-z]+)(?::(\d+))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:#(.*))?$/;
+   debugConsole.writeln(parseUrl);
+
+   var someUrl = "http://www.example.com:8080/path/path2?param=1&param2=2#fragment";
+   var result = parseUrl.exec(someUrl);
+
+   var proto = result[1];
+   var host = result[3];
+   var port = result[4];
+   var path = result[5];
+   var params = result[6];
+   var fragment = result[7];
+
+   debugConsole.writeln('Protocol  : ' + proto);
+   debugConsole.writeln('Host      : ' + host);
+   debugConsole.writeln('Port      : ' + port);
+   debugConsole.writeln('Path      : ' + path);
+   debugConsole.writeln('Parameters: ' + params);
+   debugConsole.writeln('Fragment  : ' + fragment);
+
+   dumpObject('result', result);
 }
