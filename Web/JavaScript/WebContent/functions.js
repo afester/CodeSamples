@@ -30,7 +30,7 @@ var legendTable = {
             event = window.event; // Older versions of IE use a global reference and not an argument.
          }
          var trNode = (event.target || event.srcElement); // DOM uses 'target'; older versions of IE use 'srcElement'
-         while(trNode && trNode.tagName != 'TR') {
+         while(trNode && trNode.tagName !== 'TR') {
             trNode = trNode.parentNode;
          }
 
@@ -91,7 +91,7 @@ var legendTable = {
          for (var idx = 0;  idx < colors.length;  idx++) {
             color = colors[idx];
             colorName = color.charAt(0).toUpperCase() + color.slice(1);
-            if (color == graph.color) {
+            if (color === graph.color) {
                htmlCode = htmlCode + '<option selected value="' + color + '">' + colorName + '</option>';
             } else {
                htmlCode = htmlCode + '<option value="' + color + '">' + colorName + '</option>';
@@ -161,7 +161,7 @@ var legendTable = {
          }
          var keyCode = (event.keyCode || event.which); // DOM uses 'target'; older versions of IE use 'srcElement'
 
-         if (keyCode == 13) {
+         if (keyCode === 13) {
             this.commitEdit(event);
          }
       },
@@ -449,7 +449,7 @@ function drawGraph(theGraph) {
       theGraph.isError = true;
       return;
    }
-   if (y == Infinity) {
+   if (y === Infinity) {
       y = 1000;
    }
 
@@ -512,7 +512,7 @@ function renderScene() {
    }
 
    // draw the crosshair
-   if (FGV.mouseXpos != -1 && FGV.mouseYpos != -1) {
+   if (FGV.mouseXpos !== -1 && FGV.mouseYpos !== -1) {
       // set visual properties for the cross
       FGV.context.beginPath();
       FGV.context.strokeStyle = "red";
@@ -709,12 +709,12 @@ function previousStep() {
  * functions.
  */
 function startAnimation() {
-   if (FGV.animate == true) {
+   if (FGV.animate === true) {
       return;
    }
 
    var step = function () {
-      if (FGV.animate == true) {
+      if (FGV.animate === true) {
          nextStep();
 
          // schedule next step
