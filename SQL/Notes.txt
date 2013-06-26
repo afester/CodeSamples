@@ -1,3 +1,23 @@
+Anonymous PL/SQL Block
+======================
+
+DECLARE
+   ...
+BEGIN
+   ...
+END;
+
+
+PL/SQL procedure
+================
+CREATE OR REPLACE PROCEDURE procName AS
+
+    ... -- Declarations
+
+BEGIN
+    ...
+END;
+
 
 Executing an anonymous PL/SQL block in SQL*Plus:
 ================================================ 
@@ -16,3 +36,27 @@ PL/SQL procedure successfully completed.
 SQL> 
 
 
+Executing a PL/SQL block in SQL*Plus
+====================================
+
+CREATE OR REPLACE PROCEDURE Simple IS
+BEGIN
+    dbms_output.put_line('Hello World!');
+END;
+/
+
+EXEC Simple;
+
+Note: "EXEC[UTE]" is an SQL*Plus specific command!
+
+
+Showing PL/SQL compile errors
+=============================
+
+SQL*Plus: SHOW ERRORS PROCEDURE Name
+
+Similar to the following SQL statement:
+
+SELECT * 
+FROM SYS.USER_ERRORS 
+WHERE NAME = 'Name' AND TYPE = 'PROCEDURE'

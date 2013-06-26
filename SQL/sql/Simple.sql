@@ -1,3 +1,5 @@
+-- Some very basic SQL queries
+
 SELECT * FROM City;
 SELECT * FROM Person;
 
@@ -24,7 +26,7 @@ FROM Person
 FULL JOIN City ON Person.City = City.Id;
 
 -- Select the number of Persons in each City. Query is primarily on Person,
--- grouping the rows by the city: 
+-- grouping the rows by the city name: 
 SELECT City.Name, COUNT(*)
 FROM Person
 LEFT OUTER JOIN City ON Person.City = City.Id

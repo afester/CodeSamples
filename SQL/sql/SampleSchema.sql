@@ -1,20 +1,7 @@
--- A stored procedure which drops a table, independant of whether it 
--- already exists or not.
---
--- @param tableName The name of the table to drop.
---  
-CREATE OR REPLACE PROCEDURE DROP_TABLE_IF_EXISTS(tableName IN VARCHAR2) IS
-BEGIN
-    EXECUTE IMMEDIATE 'DROP TABLE ' || tableName;
-EXCEPTION
-   WHEN OTHERS THEN
-      IF SQLCODE != -942 THEN
-         RAISE;
-      END IF;
-END;
-/
+-- Creates a simple schema to be used for various SQL queries
 
--- EXEC does not seem to work - need to use an anonymous PL/SQL block
+-- EXEC is SQL*Plus specific command - when used with other worksheets,
+-- we need to use an anonmyous PL/SQL block:
 BEGIN DROP_TABLE_IF_EXISTS('Person'); END;
 BEGIN DROP_TABLE_IF_EXISTS('City'); END;
 
