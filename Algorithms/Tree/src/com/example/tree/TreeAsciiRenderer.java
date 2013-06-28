@@ -3,7 +3,7 @@ package com.example.tree;
 import java.util.Iterator;
 
 
-public class TreeVisualizer {
+public class TreeAsciiRenderer {
 
    private final static char   BAR         = '|';
    private final static char   NO_BAR      = ' ';
@@ -13,11 +13,11 @@ public class TreeVisualizer {
    private final static String NODE_HANDLE = "--";
 
    
-   private void processChildren(TreeNode parent, String prefix) {
+   private void processChildren(TreeNode<?> parent, String prefix) {
 
-      Iterator<TreeNode> childs = parent.getChildren().iterator();
+      Iterator<?> childs = parent.getChildren().iterator();
       while(childs.hasNext()) {
-         TreeNode child = childs.next();
+         TreeNode<?> child = (TreeNode<?>) childs.next();
 
          StringBuilder line = new StringBuilder(prefix);
          StringBuilder newPrefix = new StringBuilder(prefix);
@@ -33,7 +33,7 @@ public class TreeVisualizer {
          newPrefix.append(SPACER);
 
          line.append(NODE_HANDLE);
-         line.append(child.getLabel());
+         line.append(child.getContent());
 
          System.out.println(line);
 
@@ -42,21 +42,32 @@ public class TreeVisualizer {
    }
 
 
-   public void visualizeHierarchical(Tree tree) {
-      TreeNode rootNode = tree.getRootNode();
-      System.out.println(LAST_NODE + NODE_HANDLE + rootNode.getLabel());
-      processChildren(rootNode, "   ");
+   /**
+    * Renders a tree as a vertical hierarchical structure.
+    *
+    * @param tree The tree to render.
+    */
+   public void renderHierarchical(TreeNode<?> tree) {
+      // TreeNode rootNode = tree.getRootNode();
+      System.out.println(LAST_NODE + NODE_HANDLE + tree.getContent());
+      processChildren(tree, "   ");
    }
 
 
-   private void printNode(TreeNode node) {
-      System.out.println(node);
-      for (TreeNode child : node.getChildren()) {
+   private void printNode(TreeNode<?> node) {
+      System.out.println(node.getLevel() + " " + node + " (" + node.getPathString() + ")");
+      for (TreeNode<?> child : node.getChildren()) {
          printNode(child);
       }
    }
 
-   public void visualizeFlat(Tree tree) {
-      printNode(tree.getRootNode());
+
+   /**
+    * Renders a tree as a flat list.
+    * 
+    * @param tree The tree to render.
+    */
+   public void renderFlat(TreeNode<?> tree) {
+      printNode(tree);
    }
 }
