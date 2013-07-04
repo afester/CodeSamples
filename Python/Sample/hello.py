@@ -1,6 +1,7 @@
 # Import the "random" module:
 import random
 
+
 # Python 3: "The print statement has been replaced with a print() function"
 # http://docs.python.org/3.0/whatsnew/3.0.html
 print('Hello World')
@@ -49,14 +50,6 @@ print(myTuple, len(myTuple), type(myTuple))
 print(myTuple[2])
 # Tuples are immutable:
 # myTuple[2] = 10
-
-# List
-myList = [3, 5, 7]
-print(myList, len(myList), type(myList))
-print(myList[2])
-# Lists are mutable:
-myList[2] = 10
-print(myList)
 
 # Comparison operators
 x1 = 5
@@ -145,20 +138,6 @@ finally:
     print("Finally")
 
 ############# OPERATORS
-    
-a = 10
-b = 3
-print(a / b)        # produces floating point value - 3.333333333333333333333
-print(int(a / b))   # 3
-print(a // b)       # 3
-
-c = a / b
-print(str(c) + " " + str(type(c)))
-
-b = 5
-c = b
-b += 5
-print("%s %s" % (b, c) )
 
 # Lists are mutable
 l = [3, 4, 5]
@@ -205,7 +184,12 @@ def playSimpleGame():
                 print("Hey, you got it in %s tries!" % count)
                 found = True
 
-playSimpleGame()
+
+
+print(dir())
+print(dir('__builtins__'))
+
+# playSimpleGame()
 
 
 if __name__ == '__main__':
