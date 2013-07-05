@@ -17,30 +17,6 @@ print(fac(100))
 # In python, the size of int's are only limited by available memory 
 
 
-helloStr = 'Hello World'
-print(helloStr[4])
-
-# String is immutable
-# helloStr[2] = 'p'
-
-# From int to String:
-myInt = fac(10)
-print(myInt)
-myStr = str(myInt)
-print(myStr, len(myStr))
-
-# From String to int:
-myStr = "123"
-myInt = int(myStr)
-print(type(myInt))
-
-myFloat = 3.4
-print(type(myFloat))
-print(type(myStr))
-
-print('myStr is myInt: ' + str((myStr is myInt)))
-print('myStr == myInt: ' + str((myStr == myInt)))
-print('myStr == str(myInt): ' + str((myStr == str(myInt))))
 
 # Tuple
 myTuple = 3, 5, 7   # Valid syntax!
@@ -62,9 +38,13 @@ print("2 < x1 < 6: " + str(2 < x1 < 6))
 print("8 < x1 < 16: " + str(8 < x1 < 16))
 # print("x1 <> x2: " + str(x1 <> x2)) # Python 3 has removed the <> operator
 
+helloStr = 'Hello World'
+myList = [3, 5, 7]
+
 # Membership operator
 # "For lists and tuples, the in operator uses a linear search which can be slow
 # for very large collections
+
 print("llo in %s" % helloStr + ": " + str("llo" in helloStr)) 
 print("loo in %s" % helloStr + ": " + str("loo" in helloStr))
 print("4 in myList: " + str(4 in myList) )
