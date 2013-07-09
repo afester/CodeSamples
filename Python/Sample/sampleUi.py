@@ -2,6 +2,10 @@
 
 import sys
 import decimal
+import math
+import locale
+import unicodedata
+import collections
 
 from PySide.QtCore import Qt
 from PySide.QtGui import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget
@@ -43,14 +47,23 @@ class MainWindow(QMainWindow):
         # Add some buttons to execute python code
         self.row = 0
         self.column = 0
-        self.addSample("List sample", self.listSample)
-        self.addSample("Calculations", self.calculationsSample)
-        self.addSample("Strings", self.stringSample)
-        self.newRow()
-        self.addSample("D", lambda : None)
+        self.addButton("Clear console", lambda : self.output.clear())
 
-    
-    def addSample(self, label, function):
+        self.newRow()
+        self.addButton("Calculations", self.calculationsSample)
+        self.addButton("Strings", self.stringSample)
+        self.addButton("Format", self.formatSample)
+        self.addButton("Locale", self.localeSample)
+        self.addButton("Unicode", self.unicodeSample)
+
+        self.newRow()
+        self.addButton("Tuple sample", self.tupleSample)
+        self.addButton("List sample", self.listSample)
+        self.addButton("Set sample", self.setSample)
+        self.addButton("Dictionary sample", self.dictSample)
+
+
+    def addButton(self, label, function):
         theButton = QPushButton(label)
         theButton.clicked.connect(function)
         self.buttonLayout.addWidget(theButton, self.row, self.column)
@@ -66,17 +79,6 @@ class MainWindow(QMainWindow):
         theText =  ' '.join(map(str, text))
         self.output.setTextColor(Qt.green)
         self.output.append(theText)
-
-
-    def listSample(self):
-        # List
-        myList = [3, 5, 7]
-        self.writeln(myList, len(myList), type(myList))
-        self.writeln(myList[2])
-        # Lists are mutable:
-        myList[2] = 10
-        self.writeln("myList = %s" % myList)
-        self.writeln("myList * 3 = %s" % (myList * 3) )
 
 
     def calculationsSample(self):
@@ -165,8 +167,8 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         self.writeln(aLongString)
 
         # approach 3: use parentheses (preferred approach)
-        aLongString = ("Duis %s aute irure dolor in reprehenderit in voluptate velit "
-                       "esse cillum dolore eu fugiat nulla pariatur. Excepteur sint" % "TEST")
+        aLongString = ("Duis {0} aute irure dolor in reprehenderit in voluptate velit "
+                       "esse cillum dolore eu fugiat nulla pariatur. Excepteur sint".format("TEST") )
         self.writeln(aLongString)
 
         # Using UNICODE characters - note: make sure that the editor is treating this
@@ -188,21 +190,173 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         self.writeln("\"Hello World\" * 3 = %s" % (s * 3) )
         l = ["A", "B", "C"]
         self.writeln('l = %s; ":".join(l) = %s' % (l, ":".join(l)) )
-        
+
+
+    def formatSample(self):
+        s = "Hello World"
+
         # note that the % operator has been deprecated with Python 3.1.
         # Use the format method from String instead (http://www.python.org/dev/peps/pep-3101/)
         a = 4
         b = 5
         self.writeln("{0} + {1} = {2}".format(a, b, a+b))
+        self.writeln("{a} + {b} = {c}".format(a=a, b=b, c=a+b))
+
+        self.writeln("{a[4]}".format(a=s))
+        self.writeln("\N{GREEK SMALL LETTER PI} = {0.pi}".format(math))
+
+        self.writeln("Locals: " + str(locals()))
+
+        values = {'s1':a, 's2':b, 's':a+b}
+        self.writeln("{s1} + {s2} = {s}".format(**values) )
+
+        # Format conversions
+        s = "翻訳で失われる"
+        self.writeln("{0} - {0!r} - {0!a}".format(s) )
+
+        self.writeln("Default: |{0}|".format(s) )
+        self.writeln("':25'  : |{0:25}|".format(s) )
+        self.writeln("':>25' : |{0:>25}|".format(s) )
+        self.writeln("':.^25': |{0:.^25}|".format(s) )
+        for i in range(len(s), len(s) + 5):
+            self.writeln("':.^{1}': |{0:.^{1}}|".format(s, i) )
+
+        f = math.pi
+        self.writeln("{0:.3}".format(f))    # Note: without "f", the overall number of digits is counted
+        self.writeln("{0:.5}".format(f))
+        f = 123.456
+        self.writeln("{0:.3f}".format(f))   # three digits after decimal place
+        self.writeln("{0:.5f}".format(f))   # Five digits after decimal place
 
 
-# Create a Qt application
-app = QApplication(sys.argv)
+    def printUnicode(self, startWith):
+        widths = [5, 6, 4, 25]
+        header = "{0:^{1}} {2:^{3}} {4:^{5}} {6:^{7}}".format("Dec", widths[0], "Hex", widths[1], "Char", widths[2], "Name", widths[3])
+        self.writeln(header)
+        self.writeln("-" * len(header))
 
-# Create and whow the main window
-wnd = MainWindow()
-wnd.show()
+        for codePoint in range(startWith, startWith + 16):
+            unicodeName = unicodedata.name(chr(codePoint), "(Unknown)")
+            #charName = string.capwords(unicodeName)
+            charName = unicodeName.title()
+            self.writeln("{0:>{1}} 0x{0:<{2}x} {3:^{4}} {5}".format(
+                        codePoint, widths[0], widths[1] - 2, 
+                        chr(codePoint), widths[2], 
+                        charName ))
 
-# Run the application
-app.exec_()
-sys.exit()
+    # Converts a "bytes" object into a readable string
+    def bytes2Hex(self, byteStr):
+        return " ".join("{0:2x}".format(d) for d in byteStr)
+
+
+    def str2ord(self, s):
+        return " ".join("{0:x}".format(ord(c)) for c in s)
+
+
+    def unicodeSample(self):
+        self.writeln("Highest UNICODE code point: 0x{0:x}".format(sys.maxunicode))
+        self.printUnicode(0x2722)
+
+        s = "翻る"                   # String in UCS-2 or UCS-4 encoding
+        b = s.encode()              # get UTF-8 encoding of the string
+        self.writeln("{0} ({1}) to UTF-8: {2}".format(s, self.str2ord(s), self.bytes2Hex(b)))
+
+        s = "A"
+        b = s.encode()
+        self.writeln("{0} ({1}) to UTF-8: {2}".format(s, self.str2ord(s), self.bytes2Hex(b)))
+
+        s = "€"
+        b = s.encode()
+        self.writeln("{0} ({1}) to UTF-8: {2}".format(s, self.str2ord(s), self.bytes2Hex(b)))
+
+
+    def localeSample(self):        
+        x, y= (1234567890, 1234.56)
+
+        defaultLocale = locale.getdefaultlocale()
+        self.writeln("Default locale: " + str(defaultLocale))
+
+        d= "Standard locale: {0:n} {1:n}".format(x,y)
+        self.writeln(d)
+
+        locale.setlocale(locale.LC_ALL, "C")
+        c= "'C' locale: {0:n} {1:n}".format(x,y)    #c== "1234567890 1234.56"
+        self.writeln(c)
+
+        #locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
+        #en= "{0:n} {1:n}".format(x, y) #en== "1,234,567,890 1,234.56"
+        #self.writeln(en)
+        #locale.setlocale(locale.LC_ALL, "de_DE.UTF-8")
+
+        # Note: the locale names are system dependant. See http://msdn.microsoft.com/en-us/library/39cwe7zf%28vs.71%29.aspx
+        # for the Windows names, and "locale -a" for the ones installed on a linux system 
+        locale.setlocale(locale.LC_ALL, "deu_deu")
+        de= "'deu_deu' locale: {0:n} {1:n}".format(x, y) #de== "1.234.567.890 1.234,56"
+        self.writeln(de)
+    
+        # On Windows, not even the locales returned by locale.getdefaultlocale() can be set ...
+        #locale.setlocale(locale.LC_ALL, "de_DE")    # locale.Error: unsupported locale setting
+        #de2 = "'de_DE' locale: {0:n} {1:n}".format(x, y) #de== "1.234.567.890 1.234,56"
+        #self.writeln(de2)
+
+
+    def tupleSample(self):
+        myTuple = ("Hello", "World", 42)
+        self.writeln("myTuple = {0}".format(myTuple))
+
+        a = 5
+        b = 7
+        self.writeln("a = {0}, b = {1}".format(a, b))
+        a, b = (b, a)
+        self.writeln("a = {0}, b = {1}".format(a, b))
+        Address = collections.namedtuple("Address", ("Firstname", "Lastname", "Street", "City"))
+        
+        myAddr = Address("Max", "Mustermann", "Musterstr.", "Musterstadt")
+        self.writeln(myAddr)
+        self.writeln("Firstname: {}".format(myAddr.Firstname))
+        self.writeln("Lastname: {}".format(myAddr.Lastname))
+        self.writeln("Name: {Firstname} {Lastname}".format(**myAddr._asdict() ))
+
+
+    def listSample(self):
+        # List
+        myList = [3, 5, 7]
+        self.writeln(myList, len(myList), type(myList))
+        self.writeln(myList[2])
+        # Lists are mutable:
+        myList[2] = 10
+        self.writeln("myList = {0}".format(myList))
+        self.writeln("myList * 3 = {0}".format(myList * 3) )
+
+        *part, last = myList
+        self.writeln("part: {}, last: {}".format(part, last) )
+
+        # Replace a whole slice with a new list
+        myList[0:2] = [42]
+        self.writeln("myList = {0}".format(myList))
+
+
+    def setSample(self):
+        pass
+
+
+    def dictSample(self):
+        pass
+
+
+def main():
+    
+    # Create a Qt application
+    app = QApplication(sys.argv)
+    
+    # Create and whow the main window
+    wnd = MainWindow()
+    wnd.show()
+    
+    # Run the application
+    app.exec_()
+    sys.exit()
+
+
+
+main()
