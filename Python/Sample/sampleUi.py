@@ -6,13 +6,19 @@ import math
 import locale
 import unicodedata
 import collections
+import traceback
+import os
 
 from PySide.QtCore import Qt
 from PySide.QtGui import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget
-from PySide.QtGui import QVBoxLayout, QGridLayout, QPalette
+from PySide.QtGui import QVBoxLayout, QGridLayout, QPalette, QTextCursor
 
 class MainWindow(QMainWindow):
     def __init__(self):
+        # In a Python program, sys.excepthook is called just before the program exits.
+        # So we can catch all fatal, uncaught exceptions and log them.
+        sys.excepthook = self.logException
+
         QMainWindow.__init__(self)
         self.resize(800, 600)
 
@@ -23,6 +29,7 @@ class MainWindow(QMainWindow):
         # Create a text component at the top area of the main widget
         self.output = QTextEdit(mainWidget)
         self.output.setReadOnly(True)
+        self.output.setLineWrapMode(QTextEdit.NoWrap);
 
         # set the font
         font = self.output.font()
@@ -63,6 +70,13 @@ class MainWindow(QMainWindow):
         self.addButton("Dictionary sample", self.dictSample)
 
 
+    def logException(self, exctype, value, tb):
+        self.writelnColor(Qt.red, 
+                          ("\nFATAL ERROR: Uncaught exception\n"
+                           "  {}: {}\n"
+                           "{}\n".format(exctype.__name__, value, ''.join(traceback.format_tb(tb)))) )
+
+
     def addButton(self, label, function):
         theButton = QPushButton(label)
         theButton.clicked.connect(function)
@@ -75,10 +89,27 @@ class MainWindow(QMainWindow):
         self.column = 0
 
 
-    def writeln(self, *text):
+    def writeColor(self, color, *text):
         theText =  ' '.join(map(str, text))
-        self.output.setTextColor(Qt.green)
-        self.output.append(theText)
+        self.output.setTextColor(color)
+
+        # Note: append() adds a new paragraph!
+        #self.output.append(theText)
+        self.output.textCursor().movePosition(QTextCursor.End)
+        self.output.insertPlainText(theText)
+
+
+    def write(self, *text):
+        self.writeColor(Qt.green, *text)
+
+
+    def writelnColor(self, color, *text):
+        self.writeColor(color, *text)
+        self.write('\n')
+
+
+    def writeln(self, *text):
+        self.writelnColor(Qt.green, *text)
 
 
     def calculationsSample(self):
@@ -181,16 +212,17 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
             self.writeln(hex(ord(c)))
 
         s = "Hello World"
-        self.writeln("\"Hello World\"[4:]  = %s" % s[4:])
-        self.writeln("\"Hello World\"[4:7] = %s" % s[4:7])
-        self.writeln("\"Hello World\"[0::2]= %s" % s[0::2])
-        self.writeln("\"Hello World\"[-4:]= %s" % s[-4:])
-        self.writeln("\"Hello World\"[::-2]= %s" % s[::-2])
-        self.writeln("\"Hello World\"[::-1]= %s" % s[::-1])
-        self.writeln("\"Hello World\" * 3 = %s" % (s * 3) )
+        self.writeln('"{}"[4:]  = {}'.format(s, s[4:]))
+        self.writeln('"{}"[4:7] = {}'.format(s, s[4:7]))
+        self.writeln('"{}"[0::2]= {}'.format(s, s[0::2]))
+        self.writeln('"{}"[-4:]= {}'.format(s, s[-4:]))
+        self.writeln('"{}"[::-2]= {}'.format(s, s[::-2]))
+        self.writeln('"{}"[::-1]= {}'.format(s, s[::-1]))
+        self.writeln('"{}" * 3 = {}'.format(s, (s * 3) ))
+
         l = ["A", "B", "C"]
         self.writeln('l = %s; ":".join(l) = %s' % (l, ":".join(l)) )
-
+        
 
     def formatSample(self):
         s = "Hello World"
@@ -334,14 +366,136 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         # Replace a whole slice with a new list
         myList[0:2] = [42]
         self.writeln("myList = {0}".format(myList))
+        
+        L = ["A", "B", "C", "D", "E", "F"]
+        self.writeln("L = {}".format(L) )
+        L[2:5] = ["X", "Y"]         # ["A", "B", "X", "Y", "F"]
+        self.writeln("L = {}".format(L) )
+        
+        
+        item = L.pop()
+        self.writeln("L = {}, item = {}".format(L, item) )
+        
+        # test the "del" operator
+        del item
+        try:
+            self.writeln("L = {}, item = {}".format(L, item) )
+        except UnboundLocalError as ule:
+            self.writelnColor(Qt.red, "Error: {}".format(ule) )
+
+        L = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        self.writeln("L = {}".format(L) )
+        L[1::2] = [0] * len(L[1::2])
+        self.writeln("L = {}".format(L) )
+
+        L = [1 for n in range(25)]      # same as [1] * 25
+        self.writeln("L = {}".format(L) )
+        L = [1] * 25
+        self.writeln("L = {}".format(L) )
+
+        # all even numbers up to a specific number
+        L = [n for n in range(25) if (n % 2) == 0]
+        self.writeln("L = {}".format(L) )
+
+        # Using an iterator to print the list (how python internally handles the for ... in ... loop):
+        result = ""
+        i = L.__iter__()
+        try:
+            while True:
+                v = i.__next__()
+                result = result + " " + str(v)
+        except StopIteration:
+            pass
+        self.writeln(result)
 
 
     def setSample(self):
-        pass
+        S = {}  # NOTE: Does not create an empty set, but an empty dict!
+        self.writeln("S = {} ({})".format(S, type(S)) )
+        S = set()
+        self.writeln("S = {} ({})".format(S, type(S)) )
+
+        S = {1, 10, 5, 8, 2, 5}
+        self.writeln("S = {}".format(S) )
+        S = set("apple")
+        self.writeln("S = {}".format(S) )
+
+        s1 = {'X', 'A', 'Z', 'C'}
+        s2 = {'X', 'Z'}
+        self.writeln("{} - {} = {}".format(s1, s2, s1 - s2) )
+
+        # all even numbers up to a specific number as a set
+        S = {n for n in range(25) if (n % 2) == 0}
+        self.writeln("S = {}".format(S) )
+        
+        # A set is mutable
+        S.add(30)
+        self.writeln("S = {}".format(S) )
+
+        F = frozenset(S)
+        try:
+            F.add(30)               # no add() method in a frozenset
+        except AttributeError as ae:
+            self.writelnColor(Qt.red, ae)
+
+
+    def countWords(self, fileName):
+        count = {}
+        with open(fileName, 'r') as f:
+            for line in f:
+                words = line.split()
+                for word in words:
+                    count[word] = count.get(word, 0) + 1    # avoid KeyError
+
+                    #if word in count:
+                    #    count[word] += 1
+                    #else:
+                    #    count[word] = 1
+
+        for word, num in count.items():
+            self.writelnColor(Qt.yellow, "{}: {}".format(word, num) )
+
+
+    # Variant of countWords, using a default dictionary
+    def countWordsDef(self, fileName):
+        count = collections.defaultdict(int)
+        with open(fileName, 'r') as f:
+            for line in f:
+                words = line.split()
+                for word in words:
+                    count[word] +=  1
+
+        for word, num in count.items():
+            self.writelnColor(Qt.yellow, "{}: {}".format(word, num) )
 
 
     def dictSample(self):
-        pass
+        D = {'first':1, 'second':2, 'third':3}
+        self.writeln("D = {}".format(D) )
+
+        D = dict(fourth=4, fifth=5, sixth=6)
+        self.writeln("D = {}".format(D) )
+
+        self.writeln("D['fifth'] = {}".format(D['fifth']) )
+
+        D['seventh'] = 7
+        self.writeln("D = {}".format(D) )
+
+        for k, v in D.items():
+            self.writeln("{} => {}".format(k, v) )
+
+        self.countWords("sample.txt")
+
+        F = {name:os.path.getsize(name)     # Key-value pair for each element 
+             for name in os.listdir('.')    # Generator
+             if os.path.isfile(name)}       # filter
+        self.writeln("F: {}".format(F) )
+
+        # Create reverse dictionary
+        F = {value:name for name, value in F.items() }
+        self.writeln("F: {}".format(F) )
+
+        self.countWordsDef("sample.txt")
 
 
 def main():
