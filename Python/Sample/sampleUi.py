@@ -8,6 +8,8 @@ import unicodedata
 import collections
 import traceback
 import os
+import random
+import copy
 
 from PySide.QtCore import Qt
 from PySide.QtGui import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget
@@ -69,6 +71,10 @@ class MainWindow(QMainWindow):
         self.addButton("Set sample", self.setSample)
         self.addButton("Dictionary sample", self.dictSample)
 
+        self.newRow()
+        self.addButton("File sample", self.fileSample)
+        self.addButton("Program flow sample", self.flowSample)
+
 
     def logException(self, exctype, value, tb):
         self.writelnColor(Qt.red, 
@@ -97,6 +103,10 @@ class MainWindow(QMainWindow):
         #self.output.append(theText)
         self.output.textCursor().movePosition(QTextCursor.End)
         self.output.insertPlainText(theText)
+
+        # scroll console window to bottom        
+        sb = self.output.verticalScrollBar()
+        sb.setValue(sb.maximum())
 
 
     def write(self, *text):
@@ -350,54 +360,80 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         self.writeln("Name: {Firstname} {Lastname}".format(**myAddr._asdict() ))
 
 
+
+    # Sample from the book...
+    def get_forenames_and_surnames(self):
+        forenames = []
+        surnames = []
+        
+        # Outer loop creates a reference to a list and a reference to a filename
+        # with each iteration:
+        for names, filename in ((forenames, "data/forenames.txt"),
+                                (surnames, "data/surnames.txt")):
+            # "names" = reference to corresponding list
+            # "filename" = reference to file name
+
+            for name in open(filename, encoding="utf8"):
+                # Append line to current list
+                names.append(name.rstrip())
+                
+        # returntuple with two lists 
+        return forenames, surnames
+
+
     def listSample(self):
         # List
+        self.writelnColor(Qt.lightGray, 'List samples:')
         myList = [3, 5, 7]
-        self.writeln(myList, len(myList), type(myList))
-        self.writeln(myList[2])
+        self.writeln(" ", myList, len(myList), type(myList))
+        self.writeln(" ", myList[2])
         # Lists are mutable:
         myList[2] = 10
-        self.writeln("myList = {0}".format(myList))
-        self.writeln("myList * 3 = {0}".format(myList * 3) )
+        self.writeln("  myList = {0}".format(myList))
+        self.writeln("  myList * 3 = {0}".format(myList * 3) )
 
         *part, last = myList
-        self.writeln("part: {}, last: {}".format(part, last) )
+        self.writeln("  part: {}, last: {}".format(part, last) )
 
         # Replace a whole slice with a new list
         myList[0:2] = [42]
-        self.writeln("myList = {0}".format(myList))
+        self.writeln("  myList = {0}".format(myList))
         
         L = ["A", "B", "C", "D", "E", "F"]
-        self.writeln("L = {}".format(L) )
+        self.writeln("  L = {}".format(L) )
         L[2:5] = ["X", "Y"]         # ["A", "B", "X", "Y", "F"]
-        self.writeln("L = {}".format(L) )
+        self.writeln("  L = {}".format(L) )
         
         
         item = L.pop()
-        self.writeln("L = {}, item = {}".format(L, item) )
-        
+        self.writeln("  L = {}, item = {}".format(L, item) )
+
         # test the "del" operator
+        self.writelnColor(Qt.lightGray, '\ndel operator:')
         del item
         try:
             self.writeln("L = {}, item = {}".format(L, item) )
         except UnboundLocalError as ule:
-            self.writelnColor(Qt.red, "Error: {}".format(ule) )
+            self.writelnColor(Qt.red, "  Error: {}".format(ule) )
 
+        self.writelnColor(Qt.lightGray, '\nList comprehensions:')
         L = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        self.writeln("L = {}".format(L) )
+        self.writeln("  L = {}".format(L) )
         L[1::2] = [0] * len(L[1::2])
-        self.writeln("L = {}".format(L) )
+        self.writeln("  L = {}".format(L) )
 
         L = [1 for n in range(25)]      # same as [1] * 25
-        self.writeln("L = {}".format(L) )
+        self.writeln("  L = {}".format(L) )
         L = [1] * 25
-        self.writeln("L = {}".format(L) )
+        self.writeln("  L = {}".format(L) )
 
         # all even numbers up to a specific number
         L = [n for n in range(25) if (n % 2) == 0]
-        self.writeln("L = {}".format(L) )
+        self.writeln("  L = {}".format(L) )
 
-        # Using an iterator to print the list (how python internally handles the for ... in ... loop):
+        # Using an iterator to print the list 
+        # (how python internally handles the for ... in ... loop):
+        self.writelnColor(Qt.lightGray, '\nIterator:')
         result = ""
         i = L.__iter__()
         try:
@@ -406,7 +442,64 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
                 result = result + " " + str(v)
         except StopIteration:
             pass
-        self.writeln(result)
+        self.writeln(" " + result)
+
+        # Using an enumerator
+        self.writelnColor(Qt.lightGray, '\nEnumerator:')
+        E = enumerate(L.__iter__())
+        i = E.__iter__()
+        while True:
+            try:
+                e = i.__next__()
+                self.writeln("  " + str(e))
+            except StopIteration:
+                break
+
+        self.writelnColor(Qt.lightGray, '\nCopying lists:')
+        L = ["A", "B", "C", "D"]
+
+        self.writelnColor(Qt.lightGray, '  by reference:')
+        L2 = L
+        self.writeln("  L={}, L2={}".format(L, L2))
+        L2[1] = 42
+        self.writeln("  L={}, L2={}".format(L, L2))
+
+        L = ["A", "B", "C", "D"]
+        self.writelnColor(Qt.lightGray, '  by slice:')
+        L2 = L[:]
+        self.writeln("  L={}, L2={}".format(L, L2))
+        L2[1] = 42
+        self.writeln("  L={}, L2={}".format(L, L2))
+
+        L = ["A", "B", "C", "D"]
+        self.writelnColor(Qt.lightGray, '  by list():')
+        L2 = list(L)
+        self.writeln("  L={}, L2={}".format(L, L2))
+        L2[1] = 42
+        self.writeln("  L={}, L2={}".format(L, L2))
+
+        self.writelnColor(Qt.lightGray, '  nested list:')
+        L = ["A", "B", ["C", "D"]]
+        L2 = list(L)
+        self.writeln("  L={}, L2={}".format(L, L2))
+        L2[2][0] = 42
+        self.writeln("  L={}, L2={}".format(L, L2))
+
+        self.writelnColor(Qt.lightGray, '  nested list with deepcopy():')
+        L = ["A", "B", ["C", "D"]]
+        L2 = copy.deepcopy(L)
+        self.writeln("  L={}, L2={}".format(L, L2))
+        L2[2][0] = 42
+        self.writeln("  L={}, L2={}".format(L, L2))
+
+        l1 = [1, 2, 3]
+        l2 = [4, 5, 6]
+        l1[1] = l2
+        l2[1] = l1
+        self.writeln("  l1={}, l2={}".format(l1, l2))
+
+        l3 = copy.deepcopy(l1)
+        self.writeln("  l3={}".format(l3))
 
 
     def setSample(self):
@@ -439,37 +532,42 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
             self.writelnColor(Qt.red, ae)
 
 
-    def countWords(self, fileName):
-        count = {}
-        with open(fileName, 'r') as f:
-            for line in f:
-                words = line.split()
-                for word in words:
-                    count[word] = count.get(word, 0) + 1    # avoid KeyError
-
-                    #if word in count:
-                    #    count[word] += 1
-                    #else:
-                    #    count[word] = 1
-
-        for word, num in count.items():
-            self.writelnColor(Qt.yellow, "{}: {}".format(word, num) )
-
-
-    # Variant of countWords, using a default dictionary
-    def countWordsDef(self, fileName):
-        count = collections.defaultdict(int)
-        with open(fileName, 'r') as f:
-            for line in f:
-                words = line.split()
-                for word in words:
-                    count[word] +=  1
-
-        for word, num in count.items():
-            self.writelnColor(Qt.yellow, "{}: {}".format(word, num) )
 
 
     def dictSample(self):
+
+        # Implemented as a local function inside dictSample() 
+        def countWords(fileName):
+            count = {}
+            with open(fileName, 'r') as f:
+                for line in f:
+                    words = line.split()
+                    for word in words:
+                        count[word] = count.get(word, 0) + 1    # avoid KeyError
+    
+                        #if word in count:
+                        #    count[word] += 1
+                        #else:
+                        #    count[word] = 1
+    
+            for word, num in count.items():
+                self.writelnColor(Qt.yellow, "{}: {}".format(word, num) )
+    
+
+        # Variant of countWords, using a default dictionary
+        # Implemented as a local function inside dictSample() 
+        def countWordsDef(fileName):
+            count = collections.defaultdict(int)
+            with open(fileName, 'r') as f:
+                for line in f:
+                    words = line.split()
+                    for word in words:
+                        count[word] +=  1
+
+            for word, num in count.items():
+                self.writelnColor(Qt.yellow, "{}: {}".format(word, num) )
+    
+       
         D = {'first':1, 'second':2, 'third':3}
         self.writeln("D = {}".format(D) )
 
@@ -484,7 +582,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         for k, v in D.items():
             self.writeln("{} => {}".format(k, v) )
 
-        self.countWords("sample.txt")
+        countWords("data/sample.txt")
 
         F = {name:os.path.getsize(name)     # Key-value pair for each element 
              for name in os.listdir('.')    # Generator
@@ -495,7 +593,163 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         F = {value:name for name, value in F.items() }
         self.writeln("F: {}".format(F) )
 
-        self.countWordsDef("sample.txt")
+        countWordsDef("data/sample.txt")
+
+
+    def fileSample(self):
+        self.writelnColor(Qt.lightGray, 'Read tuple of two Lists from two files:')
+        data = self.get_forenames_and_surnames()
+        self.writeln("  " + str(data))
+
+        firstnames, lastnames = data
+        self.writelnColor(Qt.lightGray, '\nWrite 10 random lines into file:')
+        fh = open("test-names1.txt", "w", encoding="utf8")
+        for i in range(10):
+            line = "{0} {1} {0}.{1}@example.com\n".format(random.choice(firstnames),
+                                                          random.choice(lastnames))
+            self.write("  " + line)
+            fh.write(line)
+        fh.close()
+
+        fh = open("test-names2.txt", "w", encoding="utf8")
+        self.writelnColor(Qt.lightGray, '\nDifferent approach, using zip():')
+        for first, last in zip(random.sample(firstnames, len(firstnames)),
+                               random.sample(lastnames, len(lastnames)) ):
+            line = "{0} {1} {0}.{1}@example.com\n".format(first, last)
+            self.write("  " + line)
+            fh.write(line)
+        fh.close()
+
+        self.writelnColor(Qt.lightGray, '\nSorted output:')
+        sortedList = list( zip(random.sample(firstnames, len(firstnames)),
+                               random.sample(lastnames, len(lastnames))) )
+        sortedList = sorted(sortedList, key = lambda k : k[1])
+        for e in sortedList:
+            self.writeln("  " + str(e))
+
+
+    def flowSample(self):
+        """Some sample code to show program flow statements, like if, while,
+           for, and exceptions"""
+        self.writelnColor(Qt.lightGray, 'Conditional expression:')
+        x = 2
+        self.writeln("  Hello " + ("World" if x == 2 else "Moon") )
+        x = 1
+        self.writeln("  Hello " + ("World" if x == 2 else "Moon") )
+
+        self.writelnColor(Qt.lightGray, '\nwhile() loop with else:')
+        elseExecuted = False
+        x = 0
+        while x < 3:
+            x += 1
+            self.writeln("  {}. iteration".format(x))
+        else:
+            elseExecuted = True
+        self.writeln("  Else suite executed: {}".format(elseExecuted))
+
+        elseExecuted = False
+        x = 0
+        while x < 10:
+            x += 1
+            self.writeln("  {}. iteration".format(x))
+            if x >= 3:
+                break       # terminating loop with break does not execute the else suite!
+        else:
+            elseExecuted = True
+        self.writeln("  Else suite executed: {}".format(elseExecuted))
+
+        self.writelnColor(Qt.lightGray, '\nfor() loop with else:')
+        elseExecuted = False
+        for a, b in zip(range(3), range(3, 6)):
+            self.writeln("  a={} b={}".format(a, b))
+        else:
+            elseExecuted = True
+        self.writeln("  Else suite executed: {}".format(elseExecuted))
+
+        elseExecuted = False
+        for a, b in zip(range(3), range(3, 6)):
+            self.writeln("  a={} b={}".format(a, b))
+            if a+b == 5:
+                break;
+        else:
+            elseExecuted = True
+        self.writeln("  Else suite executed: {}".format(elseExecuted))
+
+        self.writelnColor(Qt.lightGray, '\nException handling:')
+        result = 0
+        try:
+            result = 1 / 0
+            D = {1:"Hello", 2:"World", 3:"Moon"}
+            result = D[9]
+        except (ZeroDivisionError, KeyError) as ex:
+            result = type(ex)
+        else:
+            self.writeln("  else suite")        # not executed, since exception thrown
+        finally:
+            self.writeln("  finally suite")     # always executed
+        self.writeln("  Result: {}".format(result))
+
+        self.writelnColor(Qt.lightGray, '-------')
+        result = 0
+        try:
+            result = 1 / 2
+            D = {1:"Hello", 2:"World", 3:"Moon"}
+            result = D[9]
+        except (ZeroDivisionError, KeyError) as ex:
+            result = type(ex)
+        else:
+            self.writeln("  else suite")        # not executed, since exception thrown
+        finally:
+            self.writeln("  finally suite")     # always executed
+        self.writeln("  Result: {}".format(result))
+
+        self.writelnColor(Qt.lightGray, '-------')
+        result = 0
+        try:
+            result = 1 / 2
+            D = {1:"Hello", 2:"World", 3:"Moon"}
+            result = D[3]
+        except (ZeroDivisionError, KeyError) as ex:
+            result = type(ex)
+        else:
+            self.writeln("  else suite")        # executed, since no exception thrown
+        finally:
+            self.writeln("  finally suite")     # always executed
+        self.writeln("  Result: {}".format(result))
+
+        self.writelnColor(Qt.lightGray, '\nFunction with default arguments')
+        # note that default arguments are created at the point of the function 
+        # definition, not when the function is called!
+        def listFunc(value, theList = []):
+            theList.append(value)
+            return theList
+
+        result = listFunc(2)
+        self.writeln("  List contents: {}".format(result))
+        result = listFunc(3)
+        self.writeln("  List contents: {}".format(result))  # [2, 3] !!!
+        
+        # Correct approach: use None as default value for mutable objects
+        def listFunc2(value, theList = None):
+            resultList = [] if theList is None else theList # Make sure to create a new list when the function is called!
+
+            resultList.append(value)
+            return resultList
+
+        result = listFunc2(2)
+        self.writeln("  List contents: {}".format(result))
+        result = listFunc2(3)
+        self.writeln("  List contents: {}".format(result))
+        
+
+    def generatorSample(self):
+        mygenerator = (x*x for x in range(3))
+        self.writeln("First")
+        for i in mygenerator:
+            self.writeln("  i={}".format(i))
+        self.writeln("Second")
+        for i in mygenerator:
+            self.writeln("  i={}".format(i))
 
 
 def main():
