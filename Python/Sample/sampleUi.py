@@ -15,6 +15,9 @@ from PySide.QtCore import Qt
 from PySide.QtGui import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget
 from PySide.QtGui import QVBoxLayout, QGridLayout, QPalette, QTextCursor
 
+
+GlobalVar = "Hello Global"
+
 class MainWindow(QMainWindow):
     def __init__(self):
         # In a Python program, sys.excepthook is called just before the program exits.
@@ -740,7 +743,57 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         self.writeln("  List contents: {}".format(result))
         result = listFunc2(3)
         self.writeln("  List contents: {}".format(result))
+
+        self.writelnColor(Qt.lightGray, '\nFunction with variable number of arguments')
+        def sumAll(*values):
+            result = 0
+            for s in values:
+                result += s
+            return result
+
+        L = [1, 2, 3, 4, 5]
+        self.writeln("  sumAll({}): {}".format(L, sumAll(*L)))  # Note: need to unpack the list if we want to pass a list to the function!
+
+        def sumUs(*, first, second):    # Force keyword arguments only
+            return first + second
+        # self.writeln("  sumUs({}): {}".format(L[0:2], sumUs(L[0], L[1])) )  # Raises TypeError
+        self.writeln("  sumUs({}): {}".format(L[0:2], sumUs(first=L[0], second=L[1])) )
+
+        self.writelnColor(Qt.lightGray, '\nPass a map with the keyword arguments')
+        D = {'first':5, 'second':8}
+        self.writeln("  sumUs({}): {}".format(D, sumUs(**D)) )
+
+        self.writelnColor(Qt.lightGray, '\nUsing the global scope')
         
+        def someFunc():
+            GlobalVar = "Hello World"       # Creates a new local variable
+            self.writeln("  GlobalVar = {}".format(GlobalVar) )
+
+        def someFunc2():
+            global GlobalVar
+            GlobalVar = "Hello World"
+            self.writeln("  GlobalVar = {}".format(GlobalVar) )
+
+        self.writeln("  1) GlobalVar = {}".format(GlobalVar) )
+        someFunc()
+        self.writeln("  2) GlobalVar = {}".format(GlobalVar) ) # Still "Hello Global"!
+        someFunc2()
+        self.writeln("  3) GlobalVar = {}".format(GlobalVar) ) # Now changed to "Hello World"
+
+        self.writelnColor(Qt.lightGray, '\nThe lambda function:')
+        heron = lambda a, b, c : 0.25 * math.sqrt( (a+b+c)*(a+b-c)*(b+c-a)*(c+a-b) )
+        self.writeln("  heron({}): {}".format("1, 1, sqrt(2)", heron(1, 1, math.sqrt(2))) )  # 0.5
+
+        self.writelnColor(Qt.lightGray, '\nThe assert statement:')
+        def sumUs2(first, second):    # Force keyword arguments only
+            assert first != 0, "First argument must not be 0"
+            assert second != 0, "Second argument must not be 0"
+            return first + second
+        try:
+            self.writeln("  sumUs2({}): {}".format([0, 3], sumUs2(0, 3)) )
+        except AssertionError as ae:
+            self.writelnColor(Qt.red, "  " + ae)
+
 
     def generatorSample(self):
         mygenerator = (x*x for x in range(3))
