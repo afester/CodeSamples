@@ -1,3 +1,8 @@
+
+"""
+This module contains some Python examples for many language features.
+"""
+
 import os
 import decimal
 import locale

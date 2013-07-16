@@ -83,7 +83,6 @@ class MainWindow(QMainWindow):
     def addButton(self, label, function):
         theButton = QPushButton(label)
         theButton.clicked.connect(function)
-        print(function)
         self.buttonLayout.addWidget(theButton, self.row, self.column)
         self.column += 1
 
