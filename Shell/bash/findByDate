@@ -28,6 +28,11 @@ else
    exit 1
 fi
 
+# Fix TMP environment variable
+if [ -z "$TMP" ]; then
+   export TMP=/tmp
+fi
+
 # get reference date
 REF_DATE=$2
 
@@ -44,8 +49,8 @@ MIN_DATE=`date -d "UTC 1970-01-01 ${MIN_STAMP} secs" +"%c"`
 MAX_DATE=`date -d "UTC 1970-01-01 ${MAX_STAMP} secs" +"%c"`
 
 # Create reference file names
-MIN_FILE=${TEMP}/minref$$
-MAX_FILE=${TEMP}/maxref$$
+MIN_FILE=${TMP}/minref$$
+MAX_FILE=${TMP}/maxref$$
 
 # Create time format needed by "touch"
 MIN_TOUCH_DATE=`date -d "UTC 1970-01-01 ${MIN_STAMP} secs" +"%Y%m%d%H%M.%S"`
