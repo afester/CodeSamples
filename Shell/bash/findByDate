@@ -1,0 +1,74 @@
+#!/bin/bash
+
+usage() {
+    echo "usage: $0 [-a date] [-m date]"
+    echo
+    echo "  Finds all files below the current directory tree which"
+    echo "  have been accessed or modified at a specific date:"
+    echo
+    echo "   -a date  Finds files by access date"
+    echo "   -m date  Finds files by modification date"
+    echo
+    echo "  date has the format YYYY-MM-DD"
+}
+
+if [ $# -ne 2 ] ; then
+    usage
+    exit 1
+fi
+
+# Check action parameter
+DATE_TYPE=$1
+if [ "${DATE_TYPE}" == "-a" ] ; then
+   ACTION="accessed"
+elif [ "${DATE_TYPE}" == "-m" ] ; then
+   ACTION="modified"
+else
+   usage
+   exit 1
+fi
+
+# get reference date
+REF_DATE=$2
+
+# parse the given date and convert into time stamp
+read Y M D <<< ${REF_DATE//[-:]/ }
+REF_STAMP=`date -d "${Y}${M}${D} 00:00:00" +"%s"`
+
+# Calculate time stamps for date range - last second of previous day, first second of next day
+MIN_STAMP=$(expr ${REF_STAMP} - 1)
+MAX_STAMP=$(expr ${REF_STAMP} + 24 \* 60 \* 60)
+
+# Convert the time stamps into human readable string - use current locale for the format
+MIN_DATE=`date -d "UTC 1970-01-01 ${MIN_STAMP} secs" +"%c"`
+MAX_DATE=`date -d "UTC 1970-01-01 ${MAX_STAMP} secs" +"%c"`
+
+# Create reference file names
+MIN_FILE=${TEMP}/minref$$
+MAX_FILE=${TEMP}/maxref$$
+
+# Create time format needed by "touch"
+MIN_TOUCH_DATE=`date -d "UTC 1970-01-01 ${MIN_STAMP} secs" +"%Y%m%d%H%M.%S"`
+MAX_TOUCH_DATE=`date -d "UTC 1970-01-01 ${MAX_STAMP} secs" +"%Y%m%d%H%M.%S"`
+
+# Update the access and modification times of the reference files
+touch -t ${MIN_TOUCH_DATE} ${MIN_FILE}
+touch -t ${MAX_TOUCH_DATE} ${MAX_FILE}
+echo
+echo "Reference files used for \"find\"":
+ls --sort=time -r --full-time ${MIN_FILE} ${MAX_FILE}
+
+# Execute the find operation
+echo
+echo "Searching for files ${ACTION} between \"${MIN_DATE}\" and \"${MAX_DATE}\" ..."
+
+if [ "${ACTION}" == "modified" ] ; then
+   FIND_CMD="find . -newer ${MIN_FILE} -and -not -newer ${MAX_FILE}"
+elif [ "${ACTION}" == "accessed" ] ; then
+   FIND_CMD="find . -anewer ${MIN_FILE} -and -not -anewer ${MAX_FILE}"
+fi
+echo ${FIND_CMD}
+${FIND_CMD}
+
+# Remove the temporary files
+rm ${MIN_FILE} ${MAX_FILE}
