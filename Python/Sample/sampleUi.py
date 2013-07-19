@@ -18,7 +18,9 @@ import samplePackage.SampleModule               # Import module "SampleModule" i
 class MainWindow(QMainWindow):
     def __init__(self):
 
-        QMainWindow.__init__(self)
+        # QMainWindow.__init__(self)
+        super().__init__()      # use super() to avoid explicit dependency on the base class name
+                                # Note: must not pass the self reference to __init__ in this case!
         self.resize(800, 600)
 
         # Create the main content widget

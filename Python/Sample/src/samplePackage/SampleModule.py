@@ -11,14 +11,42 @@ import sys
 import math
 import copy
 import collections
+import re
+
 
 from random import choice, sample as getSample
 
 from PySide.QtCore import Qt
 
+from html.parser import HTMLParser
+
 GlobalVar = "Hello Global"
 
+AllSamples = []
+
+
+
+class MyHTMLParser(HTMLParser):
+    def __init__(self, out):
+        HTMLParser.__init__(self)
+        self.level = None
+        self.out = out
+
+    def handle_starttag(self, tag, attrs):
+        result = re.match("^h([1-6])", tag)
+        if result:
+            self.level = int(result.group(1))
+
+    def handle_endtag(self, tag):
+        self.level = None
+
+    def handle_data(self, data):
+        if self.level:
+            self.out.out.writeln("  {0} {1}".format("*" * self.level, data.strip()))
+
+
 class Examples():
+
     def __init__(self, out):
         self.out = out
 
@@ -26,6 +54,12 @@ class Examples():
     def getExamples(self):
         Example = collections.namedtuple("Example", ("label", "function"))
         result = []
+
+        #samples = [s for s in dir(self) if s.endswith("Sample")]
+        #self.out.writeln("{}".format(samples))
+        #self.out.writeln("{}".format(AllSamples))
+        #for s in AllSamples:
+        #    result.append(Example(s.__name__, s))
 
         result.append(Example("Calculations", self.calculationsSample))
         result.append(Example("Strings", self.stringSample))
@@ -37,14 +71,19 @@ class Examples():
         result.append(Example("List sample", self.listSample))
         result.append(Example("Set sample", self.setSample))
         result.append(Example("Dictionary sample", self.dictSample))
+        result.append(Example("Generator sample", self.generatorSample))
         result.append(None)
-        result.append(Example("File sample", self.fileSample))
-        result.append(Example("Program flow sample", self.flowSample))
-        result.append(Example("Modules sample", self.modulesSample))
+        result.append(Example("Files", self.fileSample))
+        result.append(Example("Program flow", self.flowSample))
+        result.append(Example("Modules", self.modulesSample))
+        result.append(Example("OOP", self.oopSample))
+        result.append(None)
+        result.append(Example("Dates && Times", self.datesSample))
+        result.append(Example("HTML parsing", self.htmlSample))
 
         return result
 
-
+    
     def calculationsSample(self):
         a = 10
         b = 3
@@ -84,6 +123,7 @@ class Examples():
         cplx = 1j
         self.out.writeln("cplx = %s" % cplx**2)
 
+    
     def stringSample(self):
         helloStr = 'Hello World'
         self.out.writeln(helloStr[4])
@@ -156,7 +196,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         l = ["A", "B", "C"]
         self.out.writeln('l = %s; ":".join(l) = %s' % (l, ":".join(l)) )
         
-
+    
     def formatSample(self):
         s = "Hello World"
 
@@ -193,7 +233,6 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         self.out.writeln("{0:.3f}".format(f))   # three digits after decimal place
         self.out.writeln("{0:.5f}".format(f))   # Five digits after decimal place
 
-
     def printUnicode(self, startWith):
         widths = [5, 6, 4, 25]
         header = "{0:^{1}} {2:^{3}} {4:^{5}} {6:^{7}}".format("Dec", widths[0], "Hex", widths[1], "Char", widths[2], "Name", widths[3])
@@ -217,7 +256,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
     def str2ord(self, s):
         return " ".join("{0:x}".format(ord(c)) for c in s)
 
-
+    
     def unicodeSample(self):
         self.out.writeln("Highest UNICODE code point: 0x{0:x}".format(sys.maxunicode))
         self.printUnicode(0x2722)
@@ -235,6 +274,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         self.out.writeln("{0} ({1}) to UTF-8: {2}".format(s, self.str2ord(s), self.bytes2Hex(b)))
 
 
+    
     def localeSample(self):        
         x, y= (1234567890, 1234.56)
 
@@ -265,6 +305,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         #self.out.writeln(de2)
 
 
+    
     def tupleSample(self):
         myTuple = ("Hello", "World", 42)
         self.out.writeln("myTuple = {0}".format(myTuple))
@@ -303,6 +344,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         return forenames, surnames
 
 
+    
     def listSample(self):
         # List
         self.out.writelnColor(Qt.lightGray, 'List samples:')
@@ -424,6 +466,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         self.out.writeln("  l3={}".format(l3))
 
 
+    
     def setSample(self):
         S = {}  # NOTE: Does not create an empty set, but an empty dict!
         self.out.writeln("S = {} ({})".format(S, type(S)) )
@@ -455,7 +498,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
 
 
 
-
+    
     def dictSample(self):
 
         # Implemented as a local function inside dictSample() 
@@ -517,7 +560,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
 
         countWordsDef("data/sample.txt")
 
-
+    
     def fileSample(self):
         self.out.writelnColor(Qt.lightGray, 'Read tuple of two Lists from two files:')
         data = self.get_forenames_and_surnames()
@@ -553,6 +596,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
             self.out.writeln("  " + str(e))
 
 
+    
     def flowSample(self):
         """Some sample code to show program flow statements, like if, while,
            for, and exceptions"""
@@ -717,7 +761,20 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
             self.out.writelnColor(Qt.red, "  {}".format(ae))
 
 
+    def __getGenerator(self):
+        return (x*x for x in range(3))
+
+    def __getGenerator2(self):
+        for i in range(3):
+            print("Hello")
+            yield i
+            print("Hello 2")
+            
+        #yield (x*x for x in range(3))
+
+
     def generatorSample(self):
+        self.out.writelnColor(Qt.lightGray, 'Simple generator sample:')
         mygenerator = (x*x for x in range(3))
         self.out.writeln("First")
         for i in mygenerator:
@@ -726,8 +783,22 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         for i in mygenerator:
             self.out.writeln("  i={}".format(i))
 
+        self.out.writelnColor(Qt.lightGray, 'Returning a generator from a function:')
+        g = self.__getGenerator()
+        self.out.writeln("  g={}".format(type(g)))
+        for i in g:
+            self.out.writeln("  i={}".format(i))
 
+        g = self.__getGenerator2()
+        self.out.writeln("  g={}".format(type(g)))
+        for i in g.__iter__():
+            print("Hello 3")
+            self.out.writeln("  i={}".format(i))
+
+
+    
     def modulesSample(self):
+
         self.out.writelnColor(Qt.lightGray, 'PYTHONPATH:')
         for pp in os.environ["PYTHONPATH"].split(';'):
             self.out.writeln("  {}".format(pp))
@@ -735,3 +806,189 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         self.out.writelnColor(Qt.lightGray, '\nsys.path:')
         for p in sys.path:
             self.out.writeln("  {}".format(p))
+
+
+    def oopSample(self):
+
+        self.out.writelnColor(Qt.lightGray, "Simple custom class sample:")
+
+        class Vector2D:
+            def __init__(self, x = 0, y = 0):
+                self.__x = x
+                self.__y = y
+
+            def __repr__(self):
+                """Returns the representational form of an object"""
+                return "{}({}, {})".format(self.__class__.__name__, self.__x, self.__y)
+
+            def __str__(self):
+                """Returns the string form of an object"""
+                return "({}, {})".format(self.__x, self.__y)
+
+            def __add__(self, other):
+                return Vector2D(self.__x + other.__x, self.__y + other.__y)
+
+            def __mul__(self, other):
+                if isinstance(other, int):
+                    return Vector2D(self.__x * other, self.__x * other) # Vector * scalar = Vector
+                else:
+                    return self.__x * other.__x + self.__y * other.__y      # Vector * Vector = Scalar
+
+            def __rmul__(self, other):
+                """Need rmul to support commutative scalar multiplication"""
+                return Vector2D(self.__x * other, self.__y * other) # Scalar * Vector = Vector
+
+            @property           # getter only ; read-only property
+            def length(self):
+                return math.sqrt(self.__x ** 2 + self.__y ** 2)
+
+
+        v = Vector2D()
+        self.out.writeln("  {!r}".format(v))
+        self.out.writeln("  {}".format(v))
+
+        v = v + Vector2D(2, 5)
+        self.out.writeln("  {}".format(v))
+
+        v1 = v * 3
+        self.out.writeln("  {} * 3 = {}".format(v, v1))
+
+        v1 = 3 * v
+        self.out.writeln("  3 * {} = {}".format(v, v1))
+
+        v2 = Vector2D(4, 7)
+        s = v * v2
+        self.out.writeln("  {} * {} = {}".format(v, v2, s))
+
+        self.out.writeln("  |{}| = {}".format(v, v.length))
+
+        v2.__x = 6
+        self.out.writeln("  {}".format(v2))
+
+
+        self.out.writelnColor(Qt.lightGray, "\nImmutable custom class sample:")
+
+        class ImmutableDecimal:
+            def __init__(self, value = 0, decimals = 0):
+                self.__value= value
+                self.__decimals = decimals
+                self.__factor = math.pow(10, decimals)
+
+            #def __new__(cls):
+            #    pass
+
+            def __repr__(self):
+                return "{}({}, {})".format(self.__class__.__name__,
+                                           self.__value, self.__decimals)
+
+            def __str__(self):
+                return "{}.{}".format(int(self.__value // self.__factor), 
+                                      int(self.__value % self.__factor))
+
+        x = ImmutableDecimal(1023, 2)
+        self.out.writeln("  {}".format(x))
+        self.out.writeln("  {!r} (id={})".format(x, id(x)))
+
+        # Note that the attributes of the ImmutableDecimal class can still be changed
+        # through its __init__() method!
+        x.__init__(512, 1)
+        self.out.writeln("  {!r} (id={})".format(x, id(x)))
+
+
+        class RealImmutableDecimal:
+            def __new__(cls, value = 0, decimals = 0):
+                res = super().__new__(cls)
+                res.__value = value
+                res.__decimals = decimals
+                res.__factor= math.pow(10, decimals)
+                return res
+
+            def __repr__(self):
+                return "{}({}, {})".format(self.__class__.__name__,
+                                           self.__value, self.__decimals)
+
+            def __str__(self):
+                return "{}.{}".format(int(self.__value // self.__factor), 
+                                      int(self.__value % self.__factor))
+
+        x = RealImmutableDecimal(1023, 2)
+        self.out.writeln("  {}".format(x))
+        self.out.writeln("  {!r} (id={})".format(x, id(x)))
+
+        x.__init__(512, 1)  # does not have any effect anymore - object is immutable!
+        self.out.writeln("  {!r} (id={})".format(x, id(x)))
+
+
+        
+
+
+    def datesSample(self):
+        import time
+        import datetime
+        import calendar
+
+        # from time stamp (seconds since epoch) to struct_time (no DST flag):
+        structTime_Epoch = time.gmtime(0)
+        self.out.writeln("  " + time.strftime("Epoch (UTC)  : %A, %d. %b %Y %H:%M:%S", structTime_Epoch ))
+
+        # from time stamp (seconds since epoch) to struct_time (considers DST):
+        structTime_Epoch = time.localtime(0)
+        self.out.writeln("  " + time.strftime("Epoch (Local): %A, %d. %b %Y %H:%M:%S %Z", structTime_Epoch ))
+
+        someDateTime = datetime.datetime(2008, 3, 26)
+        self.out.writeln("  " + time.strftime("Some date    : %A, %d. %b %Y %H:%M:%S %Z", someDateTime.utctimetuple()))
+
+        now = time.gmtime()
+        self.out.writeln("  " + time.strftime("Now (UTC)    : %A, %d. %b %Y %H:%M:%S", now))
+
+        nowLocal = time.localtime()
+        self.out.writeln("  " + time.strftime("Now (Local)  : %A, %d. %b %Y %H:%M:%S %Z", nowLocal))
+
+        cal = calendar.TextCalendar()
+        self.out.writeln(cal.formatmonth(nowLocal.tm_year, nowLocal.tm_mon))
+
+
+    def htmlSample(self):
+        import urllib.request
+        import configparser
+
+        self.out.writelnColor(Qt.lightGray, 'Read proxy settings:')
+        config = configparser.ConfigParser()
+        config.read('settings.ini')
+        self.out.writeln("  Sections: {}".format(config.sections()))
+        proxies = config["Proxies"]
+        self.out.writeln("  Entries: {}".format(proxies))
+
+        httpProxy = proxies["http"] if "http" in proxies else None
+        httpsProxy = proxies["https"] if "https" in proxies else None
+
+        self.out.writeln("  http: {}".format(httpProxy))
+        self.out.writeln("  https: {}".format(httpsProxy))
+
+        #THE_URL = "http://www.python.org"
+        THE_URL = "http://en.wikipedia.org/wiki/Pythons"
+        USER_AGENT='Mozilla/5.0'
+        #USER_AGENT='Python-urllib/3.3'
+
+        self.out.writelnColor(Qt.lightGray, '\nAccessing {}:'.format(THE_URL))
+
+        # (Fancy)URLopener deprecated since 3.3
+        # opener = urllib.request.FancyURLopener(proxies)
+
+        proxies = {'http': httpProxy}
+        ph = urllib.request.ProxyHandler(proxies)
+
+        opener = urllib.request.build_opener(ph)
+        opener.addheaders = [('User-agent', USER_AGENT)]
+        response = opener.open(THE_URL)
+
+        for header in response.headers:
+            self.out.writeln("  {}".format(header))
+
+        # read the content
+        s = response.read().decode('utf-8')
+        #self.out.writelnColor(Qt.cyan, s)
+
+        self.out.writelnColor(Qt.lightGray, '\nList of all header tags:')
+        parser = MyHTMLParser(self)
+        parser.feed(s)
