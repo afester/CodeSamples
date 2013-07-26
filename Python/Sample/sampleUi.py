@@ -3,7 +3,6 @@
 import sys
 import traceback
 
-
 from PySide.QtCore import Qt
 from PySide.QtGui import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget
 from PySide.QtGui import QVBoxLayout, QGridLayout, QPalette, QTextCursor
@@ -125,8 +124,8 @@ def main():
     
     # Create a Qt application
     app = QApplication(sys.argv)
-    
-    # Create and whow the main window
+
+    # Create and show the main window
     wnd = MainWindow()
     wnd.show()
     
@@ -135,5 +134,5 @@ def main():
     sys.exit()
 
 
-
-main()
+if __name__ == "__main__":
+    main()

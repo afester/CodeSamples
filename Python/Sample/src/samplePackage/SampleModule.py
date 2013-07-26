@@ -22,9 +22,6 @@ from html.parser import HTMLParser
 
 GlobalVar = "Hello Global"
 
-AllSamples = []
-
-
 
 class MyHTMLParser(HTMLParser):
     def __init__(self, out):
@@ -45,6 +42,72 @@ class MyHTMLParser(HTMLParser):
             self.out.out.writeln("  {0} {1}".format("*" * self.level, data.strip()))
 
 
+# A data object containing some data for a Task
+class TaskEntry:
+    def __init__(self, name, description, createDate, assignee, dueDate):
+        self.name = name
+        self.description = description
+        self.createDate = createDate
+        self.assignee = assignee
+        self.dueDate = dueDate 
+
+    def __str__(self):
+        trunc = lambda s, max : s if len(s) < max else s[:max-3] + "..."  
+        return "{0:15}|{1:30}|{2}|{3}|{4}".format(trunc(self.name, 15),
+                                                trunc(self.description, 30), 
+                                                 self.createDate, 
+                                                 self.assignee, 
+                                                 self.dueDate)
+
+
+# The Sample decorator. Adds all methods which are decorated with @Sample
+# to a list of samples.
+AllSamples = []
+def Sample(name, newRow = False):
+    def decorator(method):
+        if newRow:
+            AllSamples.append(None)
+        AllSamples.append((name, method))
+    return decorator
+
+
+class Vector2D:
+    def __init__(self, x = 0, y = 0):
+        self.__x = x
+        self.__y = y
+
+    def __repr__(self):
+        """Returns the representational form of an object"""
+        return "{}({}, {})".format(self.__class__.__name__, self.__x, self.__y)
+
+    def __str__(self):
+        """Returns the string form of an object"""
+        return "({}, {})".format(self.__x, self.__y)
+
+    def __add__(self, other):
+        return Vector2D(self.__x + other.__x, self.__y + other.__y)
+
+    def __sub__(self, other):
+        return Vector2D(self.__x - other.__x, self.__y - other.__y)
+
+    def __mul__(self, other):
+        if isinstance(other, int):
+            return Vector2D(self.__x * other, self.__x * other) # Vector * scalar = Vector
+        else:
+            return self.__x * other.__x + self.__y * other.__y      # Vector * Vector = Scalar
+
+    def __rmul__(self, other):
+        """Need rmul to support commutative scalar multiplication"""
+        return Vector2D(self.__x * other, self.__y * other) # Scalar * Vector = Vector
+
+    @property           # getter only ; read-only property
+    def length(self):
+        return math.sqrt(self.__x ** 2 + self.__y ** 2)
+
+    def value(self):
+        return (self.__x, self.__y)
+
+
 class Examples():
 
     def __init__(self, out):
@@ -54,36 +117,20 @@ class Examples():
     def getExamples(self):
         Example = collections.namedtuple("Example", ("label", "function"))
         result = []
-
-        #samples = [s for s in dir(self) if s.endswith("Sample")]
-        #self.out.writeln("{}".format(samples))
-        #self.out.writeln("{}".format(AllSamples))
-        #for s in AllSamples:
-        #    result.append(Example(s.__name__, s))
-
-        result.append(Example("Calculations", self.calculationsSample))
-        result.append(Example("Strings", self.stringSample))
-        result.append(Example("Format", self.formatSample))
-        result.append(Example("Locale", self.localeSample))
-        result.append(Example("Unicode", self.unicodeSample))
-        result.append(None)
-        result.append(Example("Tuple sample", self.tupleSample))
-        result.append(Example("List sample", self.listSample))
-        result.append(Example("Set sample", self.setSample))
-        result.append(Example("Dictionary sample", self.dictSample))
-        result.append(Example("Generator sample", self.generatorSample))
-        result.append(None)
-        result.append(Example("Files", self.fileSample))
-        result.append(Example("Program flow", self.flowSample))
-        result.append(Example("Modules", self.modulesSample))
-        result.append(Example("OOP", self.oopSample))
-        result.append(None)
-        result.append(Example("Dates && Times", self.datesSample))
-        result.append(Example("HTML parsing", self.htmlSample))
-
+        for s in AllSamples:
+            # The @Sample decorator received the unbound functions.
+            # To connect them later, we need the bound methods.
+            # See also http://stackoverflow.com/questions/1015307/python-bind-an-unbound-method
+            if s is None:
+                result.append(None)     # new row
+            else:                            
+                sampleName = s[0]
+                boundMethod = s[1].__get__(self)
+                result.append(Example(sampleName, boundMethod))
         return result
 
-    
+
+    @Sample("Calculations")
     def calculationsSample(self):
         a = 10
         b = 3
@@ -123,7 +170,8 @@ class Examples():
         cplx = 1j
         self.out.writeln("cplx = %s" % cplx**2)
 
-    
+
+    @Sample("Strings")
     def stringSample(self):
         helloStr = 'Hello World'
         self.out.writeln(helloStr[4])
@@ -197,6 +245,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         self.out.writeln('l = %s; ":".join(l) = %s' % (l, ":".join(l)) )
         
     
+    @Sample("Format")
     def formatSample(self):
         s = "Hello World"
 
@@ -233,48 +282,8 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         self.out.writeln("{0:.3f}".format(f))   # three digits after decimal place
         self.out.writeln("{0:.5f}".format(f))   # Five digits after decimal place
 
-    def printUnicode(self, startWith):
-        widths = [5, 6, 4, 25]
-        header = "{0:^{1}} {2:^{3}} {4:^{5}} {6:^{7}}".format("Dec", widths[0], "Hex", widths[1], "Char", widths[2], "Name", widths[3])
-        self.out.writeln(header)
-        self.out.writeln("-" * len(header))
 
-        for codePoint in range(startWith, startWith + 16):
-            unicodeName = unicodedata.name(chr(codePoint), "(Unknown)")
-            #charName = string.capwords(unicodeName)
-            charName = unicodeName.title()
-            self.out.writeln("{0:>{1}} 0x{0:<{2}x} {3:^{4}} {5}".format(
-                        codePoint, widths[0], widths[1] - 2, 
-                        chr(codePoint), widths[2], 
-                        charName ))
-
-    # Converts a "bytes" object into a readable string
-    def bytes2Hex(self, byteStr):
-        return " ".join("{0:2x}".format(d) for d in byteStr)
-
-
-    def str2ord(self, s):
-        return " ".join("{0:x}".format(ord(c)) for c in s)
-
-    
-    def unicodeSample(self):
-        self.out.writeln("Highest UNICODE code point: 0x{0:x}".format(sys.maxunicode))
-        self.printUnicode(0x2722)
-
-        s = "翻る"                   # String in UCS-2 or UCS-4 encoding
-        b = s.encode()              # get UTF-8 encoding of the string
-        self.out.writeln("{0} ({1}) to UTF-8: {2}".format(s, self.str2ord(s), self.bytes2Hex(b)))
-
-        s = "A"
-        b = s.encode()
-        self.out.writeln("{0} ({1}) to UTF-8: {2}".format(s, self.str2ord(s), self.bytes2Hex(b)))
-
-        s = "€"
-        b = s.encode()
-        self.out.writeln("{0} ({1}) to UTF-8: {2}".format(s, self.str2ord(s), self.bytes2Hex(b)))
-
-
-    
+    @Sample("Locale")
     def localeSample(self):        
         x, y= (1234567890, 1234.56)
 
@@ -305,7 +314,48 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         #self.out.writeln(de2)
 
 
-    
+    def printUnicode(self, startWith):
+        widths = [5, 6, 4, 25]
+        header = "{0:^{1}} {2:^{3}} {4:^{5}} {6:^{7}}".format("Dec", widths[0], "Hex", widths[1], "Char", widths[2], "Name", widths[3])
+        self.out.writeln(header)
+        self.out.writeln("-" * len(header))
+
+        for codePoint in range(startWith, startWith + 16):
+            unicodeName = unicodedata.name(chr(codePoint), "(Unknown)")
+            #charName = string.capwords(unicodeName)
+            charName = unicodeName.title()
+            self.out.writeln("{0:>{1}} 0x{0:<{2}x} {3:^{4}} {5}".format(
+                        codePoint, widths[0], widths[1] - 2, 
+                        chr(codePoint), widths[2], 
+                        charName ))
+
+    # Converts a "bytes" object into a readable string
+    def bytes2Hex(self, byteStr):
+        return " ".join("{0:2x}".format(d) for d in byteStr)
+
+
+    def str2ord(self, s):
+        return " ".join("{0:x}".format(ord(c)) for c in s)
+
+    @Sample("Unicode")
+    def unicodeSample(self):
+        self.out.writeln("Highest UNICODE code point: 0x{0:x}".format(sys.maxunicode))
+        self.printUnicode(0x2722)
+
+        s = "翻る"                   # String in UCS-2 or UCS-4 encoding
+        b = s.encode()              # get UTF-8 encoding of the string
+        self.out.writeln("{0} ({1}) to UTF-8: {2}".format(s, self.str2ord(s), self.bytes2Hex(b)))
+
+        s = "A"
+        b = s.encode()
+        self.out.writeln("{0} ({1}) to UTF-8: {2}".format(s, self.str2ord(s), self.bytes2Hex(b)))
+
+        s = "€"
+        b = s.encode()
+        self.out.writeln("{0} ({1}) to UTF-8: {2}".format(s, self.str2ord(s), self.bytes2Hex(b)))
+
+
+    @Sample("Tuple", True)
     def tupleSample(self):
         myTuple = ("Hello", "World", 42)
         self.out.writeln("myTuple = {0}".format(myTuple))
@@ -344,7 +394,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         return forenames, surnames
 
 
-    
+    @Sample("List")
     def listSample(self):
         # List
         self.out.writelnColor(Qt.lightGray, 'List samples:')
@@ -466,7 +516,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         self.out.writeln("  l3={}".format(l3))
 
 
-    
+    @Sample("Set")
     def setSample(self):
         S = {}  # NOTE: Does not create an empty set, but an empty dict!
         self.out.writeln("S = {} ({})".format(S, type(S)) )
@@ -496,9 +546,8 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         except AttributeError as ae:
             self.out.writelnColor(Qt.red, ae)
 
-
-
     
+    @Sample("Dictionary")
     def dictSample(self):
 
         # Implemented as a local function inside dictSample() 
@@ -560,7 +609,43 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
 
         countWordsDef("data/sample.txt")
 
-    
+
+    def __getGenerator(self):
+        return (x*x for x in range(3))
+
+    def __getGenerator2(self):
+        for i in range(3):
+            print("Hello")
+            yield i
+            print("Hello 2")
+            
+        #yield (x*x for x in range(3))
+
+
+    @Sample("Generator")
+    def generatorSample(self):
+        self.out.writelnColor(Qt.lightGray, 'Simple generator sample:')
+        mygenerator = (x*x for x in range(3))
+        self.out.writeln("First")
+        for i in mygenerator:
+            self.out.writeln("  i={}".format(i))
+        self.out.writeln("Second")
+        for i in mygenerator:
+            self.out.writeln("  i={}".format(i))
+
+        self.out.writelnColor(Qt.lightGray, 'Returning a generator from a function:')
+        g = self.__getGenerator()
+        self.out.writeln("  g={}".format(type(g)))
+        for i in g:
+            self.out.writeln("  i={}".format(i))
+
+        g = self.__getGenerator2()
+        self.out.writeln("  g={}".format(type(g)))
+        for i in g.__iter__():
+            print("Hello 3")
+            self.out.writeln("  i={}".format(i))
+
+    @Sample("File", True)
     def fileSample(self):
         self.out.writelnColor(Qt.lightGray, 'Read tuple of two Lists from two files:')
         data = self.get_forenames_and_surnames()
@@ -596,7 +681,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
             self.out.writeln("  " + str(e))
 
 
-    
+    @Sample("Program flow")
     def flowSample(self):
         """Some sample code to show program flow statements, like if, while,
            for, and exceptions"""
@@ -761,42 +846,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
             self.out.writelnColor(Qt.red, "  {}".format(ae))
 
 
-    def __getGenerator(self):
-        return (x*x for x in range(3))
-
-    def __getGenerator2(self):
-        for i in range(3):
-            print("Hello")
-            yield i
-            print("Hello 2")
-            
-        #yield (x*x for x in range(3))
-
-
-    def generatorSample(self):
-        self.out.writelnColor(Qt.lightGray, 'Simple generator sample:')
-        mygenerator = (x*x for x in range(3))
-        self.out.writeln("First")
-        for i in mygenerator:
-            self.out.writeln("  i={}".format(i))
-        self.out.writeln("Second")
-        for i in mygenerator:
-            self.out.writeln("  i={}".format(i))
-
-        self.out.writelnColor(Qt.lightGray, 'Returning a generator from a function:')
-        g = self.__getGenerator()
-        self.out.writeln("  g={}".format(type(g)))
-        for i in g:
-            self.out.writeln("  i={}".format(i))
-
-        g = self.__getGenerator2()
-        self.out.writeln("  g={}".format(type(g)))
-        for i in g.__iter__():
-            print("Hello 3")
-            self.out.writeln("  i={}".format(i))
-
-
-    
+    @Sample("Modules")
     def modulesSample(self):
 
         self.out.writelnColor(Qt.lightGray, 'PYTHONPATH:')
@@ -807,42 +857,12 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         for p in sys.path:
             self.out.writeln("  {}".format(p))
 
-
+    @Sample("OOP")
     def oopSample(self):
 
         self.out.writelnColor(Qt.lightGray, "Simple custom class sample:")
 
-        class Vector2D:
-            def __init__(self, x = 0, y = 0):
-                self.__x = x
-                self.__y = y
-
-            def __repr__(self):
-                """Returns the representational form of an object"""
-                return "{}({}, {})".format(self.__class__.__name__, self.__x, self.__y)
-
-            def __str__(self):
-                """Returns the string form of an object"""
-                return "({}, {})".format(self.__x, self.__y)
-
-            def __add__(self, other):
-                return Vector2D(self.__x + other.__x, self.__y + other.__y)
-
-            def __mul__(self, other):
-                if isinstance(other, int):
-                    return Vector2D(self.__x * other, self.__x * other) # Vector * scalar = Vector
-                else:
-                    return self.__x * other.__x + self.__y * other.__y      # Vector * Vector = Scalar
-
-            def __rmul__(self, other):
-                """Need rmul to support commutative scalar multiplication"""
-                return Vector2D(self.__x * other, self.__y * other) # Scalar * Vector = Vector
-
-            @property           # getter only ; read-only property
-            def length(self):
-                return math.sqrt(self.__x ** 2 + self.__y ** 2)
-
-
+        # See definition of Vector2D at the top of this source file
         v = Vector2D()
         self.out.writeln("  {!r}".format(v))
         self.out.writeln("  {}".format(v))
@@ -919,9 +939,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         self.out.writeln("  {!r} (id={})".format(x, id(x)))
 
 
-        
-
-
+    @Sample("Dates && Times", True)
     def datesSample(self):
         import time
         import datetime
@@ -948,6 +966,7 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         self.out.writeln(cal.formatmonth(nowLocal.tm_year, nowLocal.tm_mon))
 
 
+    @Sample("HTML parsing")
     def htmlSample(self):
         import urllib.request
         import configparser
@@ -992,3 +1011,549 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
         self.out.writelnColor(Qt.lightGray, '\nList of all header tags:')
         parser = MyHTMLParser(self)
         parser.feed(s)
+
+
+    @Sample("Save && Load")
+    def saveLoadSample(self):
+        import datetime
+        import pickle
+        import struct
+
+        self.out.writelnColor(Qt.lightGray, 'Sample data:')
+
+        # NOTE: Can not use a local class definition to pickle - 
+        # pickle requires the path to the class, but this would be a local one here
+        #class TaskEntry:
+        #    def __init__(self, name, description, createDate, assignee, dueDate):
+
+        tasks = []
+        now = datetime.datetime.now()
+        tasks.append(TaskEntry("Implement reader", "Implement the functionality to read a file",
+                               now, "Andreas", now + datetime.timedelta(10)))
+        tasks.append(TaskEntry("Test reader", "Test if the reader really works",
+                               now, "Andreas", now + datetime.timedelta(12)))
+        tasks.append(TaskEntry("Implement writer", "Implement the functionality to write a file",
+                               now, "Andreas", now + datetime.timedelta(15)))
+        tasks.append(TaskEntry("Test writer", "Test if the writer really works",
+                               now, "Andreas", now + datetime.timedelta(17)))
+        tasks.append(TaskEntry("Ship", "Ship the product",
+                               now, "Andreas", now + datetime.timedelta(25)))
+
+        for task in tasks:
+            self.out.writelnColor(Qt.yellow, "  {}".format(task))
+
+        self.out.writelnColor(Qt.lightGray, '\nPickle Sample')
+        self.out.writelnColor(Qt.red, 'NOTE that Python\'s pickle has similar security constraints like Java serialization!')
+
+        # Get pickle as stream for testing and debugging
+        # self.out.writelnColor(Qt.cyan, pickle.dumps(tasks))
+
+        self.out.writeln("  Serializing data to file ...")
+        fo = open("tasks.dat", "wb")
+        pickle.dump(tasks, fo, pickle.HIGHEST_PROTOCOL)
+        fo.close()
+
+        fileInfo = os.stat("tasks.dat")
+        self.out.writelnColor(Qt.magenta, "  Size of data file: {} bytes.".format(fileInfo.st_size))
+
+        self.out.writeln("  Reading data back from file ")
+        fi = open("tasks.dat", "rb")
+        readTasks = pickle.load(fi)
+        fi.close()
+        
+        for task in readTasks:
+            self.out.writeln("  {}".format(task))
+
+        self.out.writelnColor(Qt.lightGray, '\nBinary sample')
+
+        self.out.writeln("  Writing data to file ...")
+        fo = open("tasks.dat", "wb")
+        
+        # Simple function to return a length-prefixed byte stream of a given string
+        packedString = lambda s : struct.pack( "<H{}s".format(len(s)), len(s), s.encode("utf-8"))
+
+        for task in readTasks:
+            data = bytearray()
+            data.extend(packedString(task.name))
+            data.extend(packedString(task.description))
+            data.extend(struct.pack("<I", task.createDate.toordinal()))
+            data.extend(packedString(task.assignee))
+            data.extend(struct.pack("<I", task.dueDate.toordinal()))
+            fo.write(data)
+
+        fo.close()
+
+        fileInfo = os.stat("tasks.dat")
+        self.out.writelnColor(Qt.magenta, "  Size of data file: {} bytes.".format(fileInfo.st_size))
+
+        self.out.writeln("  Reading data back from file ")
+        fi = open("tasks.dat", "rb")
+        
+        # NOTE: The followig code only uses very rudimentary error handling -
+        # its main purpose is to show the unpack mechanism!
+        def readString():
+            data = fi.read(struct.calcsize("<H"))                       # read length
+            if len(data) == 0:
+                return None
+
+            stringLen = struct.unpack("<H", data)[0]                    # unpack length
+
+            data = fi.read(struct.calcsize("<{}s".format(stringLen)))   # read string
+            return data.decode()                                        # convert to string
+
+        readTasks = []
+        while True:
+            values = {}
+            values["name"] = readString()
+            if values["name"] is None:
+                break;
+
+            values["description"] = readString()
+            data = fi.read(struct.calcsize("<I"))                       # read data ordinal
+            values["createDate"] = datetime.datetime.fromordinal(struct.unpack("<I", data)[0])
+            values["assignee"] = readString()
+            data = fi.read(struct.calcsize("<I"))                       # read data ordinal
+            values["dueDate"] = datetime.datetime.fromordinal(struct.unpack("<I", data)[0])
+
+            readTasks.append(TaskEntry(**values))
+
+        fi.close()
+
+        for task in readTasks:
+            self.out.writeln("  {}".format(task))
+
+        self.out.writelnColor(Qt.lightGray, '\nXMLsample')
+        import xml.etree.ElementTree
+        import gzip
+
+        # Create the root node
+        root = xml.etree.ElementTree.Element("tasks")
+        for task in tasks:
+            # Create a task node
+            element = xml.etree.ElementTree.Element("task",
+                        name = task.name,
+                        description = task.description,
+                        createDate = task.createDate.isoformat(),
+                        assignee = task.assignee,
+                        dueDate = task.dueDate.isoformat())
+            root.append(element)
+        tree = xml.etree.ElementTree.ElementTree(root)
+        tree.write("tasks.xml", "utf-8")
+
+        compressed = gzip.open("tasks.xmz", "wb")
+        tree.write(compressed, "utf-8")
+        compressed.close()
+
+        fileInfo = os.stat("tasks.xml")
+        self.out.writelnColor(Qt.magenta, "  Size of data file: {} bytes.".format(fileInfo.st_size))
+        fileInfo = os.stat("tasks.xmz")
+        self.out.writelnColor(Qt.magenta, "  Size of compressed data file: {} bytes.".format(fileInfo.st_size))
+
+        self.out.writeln("  Reading data back from file")
+        readTasks = []
+        xml.etree.ElementTree.parse("tasks.xml")
+        ISO8601_FORMAT = "%Y-%m-%dT%H:%M:%S.%f" 
+        for taskElement in tree.findall("task"):
+            name = taskElement.get("name")
+            description = taskElement.get("description")
+            createDate = datetime.datetime.strptime(taskElement.get("createDate"), ISO8601_FORMAT)
+            assignee = taskElement.get("assignee")
+            dueDate = datetime.datetime.strptime(taskElement.get("dueDate"), ISO8601_FORMAT)
+            readTasks.append(TaskEntry(name, description, createDate, assignee, dueDate))
+
+        for task in readTasks:
+            self.out.writeln("  {}".format(task))
+
+        self.out.writeln("  Reading data back from compressed file")
+
+        compressed = gzip.open("tasks.xmz", "rb")
+
+        readTasks = []
+        xml.etree.ElementTree.parse(compressed)
+        ISO8601_FORMAT = "%Y-%m-%dT%H:%M:%S.%f" 
+        for taskElement in tree.findall("task"):
+            name = taskElement.get("name")
+            description = taskElement.get("description")
+            createDate = datetime.datetime.strptime(taskElement.get("createDate"), ISO8601_FORMAT)
+            assignee = taskElement.get("assignee")
+            dueDate = datetime.datetime.strptime(taskElement.get("dueDate"), ISO8601_FORMAT)
+            readTasks.append(TaskEntry(name, description, createDate, assignee, dueDate))
+        compressed.close()
+
+        for task in readTasks:
+            self.out.writeln("  {}".format(task))
+
+
+    @Sample("Advanced Procedural", True)
+    def advancedSample(self):
+        self.out.writelnColor(Qt.lightGray, 'Switch-like construct:')
+        
+        def printOne(): self.out.writeln("  One")
+        def printTwo(): self.out.writeln("  Two")
+        def printThree(): self.out.writeln("  Three")
+        def printFour(): self.out.writeln("  Four")
+
+        value = 3
+        switch = {1 : printOne,
+                  2 : printTwo,
+                  3 : printThree,
+                  4 : printFour}
+        switch[value]()
+
+        self.out.writelnColor(Qt.lightGray, '\nAdvanced yield:')
+
+        def evenNumbers(start = 0):
+            self.out.writelnColor(Qt.cyan, "  Start of generator")
+
+            result = start
+            while True:
+                self.out.writelnColor(Qt.cyan, "    Before yield")
+                newValue = (yield result)
+                self.out.writelnColor(Qt.cyan, "    After yield; result={}".format(newValue))
+
+                if newValue is not None:
+                    result = newValue
+                else:
+                    result = result + 2 
+                self.out.writelnColor(Qt.cyan, "    At end of while loop")
+            self.out.writelnColor(Qt.cyan, "  End of generator")
+
+        gen = evenNumbers()
+        self.out.writelnColor(Qt.magenta, "  Starting for-loop")
+        for x in gen:
+            self.out.writelnColor(Qt.magenta, "    In for-loop")
+
+            if x == 10:
+                self.out.writelnColor(Qt.magenta, "      Sending value to generator")
+                gen.send(20)        # switch context to the yield!!
+                self.out.writelnColor(Qt.magenta, "      Value sent.")
+
+            self.out.writelnColor(Qt.magenta, "    Checking end condition")
+            if x > 30:
+                self.out.writelnColor(Qt.magenta, "      Breaking out of loop")
+                break
+            self.out.writeln("    End of loop: {}".format(x))
+
+        self.out.writelnColor(Qt.lightGray, '\nDynamic code execution:')
+        from PySide.QtGui import QInputDialog, QLineEdit
+        result = QInputDialog.getText(None, "Enter function", "Function:", QLineEdit.Normal, "math.sin(x)")
+        if result[1]:
+            fun = result[0]
+            self.out.writeln("  f(x) = {0}".format(fun))
+            for x in range(10):
+                y = eval(fun)
+                self.out.writeln("  f({0}) = {1}".format(x, y))            
+
+        self.out.writelnColor(Qt.lightGray, '\nDecorators:')
+
+        def myFunction(): pass
+        self.out.writeln("  {0}".format(myFunction))
+
+        def Decorator(func):
+            self.out.writeln("  Creating Decorator ...")
+            def wrapper():
+                self.out.writeln("  In wrapper()")
+                func()
+            return wrapper
+
+        @Decorator
+        def myDecoratedFunction(): 
+            self.out.writeln("  In myDecoratedFunction()")
+            pass
+
+        self.out.writeln("  {0}".format(myDecoratedFunction))
+        myDecoratedFunction()
+
+        self.out.writelnColor(Qt.lightGray, '\nMethod Decorators:')
+
+        global output
+        output = self.out
+        
+        def MethodDecorator(method):
+            self.out.writeln("  Creating Decorator ...")
+            def wrapper(self):
+                output.writeln("  In wrapper()")
+                method(self)
+            return wrapper
+
+        class myClass:
+            @MethodDecorator
+            def myMethod(self):
+                output.writeln("  In myClass.myMethod()")
+
+        mc = myClass()
+        mc.myMethod()
+
+        self.out.writelnColor(Qt.lightGray, '\nFunction annotations:')
+
+        def simpleFunc(a, b, c):
+            return 42 * a * b * c
+        self.out.writeln("  {0}".format(simpleFunc.__annotations__))
+
+        def simpleFunc2(a : math.sin(x), b : Sample, c : int) -> 123:
+            return 42 * a * b * c
+        self.out.writeln("  {0}".format(simpleFunc2.__annotations__))
+
+
+        self.out.writelnColor(Qt.lightGray, '\n__slots__:')
+        v = Vector2D(3, 8)              # "normal" custom class - see above
+        self.out.writeln("  {0}".format(v.__dict__))
+
+        class Vector2D_slot:
+            
+            __slots__ = ("__x", "__y")
+            
+            def __init__(self, x = 0, y = 0):
+                self.__x = x
+                self.__y = y
+        
+            def __repr__(self):
+                """Returns the representational form of an object"""
+                return "{}({}, {})".format(self.__class__.__name__, self.__x, self.__y)
+        
+            def __str__(self):
+                """Returns the string form of an object"""
+                return "({}, {})".format(self.__x, self.__y)
+        
+            def __add__(self, other):
+                return Vector2D(self.__x + other.__x, self.__y + other.__y)
+        
+            def __mul__(self, other):
+                if isinstance(other, int):
+                    return Vector2D(self.__x * other, self.__x * other) # Vector * scalar = Vector
+                else:
+                    return self.__x * other.__x + self.__y * other.__y      # Vector * Vector = Scalar
+        
+            def __rmul__(self, other):
+                """Need rmul to support commutative scalar multiplication"""
+                return Vector2D(self.__x * other, self.__y * other) # Scalar * Vector = Vector
+        
+            @property           # getter only ; read-only property
+            def length(self):
+                return math.sqrt(self.__x ** 2 + self.__y ** 2)
+
+        v = Vector2D_slot(3, 8)
+        try:
+            self.out.writeln("  {0}".format(v.__dict__))    # 'Vector2D_slot' object has no attribute '__dict__'
+        except AttributeError as ae:
+            self.out.writelnColor(Qt.red, "  {0}".format(ae))
+
+    @Sample("Advanced OOP")
+    def sample100(self):
+
+        self.out.writelnColor(Qt.lightGray, '\nConstants class:')
+        class Const:
+            def __setattr__(self, name, value):
+                if name in self.__dict__:
+                    raise ValueError("can not change a const attribute")
+                self.__dict__[name]=value
+
+            def __delattr__(self, name):
+                if name in self.__dict__:
+                    raise ValueError("cannot delete a constattribute")
+                raise AttributeError("'{0}' object has no attribute '{1}'".format(self.__class__.__name__, name))            
+
+        c = Const()
+        self.out.writeln("  {0}".format(c.__dict__))
+        c.LOW = 100
+        c.HIGH = 512
+        c.STR = "Hello World"
+        self.out.writeln("  {0}".format(c.__dict__))
+
+        try:
+            c.HIGH = 1024                       # can not change a const attribute
+        except ValueError as ve:
+            self.out.writelnColor(Qt.red, "  {0}".format(ve))
+
+        self.out.writelnColor(Qt.lightGray, '\nContext managers:')
+        
+        class Mgr:
+            def __enter__(self):
+                output.writeln("  In __enter__()")
+                return self
+
+            def __exit__(self, exType, ex, tb):
+                output.writeln("  In __exit__({}, {}, {})".format(exType, ex, tb))
+
+        class MyException(Exception) : pass
+
+        try:
+            with Mgr() as mgr:
+                self.out.writeln("  In with suite: {}".format(mgr))
+                self.out.writelnColor(Qt.red, "  Raising exception!")
+                raise MyException("EXCEPTION!")
+        except MyException as me:
+            self.out.writelnColor(Qt.red, "  Catched {0}".format(me))
+
+
+        self.out.writelnColor(Qt.lightGray, '\nDescriptors:')
+
+        class UpCaser:
+            def __init__(self, attrName):
+                self.attrName = attrName
+
+            def __get__(self, instance, owner=None):
+                value = getattr(instance, self.attrName)
+                output.writeln("    __get__():  {}".format(value))
+                return value.upper()
+
+
+        class DataClass:
+            
+            nameInUpperCase = UpCaser("name")
+
+            def __init__(self, name):
+                self.name = name
+
+        dc = DataClass("Hello")
+        self.out.writeln("  dc.name = {0}".format(dc.name))
+        self.out.writeln("  dc.name in upper case = {0}".format(dc.nameInUpperCase))
+
+
+    @Sample("Functional programming")
+    def sample101(self):
+        import functools
+
+        self.out.writelnColor(Qt.lightGray, 'Mapping:')
+        L = [1, 2, 3, 4, 5]
+        self.out.writeln("  L = {}".format(L))
+        
+        L_mapped = list(map(lambda x : x**2, L)) 
+        self.out.writeln("  L_mapped = {}".format(L_mapped))
+
+        self.out.writelnColor(Qt.lightGray, '\nFiltering:')
+        L_filtered = list(filter(lambda x : x > 4, L_mapped))
+        self.out.writeln("  L_filtered = {}".format(L_filtered))
+
+        self.out.writelnColor(Qt.lightGray, '\nReducing:')
+        reduced = functools.reduce(lambda x, y : x * y, L_filtered)
+        self.out.writeln("  reduced = {}".format(reduced))
+
+        reducedMin = functools.reduce(min, L_filtered)
+        self.out.writeln("  reduced(min) = {}".format(reducedMin))
+
+        reducedMax = functools.reduce(max, L_filtered)
+        self.out.writeln("  reduced(max) = {}".format(reducedMax))
+
+        reducedSum = sum(L_filtered)    # Note: min/max etc. take two parameters, but sum() takes the list as one parameter! 
+        self.out.writeln("  reduced(sum) = {}".format(reducedSum))
+
+    @Sample("Coroutines")
+    def sample102(self):
+        
+        self.out.writelnColor(Qt.lightGray, 'Coroutine sample:')
+
+        # create a generator function instead of a normal function
+        # http://docs.python.org/3/reference/simple_stmts.html#the-yield-statement
+        # "Using a yield statement in a function definition is sufficient to cause 
+        #  that definition to create a generator function instead of a normal function."
+        def myCoroutine():
+            self.out.writelnColor(Qt.cyan, '  Starting coroutine ...')
+            nextVal = 0
+            while True:
+                self.out.writelnColor(Qt.cyan, '    In coroutine - now suspending ...')
+                data = yield nextVal    # nextVal returned as result from next()
+                self.out.writelnColor(Qt.cyan, '    Resuming coroutine with {}'.format(data))
+                if data is not None:
+                    break
+                nextVal += 1
+            self.out.writelnColor(Qt.cyan, '  Coroutine done.')
+
+        self.out.writelnColor(Qt.yellow, '  Creating coroutine ...')
+        go = myCoroutine()              # Note: this does not actually execute the coroutine, but only creates the generator object!
+        self.out.writelnColor(Qt.yellow, '  Created generator: {}'.format(go))
+
+        self.out.writelnColor(Qt.yellow, '  Calling generator.next()')
+        result = next(go)                        # NOW, we are calling the actual coroutine the first time 
+        self.out.writelnColor(Qt.yellow, '  Back from generator.next(): {}'.format(result))
+        
+        self.out.writelnColor(Qt.yellow, '  Calling generator.next()')
+        result = next(go) 
+        self.out.writelnColor(Qt.yellow, '  Back from generator.next(): {}'.format(result))
+
+        self.out.writelnColor(Qt.yellow, '  Sending generator a termination signal ...')
+        try:
+            go.send(True)
+        except StopIteration as si:
+            self.out.writelnColor(Qt.red, "Exception: ".format(si))
+        self.out.writelnColor(Qt.yellow, '  Termination signal sent.')
+
+        self.out.writelnColor(Qt.yellow, '  Calling generator.next()')
+        try:
+            result = next(go)                        # NOW, we are calling the actual coroutine the first time 
+        except StopIteration as si:
+            self.out.writelnColor(Qt.red, "Exception: ".format(si))
+        self.out.writelnColor(Qt.yellow, '  Back from generator.next(): {}'.format(result))
+
+
+    @Sample("Unit tests")
+    def sample103(self):
+        import unittest
+        import io
+
+        class Vector2DTest(unittest.TestCase):
+            
+            def setUp(self):
+                self.first = Vector2D(1, 2)
+                self.second= Vector2D(3, 4)
+
+            def testAdd(self) :
+                result = self.first + self.second
+                self.assertEqual(result.value(), (4, 6))
+
+            def testSub(self) :
+                result = self.first - self.second
+                self.assertEqual(result.value(), (-2, -2))
+
+            def testMul(self) :
+                result = self.first * self.second
+                self.assertEqual(result, 42)    # fail intentionally
+
+        self.out.writelnColor(Qt.lightGray, 'Unittest sample:')
+
+        result = io.StringIO()
+        runner = unittest.TextTestRunner(result)
+        suite = unittest.TestLoader().loadTestsFromTestCase(Vector2DTest)
+        runner.run(suite)
+
+        # Print somewhat formatted test run results
+        text = result.getvalue()
+        lines = text.split("\n")
+        for line in lines:
+            self.out.writelnColor(Qt.white, "  " + line)
+
+
+    @Sample("Profiling")
+    def sample104(self):
+        import timeit
+        import cProfile
+        import io, pstats
+
+        self.out.writelnColor(Qt.lightGray, 'Profiling sample using timeit:')
+
+        t = timeit.Timer("first + second",
+                         ("from samplePackage.SampleModule import Vector2D\n"
+                          "first = Vector2D(1, 2)\n"
+                          "second = Vector2D(4, 5)") )
+        result = t.timeit()         # runs 1000000 times!
+        self.out.writeln("  {} sec.".format(result))
+
+        self.out.writelnColor(Qt.lightGray, '\nProfiling sample using cProfile:')
+
+        pr = cProfile.Profile()
+
+        pr.enable()
+        first = Vector2D(1, 2)
+        second = Vector2D(4, 5)
+        for i in range(1000000):
+            third = first + second
+        pr.disable()
+
+        s = io.StringIO()
+        ps = pstats.Stats(pr, stream=s)
+        ps.strip_dirs()
+
+        ps.print_stats()    # print result into stream
+
+        for line in s.getvalue().split("\n"):
+            self.out.writelnColor(Qt.white, "  " + line)
