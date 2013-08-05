@@ -1,0 +1,66 @@
+<project name="MyProject" default="help" basedir=".">
+  <description>
+      ant script to create the jar archives for the applet sample
+  </description>
+
+  <!-- set global properties for this build -->
+  <property name="src" location="src"/>
+  <property name="build" location="WebContent/classes"/>
+  <property name="dist"  location="WebContent"/>
+
+  <target name="help" depends="init">
+    <echo>ant help  - show this help message</echo>
+    <echo>ant antlr - Rebuilds the parser sources from the grammar</echo>
+    <echo>ant grun  - Runs the graphical parse tree visualizer</echo>
+    <echo>ant clean - Cleans all generated files at ${antlr.outdir}</echo>
+  </target>
+
+  <target name="init">
+    <property name="antlr.jarfile" value="../../../nodistrib/antlr-4.1-complete.jar"/>
+    <property name="antlr.package" value="com.example.helloparser"/>
+
+    <pathconvert property="antlr.outdir" dirsep="/">
+      <map from="${basedir}" to="src" />
+      <filtermapper>
+            <replacestring from="." to="/"/>     
+        </filtermapper>
+      <path location="${antlr.package}"/>
+    </pathconvert>
+
+    <property name="antlr.grammar" value="Hello.g4"/>
+
+  </target>
+
+
+  <target name="antlr" depends="init"
+          description="Rebuilds the parser sources from the grammar">
+    <java jar="${antlr.jarfile}" fork="true">
+      <arg value="-o"/>
+      <arg value="${antlr.outdir}"/>
+      <arg value="-package"/>
+      <arg value="${antlr.package}"/>
+      <arg value="${antlr.grammar}"/>
+    </java>
+  </target>
+
+
+  <target name="grun" depends="init"
+          description="Runs the graphical parse tree visualizer">
+    <java classname="org.antlr.v4.runtime.misc.TestRig" fork="true">
+      <classpath>
+        <pathelement location="${antlr.jarfile}"/>
+        <pathelement path="bin"/>
+      </classpath>
+
+      <arg value="${antlr.package}.Hello"/>
+      <arg value="r"/>
+      <arg value="-gui"/>
+    </java>
+  </target>
+
+
+  <target name="clean" depends="init"
+          description="Cleans generated parser sources">
+    <delete dir="${antlr.outdir}"/>
+  </target>
+</project>

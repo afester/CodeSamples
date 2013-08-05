@@ -1,0 +1,28 @@
+.root {
+    -fx-background-color: linear-gradient(from 50% 0% to 50% 100%, #ffffff 0%, #e0e0e0 100%);
+ }
+
+ .button {
+    -fx-background-color: linear-gradient(#fff3e2, #ffac38);
+    -fx-background-radius: 6px;
+ 
+ /*    border-style: solid;
+    -fx-padding: 5px; 
+    border-color: orange;
+    border-width: 1px;
+ */
+ }
+ 
+ GridPane {
+    -fx-padding: 25px; 
+    -fx-hgap: 5px;
+    -fx-vgap: 5px;
+ }
+ 
+ /* Select by Java class name */
+ LegendTable {
+    -fx-hgap: 5px;
+    -fx-vgap: 5px;
+ }
+ 
+ 

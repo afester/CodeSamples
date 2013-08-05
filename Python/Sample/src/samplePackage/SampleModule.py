@@ -1557,3 +1557,135 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
 
         for line in s.getvalue().split("\n"):
             self.out.writelnColor(Qt.white, "  " + line)
+
+    @Sample("Matrix", True)
+    def sample105(self):
+
+        class Matrix:
+            def __init__(self, values = None, w = 0, h = 0):
+                if values is None:
+                    # Generate a null matrif of size w * h
+                    self.matrix = [ ([0] * h) for n in range(w)]
+                else:
+                    self.matrix = copy.deepcopy(values)
+
+            def __str__(self):
+                """Returns the string form of an object"""
+                result = ""
+                for row in self.matrix:
+                    for e in row:
+                        result = result + " {:3}".format(e)
+                    result = result + "\n"
+
+                return result 
+
+            def det(self):
+                if len(self.matrix) != len(self.matrix[0]):
+                    raise ValueError("Can not calculate determinant of non-square matrix")
+                if len(self.matrix) == 1:
+                    return self.matrix[0][0]
+                if len(self.matrix) == 2:
+                    return self.matrix[0][0] * self.matrix[1][1] - self.matrix[0][1] * self.matrix[1][0]    
+                if len(self.matrix) == 3:
+                    return self.matrix[0][0] * self.matrix[1][1] * self.matrix[2][2] \
+                         + self.matrix[0][1] * self.matrix[1][2] * self.matrix[2][0] \
+                         + self.matrix[0][2] * self.matrix[1][0] * self.matrix[2][1] \
+                         - self.matrix[0][2] * self.matrix[1][1] * self.matrix[2][0] \
+                         - self.matrix[0][1] * self.matrix[1][0] * self.matrix[2][2] \
+                         - self.matrix[0][0] * self.matrix[1][2] * self.matrix[2][1]
+                raise ValueError("Matrix is too large - only 1, 2, or 3 columns/rows currently supported")
+
+        self.out.writelnColor(Qt.lightGray, 'Matrix sample:')
+
+        m = Matrix(w = 4, h = 4)
+        self.out.writeln("{}".format(m))
+
+        m = Matrix([[11, 0, 0, 0],
+                    [11, 11, 0, 0],
+                    [11, 11, 11, 0],
+                    [11, 11, 11, 11]])
+        self.out.writeln("{}".format(m))
+
+        m = Matrix([[1, 2, 3],
+                    [3, 4, 5],
+                    [6, 7, 8],
+                    [9, 0, 1]])
+        try:
+            self.out.writeln("{}".format(m.det()))
+        except ValueError as ve:
+            self.out.writelnColor(Qt.red, "  {}".format(ve))
+
+        m = Matrix([[1, 2, 3, 0],
+                    [3, 4, 5, 1],
+                    [6, 7, 8, 2],
+                    [9, 0, 1, 3]])
+        try:
+            self.out.writeln("{}".format(m.det()))
+        except ValueError as ve:
+            self.out.writelnColor(Qt.red, "  {}".format(ve))
+
+        m = Matrix([[42]])
+        self.out.writeln("{}".format(m.det()))
+
+        m = Matrix([[1, 2],
+                    [3, 4]])
+        self.out.writeln("{}".format(m.det()))
+
+        m = Matrix([[0, 1, 2],
+                    [3, 2, 1],
+                    [1, 1, 0]])
+        self.out.writeln("{}".format(m.det()))
+
+        x1, y1 = (0, 0)
+        x2, y2 = (4, 0)
+        x3, y3 = (2, 4)
+        triangle = Matrix([[1, x1, y1],
+                           [1, x2, y2],
+                           [1, x3, y3]])
+        area = 0.5 * triangle.det()
+        self.out.writeln("  triangle area: {}".format(area))
+
+
+    @Sample("Combinations")
+    def sample106(self):
+        self.out.writelnColor(Qt.lightGray, 'Permutations sample:')
+        self.out.writelnColor(Qt.lightGray, 'Given a list L, calculate all possible permutations of its elements.')
+
+        # From http://stackoverflow.com/questions/104420/how-to-generate-all-permutations-of-a-list-in-python?rq=1
+        def all_perms(elements):
+            self.out.writelnColor(Qt.red, "  all_perms({})".format(elements))
+            # function is called recursively for each right sub list and 
+            # creates a generator for all elements of this sub list.
+            # if the input is [1, 2, 3], then the function is called three times:
+            # [1, 2, 3]    (initial call) 
+            # [2, 3]       (first recursion)
+            # [3]          (second recursion)
+            if len(elements) <=1:
+                yield elements
+            else:
+                for perm in all_perms(elements[1:]):    # recursively create new generator for right sub list
+                    #  perm contains the next permutation of the sub list
+                    self.out.writelnColor(Qt.red, "    perm = {}".format(perm))
+
+                    # insert the first element inside all positions of the current sub permutation
+                    for i in range(len(elements)):
+                        yield perm[:i] + elements[0:1] + perm[i:]
+
+        L = ['A', 'B', 'C']
+        self.out.writelnColor(Qt.yellow, "  L = {}".format(L))
+        for e in all_perms(L):
+            self.out.writeln("    {}".format(e))
+
+        L = [1, 2, 3, 4]
+        self.out.writelnColor(Qt.yellow, "  L = {}".format(L))
+        for e in all_perms(L):
+            self.out.writeln("    {}".format(e))
+
+        self.out.writelnColor(Qt.lightGray, 'Generation sample:')
+        self.out.writelnColor(Qt.lightGray, 'Given a list L, calculate all possible permutations of its elements.')
+
+        def add(sum1, sum2, base):
+            pass
+
+        number = 0
+        number = add(number, 1, 3)
