@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<todoList owner="andreas">
+    <todoItem priority="1" entered="">
+    </todoItem>
+    <todoItem priority="1" entered="">
+    </todoItem>
+    <todoItem priority="2" entered="">
+    </todoItem>
+    <todoItem priority="3" entered="">
+    </todoItem>
+</todoList>
+
