@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# qmake -spec win32-x-g++ App.pro
+qmake App.pro
