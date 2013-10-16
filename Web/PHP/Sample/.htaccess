@@ -1,0 +1,33 @@
+# http://kb.ucla.edu/articles/requested-url-not-found-when-using-apache-with-mod_alias-and-mod_rewrite
+#
+# * Alias converts URLs into file paths - e.g.
+#
+#   Alias /PHPSample/ "/home/andreas/Projects/CodeSamples/Web/PHP/Sample/"
+#
+#   means: When opening an URL like http://localhost/PHPSample/sample.php, then
+#   load the file /home/andreas/Projects/CodeSamples/Web/PHP/Sample/sample.php
+#
+# * When using rewrite rules, the rewritten request is "re-injected into the 
+#   Apache kernel, as if it were a new request". For example,
+#
+#   RewriteRule redirected sample_redirected.php [L]
+#
+#   would redirect a URL like http://localhost/redirected to the new URL 
+#   http://localhost/sample_redirected.php
+#
+# Now, when using mod_alias together with mod_redirect, the following would happen:
+#  Requested URL : http://localhost/PHPSample/redirected
+#    ==> mod_alias ==> 
+#  Aliased path  : /home/andreas/Projects/CodeSamples/Web/PHP/Sample/redirected
+#    ==> mod_rewrite ==> 
+#  Redirected URL: /home/andreas/Projects/CodeSamples/Web/PHP/Sample/sample_redirected.php
+#  This URL is then looked up **below** DocumentRoot!! Remember, it is treated
+#  as a URL and not as file path on the server!!!!
+#
+# Solution: Use ReriteBase so that the rewritten URL is transferred back to the
+# proper (aliased) URL)  
+
+RewriteEngine On
+
+RewriteBase /PHPSample
+RewriteRule redirected sample_redirected.php [L]
