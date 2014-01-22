@@ -16,8 +16,13 @@
   </target>
 
   <target name="init">
-    <property name="antlr.jarfile" value="../../../nodistrib/antlr-4.1-complete.jar"/>
+    <!-- Master properties - can be overridden in a property file -->
+    <property name="antlr.grammarname" value="Hello"/>
     <property name="antlr.package" value="com.example.helloparser"/>
+    <property name="antlr.startrule" value="r"/>
+
+    <!-- the following properties are derived from the master properties -->
+    <property name="antlr.grammar" value="${antlr.grammarname}.g4"/>
 
     <pathconvert property="antlr.outdir" dirsep="/">
       <map from="${basedir}" to="src" />
@@ -27,14 +32,24 @@
       <path location="${antlr.package}"/>
     </pathconvert>
 
-    <property name="antlr.grammar" value="Hello.g4"/>
+    <property name="antlr.jarfile" value="../../../nodistrib/antlr-4.1-complete.jar"/>
 
+    <echo>antlr.jarfile  : ${antlr.jarfile}</echo>
+    <echo>antlr.package  : ${antlr.package}</echo>
+    <echo>antlr.outdir   : ${antlr.outdir}</echo>
+    <echo>antlr.grammar  : ${antlr.grammar}</echo>
+    <echo>antlr.startrule: ${antlr.startrule}</echo>
   </target>
 
 
   <target name="antlr" depends="init"
           description="Rebuilds the parser sources from the grammar">
     <java jar="${antlr.jarfile}" fork="true">
+
+      <!-- Pending: make configurable through properties -->
+      <arg value="-no-listener"/>
+      <arg value="-visitor"/>
+
       <arg value="-o"/>
       <arg value="${antlr.outdir}"/>
       <arg value="-package"/>
@@ -52,8 +67,8 @@
         <pathelement path="bin"/>
       </classpath>
 
-      <arg value="${antlr.package}.Hello"/>
-      <arg value="r"/>
+      <arg value="${antlr.package}.${antlr.grammarname}"/>
+      <arg value="${antlr.startrule}"/>
       <arg value="-gui"/>
     </java>
   </target>

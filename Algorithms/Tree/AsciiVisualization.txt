@@ -1,0 +1,75 @@
+Given an n-ary tree, visualize the tree as follows:
+
+0 Root                    Perfix
+1 +--Node.1               ""
+2 |  +--Node.1.1          "|   "
+3 |  |  +--Node.1.1.1     "|   |   "
+3 |  |  +--Node.1.1.2
+3 |  |  `--Node.1.1.3
+2 |  +--Node.1.2          "|   "
+3 |  |  +--Node.1.2.1
+3 |  |  +--Node.1.2.2
+3 |  |  `--Node.1.2.3
+2 |  `--Node.1.3          <= No further node on this level, until the level is lower than this one
+3 |     +--Node.1.3.1
+3 |     +--Node.1.3.2
+3 |     `--Node.1.3.3
+1 +--Node.2
+2 |  +--Node.2.1
+3 |  |  +--Node.2.1.1
+3 |  |  +--Node.2.1.2
+3 |  |  `--Node.2.1.3
+2 |  +--Node.2.2
+3 |  |  +--Node.2.2.1
+3 |  |  +--Node.2.2.2
+3 |  |  `--Node.2.2.3
+2 |  `--Node.2.3
+3 |     +--Node.2.3.1
+3 |     +--Node.2.3.2
+3 |     `--Node.2.3.3
+1 `--Node.3
+2    +--Node.3.1
+3    |  +--Node.3.1.1
+3    |  +--Node.3.1.2
+3    |  `--Node.3.1.3
+2    +--Node.3.2
+3    |  +--Node.3.2.1
+3    |  +--Node.3.2.2
+3    |  `--Node.3.2.3
+2    `--Node.3.3
+3       +--Node.3.3.1
+3       +--Node.3.3.2
+3       `--Node.3.3.3
+
+Main problem: detect whether a node is the last node at a specific level.
+For each node, print "|  " as often as level-1, then print "+--" followed by the node.
+However, print "`--" for the last node of a given level. Then, also do not print "|  " for this level anymore.
+
+Depends on the actual representation of the tree: 
+  * either as list with a level assigned to each node, 
+  * or as a tree where each node has an ordered list of children. 
+The latter one much simplifies the actual problem, since each node knows how many children there are!!
+Also, iterating through the children is much easier.
+
+
+In any case, each node needs to know how many children it has!!
+
+For each child node:
+    print "|  " as often as the node's level-1, then print "+--" followed by the node label.
+    process child nodes - recursively call this method
+
+    
+    
+    
+Prefix=""
+For each row:
+    Get node
+
+    node.level > currentLevel?  // new level of children
+    
+
+    print prefix + nodeLabel
+
+    Last child?
+        prefix = prefix[:-3] + "   "   (replace "|  " with "   ")
+

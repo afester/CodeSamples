@@ -174,8 +174,8 @@ public class LegendTable extends GridPane  {
    public void setError(int index, String s) {
       index--;
 
-      Matcher matcher = pattern.matcher(s);
-      matcher.find();
-      errorLabels.get(index).setText("Error: " + matcher.group(1));
+      //Matcher matcher = pattern.matcher(s);
+      //matcher.find();
+      errorLabels.get(index).setText(s); // "Error: " + matcher.group(1));
    }
 }

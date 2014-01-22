@@ -3,6 +3,8 @@ package com.example;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -17,10 +19,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
+import javafx.util.Duration;
 
 
 public class Functions extends Application {
@@ -36,14 +35,26 @@ public class Functions extends Application {
    private double x0pos = 0;
    private double y0pos = 0;
    private double tick = 0;
-   private double t = 1;
 
+   private double t = 1;
+   private double dt = 0.1;
+   private double startT = 0.0;
+   private double stopT = 1.0;
+
+   private int animationRate = 40;
+   private Timeline stepTimeline = null;
+
+   // UI components
    private Canvas canvas;
    private GraphicsContext context;
    private TextField fromX;
    private TextField toX;
    private Label fromY;
    private Label toY;
+   private TextField curT;
+   private TextField fromT;
+   private TextField toT;
+   private TextField curDT;
 
    private LegendTable legendTable = new LegendTable(this);
 
@@ -75,6 +86,7 @@ public class Functions extends Application {
       context.fillRect(75, 75, 100, 100);
       grid.add(canvas, 0, 0);
 
+/********************************/
       final GridPane axisControlGrid = new GridPane();
 
       Label lbl = new Label("X axis:");
@@ -87,8 +99,7 @@ public class Functions extends Application {
       toX = new TextField();
       toX.setText("6.3");
       axisControlGrid.add(toX, 3, 1);
-      final Button btn = new Button();
-      btn.setText("Apply");
+      final Button btn = new Button("Apply");
       btn.setOnAction(new EventHandler<ActionEvent>() {
 
          @Override
@@ -113,6 +124,135 @@ public class Functions extends Application {
       axisControlGrid.add(txt, 4, 2);
 
       grid.add(axisControlGrid, 0, 1);
+
+/********************************/
+      
+      final GridPane parameterControlGrid = new GridPane();
+      Label lbl5 = new Label("t =");
+      parameterControlGrid.add(lbl5,  0,  0);
+      curT = new TextField();
+      parameterControlGrid.add(curT,  1,  0);
+      final Button applyParam = new Button("Apply");
+      applyParam.setOnAction(new EventHandler<ActionEvent>() {
+
+         @Override
+         public void handle(ActionEvent arg0) {
+            Functions.this.t = Double.parseDouble(curT.getText());
+            renderScene();
+         }
+      });
+
+      parameterControlGrid.add(applyParam,  2,  0);
+
+      grid.add(parameterControlGrid, 0, 2);
+
+/************************/
+
+      final GridPane animationControlGrid = new GridPane();
+
+      Label lbl6 = new Label("Animation:");
+      animationControlGrid.add(lbl6,  0,  0);
+
+      Label lbl7 = new Label("From t = ");
+      animationControlGrid.add(lbl7,  1,  0);
+      fromT = new TextField("" + startT);
+      animationControlGrid.add(fromT,  2,  0);
+
+      Label lbl8 = new Label("to");
+      animationControlGrid.add(lbl8,  3,  0);
+      toT = new TextField("" + stopT);
+      animationControlGrid.add(toT,  4,  0);
+
+      Label lbl9 = new Label("dt");
+      animationControlGrid.add(lbl9,  5,  0);
+      curDT = new TextField("" + dt);
+      animationControlGrid.add(curDT,  6,  0);
+
+      final Button startAnimation = new Button("Start");
+      startAnimation.setOnAction(new EventHandler<ActionEvent>() {
+
+         @Override
+         public void handle(ActionEvent arg0) {
+            if (stepTimeline != null) {
+               return;
+            }
+
+            // read current values from the UI
+            Functions.this.dt = Double.parseDouble(Functions.this.curDT.getText());
+            Functions.this.startT = Double.parseDouble(Functions.this.fromT.getText());
+            Functions.this.stopT = Double.parseDouble(Functions.this.toT.getText());
+
+            Functions.this.t = Functions.this.startT;
+
+            // Update UI
+            String txt = String.valueOf(Math.round(Functions.this.t * 100) / 100.0);
+            Functions.this.curT.setText(txt);
+            renderScene();
+
+            // schedule next steps
+            // Duration (and KeyFrame) are immutable, and Timeline does not contain
+            // a setter to set individual frames 
+            stepTimeline = 
+                  new Timeline(new KeyFrame(Duration.millis(animationRate), 
+                        new EventHandler<ActionEvent>() {
+
+               @Override
+               public void handle(ActionEvent event) {
+                  nextStep();
+               }
+           }));
+           stepTimeline.setCycleCount(Timeline.INDEFINITE);
+           stepTimeline.play();
+         }
+      });
+      animationControlGrid.add(startAnimation,  7,  0);
+
+      final Button stopAnimation = new Button("Stop");
+      stopAnimation.setOnAction(new EventHandler<ActionEvent>() {
+
+         @Override
+         public void handle(ActionEvent arg0) {
+            if (stepTimeline != null) {
+               stepTimeline.stop();
+               stepTimeline = null;
+            }
+         }
+      });
+      animationControlGrid.add(stopAnimation,  8,  0);
+
+      final Button nextParam = new Button("+");
+      nextParam.setOnAction(new EventHandler<ActionEvent>() {
+
+         @Override
+         public void handle(ActionEvent arg0) {
+            // read current values from the UI
+            Functions.this.dt = Double.parseDouble(Functions.this.curDT.getText());
+            Functions.this.startT = Double.parseDouble(Functions.this.fromT.getText());
+            Functions.this.stopT = Double.parseDouble(Functions.this.toT.getText());
+
+            nextStep();
+         }
+      });
+      animationControlGrid.add(nextParam,  9,  0);
+
+      final Button prevParam = new Button("-");
+      prevParam.setOnAction(new EventHandler<ActionEvent>() {
+
+         @Override
+         public void handle(ActionEvent arg0) {
+            // read current values from the UI
+            Functions.this.dt = Double.parseDouble(Functions.this.curDT.getText());
+            Functions.this.startT = Double.parseDouble(Functions.this.fromT.getText());
+            Functions.this.stopT = Double.parseDouble(Functions.this.toT.getText());
+
+            previousStep();
+         }
+      });
+      animationControlGrid.add(prevParam,  10,  0);
+
+      grid.add(animationControlGrid, 0, 3);
+
+/************************/
 
       GridPane newDeleteButtons = new GridPane();
       Button addButton = new Button("Add");
@@ -147,10 +287,13 @@ public class Functions extends Application {
       grid.add(editGrid, 1, 0);
 
       /* Add some sample functions */
-      addGraph("2*Math.sin(x+2*t)", Color.RED);
-      addGraph("Math.log(X)+t", Color.BLUE);
-      addGraph("Math.exp(x+t)", Color.GREEN);
-      addGraph("x + 3*Math.pow(x-t, 2) + Math.pow(x, 3) - 1", Color.MAROON);
+      addGraph("2*sin(x+2*t)", Color.RED);
+      addGraph("log(x)+t", Color.BLUE);
+      addGraph("e^(X+t)", Color.GREEN);
+      addGraph("x + 3*(x-t)^2 + x^3 - 1", Color.MAROON);
+      addGraph("tan(x)", Color.BLUEVIOLET);
+      addGraph("sqrt(x)", Color.YELLOWGREEN);
+      addGraph("1/x", Color.AQUA);
 
       updateValues();
       renderScene();
@@ -346,38 +489,30 @@ public class Functions extends Application {
       context.setLineWidth(1);
       // FGV.context.setLineDash([]);
 
-      // draw the graph
-      double x = startX;
-      double t = this.t; // time parameter - for parametric functions
-      double y = 0;
-      try {
-         y = eval(theGraph.getFormula(), x);
-      } catch (ScriptException e) {
-         legendTable.setError(theGraph.getIndex(), e.getLocalizedMessage());
-         theGraph.setIsError(true);
-         return;
-      }
-      // if (y === Infinity) {
-      // y = 1000;
-      // }
-
-      double xpos = x0pos + x / scalePerPixel;
-      double ypos = y0pos - y / scalePerPixel;
-      context.moveTo(xpos, ypos);
-
-      x += scalePerPixel;
-      for (; x < stopX; x += scalePerPixel) {
+      boolean move = true;
+      theGraph.setT(this.t);
+      for (double x = startX; x < stopX; x += scalePerPixel) {
          try {
-            y = eval(theGraph.getFormula(), x);
-         } catch (ScriptException e) {
+            Double y = theGraph.evaluate(x);
+
+            double xpos = x0pos + x / scalePerPixel;
+            double ypos = y0pos - y / scalePerPixel;
+
+            if (!Double.isNaN(y)) {
+               if (move) {
+                  move = false;
+                  context.moveTo(xpos, ypos);
+               } else {
+                  context.lineTo(xpos, ypos);
+               }
+            } else {
+               move = true;  // next non-NaN needs to MOVE first
+            }
+         } catch (Exception e) {
             legendTable.setError(theGraph.getIndex(), e.getLocalizedMessage());
             theGraph.setIsError(true);
             return;
          }
-
-         xpos = x0pos + x / scalePerPixel;
-         ypos = y0pos - y / scalePerPixel;
-         context.lineTo(xpos, ypos);
       }
 
       context.stroke();
@@ -401,15 +536,51 @@ public class Functions extends Application {
    }
 
 
-   private ScriptEngineManager manager = new ScriptEngineManager();
-   private ScriptEngine engine = manager
-         .getEngineByMimeType("application/javascript");
 
-   private double eval(String formula, double x) throws ScriptException {
-      engine.put("x", x);
-      engine.put("t", 1);
-      engine.eval("y = " + formula);
-      Double y = (Double) engine.get("y");
-      return y.doubleValue();
+   private void nextStep() {
+      // calculate next t
+      this.t = this.t + this.dt;
+
+      // check if value still in range - if end is reached, reset parameter
+      if (this.dt < 0) {    // counting backwards
+          if (this.t <= this.stopT) {
+              // FGV.animate = false;
+             this.t = this.startT;
+          }
+      } else {             // counting forward
+          if (this.t >= this.stopT) {
+              // FGV.animate = false;
+             this.t = this.startT;
+          }
+      }
+
+      // Update UI
+      String txt = String.valueOf(Math.round(this.t * 100) / 100.0);
+      this.curT.setText(txt);
+      renderScene();
+   }
+
+
+
+   private void previousStep() {
+      // calculate next t
+      this.t = this.t - this.dt;
+
+      // check if value still in range - if end is reached, reset parameter
+      if (this.dt < 0) {    // counting backwards
+          if (this.t > this.startT) {
+             this.t = this.stopT;
+          }
+      } else {             // counting forward
+          if (this.t <= this.startT) {
+              // FGV.animate = false;
+             this.t = this.stopT;
+          }
+      }
+
+      // Update UI
+      String txt = String.valueOf(Math.round(this.t * 100) / 100.0);
+      this.curT.setText(txt);
+      renderScene();
    }
 }
