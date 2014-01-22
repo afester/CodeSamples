@@ -1,0 +1,79 @@
+@CHARSET "ISO-8859-1";
+
+/* ==================== Layout ===================== */
+
+/* Header row at top */
+#header {
+  overflow: hidden;   /* http://stackoverflow.com/questions/7168623/why-is-that-when-i-apply-a-margin-to-a-child-div-tag-it-affects-the-parent-div */
+}
+
+/* central div containing three columns */
+#wrap {
+  height: 100%;
+  overflow: hidden;   /* http://stackoverflow.com/questions/7168623/why-is-that-when-i-apply-a-margin-to-a-child-div-tag-it-affects-the-parent-div */
+}
+
+/* left column */
+#left {
+  width: 100px;              /* Default width of left column */
+  float: left;
+  padding-bottom: 32767px !important; /* http://www.positioniseverything.net/articles/onetruelayout/equalheight.html */
+  margin-bottom: -32767px !important;
+}
+
+/* Central column - resizes its width according to browser width, resizes its height according to the contents */
+#center {
+    overflow: hidden;   /* http://stackoverflow.com/questions/7168623/why-is-that-when-i-apply-a-margin-to-a-child-div-tag-it-affects-the-parent-div */
+}
+
+/* Content header */
+#contentheader {
+  overflow: hidden;       /* make div large enough so that it covers its children (???) */
+}
+
+/* right column */
+#right {
+  width: 100px;              /* Default width of right column */
+  float: right;
+  padding-bottom: 32767px !important; /* http://www.positioniseverything.net/articles/onetruelayout/equalheight.html */
+  margin-bottom: -32767px !important;
+}
+
+
+
+
+/* ==================== Style ========================== */
+
+body {
+}
+
+
+/* The whole page - all content is wrapped by this div */
+#page {
+    border: dashed 1px;
+}
+
+#header {
+  border-bottom: dashed 1px;
+}
+
+#left {
+  width : 200px;
+  border-right: dashed 1px;
+}
+
+#center {
+}
+
+#right {
+  border-left: dashed 1px;
+}
+
+
+#contentheader {
+  border-bottom: dashed 1px;
+}
+
+#footer {
+  border-top: dashed 1px;
+}
