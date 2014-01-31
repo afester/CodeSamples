@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<project name="java8" default="run" basedir=".">
+  <property name="src" value="src"/>
+  <property name="build" value="bin"/>
+
+  <target name="run" depends="build">
+    <java classname="com.example.MethodParameters">
+        <classpath>
+           <pathelement location="${build}"/>
+         </classpath>
+    </java>
+  </target>
+
+  <target name="build" depends="clean">
+    <mkdir dir="${build}"/>
+    <javac srcdir="${src}"
+           destdir="${build}">
+        <compilerarg value="-parameters"/>
+    </javac>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build}"/>
+  </target>
+
+</project>

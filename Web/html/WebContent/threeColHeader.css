@@ -55,11 +55,13 @@ body {
 
 #header {
   border-bottom: dashed 1px;
+  background-color: yellow;
 }
 
 #left {
   width : 200px;
   border-right: dashed 1px;
+  background-color: green;
 }
 
 #center {
@@ -67,13 +69,24 @@ body {
 
 #right {
   border-left: dashed 1px;
+  background-color: red;
 }
 
+#allheader {
+	border-bottom: dashed 1px;
+}
 
 #contentheader {
   border-bottom: dashed 1px;
+  background-color: lightblue;
+}
+
+#contentfooter {
+  border-top: dashed 1px;
+  background-color: lightblue;
 }
 
 #footer {
   border-top: dashed 1px;
+  background-color: gray;
 }

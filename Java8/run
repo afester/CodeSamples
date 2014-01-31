@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ -z "${ANT_HOME}" ] ; then
+    echo "ANT_HOME is not set!"
+    exit 1
+fi
+if [ -z "${JAVA_HOME}" ] ; then
+    echo "JAVA_HOME is not set!"
+    exit 1
+fi
+
+echo "ANT_HOME: ${ANT_HOME}"
+echo "JAVA_HOME: ${JAVA_HOME}"
+ANT="${ANT_HOME}"/bin/ant
+echo "ANT: ${ANT}"
+echo "-------------------------------"
+
+"${ANT}"
