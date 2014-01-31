@@ -1,0 +1,3 @@
+#!/bin/bash
+
+xmllint -schema Sample.xsd Sample.xml | nl
