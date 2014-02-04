@@ -1689,3 +1689,116 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
 
         number = 0
         number = add(number, 1, 3)
+
+
+
+    def folderTree(self, folders, indent = 0):
+        """Displays all available folders in a tree structure.
+
+        Keyword arguments:
+        folders    --  The current Folders iterator
+        indent     --  The current indent level
+        """
+        prefix = ' ' * (indent*2)
+        i = 0
+        for folder in folders:
+            self.out.writelnColor(Qt.yellow, "{}{}. {} ({})".format(prefix, i, folder.Name, folder.DefaultItemType))
+            self.folderTree(folder.Folders, indent + 1)
+            i = i + 1
+
+
+    def findFolder(self, folders, searchPath, level=0):
+        """Find a folder by following a given  folder path.
+
+        Keyword arguments:
+        folders    --  The Folders iterator
+        searchPath --  The search path - a string array with the folder names 
+        level      --  The current search level
+        """
+        for folder in folders:
+            if folder.Name == searchPath[level]:
+                if level < len(searchPath)-1:
+                    # Search sub folder
+                    folder = self.findFolder(folder.folders, searchPath, level+1)
+                return folder
+        return None
+
+
+    def printCalendar(self, folder):
+        """Prints calendar events during the next 30 days.
+
+        Keyword arguments:
+        folder    --  The Calendar folder to use.
+        """
+        import datetime
+        
+        # Get the AppointmentItem objects
+        # http://msdn.microsoft.com/en-us/library/office/aa210899(v=office.11).aspx
+        items = folder.Items
+
+        # Restrict to items in the next 30 days
+        begin = datetime.date.today()
+        end = begin + datetime.timedelta(days = 30);
+        restriction = "[Start] >= '" + begin.strftime("%m/%d/%Y") + "' AND [End] <= '" +end.strftime("%m/%d/%Y") + "'"
+        restrictedItems = items.Restrict(restriction)
+
+        # Print items
+        for appointmentItem in restrictedItems:
+            self.out.writelnColor(Qt.yellow, "{0} Start: {1}, End: {2}, Organizer: {3}".format(
+                  appointmentItem.Subject, appointmentItem.Start, 
+                  appointmentItem.End, appointmentItem.Organizer))
+
+
+    @Sample("Win32 COM")
+    def sample107(self):
+
+        import win32com.client
+
+        # get Outlook application object
+        Outlook = win32com.client.Dispatch("Outlook.Application")
+        self.out.writelnColor(Qt.yellow, "Outlook version: {}".format(Outlook.Version))
+        self.out.writelnColor(Qt.yellow, "Default profile name: {}".format(Outlook.DefaultProfileName))
+
+        # get the Namespace / Session object
+        # namespace = Outlook.GetNamespace("MAPI") 
+        namespace = Outlook.Session         # identical to GetNameSpace("MAPI") (starting with Outlook 98)
+        self.out.writelnColor(Qt.yellow, "Current profile name: {}".format(namespace.CurrentProfileName))
+
+        # Dump all available address lists
+        self.out.writelnColor(Qt.yellow, "\nAddress lists")
+        self.out.writelnColor(Qt.yellow, "-------------")
+        addrLists = namespace.AddressLists
+        i = 0
+        for al in addrLists:
+            self.out.writelnColor(Qt.yellow, "{}. {}".format(i, al))
+            i = i + 1
+
+        # Show tree of all available folders
+        self.out.writelnColor(Qt.yellow, "\nFolders")
+        self.out.writelnColor(Qt.yellow, "-------")
+        self.folderTree(namespace.Folders)
+
+        # get own calendar and print all entries in the next 30 days
+        self.out.writelnColor(Qt.yellow, "\nMy calendar")
+        self.out.writelnColor(Qt.yellow, "---------------")
+        myCalendar = namespace.GetDefaultFolder(9)
+        self.printCalendar(myCalendar)
+
+        # get shared calendar and print all entries in the next 30 days
+        # Should work, but could not get it to work actually - "Object not found" ...
+        # recipient = namespace.createRecipient("Change Me")
+        # self.out.writelnColor(Qt.yellow, recipient)
+        # resolved = recipient.Resolve()
+        # self.out.writelnColor(Qt.yellow, resolved)
+        # self.out.writelnColor(Qt.yellow, recipient.resolved)
+        # sharedCalendar = namespace.GetSharedDefaultFolder(recipient, 9)
+        # self.out.writelnColor(Qt.yellow, sharedCalendar)
+        # self.printCalendar(sharedCalendar)
+
+        # get shared calendar through folder tree
+        self.out.writelnColor(Qt.yellow, "\nShared calendar")
+        self.out.writelnColor(Qt.yellow, "---------------")
+        sharedCalendar = self.findFolder(namespace.Folders, ["Some shared workspace", "Calendar"])
+        self.out.writelnColor(Qt.yellow, sharedCalendar)
+        self.out.writelnColor(Qt.yellow, sharedCalendar.Parent)
+        self.printCalendar(sharedCalendar)
