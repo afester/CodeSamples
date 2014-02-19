@@ -1,0 +1,71 @@
+@CHARSET "ISO-8859-1";
+
+/* ==================== Layout ========================== */
+
+html {
+  width:100%;
+}
+
+#page {
+   min-width: 800px;
+}
+
+/* column container */
+#columns{
+  display: table;
+  width: 100%;
+}
+
+/* all immediate <div> children of #columns are table cells */ 
+#columns > div{
+  display: table-cell;
+}
+
+/* container with central component and right fixed column */
+#centertable {
+    display: table;
+}
+#centertable > div{
+  display: table-cell;
+}
+
+#left {
+  width: 100px;
+}
+
+#right {
+  width:100px;
+}
+
+
+/* The whole page - all content is wrapped by this div */
+#page {
+  border: dashed 1px;
+}
+
+#header, #footer {
+  background-color: yellow;
+}
+
+#mainheader, #mainfooter {
+  background-color: lightgreen;
+}
+
+#contentheader, #contentfooter {
+  background-color: lightblue;
+}
+
+#left {
+  border: dashed 1px;
+  background-color: green;
+}
+
+#center {
+  border: dashed 2px red;
+}
+
+#right {
+  border: dashed 1px;
+  background-color: red;
+}
+
