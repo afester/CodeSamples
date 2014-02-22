@@ -37,3 +37,13 @@ ORDER BY City.Name;
 SELECT Person.City, COUNT(*)
 FROM Person
 GROUP BY Person.City;
+
+-- Select all Persons with their cities, including Persons which do not have a 
+-- city and print a useful value instead of null
+SELECT Person.Firstname, Person.Name, Person.Email,
+       CASE 
+           WHEN Person.City IS NULL THEN 'N/A' 
+           ELSE City.Name 
+       END AS City
+FROM Person
+LEFT OUTER JOIN City ON Person.City = City.Id;

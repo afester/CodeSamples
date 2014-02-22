@@ -1557,3 +1557,248 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
 
         for line in s.getvalue().split("\n"):
             self.out.writelnColor(Qt.white, "  " + line)
+
+    @Sample("Matrix", True)
+    def sample105(self):
+
+        class Matrix:
+            def __init__(self, values = None, w = 0, h = 0):
+                if values is None:
+                    # Generate a null matrif of size w * h
+                    self.matrix = [ ([0] * h) for n in range(w)]
+                else:
+                    self.matrix = copy.deepcopy(values)
+
+            def __str__(self):
+                """Returns the string form of an object"""
+                result = ""
+                for row in self.matrix:
+                    for e in row:
+                        result = result + " {:3}".format(e)
+                    result = result + "\n"
+
+                return result 
+
+            def det(self):
+                if len(self.matrix) != len(self.matrix[0]):
+                    raise ValueError("Can not calculate determinant of non-square matrix")
+                if len(self.matrix) == 1:
+                    return self.matrix[0][0]
+                if len(self.matrix) == 2:
+                    return self.matrix[0][0] * self.matrix[1][1] - self.matrix[0][1] * self.matrix[1][0]    
+                if len(self.matrix) == 3:
+                    return self.matrix[0][0] * self.matrix[1][1] * self.matrix[2][2] \
+                         + self.matrix[0][1] * self.matrix[1][2] * self.matrix[2][0] \
+                         + self.matrix[0][2] * self.matrix[1][0] * self.matrix[2][1] \
+                         - self.matrix[0][2] * self.matrix[1][1] * self.matrix[2][0] \
+                         - self.matrix[0][1] * self.matrix[1][0] * self.matrix[2][2] \
+                         - self.matrix[0][0] * self.matrix[1][2] * self.matrix[2][1]
+                raise ValueError("Matrix is too large - only 1, 2, or 3 columns/rows currently supported")
+
+        self.out.writelnColor(Qt.lightGray, 'Matrix sample:')
+
+        m = Matrix(w = 4, h = 4)
+        self.out.writeln("{}".format(m))
+
+        m = Matrix([[11, 0, 0, 0],
+                    [11, 11, 0, 0],
+                    [11, 11, 11, 0],
+                    [11, 11, 11, 11]])
+        self.out.writeln("{}".format(m))
+
+        m = Matrix([[1, 2, 3],
+                    [3, 4, 5],
+                    [6, 7, 8],
+                    [9, 0, 1]])
+        try:
+            self.out.writeln("{}".format(m.det()))
+        except ValueError as ve:
+            self.out.writelnColor(Qt.red, "  {}".format(ve))
+
+        m = Matrix([[1, 2, 3, 0],
+                    [3, 4, 5, 1],
+                    [6, 7, 8, 2],
+                    [9, 0, 1, 3]])
+        try:
+            self.out.writeln("{}".format(m.det()))
+        except ValueError as ve:
+            self.out.writelnColor(Qt.red, "  {}".format(ve))
+
+        m = Matrix([[42]])
+        self.out.writeln("{}".format(m.det()))
+
+        m = Matrix([[1, 2],
+                    [3, 4]])
+        self.out.writeln("{}".format(m.det()))
+
+        m = Matrix([[0, 1, 2],
+                    [3, 2, 1],
+                    [1, 1, 0]])
+        self.out.writeln("{}".format(m.det()))
+
+        x1, y1 = (0, 0)
+        x2, y2 = (4, 0)
+        x3, y3 = (2, 4)
+        triangle = Matrix([[1, x1, y1],
+                           [1, x2, y2],
+                           [1, x3, y3]])
+        area = 0.5 * triangle.det()
+        self.out.writeln("  triangle area: {}".format(area))
+
+
+    @Sample("Combinations")
+    def sample106(self):
+        self.out.writelnColor(Qt.lightGray, 'Permutations sample:')
+        self.out.writelnColor(Qt.lightGray, 'Given a list L, calculate all possible permutations of its elements.')
+
+        # From http://stackoverflow.com/questions/104420/how-to-generate-all-permutations-of-a-list-in-python?rq=1
+        def all_perms(elements):
+            self.out.writelnColor(Qt.red, "  all_perms({})".format(elements))
+            # function is called recursively for each right sub list and 
+            # creates a generator for all elements of this sub list.
+            # if the input is [1, 2, 3], then the function is called three times:
+            # [1, 2, 3]    (initial call) 
+            # [2, 3]       (first recursion)
+            # [3]          (second recursion)
+            if len(elements) <=1:
+                yield elements
+            else:
+                for perm in all_perms(elements[1:]):    # recursively create new generator for right sub list
+                    #  perm contains the next permutation of the sub list
+                    self.out.writelnColor(Qt.red, "    perm = {}".format(perm))
+
+                    # insert the first element inside all positions of the current sub permutation
+                    for i in range(len(elements)):
+                        yield perm[:i] + elements[0:1] + perm[i:]
+
+        L = ['A', 'B', 'C']
+        self.out.writelnColor(Qt.yellow, "  L = {}".format(L))
+        for e in all_perms(L):
+            self.out.writeln("    {}".format(e))
+
+        L = [1, 2, 3, 4]
+        self.out.writelnColor(Qt.yellow, "  L = {}".format(L))
+        for e in all_perms(L):
+            self.out.writeln("    {}".format(e))
+
+        self.out.writelnColor(Qt.lightGray, 'Generation sample:')
+        self.out.writelnColor(Qt.lightGray, 'Given a list L, calculate all possible permutations of its elements.')
+
+        def add(sum1, sum2, base):
+            pass
+
+        number = 0
+        number = add(number, 1, 3)
+
+
+
+    def folderTree(self, folders, indent = 0):
+        """Displays all available folders in a tree structure.
+
+        Keyword arguments:
+        folders    --  The current Folders iterator
+        indent     --  The current indent level
+        """
+        prefix = ' ' * (indent*2)
+        i = 0
+        for folder in folders:
+            self.out.writelnColor(Qt.yellow, "{}{}. {} ({})".format(prefix, i, folder.Name, folder.DefaultItemType))
+            self.folderTree(folder.Folders, indent + 1)
+            i = i + 1
+
+
+    def findFolder(self, folders, searchPath, level=0):
+        """Find a folder by following a given  folder path.
+
+        Keyword arguments:
+        folders    --  The Folders iterator
+        searchPath --  The search path - a string array with the folder names 
+        level      --  The current search level
+        """
+        for folder in folders:
+            if folder.Name == searchPath[level]:
+                if level < len(searchPath)-1:
+                    # Search sub folder
+                    folder = self.findFolder(folder.folders, searchPath, level+1)
+                return folder
+        return None
+
+
+    def printCalendar(self, folder):
+        """Prints calendar events during the next 30 days.
+
+        Keyword arguments:
+        folder    --  The Calendar folder to use.
+        """
+        import datetime
+        
+        # Get the AppointmentItem objects
+        # http://msdn.microsoft.com/en-us/library/office/aa210899(v=office.11).aspx
+        items = folder.Items
+
+        # Restrict to items in the next 30 days
+        begin = datetime.date.today()
+        end = begin + datetime.timedelta(days = 30);
+        restriction = "[Start] >= '" + begin.strftime("%m/%d/%Y") + "' AND [End] <= '" +end.strftime("%m/%d/%Y") + "'"
+        restrictedItems = items.Restrict(restriction)
+
+        # Print items
+        for appointmentItem in restrictedItems:
+            self.out.writelnColor(Qt.yellow, "{0} Start: {1}, End: {2}, Organizer: {3}".format(
+                  appointmentItem.Subject, appointmentItem.Start, 
+                  appointmentItem.End, appointmentItem.Organizer))
+
+
+    @Sample("Win32 COM")
+    def sample107(self):
+
+        import win32com.client
+
+        # get Outlook application object
+        Outlook = win32com.client.Dispatch("Outlook.Application")
+        self.out.writelnColor(Qt.yellow, "Outlook version: {}".format(Outlook.Version))
+        self.out.writelnColor(Qt.yellow, "Default profile name: {}".format(Outlook.DefaultProfileName))
+
+        # get the Namespace / Session object
+        # namespace = Outlook.GetNamespace("MAPI") 
+        namespace = Outlook.Session         # identical to GetNameSpace("MAPI") (starting with Outlook 98)
+        self.out.writelnColor(Qt.yellow, "Current profile name: {}".format(namespace.CurrentProfileName))
+
+        # Dump all available address lists
+        self.out.writelnColor(Qt.yellow, "\nAddress lists")
+        self.out.writelnColor(Qt.yellow, "-------------")
+        addrLists = namespace.AddressLists
+        i = 0
+        for al in addrLists:
+            self.out.writelnColor(Qt.yellow, "{}. {}".format(i, al))
+            i = i + 1
+
+        # Show tree of all available folders
+        self.out.writelnColor(Qt.yellow, "\nFolders")
+        self.out.writelnColor(Qt.yellow, "-------")
+        self.folderTree(namespace.Folders)
+
+        # get own calendar and print all entries in the next 30 days
+        self.out.writelnColor(Qt.yellow, "\nMy calendar")
+        self.out.writelnColor(Qt.yellow, "---------------")
+        myCalendar = namespace.GetDefaultFolder(9)
+        self.printCalendar(myCalendar)
+
+        # get shared calendar and print all entries in the next 30 days
+        # Should work, but could not get it to work actually - "Object not found" ...
+        # recipient = namespace.createRecipient("Change Me")
+        # self.out.writelnColor(Qt.yellow, recipient)
+        # resolved = recipient.Resolve()
+        # self.out.writelnColor(Qt.yellow, resolved)
+        # self.out.writelnColor(Qt.yellow, recipient.resolved)
+        # sharedCalendar = namespace.GetSharedDefaultFolder(recipient, 9)
+        # self.out.writelnColor(Qt.yellow, sharedCalendar)
+        # self.printCalendar(sharedCalendar)
+
+        # get shared calendar through folder tree
+        self.out.writelnColor(Qt.yellow, "\nShared calendar")
+        self.out.writelnColor(Qt.yellow, "---------------")
+        sharedCalendar = self.findFolder(namespace.Folders, ["Some shared workspace", "Calendar"])
+        self.out.writelnColor(Qt.yellow, sharedCalendar)
+        self.out.writelnColor(Qt.yellow, sharedCalendar.Parent)
+        self.printCalendar(sharedCalendar)

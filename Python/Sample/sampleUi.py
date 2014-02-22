@@ -3,7 +3,7 @@
 import sys
 import traceback
 
-from PySide.QtCore import Qt
+from PySide.QtCore import Qt, qVersion
 from PySide.QtGui import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget
 from PySide.QtGui import QVBoxLayout, QGridLayout, QPalette, QTextCursor
 
@@ -72,6 +72,15 @@ class MainWindow(QMainWindow):
         # NOTE: we must be sure not to set the excepthook BEFORE we an actually
         # log something!! 
         sys.excepthook = self.logException
+
+        self.writelnColor(Qt.magenta, 
+                          "Python version: {0}.{1}.{2} ({3})".format(
+                              sys.version_info[0], 
+                              sys.version_info[1], 
+                              sys.version_info[2], 
+                              sys.version_info[3]))
+        self.writelnColor(Qt.magenta, 
+                          "Qt version    : {0}".format(qVersion()))
 
 
     def logException(self, exctype, value, tb):

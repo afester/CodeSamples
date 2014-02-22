@@ -1,0 +1,6 @@
+Python samples project - Requires Python 3.3
+
+Start with:
+
+$ export PYTHONPATH=src
+$ python sampleUi.py

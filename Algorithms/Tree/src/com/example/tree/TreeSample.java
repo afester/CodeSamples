@@ -40,15 +40,20 @@ public class TreeSample {
    public void run()  {
       // Create a sample tree
       TreeNode<String> tree = createTree(3, 3);
-
-//      int idx = tree.indexOf(new TreeNode(3, "Node.2.3.1"));
-//      tree.add(idx + 1, new TreeNode(4, "Node.2.3.1.2", true));
-//      tree.add(idx + 1, new TreeNode(4, "Node.2.3.1.1", false));
+      
+      TreeNode[] path = {new TreeNode<String>("Node.2"), 
+                         new TreeNode<String>("Node.2.3"),
+                         new TreeNode<String>("Node.2.3.1")};
+      TreeNode<String> node = tree.findNode(path);
+      System.err.println(node.getPathString());
+      for (int i = 0;  i < 500;  i++) {
+         node.addChildren(new TreeNode<String>("Node.2.3.1." + i));
+      }
 
       // visualize the tree using plain old ASCII
       TreeAsciiRenderer tv = new TreeAsciiRenderer();
+      tv.renderHierarchical(tree);
       tv.renderFlat(tree);
-      // tv.renderHierarchical(tree);
    }
 
 

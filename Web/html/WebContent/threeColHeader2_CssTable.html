@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+    <link rel="stylesheet" type="text/css" href="threeColHeader2_CssTable.css">
+    <title>3 column layout with flexible central column and various headers and footers, based on CSS table display</title>
+  </head>
+
+  <body>
+    <div id="page">
+
+      <!-- Page header spanning all columns  -->
+      <div id="header">Page Header</div>
+
+      <div id="columns">
+  
+        <!-- left column (fixed) -->
+        <div id="left">Left column</div>
+  
+        <!-- large right column (resizable) -->
+        <div id="center">
+
+          <!-- header spanning whole right column -->
+          <div id="mainheader">Main Header</div>
+
+          <div id="centertable">
+
+            <div id="wrapcontent">
+
+              <div id="contentheader">Content header</div>
+
+              <div id="content">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed 
+diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita 
+kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum 
+dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt
+ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et 
+justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est
+Lorem ipsum dolor sit amet.
+              </div>
+
+              <div id="contentfooter">Content footer</div>
+
+            </div>
+
+            <!-- right column (fixed) -->
+            <div id="right">Right column</div>
+          </div>
+
+          <!-- footer spanning whole right column -->
+          <div id="mainfooter">Main Footer</div>
+
+        </div>
+
+      </div>
+      
+      <!-- Page footer spanning all columns  -->
+      <div id="footer">Page Footer</div>
+
+    </div>
+
+  </body>
+</html>

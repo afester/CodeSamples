@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+    <link rel="stylesheet" type="text/css" href="threeColHeader.css">
+    <link rel="stylesheet" type="text/css" href="table.css">
+    <title>3 column layout with flexible content column</title>
+  </head>
+
+  <body>
+    <div id="page">
+
+      <div id="header">HTML table samples</div>
+      <div id="wrap">
+
+        <!-- left column (fixed) -->
+        <div id="left">Left column</div>
+
+        <!-- right column (fixed) -->
+        <div id="right">Right column</div>
+
+        <!-- middle column (resizable) -->
+        <div id="center">
+          <div id="contentheader">Simple HTML table</div>
+          <div id="content">
+
+            <table class="sampleTable">
+            <!--  <colgroup> allows to apply styles to a table in terms of columns
+                  so that the styles do not need to be defined for each and every <td>
+                  element. If a class is still attached to <td>, this takes precedence 
+                  (see last row). -->
+              <colgroup>
+                <col span="2" style="background-color:green">
+                <col style="background-color:yellow">
+              </colgroup>
+
+              <tr><td>1.1</td><td>1.2</td><td>1.3</td></tr>
+              <tr><td>2.1</td><td>2.2</td><td>2.3</td></tr>
+              <tr><td>3.1</td><td>3.2</td><td>3.3</td></tr>
+              <tr><td class="sampleCell">4.1</td><td>4.2</td><td class="sampleCell">4.3</td></tr>
+            </table>
+
+            <hr/>
+
+            <table class="sampleTable">
+              <colgroup span="2" style="background-color:blue">
+              </colgroup>
+
+              <tr><td>1.1</td><td>1.2</td><td>1.3</td></tr>
+              <tr><td>2.1</td><td>2.2</td><td>2.3</td></tr>
+              <tr><td>3.1</td><td>3.2</td><td>3.3</td></tr>
+            </table>
+
+          </div>
+        </div>
+
+      </div>
+
+      <div id="footer">Page Footer</div>
+
+    </div>
+
+  </body>
+</html>
