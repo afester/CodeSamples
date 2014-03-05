@@ -6,8 +6,6 @@
 TEMPLATE = app
 QT = gui core widgets
 
-CONFIG += qt warn_on debug
+CONFIG += qt warn_on debug console
 
-FORMS = GraphicsView.ui
-HEADERS = GraphicsView.h
-SOURCES = GraphicsView.cpp main.cpp
+SOURCES = GraphicsView.cpp
