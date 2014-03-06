@@ -12,6 +12,7 @@
 #include <QMainWindow>
 #include <QGraphicsView>
 #include <QGraphicsItem>
+#include <QVBoxLayout>
 
 class GraphicsItem : public QGraphicsRectItem {
 public:
@@ -22,13 +23,25 @@ protected:
 };
 
 class GraphicsView : public QGraphicsView {
+	Q_OBJECT;
+
     QColor viewColor;
+
+protected:
+    void drawBackground(QPainter * painter, const QRectF & rect);
+
+    void paintEvent(QPaintEvent * event);
+
+    void setupViewport ( QWidget * viewport );
 
 public:
     GraphicsView(QWidget* parent);
 
     void setColor(const QColor& color);
     QColor getColor();
+
+public slots:
+    void setZoom(int idx);
 };
 
 class Ui_MainWindow;
@@ -36,11 +49,17 @@ class Ui_MainWindow;
 class MainWindow : public QMainWindow {
         Q_OBJECT
 
+        QAction *actionX;
+        QWidget *centralwidget;
+        GraphicsView *view;
+        QMenuBar *menubar;
+        QStatusBar *statusbar;
+        QToolBar *toolBar;
+
 public:
 
         MainWindow(QWidget* parent);
         ~MainWindow();
 
-        Ui_MainWindow* ui;
         QGraphicsScene* scene;
 };
