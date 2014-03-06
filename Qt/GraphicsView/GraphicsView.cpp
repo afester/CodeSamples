@@ -28,7 +28,7 @@ int c = 0;
 
 GraphicsView::GraphicsView(QWidget* parent) : QGraphicsView(parent) {
 	setRenderHint(QPainter::Antialiasing);
-    setViewportMargins(30, 30, 0, 0);
+ //   setViewportMargins(30, 30, 0, 0);
 
 	// setAlignment(Qt::AlignTop);
 }
@@ -80,6 +80,14 @@ void GraphicsView::setZoom(int idx) {
 		scale.scale(values[idx], values[idx]);
 		setTransform(scale);
 	}
+
+	switch(idx) {
+		case 0 : viewport()->setMaximumSize(100, 150); break;
+		case 1 : viewport()->setMaximumSize(200, 300); break;
+		case 2 : viewport()->setMaximumSize(400, 600); break;
+		case 3 : viewport()->setMaximumSize(800, 1200); break;
+	}
+	updateGeometry();
 }
 
 void GraphicsView::setupViewport ( QWidget * viewport ) {
@@ -136,32 +144,57 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     setObjectName(QStringLiteral("MainWindow"));
-    resize(401, 518);
+    resize(640, 480);
 
     actionX = new QAction(this);
     actionX->setObjectName(QStringLiteral("actionX"));
 
-    centralwidget = new QWidget(this);
-    centralwidget->setAutoFillBackground(true);
-    centralwidget->setPalette(red);
+    centralwidget = new QWidget();
 
+    QFrame* graphicsWidget = new QFrame(centralwidget);
+
+    QGridLayout* ml = new QGridLayout(centralwidget);
+    ml->setRowStretch(0, 1);
+    ml->setMargin(0);
+    ml->setHorizontalSpacing(0);
+    ml->setVerticalSpacing(0);
+
+    ml->setRowStretch(2, 1);
+    ml->setColumnStretch(0, 1);
+    ml->setColumnStretch(2, 1);
+    ml->addWidget(new QWidget(), 0, 1);
+    ml->addWidget(new QWidget(), 1, 0);
+    ml->addWidget(new QWidget(), 1, 2);
+    ml->addWidget(new QWidget(), 2, 1);
+    ml->addWidget(graphicsWidget, 1, 1);
+    centralwidget->setLayout(ml);
+
+	QPalette palette;
+	palette.setColor(QPalette::Foreground, QColor(0xa0, 0xa0, 0xa0));
+	graphicsWidget->setPalette(palette);
+
+    graphicsWidget->setFrameStyle(QFrame::Box);
+    QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect(graphicsWidget);
+    shadow->setBlurRadius(20);
+    shadow->setColor(QColor(0xa0, 0xa0, 0xa0));
+    graphicsWidget->setGraphicsEffect(shadow);
+    graphicsWidget->setAutoFillBackground(true);
 
     QGridLayout* layout = new QGridLayout();
-    centralwidget->setLayout(layout);
+    graphicsWidget->setLayout(layout);
 
-   // layout->setContentsMargins(10, 10, 10, 10);
     layout->setMargin(0);
     layout->setHorizontalSpacing(0);
     layout->setVerticalSpacing(0);
-    centralwidget->setObjectName(QStringLiteral("centralwidget"));
+    graphicsWidget->setObjectName(QStringLiteral("centralwidget"));
 
-    QWidget* topHeader = new QWidget(centralwidget);
+    QWidget* topHeader = new QWidget(graphicsWidget);
     topHeader->setFixedHeight(30);
     topHeader->setPalette(green);
     topHeader->setAutoFillBackground(true);
     topHeader->setMaximumWidth(430);
 
-    QWidget* leftHeader = new QWidget(centralwidget);
+    QWidget* leftHeader = new QWidget(graphicsWidget);
     leftHeader->setFixedWidth(30);
     leftHeader->setPalette(green);
     leftHeader->setAutoFillBackground(true);
@@ -171,13 +204,15 @@ MainWindow::MainWindow(QWidget *parent) :
     vbox->addWidget(leftHeader, 1);
     vbox->addStretch(0);
 
-    view = new GraphicsView(centralwidget);
+    view = new GraphicsView(graphicsWidget);
     view->setObjectName(QStringLiteral("view"));
 
     layout->addWidget(topHeader, 0, 1);
     layout->addLayout(vbox, 1, 0);
     // layout->addWidget(leftHeader, 1, 0);
     layout->addWidget(view, 1, 1);
+
+/*******************************/
 
     setCentralWidget(centralwidget);
 
@@ -247,6 +282,9 @@ MainWindow::MainWindow(QWidget *parent) :
     scene->setSceneRect(0, 0, 400, 600);
     view->viewport()->setMaximumSize(400, 600);
 
+ //   view->setMaximumSize(440, 640);
+
+/*
     QWidget* topRuler = new QWidget(view);
     topRuler->setPalette(yellow);
     topRuler->setAutoFillBackground(true);
@@ -260,7 +298,7 @@ MainWindow::MainWindow(QWidget *parent) :
     leftRuler->setFixedWidth(30);
     leftRuler->setFixedHeight(600);
     leftRuler->move(0, 30);
-
+*/
     GraphicsItem* item = new GraphicsItem(10, 10, 50, 50);
     scene->addItem(item);
     item = new GraphicsItem(0, 0, 5, 5);
