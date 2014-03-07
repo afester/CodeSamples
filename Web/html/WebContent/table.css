@@ -1,0 +1,52 @@
+@CHARSET "ISO-8859-1";
+
+body {
+}
+
+
+/* The whole page - all content is wrapped by this div */
+#page {
+  border: solid 1px;
+}
+
+#header {
+  background-color: #e0e0e0;
+}
+
+#left {
+  width : 200px;
+  border-right: dashed 1px;
+}
+
+#center {
+}
+
+#right {
+  border-left: dashed 1px;
+}
+
+
+#contentheader {
+  border-bottom: dashed 1px;
+}
+
+#content {
+  padding: 10px;	
+}
+
+#footer {
+  border-top: dashed 1px;
+}
+
+.sampleTable {
+  background-color: red;
+  border-spacing: 1px;
+}
+
+.sampleCell {
+  background-color: white;
+}
+
+col.first {
+  background-color: yellow;
+}

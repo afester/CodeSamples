@@ -65,6 +65,42 @@ public class TreeNode <T> {
 
 
    /**
+    * Searches a specific node in the tree through its path.
+    * 
+    * @param path  An array of TreeNodes which make up the path to the
+    *              node which is searched.
+    * @param level The current search level.
+    * @return The node which was found at the given level, or <code>null</code> 
+    *         if no child node was found
+    */
+   private TreeNode<T> searchSubtree(TreeNode<T>[] path, int level) {
+      for (TreeNode<T> node : getChildren()) {
+         if (node.equals(path[level])) {
+            TreeNode<T> result = node;
+            if (level < path.length-1) {
+               result = node.searchSubtree(path, level + 1);
+            }
+            return result; 
+         }
+      }
+      return null;
+   }
+
+   
+   /**
+    * Searches for a node along a given path.
+    * 
+    * @param  path The path to the node which is to be found or <code>null</code>
+    *              if the path does not exist.
+    * 
+    * @return The node at the given path.
+    */
+   public TreeNode<T> findNode(TreeNode<T>[] path) {
+      return searchSubtree(path, 0);
+   }
+
+   
+   /**
     * Adds a child node to this tree node.
     * 
     * @param child The child node to add.
@@ -112,7 +148,7 @@ public class TreeNode <T> {
     * @return The path to the root node as a array of TreeNode objects.
     */
    public TreeNode<?>[] getPath() {
-      TreeNode<?>[] result = new TreeNode<?>[getLevel()];
+      TreeNode<?>[] result = new TreeNode<?>[getLevel() + 1];
 
       int i = 0;
       TreeNode<T> node = this;
@@ -125,7 +161,45 @@ public class TreeNode <T> {
       return result;
    }
 
-   
+
+   /**
+    * @return A hash code for this TreeNode. Only the content is regarded
+    *         for calculating the hash code, since two nodes are treated equal 
+    *         when their content objects are equal.
+    */
+   @Override
+   public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((content == null) ? 0 : content.hashCode());
+      return result;
+   }
+
+
+   /**
+   * @return <code>true</code> if this TreeNode is equal to another one, 
+   *         <code>false</code> otherwise.
+   *         Only the node content is regarded when checking for equality,
+   *         since two nodes are treated equal when their content objects are equal.
+   */
+   @Override
+   public boolean equals(Object obj) {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      TreeNode other = (TreeNode) obj;
+      if (content == null) {
+         if (other.content != null)
+            return false;
+      } else if (!content.equals(other.content))
+         return false;
+      return true;
+   }
+
+
    private void setParent(TreeNode<T> parent) {
       this.parent = parent;  
    }

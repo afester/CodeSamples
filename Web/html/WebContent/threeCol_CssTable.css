@@ -1,0 +1,59 @@
+@CHARSET "ISO-8859-1";
+
+/* ==================== Layout ========================== */
+
+body, html {
+  width:100%;
+}
+
+#wrapper{
+  display: table;
+  width: 100%;
+}
+
+#wrapper > div{
+  display: table-cell;
+}
+
+#left {
+  width: 100px;
+  min-width:100px;
+}
+
+#center {
+  min-width:400px;
+}
+
+#right {
+  width:100px;
+  min-width:100px;
+}
+
+
+/* ==================== Style ========================== */
+
+body {
+}
+
+
+/* The whole page - all content is wrapped by this div */
+#page {
+    border: dashed 1px;
+}
+
+#left {
+  width : 200px;
+  min-width: 200px;
+
+  border: dashed 1px;
+  background-color: green;
+}
+
+#center {
+  border: dashed 2px red;
+}
+
+#right {
+  border: dashed 1px;
+  background-color: red;
+}

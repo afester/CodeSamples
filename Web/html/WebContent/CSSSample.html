@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+    <title>Some CSS samples</title>
+    
+<style>
+#page > p {          /* Selects immediate <p> children of #page */
+  color: green;
+}
+
+#page p {            /* Selects all <p> nodes inside #page */
+  background-color: red;
+}
+
+#page+p {            /* Selects all <p> nodes immediately following #page */
+  background-color: yellow;
+}
+
+</style>
+
+  </head>
+
+  <body>
+    <div id="page">
+        <p>Paragraph as child of #page</p>
+        
+        <div id="subsection">
+            <p>Paragraph as child of subsection</p>
+        </div>    
+
+    </div>
+
+    <p>Paragraph immediately after #page</p>
+
+  </body>
+</html>
