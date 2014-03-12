@@ -1,0 +1,30 @@
+#!/bin/bash
+
+usage() {
+    echo "usage: $0 date"
+    echo
+    echo "  Lists all files together with their size"
+    echo "  below the current directory tree which"
+    echo "  have been modified after the given date."
+    echo
+    echo "  date has the format YYYY-MM-DD [HH:MM:SS]"
+}
+
+if [ $# -ne 1 ] ; then
+    usage
+    exit 1
+fi
+
+REFDATE=$1
+COUNT=0
+TOTALSIZE=0
+
+while read f
+do
+  FILENAME=`echo $f | sed -e "s,^./,,g"`
+  SIZE=`stat --format="%s" "${FILENAME}"`
+  (( COUNT++ ))
+  TOTALSIZE=$((TOTALSIZE + SIZE))
+  echo "$FILENAME $SIZE"
+done < <( find . -type f -newermt ${REFDATE}  )
+echo "${COUNT} files with total size of ${TOTALSIZE}"

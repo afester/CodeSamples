@@ -1,0 +1,60 @@
+@CHARSET "ISO-8859-1";
+
+body {
+    background-color: lightgray;
+}
+
+
+/* Header row at top */
+#header {
+    background-color: #ff0000;
+
+/*    height: 50px;*/ /* will be defined by the container contents! */
+}
+
+
+/* central row containing three columns */
+#wrap {
+    background-color: #00ff00;
+    height: 100%;
+
+    overflow: hidden;   /* http://stackoverflow.com/questions/7168623/why-is-that-when-i-apply-a-margin-to-a-child-div-tag-it-affects-the-parent-div */
+}
+
+
+/* left column */
+#left {
+    background-color: #ffff00; /* Background color - especially for debugging */
+    width: 150px;              /* Width of left column */
+
+    float: left;
+    padding-bottom: 32767px !important; /* http://www.positioniseverything.net/articles/onetruelayout/equalheight.html */
+    margin-bottom: -32767px !important;
+}
+
+
+/* central content column - resizes its width according to browser width, resizes its height according to the contents */
+#content {
+    background-color: #00ffff;
+
+    overflow: hidden;   /* http://stackoverflow.com/questions/7168623/why-is-that-when-i-apply-a-margin-to-a-child-div-tag-it-affects-the-parent-div */
+}
+
+
+/* right column */
+#right {
+    background-color: #ffff00; /* Background color - especially for debugging */
+    width: 150px;              /* width of right column */
+
+    float: right; 
+    padding-bottom: 32767px !important; /* http://www.positioniseverything.net/articles/onetruelayout/equalheight.html */
+    margin-bottom: -32767px !important;
+}
+
+
+#footer {
+    background-color: #ff0000;
+
+/*    height: 50px;*/ /* will be defined by the container contents! */
+}
+
