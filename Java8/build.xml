@@ -4,7 +4,19 @@
   <property name="build" value="bin"/>
 
   <target name="run" depends="build">
-    <java classname="com.example.MethodParameters">
+    <java classname="com.example.java8.LambdaExpression">
+        <classpath>
+           <pathelement location="${build}"/>
+         </classpath>
+    </java>
+
+    <java classname="com.example.java8.MethodParameters">
+        <classpath>
+           <pathelement location="${build}"/>
+         </classpath>
+    </java>
+
+    <java classname="com.example.java8.Iterators">
         <classpath>
            <pathelement location="${build}"/>
          </classpath>
