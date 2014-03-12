@@ -3,27 +3,32 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <string.h>
 
-int main (int argc, char *argv[])
-{
+int main (int argc, char *argv[]) {
     struct dirent *dirent;
-    struct stat filestat;
     DIR* dirp;
+    struct stat filestat;
 
     if (argc != 2) {
-        printf("error");
+        printf("Usage: %s pathName\n\n", argv[0]);
         return 1;
     }
 
     if ((dirp = opendir(argv[1])) == NULL) {
-        printf("error");
+        perror("opendir");
         return 1;
     }
 
-    while ((dirent = readdir(dirp)) != NULL)
-    {
-        stat(dirent->d_name, &filestat);
-        printf("%s %d\n", dirent->d_name, dirent->d_type);    
+    while ((dirent = readdir(dirp)) != NULL) {
+        char filename[1024];  // TODO!
+        strcpy(filename, argv[1]);
+        strcat(filename, "/");
+        strcat(filename, dirent->d_name);
+        if (stat(filename, &filestat) == -1) {
+           perror("stat");
+        }
+        printf("%-6d %-6zu %s\n", dirent->d_type, filestat.st_size, dirent->d_name);
     }
 
     return 0;
