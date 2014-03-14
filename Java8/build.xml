@@ -4,7 +4,7 @@
   <property name="build" value="bin"/>
 
   <target name="run" depends="build">
-    <java classname="com.example.java8.LambdaExpression">
+<!--     <java classname="com.example.java8.LambdaExpression">
         <classpath>
            <pathelement location="${build}"/>
          </classpath>
@@ -21,10 +21,20 @@
            <pathelement location="${build}"/>
          </classpath>
     </java>
+-->
+    <java classname="com.example.java8.ParallelSort">
+        <classpath>
+           <pathelement location="${build}"/>
+         </classpath>
+    </java>
   </target>
 
   <target name="build" depends="clean">
     <mkdir dir="${build}"/>
+    <javac srcdir="../Tools/ProfileJava/src"
+           destdir="${build}">
+        <compilerarg value="-parameters"/>
+    </javac>
     <javac srcdir="${src}"
            destdir="${build}">
         <compilerarg value="-parameters"/>

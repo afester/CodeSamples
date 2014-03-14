@@ -17,11 +17,15 @@
 #include <QStatusBar>
 #include <QToolBar>
 #include <QComboBox>
+#include <QCheckBox>
 #include <QDebug>
 #include <QLabel>
 #include <QGraphicsDropShadowEffect>
+#include <QScreen>
+#include <QApplication>
 
 #include "GraphicsView.h"
+#include "LabelledComboBox.h"
 
 QLabel* debugConsole;
 int c = 0;
@@ -31,7 +35,14 @@ GraphicsView::GraphicsView(QWidget* parent) : QGraphicsView(parent) {
  //   setViewportMargins(30, 30, 0, 0);
 
 	// setAlignment(Qt::AlignTop);
+
+	QScreen *srn = QApplication::screens().at(0);
+	//xDpi = (qreal)srn->physicalDotsPerInchX();
+	//yDpi = (qreal)srn->physicalDotsPerInchY();
+	xDpi = (qreal)srn->logicalDotsPerInchX();
+	yDpi = (qreal)srn->logicalDotsPerInchY();
 }
+
 
 void GraphicsView::drawBackground(QPainter * painter, const QRectF & rect) {
 /*	QString outStr;
@@ -71,24 +82,80 @@ QColor GraphicsView::getColor() {
     return viewColor;
 }
 
+
+void GraphicsView::updateSize() {
+	QSizeF realSize = sceneSize;
+	if (landscape) {
+		realSize = QSize(sceneSize.height(), sceneSize.width());
+	}
+
+	scene()->setSceneRect(QRectF(0, 0, realSize.width(), realSize.height()));
+
+	float xScaleDPI = xDpi / 25.4;
+	float yScaleDPI = yDpi / 25.4;
+
+	float effectiveScaleX = zoomScale * xScaleDPI;
+	float effectiveScaleY = zoomScale * yScaleDPI;
+
+//	QSize viewportSize((sceneRect().width() * effectiveScaleX)  + 13,	// +1 pixel
+//			 	 	   (sceneRect().height() * effectiveScaleY) + 13);	// to overcome rounding issues
+
+	qDebug() << "DPI:" << xDpi << ", " << yDpi;
+	qDebug() << "px/mm: " << xScaleDPI << ", " << yScaleDPI;
+	qDebug() << "ZOOM SCALE:" << zoomScale;
+	qDebug() << "EFFECTIVE SCALE:" << effectiveScaleX << ", " << effectiveScaleY;
+	qDebug() << "SCENE RECT:" << sceneRect() << "/" << scene()->sceneRect();
+	QRectF scaledScene(sceneRect().x(), sceneRect().y(),
+					   sceneRect().width() * effectiveScaleX,
+					   sceneRect().height() * effectiveScaleY);
+	qDebug() << "SCALED SCENE RECT:" << scaledScene;
+	qDebug() << "SCROLLAREA MIN SIZE:" << minimumSize();
+	qDebug() << "SCROLLAREA MIN SIZE HINT:" << minimumSizeHint();
+
+//	qDebug() << "VIEWPORT SIZE:" << viewportSize;
+
+//	viewport()->setMaximumSize(viewportSize);
+
+	QTransform transform;
+	transform.scale(effectiveScaleX, effectiveScaleY);
+	setTransform(transform);
+
+	updateGeometry();
+}
+
+
 void GraphicsView::setZoom(int idx) {
 	static float values[] = {0.25, 0.5, 1.0, 2.0};
 
 	if (idx >= 0 && idx < sizeof(values)) {
-		qDebug() << values[idx];
-		QTransform scale;
-		scale.scale(values[idx], values[idx]);
-		setTransform(scale);
+		zoomScale = values[idx];
+		updateSize();
 	}
-
-	switch(idx) {
-		case 0 : viewport()->setMaximumSize(100, 150); break;
-		case 1 : viewport()->setMaximumSize(200, 300); break;
-		case 2 : viewport()->setMaximumSize(400, 600); break;
-		case 3 : viewport()->setMaximumSize(800, 1200); break;
-	}
-	updateGeometry();
 }
+
+
+void GraphicsView::setSize(int idx) {
+	static QSizeF sizes[] = {QSizeF(297.0, 420.0),  // mm (A3)
+							 QSizeF(210.0, 297.0),  // mm (A4)
+							 QSizeF(148, 210) };    // mm (A5)
+
+	if (idx >= 0 && idx < sizeof(sizes)) {
+		sceneSize = sizes[idx];
+		updateSize();
+	}
+}
+
+
+void GraphicsView::setDirection(int idx) {
+	if (idx == Qt::Checked) {
+		landscape = true;
+	} else {
+		landscape = false;
+	}
+	updateSize();
+}
+
+
 
 void GraphicsView::setupViewport ( QWidget * viewport ) {
 
@@ -192,13 +259,13 @@ MainWindow::MainWindow(QWidget *parent) :
     topHeader->setFixedHeight(30);
     topHeader->setPalette(green);
     topHeader->setAutoFillBackground(true);
-    topHeader->setMaximumWidth(430);
+//    topHeader->setMaximumWidth(430);
 
     QWidget* leftHeader = new QWidget(graphicsWidget);
     leftHeader->setFixedWidth(30);
     leftHeader->setPalette(green);
     leftHeader->setAutoFillBackground(true);
-    leftHeader->setMaximumHeight(630);
+//    leftHeader->setMaximumHeight(630);
 
     QVBoxLayout* vbox = new QVBoxLayout();
     vbox->addWidget(leftHeader, 1);
@@ -244,13 +311,28 @@ MainWindow::MainWindow(QWidget *parent) :
     debugConsole->setFixedWidth(200);
     debugConsole->show();
 
-    QComboBox* zoomWidget = new QComboBox();
-    zoomWidget->addItem("25%");
-    zoomWidget->addItem("50%");
-    zoomWidget->addItem("100%");
-    zoomWidget->addItem("200%");
+    LabelledComboBox* zoomWidget = new LabelledComboBox(toolBar, "Scale: ");
+    zoomWidget->getComboBox()->addItem("25%");
+    zoomWidget->getComboBox()->addItem("50%");
+    zoomWidget->getComboBox()->addItem("100%");
+    zoomWidget->getComboBox()->addItem("200%");
     toolBar->addWidget(zoomWidget);
-    QObject::connect(zoomWidget, SIGNAL(currentIndexChanged(int)), view, SLOT(setZoom(int)));
+    QObject::connect(zoomWidget->getComboBox(), SIGNAL(currentIndexChanged(int)),
+    				 view, SLOT(setZoom(int)));
+
+    LabelledComboBox* sizeWidget = new LabelledComboBox(toolBar, "Size: ");
+    sizeWidget->getComboBox()->addItem("DIN A3");
+    sizeWidget->getComboBox()->addItem("DIN A4");
+    sizeWidget->getComboBox()->addItem("DIN A5");
+    toolBar->addWidget(sizeWidget);
+    QObject::connect(sizeWidget->getComboBox(), SIGNAL(currentIndexChanged(int)),
+    				 view, SLOT(setSize(int)));
+
+    QCheckBox* checkbox = new QCheckBox("Landscape: ", toolBar);
+    toolBar->addWidget(checkbox);
+    QObject::connect(checkbox, SIGNAL(stateChanged(int)),
+    				 view, SLOT(setDirection(int)));
+
 
 /*******************************************/
 #if 0
@@ -279,10 +361,11 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
 
     view->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    scene->setSceneRect(0, 0, 400, 600);
-    view->viewport()->setMaximumSize(400, 600);
 
- //   view->setMaximumSize(440, 640);
+
+//    scene->setSceneRect(0, 0, 400, 600);
+//    view->viewport()->setMaximumSize(400, 600);
+//   view->setMaximumSize(440, 640);
 
 /*
     QWidget* topRuler = new QWidget(view);
@@ -312,6 +395,11 @@ MainWindow::MainWindow(QWidget *parent) :
 // sceneRect does not affect clipping! Items still paint outside the sceneRect if necessary.
 //    scene->setSceneRect(-15, -15, 260, 320);
     view->setScene(scene);
+
+    // initialize the sizes
+    view->setSize(1);					// A4
+    view->setDirection(Qt::Unchecked);	// portrait
+    view->setZoom(2);					// 100%
 
 #if 0
 /*	QVBoxLayout* vbox = new QVBoxLayout();

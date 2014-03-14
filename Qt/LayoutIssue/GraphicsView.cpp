@@ -34,9 +34,7 @@ public:
 		// create widget with fixed width of 20 px and maximum height of 200
 		QWidget* leftHeader = new ColoredWidget(Qt::blue, centralwidget);
 		leftHeader->setFixedWidth(20);
-//		leftHeader->setMaximumHeight(200);
-		leftHeader->setFixedHeight(20);
-
+		leftHeader->setMaximumHeight(200);
 		// create scroll area as main widget
 		QWidget* view = new QScrollArea(centralwidget);
 /**********************/
@@ -48,7 +46,13 @@ public:
 		view->setAutoFillBackground(true);
 /*****************/
 		layout->addWidget(topHeader,  0, 1);
+
+//		QVBoxLayout* vbox = new QVBoxLayout();
+//		vbox->addWidget(leftHeader, 1);
+//		vbox->addStretch(0);
 		layout->addWidget(leftHeader, 1, 0);
+//		layout->addLayout(vbox, 1, 0);
+
 		// layout->addWidget(leftHeader, 1, 0, Qt::AlignTop); // widget not displayed at all!
 		layout->addWidget(view, 1, 1);
 	}

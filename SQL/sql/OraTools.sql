@@ -31,3 +31,16 @@ EXCEPTION
       END IF;
 END;
 /
+
+-- Select tables from data dictionary
+SELECT table_name 
+FROM user_tables
+WHERE table_name LIKE 'MY_%'
+ORDER BY table_name;
+
+-- Select all columns for a table
+SELECT column_name, data_type, data_length, owner
+FROM   all_tab_cols
+WHERE  table_name = 'MY_TABLE'
+ORDER BY column_name;
+

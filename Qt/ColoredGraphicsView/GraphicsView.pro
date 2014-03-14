@@ -6,8 +6,8 @@
 TEMPLATE = app
 QT = gui core widgets
 
-CONFIG += qt warn_on debug console
+CONFIG += qt warn_on debug
 
 FORMS = GraphicsView.ui
-HEADERS = GraphicsView.h LabelledComboBox.h
-SOURCES = GraphicsView.cpp LabelledComboBox.cpp main.cpp
+HEADERS = GraphicsView.h
+SOURCES = GraphicsView.cpp main.cpp
