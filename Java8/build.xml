@@ -21,8 +21,14 @@
            <pathelement location="${build}"/>
          </classpath>
     </java>
--->
+
     <java classname="com.example.java8.ParallelSort">
+        <classpath>
+           <pathelement location="${build}"/>
+         </classpath>
+    </java>
+-->
+    <java classname="com.example.java8.VirtualExtensionMethods">
         <classpath>
            <pathelement location="${build}"/>
          </classpath>
