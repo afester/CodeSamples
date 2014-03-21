@@ -17,7 +17,7 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-class ClientAction implements PrivilegedAction {
+class ClientAction implements PrivilegedAction<Object> {
 
    @Override
    public Object run() {
@@ -47,7 +47,6 @@ class TextCallbackHandler implements CallbackHandler {
          try {
             return input.readLine().toCharArray();
          } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
          }
       }
@@ -129,7 +128,7 @@ public class KerberosSample {
        Subject mySubject = lc.getSubject();
        System.out.println(mySubject);
 
-       PrivilegedAction action = new ClientAction();
+       PrivilegedAction<?> action = new ClientAction();
        Subject.doAs(mySubject, action);
    }
 }
