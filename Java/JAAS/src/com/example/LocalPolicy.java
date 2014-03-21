@@ -16,7 +16,7 @@ public class LocalPolicy {
       // install a security manager - uses the policy file set through java.security.policy
       System.setSecurityManager(new SecurityManager());
 
-      // Now, we can not even read non-sensitive properties anymore.
+      // If our local.policy file allows access to os.name, we can read it
       try {
          String loginConfig = System.getProperty("os.name");
          System.err.println("Login config: " + loginConfig);

@@ -110,9 +110,18 @@ class TextCallbackHandler implements CallbackHandler {
 public class KerberosSample {
    
    public static void main(String[] args) {
+      // Load security related system properties from property file
+      Properties p = System.getProperties();
+      try {
+         p.load(new FileInputStream("security.properties"));
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+      System.setProperties(p);
+
       // set the name of our local policy file - can also be passed  
       // when launching the JVM through -D
-      System.setProperty("java.security.policy", "=local.policy");
+      System.setProperty("java.security.policy", "kerberos.policy");
 
       // install a security manager - uses the policy file set through java.security.policy
       System.setSecurityManager(new SecurityManager());
@@ -128,15 +137,6 @@ public class KerberosSample {
       }catch(AccessControlException e) {
          System.err.println("Error: " + e.getMessage());
       }
-
-      // Load security related system properties from property file
-      Properties p = System.getProperties();
-      try {
-         p.load(new FileInputStream("security.properties"));
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
-      System.setProperties(p);
 
       LoginContext lc = null;
       try {
