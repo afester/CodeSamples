@@ -2,9 +2,11 @@ package com.example;
 
 import java.io.BufferedReader;
 import java.io.Console;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.AccessControlException;
 import java.security.PrivilegedAction;
 import java.util.Properties;
 
@@ -21,7 +23,13 @@ class ClientAction implements PrivilegedAction<Object> {
 
    @Override
    public Object run() {
-      System.out.println("Executing privileged action ...");
+      System.err.println("Executing privileged action ...");
+      
+      File f = new File("login.config");
+      if (f.exists()) {
+         System.err.println("File exists, reading file ...");
+      }
+
       return null;
    }
    
@@ -102,6 +110,25 @@ class TextCallbackHandler implements CallbackHandler {
 public class KerberosSample {
    
    public static void main(String[] args) {
+      // set the name of our local policy file - can also be passed  
+      // when launching the JVM through -D
+      System.setProperty("java.security.policy", "=local.policy");
+
+      // install a security manager - uses the policy file set through java.security.policy
+      System.setSecurityManager(new SecurityManager());
+      
+      // some (non-sensitive) properties are still readable
+      String osName = System.getProperty("os.name");
+      System.err.println("OS Name: " + osName);
+
+      // Others can not be read anymore
+      try {
+         String loginConfig = System.getProperty("java.security.auth.login.config");
+         System.err.println("Login config: " + loginConfig);
+      }catch(AccessControlException e) {
+         System.err.println("Error: " + e.getMessage());
+      }
+
       // Load security related system properties from property file
       Properties p = System.getProperties();
       try {

@@ -1,0 +1,11 @@
+// Empty codeBase grants the permission to any code!
+// alternatively, codeBase "file:bin/-" could be used.
+// the last character of the code base defines the code search algorithm:
+// * trailing "/" matches all class files (not JAR files) in the specified directory (plus respective package names)
+// * trailing "/*" matches all files (both class and JAR files) contained in that directory (plus respective package names)
+// * trailing "/-" matches all files (both class and JAR files) in the directory and 
+//   recursively all files in subdirectories contained in that directory
+
+grant {
+  permission java.util.PropertyPermission "os.name", "read,write";
+};
