@@ -1,3 +1,6 @@
+# JAAS configuration properties - adjust as necessary and
+# rename the file to security.properties
+
 # Security specific properties
 java.security.auth.login.config=login.config
 
