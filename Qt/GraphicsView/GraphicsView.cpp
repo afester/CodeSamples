@@ -171,14 +171,14 @@ QSize GraphicsView::sizeHint() const {
    QSizeF baseSize = matrix().mapRect(sceneRect()).size();
    baseSize += QSizeF(frameWidth() * 2, frameWidth() * 2);
    baseSize = baseSize.boundedTo((3 * QApplication::desktop()->size()) / 4);
-
-   qDebug() << "   BASE SIZE:" << baseSize;
+   // qDebug() << "   BASE SIZE:" << baseSize;
 
    // before rounding through toSize(), add 0.5 to make sure to round upwards
+   // See https://bugreports.qt-project.org/browse/QTBUG-37702
    baseSize += QSizeF(0.5, 0.5);
 
    QSize result = baseSize.toSize();
-   qDebug() << "   RESULT:" << result;
+   // qDebug() << "   RESULT:" << result;
 
    return result;
 }
@@ -500,6 +500,69 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 #endif
 
+class ColoredWidget : public QWidget {
+public:
+    ColoredWidget(const  QColor& color, QWidget* parent) : QWidget(parent) {
+        QPalette pal;
+        QBrush brush(color);
+        brush.setStyle(Qt::SolidPattern);
+        pal.setBrush(QPalette::Active, QPalette::Window, brush);
+        setPalette(pal);
+        setAutoFillBackground(true);
+    }
+};
+
+
+
+class ScaleWidget : public QWidget {
+
+public:
+    enum Direction{Vertical, Horizontal};
+
+    ScaleWidget(QWidget* parent, GraphicsView* view, Direction dir) :
+            QWidget(parent), theView(view), direction(dir) {
+        setAutoFillBackground(true);
+
+        QPalette pal = palette();
+        pal.setBrush(QPalette::Active, QPalette::Base, Qt::white);
+        pal.setBrush(QPalette::Active, QPalette::Window, Qt::white);
+        pal.setColor(QPalette::Active, QPalette::Foreground, Qt::gray);
+        setPalette(pal);
+    }
+
+protected:
+    void paintEvent ( QPaintEvent * event ) {
+        QPainter p(this);
+        p.setRenderHint(QPainter::Antialiasing);
+
+        if (direction == Vertical) {
+            qreal scale = theView->transform().m22();
+
+            for (int y = 0;  y < height();  y++) {
+                if ( (y % 10) == 0) {
+                    p.drawLine(QPointF(6, y*scale), QPointF(width(), y*scale));
+                } else {
+                    p.drawLine(QPointF(12, y*scale), QPointF(width(), y*scale));
+                }
+            }
+        } else {
+            qreal scale = theView->transform().m11();
+
+            for (int x = 0;  x < width();  x++) {
+                if ( (x % 10) == 0) {
+                    p.drawLine(QPointF(x*scale, 6), QPointF(x*scale, height()));
+                } else {
+                    p.drawLine(QPointF(x*scale, 12), QPointF(x*scale, height()));
+                }
+            }
+        }
+    }
+
+private:
+    GraphicsView* theView;
+    Direction direction;
+};
+
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -510,8 +573,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     centralwidget = new QWidget(this);
 
-    view = new GraphicsView(centralwidget);
-    view->setObjectName(QStringLiteral("view"));
+    QFrame* graphicsWidget = new QFrame(centralwidget);
+    graphicsWidget->setObjectName(QStringLiteral("frameWidget"));
+    QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect(graphicsWidget);
+    shadow->setBlurRadius(20);
+    shadow->setColor(QColor(0xa0, 0xa0, 0xa0));
+    graphicsWidget->setGraphicsEffect(shadow);
 
     QGridLayout* ml = new CenterLayout(centralwidget);
     ml->setRowStretch(0, 1);
@@ -522,16 +589,44 @@ MainWindow::MainWindow(QWidget *parent) :
     ml->setRowStretch(2, 1);
     ml->setColumnStretch(0, 1);
     ml->setColumnStretch(2, 1);
-    ml->addWidget(view, 1, 1);
+    ml->addWidget(graphicsWidget, 1, 1);
+
     centralwidget->setLayout(ml);
-
-/*******************************/
-
     setCentralWidget(centralwidget);
 
-    view->setFrameStyle(0);	// do not show a frame around the scroll area
+/*********************/
+    QGridLayout* layout = new QGridLayout();
+    layout->setMargin(0);
+    layout->setHorizontalSpacing(0);
+    layout->setVerticalSpacing(0);
 
-/**********************************************/
+    view = new GraphicsView(graphicsWidget);
+    view->setObjectName(QStringLiteral("view"));
+    view->setFrameStyle(0); // do not show a frame around the scroll area
+
+    // create widget with fixed height of 20 px and maximum width of 200
+    QWidget* topHeader = new ScaleWidget(graphicsWidget, view, ScaleWidget::Horizontal);
+//    topHeader->setMaximumWidth(200);
+    topHeader->setFixedHeight(20);
+
+    // create widget with fixed width of 20 px and maximum height of 200
+    QWidget* leftHeader = new ScaleWidget(graphicsWidget, view, ScaleWidget::Vertical);
+    leftHeader->setFixedWidth(20);
+//    leftHeader->setMaximumHeight(200);
+
+
+    graphicsWidget->setLayout(layout);
+    layout->addWidget(topHeader,  0, 1);
+
+    QVBoxLayout* vbox = new QVBoxLayout();
+    vbox->addWidget(leftHeader, 1);
+    vbox->addStretch(0);
+    // layout->addWidget(leftHeader, 1, 0);
+    layout->addLayout(vbox, 1, 0);
+
+    layout->addWidget(view, 1, 1);
+
+/************************************/
 
     menubar = new QMenuBar(this);
     menubar->setObjectName(QStringLiteral("menubar"));
