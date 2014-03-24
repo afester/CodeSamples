@@ -100,6 +100,18 @@ void GraphicsView::updateSize() {
 //	QSize viewportSize((sceneRect().width() * effectiveScaleX)  + 13,	// +1 pixel
 //			 	 	   (sceneRect().height() * effectiveScaleY) + 13);	// to overcome rounding issues
 
+
+//	qDebug() << "VIEWPORT SIZE:" << viewportSize;
+
+//	viewport()->setMaximumSize(viewportSize);
+
+	QTransform transform;
+	transform.scale(effectiveScaleX, effectiveScaleY);
+	setTransform(transform);
+
+	updateGeometry();
+
+
 	qDebug() << "DPI:" << xDpi << ", " << yDpi;
 	qDebug() << "px/mm: " << xScaleDPI << ", " << yScaleDPI;
 	qDebug() << "ZOOM SCALE:" << zoomScale;
@@ -111,16 +123,9 @@ void GraphicsView::updateSize() {
 	qDebug() << "SCALED SCENE RECT:" << scaledScene;
 	qDebug() << "SCROLLAREA MIN SIZE:" << minimumSize();
 	qDebug() << "SCROLLAREA MIN SIZE HINT:" << minimumSizeHint();
+	qDebug() << "SCROLLAREA MAX SIZE: " << maximumSize();
+	qDebug() << "SCROLLAREA SIZE: " << rect();
 
-//	qDebug() << "VIEWPORT SIZE:" << viewportSize;
-
-//	viewport()->setMaximumSize(viewportSize);
-
-	QTransform transform;
-	transform.scale(effectiveScaleX, effectiveScaleY);
-	setTransform(transform);
-
-	updateGeometry();
 }
 
 
@@ -161,6 +166,24 @@ void GraphicsView::setupViewport ( QWidget * viewport ) {
 
 }
 
+QSize GraphicsView::sizeHint() const {
+   // Default size calculation from QGraphicsView::sizeHint()
+   QSizeF baseSize = matrix().mapRect(sceneRect()).size();
+   baseSize += QSizeF(frameWidth() * 2, frameWidth() * 2);
+   baseSize = baseSize.boundedTo((3 * QApplication::desktop()->size()) / 4);
+
+   qDebug() << "   BASE SIZE:" << baseSize;
+
+   // before rounding through toSize(), add 0.5 to make sure to round upwards
+   baseSize += QSizeF(0.5, 0.5);
+
+   QSize result = baseSize.toSize();
+   qDebug() << "   RESULT:" << result;
+
+   return result;
+}
+
+
 GraphicsItem::GraphicsItem ( qreal x, qreal y, qreal width, qreal height, QGraphicsItem * parent) :
         QGraphicsRectItem(x, y, width, height, parent) {
 }
@@ -174,6 +197,37 @@ void GraphicsItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * 
     painter->drawRect(rect());
 }
 
+
+class CenterLayout : public QGridLayout {
+public:
+	CenterLayout(QWidget* parent) : QGridLayout(parent) { }
+
+	void setGeometry(const QRect& r) {
+		qDebug() << "\n   LAYOUT rect:" << r;
+		qDebug() << "   Item count :" << count();
+
+		QGridLayout::setGeometry(r);
+
+		QWidget* wdg = itemAtPosition(1, 1)->widget();
+		qDebug() << "   Widget:" << wdg;
+		qDebug() << "      rect(): " << wdg->rect();
+		qDebug() << "	   minimumSize(): " << wdg->minimumSize();
+		qDebug() << "	   minimumSizeHint(): " << wdg->minimumSizeHint();
+		qDebug() << "	   maximumSize(): " << wdg->maximumSize();
+		qDebug() << "	   sizeHint(): " << wdg->sizeHint();
+
+		QGraphicsView* view = dynamic_cast<QGraphicsView*>(wdg);
+		if (view) {
+			qDebug() << "      sceneRect():" << view->sceneRect() << "/" << view->scene()->sceneRect();
+			//QRectF scaledScene(sceneRect().x(), sceneRect().y(),
+			//				   sceneRect().width() * effectiveScaleX,
+			//				   sceneRect().height() * effectiveScaleY);
+			//qDebug() << "SCALED SCENE RECT:" << scaledScene;
+		}
+		//wdg->setGeometry(wdg->x(), wdg->y(), wdg->height(), wdg->width() + 1);
+	}
+};
+#if 0
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), scene(new QGraphicsScene()) {
 
@@ -219,8 +273,9 @@ MainWindow::MainWindow(QWidget *parent) :
     centralwidget = new QWidget();
 
     QFrame* graphicsWidget = new QFrame(centralwidget);
+    graphicsWidget->setObjectName(QStringLiteral("frameWidget"));
 
-    QGridLayout* ml = new QGridLayout(centralwidget);
+    QGridLayout* ml = new CenterLayout(centralwidget);
     ml->setRowStretch(0, 1);
     ml->setMargin(0);
     ml->setHorizontalSpacing(0);
@@ -229,10 +284,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ml->setRowStretch(2, 1);
     ml->setColumnStretch(0, 1);
     ml->setColumnStretch(2, 1);
-    ml->addWidget(new QWidget(), 0, 1);
-    ml->addWidget(new QWidget(), 1, 0);
-    ml->addWidget(new QWidget(), 1, 2);
-    ml->addWidget(new QWidget(), 2, 1);
     ml->addWidget(graphicsWidget, 1, 1);
     centralwidget->setLayout(ml);
 
@@ -253,7 +304,6 @@ MainWindow::MainWindow(QWidget *parent) :
     layout->setMargin(0);
     layout->setHorizontalSpacing(0);
     layout->setVerticalSpacing(0);
-    graphicsWidget->setObjectName(QStringLiteral("centralwidget"));
 
     QWidget* topHeader = new QWidget(graphicsWidget);
     topHeader->setFixedHeight(30);
@@ -332,6 +382,12 @@ MainWindow::MainWindow(QWidget *parent) :
     toolBar->addWidget(checkbox);
     QObject::connect(checkbox, SIGNAL(stateChanged(int)),
     				 view, SLOT(setDirection(int)));
+
+    QAction* actionInfo = new QAction("Info", this);
+    toolBar->addAction(actionInfo);
+    QObject::connect(actionInfo, SIGNAL(triggered(bool)),
+    				 this, SLOT(printInfo()));
+
 
 
 /*******************************************/
@@ -441,6 +497,109 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
 
     view->setColor(Qt::blue);	// A blue view
+}
+#endif
+
+
+
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent), scene(new QGraphicsScene()) {
+
+    setObjectName(QStringLiteral("MainWindow"));
+    resize(1024, 768);
+
+    centralwidget = new QWidget(this);
+
+    view = new GraphicsView(centralwidget);
+    view->setObjectName(QStringLiteral("view"));
+
+    QGridLayout* ml = new CenterLayout(centralwidget);
+    ml->setRowStretch(0, 1);
+    ml->setMargin(0);
+    ml->setHorizontalSpacing(0);
+    ml->setVerticalSpacing(0);
+
+    ml->setRowStretch(2, 1);
+    ml->setColumnStretch(0, 1);
+    ml->setColumnStretch(2, 1);
+    ml->addWidget(view, 1, 1);
+    centralwidget->setLayout(ml);
+
+/*******************************/
+
+    setCentralWidget(centralwidget);
+
+    view->setFrameStyle(0);	// do not show a frame around the scroll area
+
+/**********************************************/
+
+    menubar = new QMenuBar(this);
+    menubar->setObjectName(QStringLiteral("menubar"));
+    menubar->setGeometry(QRect(0, 0, 401, 21));
+    setMenuBar(menubar);
+
+    statusbar = new QStatusBar(this);
+    statusbar->setObjectName(QStringLiteral("statusbar"));
+    setStatusBar(statusbar);
+
+    toolBar = new QToolBar(this);
+    toolBar->setObjectName(QStringLiteral("toolBar"));
+    addToolBar(Qt::TopToolBarArea, toolBar);
+
+
+    LabelledComboBox* zoomWidget = new LabelledComboBox(toolBar, "Scale: ");
+    zoomWidget->getComboBox()->addItem("25%");
+    zoomWidget->getComboBox()->addItem("50%");
+    zoomWidget->getComboBox()->addItem("100%");
+    zoomWidget->getComboBox()->addItem("200%");
+    toolBar->addWidget(zoomWidget);
+    QObject::connect(zoomWidget->getComboBox(), SIGNAL(currentIndexChanged(int)),
+    				 view, SLOT(setZoom(int)));
+
+    LabelledComboBox* sizeWidget = new LabelledComboBox(toolBar, "Size: ");
+    sizeWidget->getComboBox()->addItem("DIN A3");
+    sizeWidget->getComboBox()->addItem("DIN A4");
+    sizeWidget->getComboBox()->addItem("DIN A5");
+    toolBar->addWidget(sizeWidget);
+    QObject::connect(sizeWidget->getComboBox(), SIGNAL(currentIndexChanged(int)),
+    				 view, SLOT(setSize(int)));
+
+    QCheckBox* checkbox = new QCheckBox("Landscape: ", toolBar);
+    toolBar->addWidget(checkbox);
+    QObject::connect(checkbox, SIGNAL(stateChanged(int)),
+    				 view, SLOT(setDirection(int)));
+
+    QAction* actionInfo = new QAction("Info", this);
+    toolBar->addAction(actionInfo);
+    QObject::connect(actionInfo, SIGNAL(triggered(bool)),
+    				 this, SLOT(printInfo()));
+
+    view->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+
+    GraphicsItem* item = new GraphicsItem(10, 10, 50, 50);
+    scene->addItem(item);
+    item = new GraphicsItem(0, 0, 5, 5);
+    scene->addItem(item);
+    item = new GraphicsItem(225, 295, 5, 5);
+    scene->addItem(item);
+    item = new GraphicsItem(125, 100, 200, 100);
+    scene->addItem(item);
+
+    view->setScene(scene);
+
+    // initialize the sizes
+    view->setSize(2);
+    view->setDirection(Qt::Checked);
+    view->setZoom(2);
+
+    view->setColor(Qt::blue);	// A blue view
+}
+
+
+void MainWindow::printInfo() {
+	qDebug() << "\nLAYOUT INFO:\n====================";
+	qDebug() << "   QGraphicsView: " << view->rect();
+	qDebug() << "   viewport: " << view->viewport()->rect();
 }
 
 

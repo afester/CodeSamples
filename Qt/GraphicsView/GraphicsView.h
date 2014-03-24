@@ -13,6 +13,9 @@
 #include <QGraphicsView>
 #include <QGraphicsItem>
 #include <QVBoxLayout>
+#include <QDesktopWidget>
+#include <QApplication>
+#include <QDebug>
 
 class GraphicsItem : public QGraphicsRectItem {
 public:
@@ -45,6 +48,8 @@ protected:
 
     void setupViewport ( QWidget * viewport );
 
+    QSize sizeHint() const;
+
 public:
     GraphicsView(QWidget* parent);
 
@@ -62,7 +67,7 @@ public slots:
 class Ui_MainWindow;
 
 class MainWindow : public QMainWindow {
-        Q_OBJECT
+        Q_OBJECT;
 
         QAction *actionX;
         QWidget *centralwidget;
@@ -77,4 +82,7 @@ public:
         ~MainWindow();
 
         QGraphicsScene* scene;
+
+public slots:
+		void printInfo();
 };
