@@ -522,11 +522,12 @@ public:
     ScaleWidget(QWidget* parent, GraphicsView* view, Direction dir) :
             QWidget(parent), theView(view), direction(dir) {
         setAutoFillBackground(true);
+        setFont(QFont("Sans", 6));  // default font
 
         QPalette pal = palette();
         pal.setBrush(QPalette::Active, QPalette::Base, Qt::white);
         pal.setBrush(QPalette::Active, QPalette::Window, Qt::white);
-        pal.setColor(QPalette::Active, QPalette::Foreground, Qt::gray);
+        pal.setColor(QPalette::Active, QPalette::Foreground, QColor(0xA0, 0xA0, 0xA0)); // Qt::gray);
         setPalette(pal);
     }
 
@@ -534,23 +535,44 @@ protected:
     void paintEvent ( QPaintEvent * event ) {
         QPainter p(this);
         p.setRenderHint(QPainter::Antialiasing);
+        QFontMetrics fm = fontMetrics();
 
         if (direction == Vertical) {
             qreal scale = theView->transform().m22();
+            QTextOption option;
+            option.setAlignment(Qt::AlignRight);
 
-            for (int y = 0;  y < height();  y++) {
+            for (int y = 0;  y < height() / scale;  y++) {
                 if ( (y % 10) == 0) {
-                    p.drawLine(QPointF(6, y*scale), QPointF(width(), y*scale));
-                } else {
                     p.drawLine(QPointF(12, y*scale), QPointF(width(), y*scale));
+
+                    if (y > 0) {
+                        QRectF textBox(0, y * scale - fm.height(), 14, fm.height());
+                        //p.drawRect(textBox);
+                        p.drawText(textBox, QString::number(y), option); // yy / (10*mm2pix)), option);
+                    }
+                } else {
+                    p.drawLine(QPointF(16, y*scale), QPointF(width(), y*scale));
+
                 }
             }
         } else {
             qreal scale = theView->transform().m11();
+            QTextOption option;
+            option.setAlignment(Qt::AlignRight);
 
             for (int x = 0;  x < width();  x++) {
                 if ( (x % 10) == 0) {
                     p.drawLine(QPointF(x*scale, 6), QPointF(x*scale, height()));
+int largeTicksSize = 5;
+
+                    if (x > 0) {
+                        QRectF textBox(x*scale-20, 0,
+                                //(x-9)*scale, 0, // 22 - largeTicksSize - fm.height(),
+                                        18, fm.height());
+                        //p.drawRect(textBox);
+                        p.drawText(textBox, QString::number(x), option);
+                    }
                 } else {
                     p.drawLine(QPointF(x*scale, 12), QPointF(x*scale, height()));
                 }
@@ -611,7 +633,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // create widget with fixed width of 20 px and maximum height of 200
     QWidget* leftHeader = new ScaleWidget(graphicsWidget, view, ScaleWidget::Vertical);
-    leftHeader->setFixedWidth(20);
+    leftHeader->setFixedWidth(23);
 //    leftHeader->setMaximumHeight(200);
 
 
