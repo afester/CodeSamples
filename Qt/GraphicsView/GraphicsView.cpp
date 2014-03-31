@@ -32,6 +32,13 @@ int c = 0;
 
 GraphicsView::GraphicsView(QWidget* parent) : QGraphicsView(parent) {
 	setRenderHint(QPainter::Antialiasing);
+	//setViewportMargins(0, 0, 2, 2);
+	setAutoFillBackground(true);
+    QPalette pal = palette();
+    pal.setBrush(QPalette::Base, Qt::red);
+    pal.setBrush(QPalette::Window, Qt::red);
+    setPalette(pal);
+
  //   setViewportMargins(30, 30, 0, 0);
 
 	// setAlignment(Qt::AlignTop);
@@ -40,6 +47,9 @@ GraphicsView::GraphicsView(QWidget* parent) : QGraphicsView(parent) {
 	//xDpi = (qreal)srn->physicalDotsPerInchX();
 	//yDpi = (qreal)srn->physicalDotsPerInchY();
 	xDpi = (qreal)srn->logicalDotsPerInchX();
+	qDebug() << "DPI-X:" << xDpi;
+	xDpi = 93;
+
 	yDpi = (qreal)srn->logicalDotsPerInchY();
 }
 
@@ -171,14 +181,15 @@ QSize GraphicsView::sizeHint() const {
    QSizeF baseSize = matrix().mapRect(sceneRect()).size();
    baseSize += QSizeF(frameWidth() * 2, frameWidth() * 2);
    baseSize = baseSize.boundedTo((3 * QApplication::desktop()->size()) / 4);
-   // qDebug() << "   BASE SIZE:" << baseSize;
+   qDebug() << "   BASE SIZE:" << baseSize;
 
    // before rounding through toSize(), add 0.5 to make sure to round upwards
    // See https://bugreports.qt-project.org/browse/QTBUG-37702
    baseSize += QSizeF(0.5, 0.5);
 
    QSize result = baseSize.toSize();
-   // qDebug() << "   RESULT:" << result;
+   //result += QSize(4, 4);   // viewport margins!!!
+   qDebug() << "   RESULT:" << result;
 
    return result;
 }
@@ -513,6 +524,30 @@ public:
 };
 
 
+class ScaleEdgeWidget : public QWidget {
+public:
+    ScaleEdgeWidget(QWidget* parent) : QWidget(parent) {
+        setAutoFillBackground(true);
+
+        QPalette pal = palette();
+        pal.setBrush(QPalette::Base, Qt::white);
+        pal.setBrush(QPalette::Window, Qt::white);
+        setPalette(pal);
+    }
+
+protected:
+    void paintEvent ( QPaintEvent * event ) {
+        QPainter p(this);
+        p.setRenderHint(QPainter::Antialiasing);
+
+        p.setPen(Qt::darkGray);
+        p.drawLine(0, 0, width(), 0);
+        p.drawLine(1, 1, width(), 1);
+        p.drawLine(0, 0, 0, height());
+        p.drawLine(1, 1, 1, height());
+    }
+
+};
 
 class ScaleWidget : public QWidget {
 
@@ -525,26 +560,35 @@ public:
         setFont(QFont("Sans", 6));  // default font
 
         QPalette pal = palette();
-        pal.setBrush(QPalette::Active, QPalette::Base, Qt::white);
-        pal.setBrush(QPalette::Active, QPalette::Window, Qt::white);
-        pal.setColor(QPalette::Active, QPalette::Foreground, QColor(0xA0, 0xA0, 0xA0)); // Qt::gray);
+        pal.setBrush(QPalette::Base, Qt::white); /// QColor(0xf8, 0xf8, 0xf8)); //Qt::white);
+        pal.setBrush(QPalette::Window, Qt::white); // QColor(0xf8, 0xf8, 0xf8)); // Qt::white);
+        pal.setColor(QPalette::Foreground, QColor(0x80, 0x80, 0x80)); // Qt::gray);
         setPalette(pal);
     }
 
 protected:
     void paintEvent ( QPaintEvent * event ) {
         QPainter p(this);
-        p.setRenderHint(QPainter::Antialiasing);
+//        p.setRenderHint(QPainter::Antialiasing);
+
         QFontMetrics fm = fontMetrics();
 
         if (direction == Vertical) {
+            p.setPen(Qt::lightGray);
+            p.drawLine(width() - 1, 0, width() - 1, height());
+
+            p.setPen(Qt::darkGray);
+            p.setRenderHint(QPainter::Antialiasing);
+            p.drawLine(0, 0, 0, height());
+            p.drawLine(1, 0, 1, height() - 2);
+
             qreal scale = theView->transform().m22();
             QTextOption option;
             option.setAlignment(Qt::AlignRight);
 
             for (int y = 0;  y < height() / scale;  y++) {
                 if ( (y % 10) == 0) {
-                    p.drawLine(QPointF(12, y*scale), QPointF(width(), y*scale));
+                    p.drawLine(QPointF(12, y*scale), QPointF(width() - 4, y*scale));
 
                     if (y > 0) {
                         QRectF textBox(0, y * scale - fm.height(), 14, fm.height());
@@ -552,29 +596,37 @@ protected:
                         p.drawText(textBox, QString::number(y), option); // yy / (10*mm2pix)), option);
                     }
                 } else {
-                    p.drawLine(QPointF(16, y*scale), QPointF(width(), y*scale));
+                    p.drawLine(QPointF(16, y*scale), QPointF(width() - 4, y*scale));
 
                 }
             }
         } else {
+            p.setPen(Qt::lightGray);
+            p.drawLine(0, height() - 1, width(), height() - 1);
+
+            p.setPen(Qt::darkGray);
+            p.setRenderHint(QPainter::Antialiasing);
+            p.drawLine(0, 0, width(), 0);
+            p.drawLine(0, 1, width() - 2, 1);
+
             qreal scale = theView->transform().m11();
             QTextOption option;
             option.setAlignment(Qt::AlignRight);
 
             for (int x = 0;  x < width();  x++) {
                 if ( (x % 10) == 0) {
-                    p.drawLine(QPointF(x*scale, 6), QPointF(x*scale, height()));
+                    p.drawLine(QPointF(x*scale, 9), QPointF(x*scale, height() - 4));
 int largeTicksSize = 5;
 
                     if (x > 0) {
-                        QRectF textBox(x*scale-20, 0,
+                        QRectF textBox(x*scale-20, 3,
                                 //(x-9)*scale, 0, // 22 - largeTicksSize - fm.height(),
                                         18, fm.height());
                         //p.drawRect(textBox);
                         p.drawText(textBox, QString::number(x), option);
                     }
                 } else {
-                    p.drawLine(QPointF(x*scale, 12), QPointF(x*scale, height()));
+                    p.drawLine(QPointF(x*scale, 15), QPointF(x*scale, height() - 4));
                 }
             }
         }
@@ -628,16 +680,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // create widget with fixed height of 20 px and maximum width of 200
     QWidget* topHeader = new ScaleWidget(graphicsWidget, view, ScaleWidget::Horizontal);
-//    topHeader->setMaximumWidth(200);
-    topHeader->setFixedHeight(20);
+    topHeader->setFixedHeight(23);
 
     // create widget with fixed width of 20 px and maximum height of 200
     QWidget* leftHeader = new ScaleWidget(graphicsWidget, view, ScaleWidget::Vertical);
     leftHeader->setFixedWidth(23);
-//    leftHeader->setMaximumHeight(200);
 
+    QWidget* edge = new ScaleEdgeWidget(graphicsWidget);
+    edge->setFixedSize(23, 23);
 
     graphicsWidget->setLayout(layout);
+    layout->addWidget(edge,  0, 0);
     layout->addWidget(topHeader,  0, 1);
 
     QVBoxLayout* vbox = new QVBoxLayout();
