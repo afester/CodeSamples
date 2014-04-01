@@ -24,7 +24,7 @@ public class LDAPSample {
       try {
          
          
-        lc = new LoginContext("LDAPLogin", new TextCallbackHandler());
+        lc = new LoginContext("LDAPUidLogin", new TextCallbackHandler());
 
         // attempt authentication
         System.err.println("Logging in ...");
