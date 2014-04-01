@@ -62,7 +62,35 @@ public:
     QColor getColor();
 };
 
-class ScaleWidget;
+
+class ScaleWidget : public QWidget {
+    Q_OBJECT;
+
+    float theScale;
+    int offset;
+
+    int smallTicksSize;
+    int mediumTicksSize;
+    int largeTicksSize;
+
+public:
+    enum Direction{Vertical, Horizontal};
+
+    ScaleWidget(QWidget* parent, GraphicsView* view, Direction dir);
+
+    void setScale(float scale);
+
+    void setOffset(int value);
+
+protected:
+    void paintEvent ( QPaintEvent * event );
+
+private:
+    GraphicsView* theView;
+    Direction direction;
+};
+
+
 class ScaleEdgeWidget;
 
 class GraphicsSheet : public QFrame {
@@ -114,6 +142,9 @@ public slots:
     void setSize(int idx);
 
     void setDirection(int idx);
+
+private slots:
+    void areaMoved();
 };
 
 
