@@ -25,38 +25,90 @@ protected:
     void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget);
 };
 
-
+class GraphicsScene : public QGraphicsScene {
+};
 
 class GraphicsView : public QGraphicsView {
 	Q_OBJECT;
 
     QColor viewColor;
 
+
     float xDpi;
     float yDpi;
 
-    float zoomScale;
-    QSizeF sceneSize;
-    bool landscape;
+    float zoomScale;    // e.g. 50%
+    QSizeF sceneSize;   // e.g. 148x210
+    bool landscape;     // true or false (landscape or portrait)
 
     void updateSize();
 
 protected:
     void drawBackground(QPainter * painter, const QRectF & rect);
 
-    void paintEvent(QPaintEvent * event);
-
-    void setupViewport ( QWidget * viewport );
-
     QSize sizeHint() const;
 
 public:
     GraphicsView(QWidget* parent);
 
+    void setZoom(float zoom);
+
+    void setSize(const QSizeF& dimension);
+
+    void setDirection(int idx);
+
     void setColor(const QColor& color);
+
     QColor getColor();
+};
+
+class ScaleWidget;
+class ScaleEdgeWidget;
+
+class GraphicsSheet : public QFrame {
+    Q_OBJECT;
+
+    QStringList sizeNames;
+    QList<QSizeF> sizeDimensions;
+
+    QStringList scaleNames;
+    QList<float> scaleLevels;
+
+    QStringList zoomNames;
+    QList<float> zoomLevels;
+
+    ScaleWidget* xScale;
+    ScaleWidget* yScale;
+    ScaleEdgeWidget* edge;
+    GraphicsView *view;
+
+public:
+    GraphicsScene* scene;
+
+public:
+    GraphicsSheet(QWidget* parent);
+
+    void addSize(const QString& name, const QSizeF& size);
+
+    QStringList getSizeNames() const;
+
+    void addZoom(const QString& name, float level);
+
+    QStringList getZoomNames() const;
+
+    void addScale(const QString& name, float scale);
+
+    QStringList getScaleNames() const;
+
+    void setUnit(const QString& unit);
+
+    GraphicsView* getView();
+
+    GraphicsScene* getScene();
 
 public slots:
+    void setScale(int idx);
+
     void setZoom(int idx);
 
     void setSize(int idx);
@@ -64,25 +116,25 @@ public slots:
     void setDirection(int idx);
 };
 
+
 class Ui_MainWindow;
 
 class MainWindow : public QMainWindow {
-        Q_OBJECT;
+    Q_OBJECT;
 
-        QAction *actionX;
-        QWidget *centralwidget;
-        GraphicsView *view;
-        QMenuBar *menubar;
-        QStatusBar *statusbar;
-        QToolBar *toolBar;
+    QAction *actionX;
+    QWidget *centralwidget;
+    GraphicsSheet* graphicsSheet;
+    QMenuBar *menubar;
+    QStatusBar *statusbar;
+    QToolBar *toolBar;
 
 public:
 
-        MainWindow(QWidget* parent);
-        ~MainWindow();
+    MainWindow(QWidget* parent);
+    ~MainWindow();
 
-        QGraphicsScene* scene;
 
 public slots:
-		void printInfo();
+	void printInfo();
 };
