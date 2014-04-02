@@ -46,6 +46,9 @@ class GraphicsView : public QGraphicsView {
 protected:
     void drawBackground(QPainter * painter, const QRectF & rect);
 
+    void resizeEvent ( QResizeEvent * event );
+
+
     QSize sizeHint() const;
 
 public:
@@ -133,6 +136,8 @@ public:
     GraphicsView* getView();
 
     GraphicsScene* getScene();
+
+    void updateScales();
 
 public slots:
     void setScale(int idx);

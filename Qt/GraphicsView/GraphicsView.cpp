@@ -82,19 +82,19 @@ void GraphicsView::updateSize() {
 
 	updateGeometry();
 
-	qDebug() << "DPI:" << xDpi << ", " << yDpi;
-	qDebug() << "px/mm: " << xScaleDPI << ", " << yScaleDPI;
-	qDebug() << "ZOOM SCALE:" << zoomScale;
-	qDebug() << "EFFECTIVE SCALE:" << effectiveScaleX << ", " << effectiveScaleY;
-	qDebug() << "SCENE RECT:" << sceneRect() << "/" << scene()->sceneRect();
+//	qDebug() << "DPI:" << xDpi << ", " << yDpi;
+//	qDebug() << "px/mm: " << xScaleDPI << ", " << yScaleDPI;
+//	qDebug() << "ZOOM SCALE:" << zoomScale;
+//	qDebug() << "EFFECTIVE SCALE:" << effectiveScaleX << ", " << effectiveScaleY;
+//	qDebug() << "SCENE RECT:" << sceneRect() << "/" << scene()->sceneRect();
 	QRectF scaledScene(sceneRect().x(), sceneRect().y(),
 					   sceneRect().width() * effectiveScaleX,
 					   sceneRect().height() * effectiveScaleY);
-	qDebug() << "SCALED SCENE RECT:" << scaledScene;
-	qDebug() << "SCROLLAREA MIN SIZE:" << minimumSize();
-	qDebug() << "SCROLLAREA MIN SIZE HINT:" << minimumSizeHint();
-	qDebug() << "SCROLLAREA MAX SIZE: " << maximumSize();
-	qDebug() << "SCROLLAREA SIZE: " << rect();
+//	qDebug() << "SCALED SCENE RECT:" << scaledScene;
+//	qDebug() << "SCROLLAREA MIN SIZE:" << minimumSize();
+//	qDebug() << "SCROLLAREA MIN SIZE HINT:" << minimumSizeHint();
+//	qDebug() << "SCROLLAREA MAX SIZE: " << maximumSize();
+//	qDebug() << "SCROLLAREA SIZE: " << rect();
 }
 
 
@@ -139,8 +139,23 @@ QSize GraphicsView::sizeHint() const {
 }
 
 
+void GraphicsView::resizeEvent ( QResizeEvent * event ) {
+    QGraphicsView::resizeEvent(event);
+
+    GraphicsSheet* sheet = dynamic_cast<GraphicsSheet*>(this->parent());
+    sheet->updateScales();
+}
+
+
+
 GraphicsView* GraphicsSheet::getView() {
     return view;
+}
+
+
+void GraphicsSheet::updateScales() {
+    xScale->setMaximumWidth(view->viewport()->width());
+    yScale->setMaximumHeight(view->viewport()->height());
 }
 
 
@@ -169,22 +184,22 @@ public:
 	CenterLayout(QWidget* parent) : QGridLayout(parent) { }
 
 	void setGeometry(const QRect& r) {
-		qDebug() << "\n   LAYOUT rect:" << r;
-		qDebug() << "   Item count :" << count();
+//		qDebug() << "\n   LAYOUT rect:" << r;
+//		qDebug() << "   Item count :" << count();
 
 		QGridLayout::setGeometry(r);
 
 		QWidget* wdg = itemAtPosition(1, 1)->widget();
-		qDebug() << "   Widget:" << wdg;
-		qDebug() << "      rect(): " << wdg->rect();
-		qDebug() << "	   minimumSize(): " << wdg->minimumSize();
-		qDebug() << "	   minimumSizeHint(): " << wdg->minimumSizeHint();
-		qDebug() << "	   maximumSize(): " << wdg->maximumSize();
-		qDebug() << "	   sizeHint(): " << wdg->sizeHint();
+//		qDebug() << "   Widget:" << wdg;
+//		qDebug() << "      rect(): " << wdg->rect();
+//		qDebug() << "	   minimumSize(): " << wdg->minimumSize();
+//		qDebug() << "	   minimumSizeHint(): " << wdg->minimumSizeHint();
+//		qDebug() << "	   maximumSize(): " << wdg->maximumSize();
+//		qDebug() << "	   sizeHint(): " << wdg->sizeHint();
 
 		QGraphicsView* view = dynamic_cast<QGraphicsView*>(wdg);
 		if (view) {
-			qDebug() << "      sceneRect():" << view->sceneRect() << "/" << view->scene()->sceneRect();
+//			qDebug() << "      sceneRect():" << view->sceneRect() << "/" << view->scene()->sceneRect();
 			//QRectF scaledScene(sceneRect().x(), sceneRect().y(),
 			//				   sceneRect().width() * effectiveScaleX,
 			//				   sceneRect().height() * effectiveScaleY);
@@ -284,6 +299,7 @@ void ScaleWidget::paintEvent ( QPaintEvent * event ) {
 
     QFontMetrics fm = fontMetrics();
 
+
     if (direction == Vertical) {
         p.setPen(Qt::lightGray);
         p.drawLine(width() - 1, 0, width() - 1, height());
@@ -297,19 +313,24 @@ void ScaleWidget::paintEvent ( QPaintEvent * event ) {
         QTextOption option;
         option.setAlignment(Qt::AlignRight);
 
-        for (int y = 0;  y < height() / scale;  y++) {
+        for (int y = 0;  y < (theView->viewport()->height() + offset ) / scale;  y++) {
+            float ypos = y*scale - offset;
+
             if ( (y % 10) == 0) {
-                p.drawLine(QPointF(20 - largeTicksSize, y*scale), QPointF(width() - 4, y*scale));
+                p.drawLine(QPointF(20 - largeTicksSize, ypos),
+                           QPointF(width() - 4, ypos));
 
                 if (y > 0) {
-                    QRectF textBox(0, y * scale - fm.height(), 14, fm.height());
+                    QRectF textBox(0, ypos - fm.height(), 14, fm.height());
                     //p.drawRect(textBox);
                     p.drawText(textBox, QString::number(y / theScale), option);
                 }
             } else if ( (y % 5) == 0) {
-                p.drawLine(QPointF(20 - mediumTicksSize, y*scale), QPointF(width() - 4, y*scale));
+                p.drawLine(QPointF(20 - mediumTicksSize, ypos),
+                           QPointF(width() - 4, ypos));
             } else {
-                p.drawLine(QPointF(20 - smallTicksSize, y*scale), QPointF(width() - 4, y*scale));
+                p.drawLine(QPointF(20 - smallTicksSize, ypos),
+                           QPointF(width() - 4, ypos));
             }
         }
     } else {
@@ -325,26 +346,53 @@ void ScaleWidget::paintEvent ( QPaintEvent * event ) {
         QTextOption option;
         option.setAlignment(Qt::AlignRight);
 
-        for (int x = 0;  x < width();  x++) {
+        for (int x = 0;  x < (theView->viewport()->width() + offset ) / scale;  x++) {
+            float xpos = x*scale - offset;
+
             if ( (x % 10) == 0) {
-                p.drawLine(QPointF(x*scale, 19 - largeTicksSize), QPointF(x*scale, height() - 4));
+                p.drawLine(QPointF(xpos, 19 - largeTicksSize),
+                           QPointF(xpos, height() - 4));
 
                 if (x > 0) {
-                    QRectF textBox(x*scale-20, 3,
+                    QRectF textBox(xpos - 20, 3,
                             //(x-9)*scale, 0, // 22 - largeTicksSize - fm.height(),
                                     18, fm.height());
                     //p.drawRect(textBox);
                     p.drawText(textBox, QString::number(x / theScale), option);
                 }
             } else if ( (x % 5) == 0) {
-                p.drawLine(QPointF(x*scale, 19 - mediumTicksSize), QPointF(x*scale, height() - 4));
+                p.drawLine(QPointF(xpos, 19 - mediumTicksSize),
+                           QPointF(xpos, height() - 4));
             } else {
-                p.drawLine(QPointF(x*scale, 19 - smallTicksSize), QPointF(x*scale, height() - 4));
+                p.drawLine(QPointF(xpos, 19 - smallTicksSize),
+                           QPointF(xpos, height() - 4));
             }
         }
     }
 }
 
+
+
+
+
+class RulerLayout : public QGridLayout {
+public:
+    void setGeometry(const QRect& r) {
+        QGridLayout::setGeometry(r);
+#if 0
+        QLayoutItem* xRulerItem = itemAtPosition(0, 1);
+        QWidget* xRuler = xRulerItem->widget();
+
+        QLayoutItem* viewItem = itemAtPosition(1, 1);
+        GraphicsView* gv = dynamic_cast<GraphicsView*>(viewItem->widget());
+
+        // Viewport not yet properly set up here - only the view widget is layouted!
+        // Viewport setup and scroll bar layouting seems to be done later ...
+        xRuler->setGeometry(xRuler->x(), xRuler->y(),
+                            gv->viewport()->width(), xRuler->height());
+#endif
+    }
+};
 
 GraphicsSheet::GraphicsSheet(QWidget* parent) : QFrame(parent) {
     view = new GraphicsView(this);
@@ -356,26 +404,23 @@ GraphicsSheet::GraphicsSheet(QWidget* parent) : QFrame(parent) {
     // create widget with fixed width of 20 px and maximum height of 200
     yScale = new ScaleWidget(this, view, ScaleWidget::Vertical);
     yScale->setFixedWidth(23);
-
-    edge = new ScaleEdgeWidget(this);
-    edge->setFixedSize(23, 23);
-
-    QGridLayout* layout = new QGridLayout();
-    layout->setMargin(0);
-    layout->setHorizontalSpacing(0);
-    layout->setVerticalSpacing(0);
-
-    setLayout(layout);
-    layout->addWidget(edge,  0, 0);
-    layout->addWidget(xScale,  0, 1);
-
     QVBoxLayout* vbox = new QVBoxLayout();
     vbox->addWidget(yScale, 1);
     vbox->addStretch(0);
 
-    layout->addLayout(vbox, 1, 0);
+    edge = new ScaleEdgeWidget(this);
+    edge->setFixedSize(23, 23);
 
-    layout->addWidget(view, 1, 1);
+    QGridLayout* layout = new RulerLayout(); // view, xScale, vbox, edge);
+    layout->setMargin(0);
+    layout->setHorizontalSpacing(0);
+    layout->setVerticalSpacing(0);
+    layout->addWidget(edge,   0, 0);
+    layout->addWidget(xScale, 0, 1);
+    layout->addLayout(vbox,   1, 0);
+    layout->addWidget(view,   1, 1);
+
+    setLayout(layout);
 
     QObject::connect(view->verticalScrollBar(), SIGNAL(valueChanged(int)),
                      this, SLOT(areaMoved()));
