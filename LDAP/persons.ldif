@@ -1,0 +1,20 @@
+dn: uid=martydoe,ou=people,dc=example,dc=com
+objectClass: person
+objectClass: uidObject
+sn: Doe
+cn: Marty Doe
+uid: martydoe
+userPassword: {SSHA}7L4chgqEb/tr6YDN0YbQkzekDk6uY31N
+telephoneNumber: +49(4321)654320
+description: Sample Entry 2
+
+dn: uid=johndoe,ou=people,dc=example,dc=com
+objectClass: person
+objectClass: uidObject
+sn: Doe
+cn: John Doe
+uid: johndoe
+userPassword: {SSHA}7L4chgqEb/tr6YDN0YbQkzekDk6uY31N
+telephoneNumber: +49(4321)654321
+seeAlso: cn=Marty Doe,ou=people,dc=example,dc=com
+description: Sample Entry
