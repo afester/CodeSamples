@@ -5,10 +5,6 @@
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
 
-/* StackOverflow reference:
- * http://stackoverflow.com/questions/...
- */
-
 #include <iostream>
 #include <typeinfo>
 
@@ -35,7 +31,7 @@ int c = 0;
 #define RULERHEIGHT 23
 #define RULERWIDTH 23
 
-GraphicsView::GraphicsView(QWidget* parent) : QGraphicsView(parent) {
+GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent) {
 	setRenderHint(QPainter::Antialiasing);
 	setAutoFillBackground(true);
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
@@ -47,25 +43,44 @@ GraphicsView::GraphicsView(QWidget* parent) : QGraphicsView(parent) {
 	yDpi = (qreal)srn->logicalDotsPerInchY();
 
     setFrameStyle(0); // do not show a frame around the scroll area
+
+    // create widget with fixed height of 20 px and maximum width of 200
+    xScale = new ScaleWidget(this, this, ScaleWidget::Horizontal);
+    xScale->setFixedHeight(RULERHEIGHT);
+
+    // create widget with fixed width of 20 px and maximum height of 200
+    yScale = new ScaleWidget(this, this, ScaleWidget::Vertical);
+    yScale->setFixedWidth(RULERWIDTH);
+
+    edge = new ScaleEdgeWidget(this);
+    edge->setFixedSize(RULERHEIGHT, RULERWIDTH);
+
+    QObject::connect(verticalScrollBar(), SIGNAL(valueChanged(int)),
+                     this, SLOT(areaMoved()));
+    QObject::connect(horizontalScrollBar(), SIGNAL(valueChanged(int)),
+                     this, SLOT(areaMoved()));
+
+    setScene(new GraphicsScene());
 }
 
 
-void GraphicsView::drawBackground(QPainter * painter, const QRectF & rect) {
+
+void GraphicsSheet::drawBackground(QPainter * painter, const QRectF & rect) {
 //	painter->fillRect(rect, QBrush(Qt::white));
 }
 
 
-void GraphicsView::setColor(const QColor& color) {
+void GraphicsSheet::setColor(const QColor& color) {
     viewColor = color;
 }
 
 
-QColor GraphicsView::getColor() {
+QColor GraphicsSheet::getColor() {
     return viewColor;
 }
 
 
-void GraphicsView::updateSize() {
+void GraphicsSheet::updateSize() {
 	QSizeF realSize = sceneSize;
 	if (landscape) {
 		realSize = QSize(sceneSize.height(), sceneSize.width());
@@ -101,19 +116,19 @@ void GraphicsView::updateSize() {
 }
 
 
-void GraphicsView::setZoom(float zoom) {
+void GraphicsSheet::setZoom(float zoom) {
     zoomScale = zoom;
     updateSize();
 }
 
 
-void GraphicsView::setSize(const QSizeF& dimension) {
+void GraphicsSheet::setSize(const QSizeF& dimension) {
     sceneSize = dimension;
     updateSize();
 }
 
 
-void GraphicsView::setDirection(int idx) {
+void GraphicsSheet::setDirection(int idx) {
     if (idx == Qt::Checked) {
         landscape = true;
     } else {
@@ -123,7 +138,7 @@ void GraphicsView::setDirection(int idx) {
 }
 
 
-QSize GraphicsView::sizeHint() const {
+QSize GraphicsSheet::sizeHint() const {
    // Default size calculation from QGraphicsSheet::sizeHint()
    QSizeF baseSize = matrix().mapRect(sceneRect()).size();
    baseSize += QSizeF(frameWidth() * 2, frameWidth() * 2);
@@ -142,30 +157,11 @@ QSize GraphicsView::sizeHint() const {
 }
 
 
-void GraphicsView::resizeEvent ( QResizeEvent * event ) {
+void GraphicsSheet::resizeEvent ( QResizeEvent * event ) {
     QGraphicsView::resizeEvent(event);
 
-    GraphicsSheet* sheet = dynamic_cast<GraphicsSheet*>(this->parent());
-    sheet->updateScales();
-}
-
-
-
-GraphicsView* GraphicsSheet::getView() {
-    return view;
-}
-
-
-void GraphicsSheet::updateScales() {
-    qDebug() << "VP:" << view->viewport()->size();
-    xScale->setGeometry(RULERWIDTH, 0, view->viewport()->width(), xScale->height());
-    yScale->setGeometry(0, RULERHEIGHT, yScale->width(), view->viewport()->height());
-//    yScale->setMaximumHeight(view->viewport()->height());
-}
-
-
-GraphicsScene* GraphicsSheet::getScene() {
-    return scene;
+    xScale->setGeometry(RULERWIDTH, 0, viewport()->width(), xScale->height());
+    yScale->setGeometry(0, RULERHEIGHT, yScale->width(), viewport()->height());
 }
 
 
@@ -175,44 +171,13 @@ GraphicsItem::GraphicsItem ( qreal x, qreal y, qreal width, qreal height, QGraph
 
 
 void GraphicsItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget) {
-    GraphicsView* requestingView = dynamic_cast<GraphicsView*>(widget->parent());
+    GraphicsSheet* requestingView = dynamic_cast<GraphicsSheet*>(widget->parent());
     if (requestingView) {
         painter->setPen(requestingView->getColor());
     }
 
     painter->drawRect(rect());
 }
-
-
-class CenterLayout : public QGridLayout {
-public:
-	CenterLayout(QWidget* parent) : QGridLayout(parent) { }
-
-	void setGeometry(const QRect& r) {
-//		qDebug() << "\n   LAYOUT rect:" << r;
-//		qDebug() << "   Item count :" << count();
-
-		QGridLayout::setGeometry(r);
-
-		QWidget* wdg = itemAtPosition(1, 1)->widget();
-//		qDebug() << "   Widget:" << wdg;
-//		qDebug() << "      rect(): " << wdg->rect();
-//		qDebug() << "	   minimumSize(): " << wdg->minimumSize();
-//		qDebug() << "	   minimumSizeHint(): " << wdg->minimumSizeHint();
-//		qDebug() << "	   maximumSize(): " << wdg->maximumSize();
-//		qDebug() << "	   sizeHint(): " << wdg->sizeHint();
-
-		QGraphicsView* view = dynamic_cast<QGraphicsView*>(wdg);
-		if (view) {
-//			qDebug() << "      sceneRect():" << view->sceneRect() << "/" << view->scene()->sceneRect();
-			//QRectF scaledScene(sceneRect().x(), sceneRect().y(),
-			//				   sceneRect().width() * effectiveScaleX,
-			//				   sceneRect().height() * effectiveScaleY);
-			//qDebug() << "SCALED SCENE RECT:" << scaledScene;
-		}
-		//wdg->setGeometry(wdg->x(), wdg->y(), wdg->height(), wdg->width() + 1);
-	}
-};
 
 
 class ColoredWidget : public QWidget {
@@ -228,53 +193,46 @@ public:
 };
 
 
-class ScaleEdgeWidget : public QWidget {
-    QString unit;
+ScaleEdgeWidget::ScaleEdgeWidget(QWidget* parent) : QWidget(parent) {
+    setAutoFillBackground(true);
+    setFont(QFont("Sans", 6));  // default font
 
-public:
-    ScaleEdgeWidget(QWidget* parent) : QWidget(parent) {
-        setAutoFillBackground(true);
-        setFont(QFont("Sans", 6));  // default font
+    QPalette pal = palette();
+    pal.setBrush(QPalette::Base, Qt::white);
+    pal.setBrush(QPalette::Window, Qt::white);
+    setPalette(pal);
+}
 
-        QPalette pal = palette();
-        pal.setBrush(QPalette::Base, Qt::white);
-        pal.setBrush(QPalette::Window, Qt::white);
-        setPalette(pal);
-    }
+void ScaleEdgeWidget::setUnit(const QString& theUnit) {
+    unit = theUnit;
+}
 
-    void setUnit(const QString& theUnit) {
-        unit = theUnit;
-    }
+void ScaleEdgeWidget::paintEvent ( QPaintEvent * event ) {
+    QPainter p(this);
+    p.setRenderHint(QPainter::Antialiasing);
 
-protected:
-    void paintEvent ( QPaintEvent * event ) {
-        QPainter p(this);
-        p.setRenderHint(QPainter::Antialiasing);
+    p.setPen(Qt::darkGray);
+    p.drawLine(0, 0, width(), 0);
+    p.drawLine(1, 1, width(), 1);
+    p.drawLine(0, 0, 0, height());
+    p.drawLine(1, 1, 1, height());
+    p.drawLine(1, 1, width(), height());
 
-        p.setPen(Qt::darkGray);
-        p.drawLine(0, 0, width(), 0);
-        p.drawLine(1, 1, width(), 1);
-        p.drawLine(0, 0, 0, height());
-        p.drawLine(1, 1, 1, height());
-        p.drawLine(1, 1, width(), height());
+    QTextOption option;
+    option.setAlignment(Qt::AlignRight);
+    QRectF textBox(2, 1,
+                   20, fontMetrics().height());
+    //p.drawRect(textBox);
+    p.drawText(textBox, unit, option);
 
-        QTextOption option;
-        option.setAlignment(Qt::AlignRight);
-        QRectF textBox(2, 1,
-                       20, fontMetrics().height());
-        //p.drawRect(textBox);
-        p.drawText(textBox, unit, option);
-
-        QRectF textBox2(2, 3 + fontMetrics().height(),
-                        20, fontMetrics().height());
-        //p.drawRect(textBox2);
-        p.drawText(textBox2, unit);
-    }
-
-};
+    QRectF textBox2(2, 3 + fontMetrics().height(),
+                    20, fontMetrics().height());
+    //p.drawRect(textBox2);
+    p.drawText(textBox2, unit);
+}
 
 
-ScaleWidget::ScaleWidget(QWidget* parent, GraphicsView* view, Direction dir) :
+ScaleWidget::ScaleWidget(QWidget* parent, GraphicsSheet* view, Direction dir) :
             QWidget(parent), theView(view), direction(dir),
             smallTicksSize(4), mediumTicksSize(6), largeTicksSize(8), offset(0) {
     setAutoFillBackground(true);
@@ -377,61 +335,6 @@ void ScaleWidget::paintEvent ( QPaintEvent * event ) {
 }
 
 
-
-
-
-class RulerLayout : public QGridLayout {
-public:
-    void setGeometry(const QRect& r) {
-        QGridLayout::setGeometry(r);
-#if 0
-        QLayoutItem* xRulerItem = itemAtPosition(0, 1);
-        QWidget* xRuler = xRulerItem->widget();
-
-        QLayoutItem* viewItem = itemAtPosition(1, 1);
-        GraphicsView* gv = dynamic_cast<GraphicsView*>(viewItem->widget());
-
-        // Viewport not yet properly set up here - only the view widget is layouted!
-        // Viewport setup and scroll bar layouting seems to be done later ...
-        xRuler->setGeometry(xRuler->x(), xRuler->y(),
-                            gv->viewport()->width(), xRuler->height());
-#endif
-    }
-};
-
-GraphicsSheet::GraphicsSheet(QWidget* parent) : QFrame(parent) {
-    view = new GraphicsView(this);
-
-
-    // create widget with fixed height of 20 px and maximum width of 200
-    xScale = new ScaleWidget(view, view, ScaleWidget::Horizontal);
-    xScale->setFixedHeight(RULERHEIGHT);
-
-    // create widget with fixed width of 20 px and maximum height of 200
-    yScale = new ScaleWidget(view, view, ScaleWidget::Vertical);
-    yScale->setFixedWidth(RULERWIDTH);
-
-    edge = new ScaleEdgeWidget(view);
-    edge->setFixedSize(RULERHEIGHT, RULERWIDTH);
-
-    QGridLayout* layout = new QGridLayout();
-    layout->setMargin(0);
-    layout->setHorizontalSpacing(0);
-    layout->setVerticalSpacing(0);
-    layout->addWidget(view, 1, 1);
-
-    setLayout(layout);
-
-    QObject::connect(view->verticalScrollBar(), SIGNAL(valueChanged(int)),
-                     this, SLOT(areaMoved()));
-    QObject::connect(view->horizontalScrollBar(), SIGNAL(valueChanged(int)),
-                     this, SLOT(areaMoved()));
-
-    scene = new GraphicsScene();
-    view->setScene(scene);
-}
-
-
 void GraphicsSheet::setUnit(const QString& unit) {
     edge->setUnit(unit);
 }
@@ -449,7 +352,7 @@ QStringList GraphicsSheet::getZoomNames() const {
 
 void GraphicsSheet::setZoom(int idx) {
     if (idx >= 0 && idx < zoomLevels.size()) {
-        view->setZoom(zoomLevels.at(idx));
+        setZoom(zoomLevels.at(idx));
     }
 }
 
@@ -487,20 +390,16 @@ QStringList GraphicsSheet::getSizeNames() const {
 
 void GraphicsSheet::setSize(int idx) {
     if (idx >= 0 && idx < sizeDimensions.size()) {
-        view->setSize(sizeDimensions[idx]);
+        setSize(sizeDimensions[idx]);
     }
 }
 
 
-void GraphicsSheet::setDirection(int idx) {
-    view->setDirection(idx);
-}
-
 void GraphicsSheet::areaMoved() {
-    QPoint topLeft = view->viewport()->rect().topLeft();
+    QPoint topLeft = viewport()->rect().topLeft();
 
-    xScale->setOffset(view->horizontalScrollBar()->value() - topLeft.x());
-    yScale->setOffset(view->verticalScrollBar()->value() - topLeft.y());
+    xScale->setOffset(horizontalScrollBar()->value() - topLeft.x());
+    yScale->setOffset(verticalScrollBar()->value() - topLeft.y());
 }
 
 
@@ -519,7 +418,7 @@ MainWindow::MainWindow(QWidget *parent) :
     shadow->setColor(QColor(0xa0, 0xa0, 0xa0));
     graphicsSheet->setGraphicsEffect(shadow);
 
-    QGridLayout* ml = new CenterLayout(centralwidget);
+    QGridLayout* ml = new QGridLayout(centralwidget);
     ml->setRowStretch(0, 1);
     ml->setMargin(0);
     ml->setHorizontalSpacing(0);
@@ -597,27 +496,27 @@ MainWindow::MainWindow(QWidget *parent) :
     				 this, SLOT(printInfo()));
 
     GraphicsItem* item = new GraphicsItem(10, 10, 50, 50);
-    graphicsSheet->scene->addItem(item);
+    graphicsSheet->scene()->addItem(item);
     item = new GraphicsItem(0, 0, 5, 5);
-    graphicsSheet->scene->addItem(item);
+    graphicsSheet->scene()->addItem(item);
     item = new GraphicsItem(225, 295, 5, 5);
-    graphicsSheet->scene->addItem(item);
+    graphicsSheet->scene()->addItem(item);
     item = new GraphicsItem(125, 100, 200, 100);
-    graphicsSheet->scene->addItem(item);
+    graphicsSheet->scene()->addItem(item);
 
     zoomWidget->getComboBox()->setCurrentIndex(2);
     sizeWidget->getComboBox()->setCurrentIndex(3);
     scaleWidget->getComboBox()->setCurrentIndex(2);
     checkbox->setChecked(true);
 
-    graphicsSheet->getView()->setColor(Qt::blue);	// A blue view
+    graphicsSheet->setColor(Qt::blue);	// A blue view
 }
 
 
 void MainWindow::printInfo() {
 	qDebug() << "\nLAYOUT INFO:\n====================";
-	qDebug() << "   QGraphicsView: " << graphicsSheet->getView()->rect();
-	qDebug() << "   viewport: " << graphicsSheet->getView()->viewport()->rect();
+	qDebug() << "   QGraphicsSheet: " << graphicsSheet->rect();
+	qDebug() << "   viewport: " << graphicsSheet->viewport()->rect();
 }
 
 

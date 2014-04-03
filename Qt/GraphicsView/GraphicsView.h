@@ -28,43 +28,8 @@ protected:
 class GraphicsScene : public QGraphicsScene {
 };
 
-class GraphicsView : public QGraphicsView {
-	Q_OBJECT;
 
-    QColor viewColor;
-
-
-    float xDpi;
-    float yDpi;
-
-    float zoomScale;    // e.g. 50%
-    QSizeF sceneSize;   // e.g. 148x210
-    bool landscape;     // true or false (landscape or portrait)
-
-    void updateSize();
-
-protected:
-    void drawBackground(QPainter * painter, const QRectF & rect);
-
-    void resizeEvent ( QResizeEvent * event );
-
-
-    QSize sizeHint() const;
-
-public:
-    GraphicsView(QWidget* parent);
-
-    void setZoom(float zoom);
-
-    void setSize(const QSizeF& dimension);
-
-    void setDirection(int idx);
-
-    void setColor(const QColor& color);
-
-    QColor getColor();
-};
-
+class GraphicsSheet;
 
 class ScaleWidget : public QWidget {
     Q_OBJECT;
@@ -79,7 +44,7 @@ class ScaleWidget : public QWidget {
 public:
     enum Direction{Vertical, Horizontal};
 
-    ScaleWidget(QWidget* parent, GraphicsView* view, Direction dir);
+    ScaleWidget(QWidget* parent, GraphicsSheet* view, Direction dir);
 
     void setScale(float scale);
 
@@ -89,14 +54,25 @@ protected:
     void paintEvent ( QPaintEvent * event );
 
 private:
-    GraphicsView* theView;
+    GraphicsSheet* theView;
     Direction direction;
 };
 
 
-class ScaleEdgeWidget;
+class ScaleEdgeWidget : public QWidget {
+    QString unit;
 
-class GraphicsSheet : public QFrame {
+public:
+    ScaleEdgeWidget(QWidget* parent);
+
+    void setUnit(const QString& theUnit);
+
+protected:
+    void paintEvent ( QPaintEvent * event );
+};
+
+
+class GraphicsSheet : public QGraphicsView {
     Q_OBJECT;
 
     QStringList sizeNames;
@@ -111,10 +87,17 @@ class GraphicsSheet : public QFrame {
     ScaleWidget* xScale;
     ScaleWidget* yScale;
     ScaleEdgeWidget* edge;
-    GraphicsView *view;
 
-public:
-    GraphicsScene* scene;
+    QColor viewColor;
+
+    float xDpi;
+    float yDpi;
+
+    float zoomScale;    // e.g. 50%
+    QSizeF sceneSize;   // e.g. 148x210
+    bool landscape;     // true or false (landscape or portrait)
+
+    void updateSize();
 
 public:
     GraphicsSheet(QWidget* parent);
@@ -133,11 +116,14 @@ public:
 
     void setUnit(const QString& unit);
 
-    GraphicsView* getView();
+    void setZoom(float zoom);
 
-    GraphicsScene* getScene();
+    void setSize(const QSizeF& dimension);
 
-    void updateScales();
+    void setColor(const QColor& color);
+
+    QColor getColor();
+
 
 public slots:
     void setScale(int idx);
@@ -150,6 +136,13 @@ public slots:
 
 private slots:
     void areaMoved();
+
+protected:
+    void drawBackground(QPainter * painter, const QRectF & rect);
+
+    void resizeEvent ( QResizeEvent * event );
+
+    QSize sizeHint() const;
 };
 
 
