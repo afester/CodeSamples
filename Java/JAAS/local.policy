@@ -8,4 +8,6 @@
 
 grant {
   permission java.util.PropertyPermission "os.name", "read,write";
+
+  permission java.lang.RuntimePermission "executeAllowedAction";
 };

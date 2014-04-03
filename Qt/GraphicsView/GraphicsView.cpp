@@ -32,11 +32,14 @@
 QLabel* debugConsole;
 int c = 0;
 
+#define RULERHEIGHT 23
+#define RULERWIDTH 23
+
 GraphicsView::GraphicsView(QWidget* parent) : QGraphicsView(parent) {
 	setRenderHint(QPainter::Antialiasing);
-//	setAutoFillBackground(true);
+	setAutoFillBackground(true);
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    setViewportMargins(25, 25, 0, 0);
+    setViewportMargins(RULERWIDTH, RULERHEIGHT, 0, 0);
 
 	QScreen *srn = QApplication::screens().at(0);
 	xDpi = (qreal)srn->logicalDotsPerInchX();
@@ -131,9 +134,9 @@ QSize GraphicsView::sizeHint() const {
    // See https://bugreports.qt-project.org/browse/QTBUG-37702
    QSize result = QSize(qCeil(baseSize.width()), qCeil(baseSize.height()));
 
-   result += QSize(25, 25);   // viewport margins are not yet considered!!!
+   result += QSize(RULERWIDTH, RULERHEIGHT);   // viewport margins are not yet considered!!!
 
-   qDebug() << "   RESULT:" << result;
+   // qDebug() << "   RESULT:" << result;
 
    return result;
 }
@@ -155,8 +158,8 @@ GraphicsView* GraphicsSheet::getView() {
 
 void GraphicsSheet::updateScales() {
     qDebug() << "VP:" << view->viewport()->size();
-    xScale->setGeometry(25, 0, view->viewport()->width(), xScale->height());
-    yScale->setGeometry(0, 25, yScale->width(), view->viewport()->height());
+    xScale->setGeometry(RULERWIDTH, 0, view->viewport()->width(), xScale->height());
+    yScale->setGeometry(0, RULERHEIGHT, yScale->width(), view->viewport()->height());
 //    yScale->setMaximumHeight(view->viewport()->height());
 }
 
@@ -316,7 +319,7 @@ void ScaleWidget::paintEvent ( QPaintEvent * event ) {
         option.setAlignment(Qt::AlignRight);
 
         for (int y = 0;  y < (theView->viewport()->height() + offset ) / scale;  y++) {
-            float ypos = y*scale - offset + 25;
+            float ypos = y*scale - offset;
 
             if ( (y % 10) == 0) {
                 p.drawLine(QPointF(20 - largeTicksSize, ypos),
@@ -349,7 +352,7 @@ void ScaleWidget::paintEvent ( QPaintEvent * event ) {
         option.setAlignment(Qt::AlignRight);
 
         for (int x = 0;  x < (theView->viewport()->width() + offset ) / scale;  x++) {
-            float xpos = x*scale - offset + 25;
+            float xpos = x*scale - offset;
 
             if ( (x % 10) == 0) {
                 p.drawLine(QPointF(xpos, 19 - largeTicksSize),
@@ -402,26 +405,20 @@ GraphicsSheet::GraphicsSheet(QWidget* parent) : QFrame(parent) {
 
     // create widget with fixed height of 20 px and maximum width of 200
     xScale = new ScaleWidget(view, view, ScaleWidget::Horizontal);
-    xScale->setFixedHeight(23);
+    xScale->setFixedHeight(RULERHEIGHT);
 
     // create widget with fixed width of 20 px and maximum height of 200
     yScale = new ScaleWidget(view, view, ScaleWidget::Vertical);
-    yScale->setFixedWidth(23);
-    QVBoxLayout* vbox = new QVBoxLayout();
-    vbox->addWidget(yScale, 1);
-    vbox->addStretch(0);
+    yScale->setFixedWidth(RULERWIDTH);
 
     edge = new ScaleEdgeWidget(view);
-    edge->setFixedSize(23, 23);
+    edge->setFixedSize(RULERHEIGHT, RULERWIDTH);
 
-    QGridLayout* layout = new RulerLayout(); // view, xScale, vbox, edge);
+    QGridLayout* layout = new QGridLayout();
     layout->setMargin(0);
     layout->setHorizontalSpacing(0);
     layout->setVerticalSpacing(0);
-//    layout->addWidget(edge,   0, 0);
-//    layout->addWidget(xScale, 0, 1);
-//    layout->addLayout(vbox,   1, 0);
-    layout->addWidget(view,   1, 1);
+    layout->addWidget(view, 1, 1);
 
     setLayout(layout);
 

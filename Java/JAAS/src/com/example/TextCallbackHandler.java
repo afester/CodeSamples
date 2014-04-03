@@ -25,30 +25,42 @@ class TextCallbackHandler implements CallbackHandler {
    }
 
    private char[] readPassword() {
-      if (cons != null) {
-         return cons.readPassword();
+      
+      String pass = System.getProperty("com.example.UserPass");
+      if (pass != null) {
+         return pass.toCharArray();
       } else {
-         try {
-            return input.readLine().toCharArray();
-         } catch (IOException e) {
-            e.printStackTrace();
+   
+         if (cons != null) {
+            return cons.readPassword();
+         } else {
+            try {
+               return input.readLine().toCharArray();
+            } catch (IOException e) {
+               e.printStackTrace();
+            }
          }
       }
-      
+
       return new char[0];
    }
 
    private String readLine() {
-      if (cons != null) {
-         return cons.readLine();
-      } else {
-         try {
-            return input.readLine();
-         } catch (IOException e) {
-            e.printStackTrace();
+      String user = System.getProperty("com.example.UserName");
+      if (user != null) {
+         return user;
+      } else { 
+         if (cons != null) {
+            return cons.readLine();
+         } else {
+            try {
+               return input.readLine();
+            } catch (IOException e) {
+               e.printStackTrace();
+            }
          }
       }
-      
+
       return "";
    }
 
