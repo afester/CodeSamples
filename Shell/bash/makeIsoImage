@@ -1,0 +1,19 @@
+#!/bin/bash
+
+usage() {
+    echo "usage: $0 listfile"
+    echo
+    echo "  Creates an ISO9660 image from the given list file. Each entry in the list"
+    echo "  file also needs to define the graft point, i.e. must have the following"
+    echo "  format:"
+    echo "  /pathOnCd=sourcePath"
+}
+
+if [ $# -ne 1 ] ; then
+    usage
+    exit 1
+fi
+
+LISTFILE=$1
+
+genisoimage -JR -o dvd0.iso -graft-points -path-list ${LISTFILE}
