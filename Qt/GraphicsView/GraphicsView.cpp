@@ -153,17 +153,160 @@ QSize GraphicsSheet::sizeHint() const {
 
    qDebug() << "   RESULT:" << result;
 
+   // qDebug() << verticalScrollBar()->width();
+   result += QSize(verticalScrollBar()->isVisible()   ? 16 : 0, // verticalScrollBar()->width() : 0,
+                   horizontalScrollBar()->isVisible() ? 16 : 0); // horizontalScrollBar()->height(): 0);
+   qDebug() << "   RESULT2:" << result;
+
    return result;
 }
 
 
 void GraphicsSheet::resizeEvent ( QResizeEvent * event ) {
+    qDebug() << "BEFORE resizeEvent";
+    qDebug() << "   VSB:" << verticalScrollBar()->minimum() << " - " << verticalScrollBar()->maximum();
+    qDebug() << "   HSB:" << horizontalScrollBar()->minimum() << " - " << horizontalScrollBar()->maximum();
+//    qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
+//    qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->objectName();
+//    qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
+//    qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->objectName();
+//    qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
+
     QGraphicsView::resizeEvent(event);
+
+    if (verticalScrollBar()->maximum() < 16) { // <=  verticalScrollBar()->width()) {
+        verticalScrollBar()->setMaximum(0);
+    }
+    if (horizontalScrollBar()->maximum() < 16) { // <= horizontalScrollBar()->height()) {
+        horizontalScrollBar()->setMaximum(0);
+    }
+    updateGeometry();   // triggers a re-read of sizeHint()!
+
+    // the previous call recalculates the scroll bar ranges, but does not yet
+    // enable or disable the scroll bar widgets. Instead, it schedules a
+    // QueuedConnection event which will asynchronously call layoutChildren()
+    // in the private QAbstractScrollArea code. This will finally lead to
+    // showing or hiding the scroll bars, depending on their current range.
+
+    qDebug() << "AFTER resizeEvent";
+    qDebug() << "   VSB:" << verticalScrollBar()->minimum() << " - " << verticalScrollBar()->maximum();
+    qDebug() << "   HSB:" << horizontalScrollBar()->minimum() << " - " << horizontalScrollBar()->maximum();
+//    qDebug() << "   VSB:" << verticalScrollBar()->isVisible();
+//    qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
+//    qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->objectName();
+//    qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
+//    qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->objectName();
+//    qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
 
     xScale->setGeometry(RULERWIDTH, 0, viewport()->width(), xScale->height());
     yScale->setGeometry(0, RULERHEIGHT, yScale->width(), viewport()->height());
 }
 
+
+void GraphicsSheet::setUnit(const QString& unit) {
+    edge->setUnit(unit);
+}
+
+void GraphicsSheet::addZoom(const QString& name, float level) {
+    zoomNames.append(name);
+    zoomLevels.append(level);
+}
+
+
+QStringList GraphicsSheet::getZoomNames() const {
+    return zoomNames;
+}
+
+
+void GraphicsSheet::setZoom(int idx) {
+    if (idx >= 0 && idx < zoomLevels.size()) {
+        setZoom(zoomLevels.at(idx));
+    }
+}
+
+
+void GraphicsSheet::addScale(const QString& name, float level) {
+    scaleNames.append(name);
+    scaleLevels.append(level);
+}
+
+
+QStringList GraphicsSheet::getScaleNames() const {
+    return scaleNames;
+}
+
+
+void GraphicsSheet::setScale(int idx) {
+    if (idx >= 0 && idx < scaleLevels.size()) {
+        xScale->setScale(scaleLevels.at(idx));
+        xScale->repaint();
+        yScale->setScale(scaleLevels.at(idx));
+        yScale->repaint();
+    }
+}
+
+void GraphicsSheet::addSize(const QString& name, const QSizeF& size) {
+    sizeNames.append(name);
+    sizeDimensions.append(size);
+}
+
+
+QStringList GraphicsSheet::getSizeNames() const {
+    return sizeNames;
+}
+
+
+void GraphicsSheet::setSize(int idx) {
+    if (idx >= 0 && idx < sizeDimensions.size()) {
+        setSize(sizeDimensions[idx]);
+    }
+}
+
+
+void GraphicsSheet::areaMoved() {
+    QPoint topLeft = viewport()->rect().topLeft();
+
+    xScale->setOffset(horizontalScrollBar()->value() - topLeft.x());
+    yScale->setOffset(verticalScrollBar()->value() - topLeft.y());
+}
+
+
+
+bool GraphicsSheet::event(QEvent *e) {
+
+/*
+QObject::connect(hbar, SIGNAL(valueChanged(int)),     q, SLOT(_q_hslide(int)));
+QObject::connect(hbar, SIGNAL(rangeChanged(int,int)), q, SLOT(_q_showOrHideScrollBars()), Qt::QueuedConnection);
+*/
+    /*
+    switch (e->type()) {
+        case QEvent::LayoutRequest:
+        case QEvent::Resize:
+            qDebug() << "BEFORE resize";
+            qDebug() << "   VSB:" << verticalScrollBar()->isVisible();
+            qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
+            qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->objectName();
+            qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
+            qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->objectName();
+            qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
+            break;
+    }
+*/
+    bool result = QGraphicsView::event(e);
+/*
+    switch (e->type()) {
+        case QEvent::LayoutRequest:
+        case QEvent::Resize:
+            qDebug() << "AFTER resize";
+            qDebug() << "   VSB:" << verticalScrollBar()->isVisible();
+            qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
+            qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
+            qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
+            break;
+    }
+*/
+    return result;
+}
 
 GraphicsItem::GraphicsItem ( qreal x, qreal y, qreal width, qreal height, QGraphicsItem * parent) :
         QGraphicsRectItem(x, y, width, height, parent) {
@@ -335,107 +478,6 @@ void ScaleWidget::paintEvent ( QPaintEvent * event ) {
 }
 
 
-void GraphicsSheet::setUnit(const QString& unit) {
-    edge->setUnit(unit);
-}
-
-void GraphicsSheet::addZoom(const QString& name, float level) {
-    zoomNames.append(name);
-    zoomLevels.append(level);
-}
-
-
-QStringList GraphicsSheet::getZoomNames() const {
-    return zoomNames;
-}
-
-
-void GraphicsSheet::setZoom(int idx) {
-    if (idx >= 0 && idx < zoomLevels.size()) {
-        setZoom(zoomLevels.at(idx));
-    }
-}
-
-
-void GraphicsSheet::addScale(const QString& name, float level) {
-    scaleNames.append(name);
-    scaleLevels.append(level);
-}
-
-
-QStringList GraphicsSheet::getScaleNames() const {
-    return scaleNames;
-}
-
-
-void GraphicsSheet::setScale(int idx) {
-    if (idx >= 0 && idx < scaleLevels.size()) {
-        xScale->setScale(scaleLevels.at(idx));
-        xScale->repaint();
-        yScale->setScale(scaleLevels.at(idx));
-        yScale->repaint();
-    }
-}
-
-void GraphicsSheet::addSize(const QString& name, const QSizeF& size) {
-    sizeNames.append(name);
-    sizeDimensions.append(size);
-}
-
-
-QStringList GraphicsSheet::getSizeNames() const {
-    return sizeNames;
-}
-
-
-void GraphicsSheet::setSize(int idx) {
-    if (idx >= 0 && idx < sizeDimensions.size()) {
-        setSize(sizeDimensions[idx]);
-    }
-}
-
-
-void GraphicsSheet::areaMoved() {
-    QPoint topLeft = viewport()->rect().topLeft();
-
-    xScale->setOffset(horizontalScrollBar()->value() - topLeft.x());
-    yScale->setOffset(verticalScrollBar()->value() - topLeft.y());
-}
-
-
-
-bool GraphicsSheet::event(QEvent *e) {
-
-    switch (e->type()) {
-        case QEvent::LayoutRequest:
-        case QEvent::Resize:
-            qDebug() << "BEFORE resize";
-            qDebug() << "   VSB:" << verticalScrollBar()->isVisible();
-            qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
-            qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->objectName();
-            qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
-            qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->objectName();
-            qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
-            break;
-    }
-
-    bool result = QGraphicsView::event(e);
-
-    switch (e->type()) {
-        case QEvent::LayoutRequest:
-        case QEvent::Resize:
-            qDebug() << "AFTER resize";
-            qDebug() << "   VSB:" << verticalScrollBar()->isVisible();
-            qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
-            qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
-            qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
-            break;
-    }
-
-    return result;
-}
-
-
 class CenterLayout : public QGridLayout {
 public:
        CenterLayout(QWidget* parent, QWidget* center) : QGridLayout(parent) {
@@ -453,10 +495,48 @@ public:
 
        void setGeometry(const QRect& r) {
            QGridLayout::setGeometry(r);
-           qDebug() << r;
+           //qDebug() << r;
        }
 };
 
+
+#if 0
+class CenterLayout : public QLayout {
+    QWidget* centralWidget;
+public:
+       CenterLayout(QWidget* parent, QWidget* center) : QLayout(parent), centralWidget(center) {
+//           setMargin(0);
+/*           setHorizontalSpacing(0);
+           setVerticalSpacing(0);
+
+           setRowStretch(0, 1);
+           setRowStretch(2, 1);
+           setColumnStretch(0, 1);
+           setColumnStretch(2, 1);
+
+           addWidget(center, 1, 1);*/
+       }
+
+       virtual QSize sizeHint() const = 0;
+
+       virtual void addItem(QLayoutItem *) = 0;
+
+       virtual QLayoutItem *itemAt(int index) const = 0;
+
+       virtual QLayoutItem *takeAt(int index) = 0;
+
+       virtual int count() const {
+           return 1;
+       }
+
+       void setGeometry(const QRect& r) {
+           qDebug() << "LAYOUT:" << r;
+           qDebug() << "  WDG:" << centralWidget->sizeHint();
+           //QGridLayout::setGeometry(r);
+           //qDebug() << r;
+       }
+};
+#endif
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent) {
