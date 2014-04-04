@@ -143,6 +143,8 @@ protected:
     void resizeEvent ( QResizeEvent * event );
 
     QSize sizeHint() const;
+
+    bool event(QEvent *e);
 };
 
 
@@ -152,7 +154,6 @@ class MainWindow : public QMainWindow {
     Q_OBJECT;
 
     QAction *actionX;
-    QWidget *centralwidget;
     GraphicsSheet* graphicsSheet;
     QMenuBar *menubar;
     QStatusBar *statusbar;

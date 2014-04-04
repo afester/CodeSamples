@@ -151,7 +151,7 @@ QSize GraphicsSheet::sizeHint() const {
 
    result += QSize(RULERWIDTH, RULERHEIGHT);   // viewport margins are not yet considered!!!
 
-   // qDebug() << "   RESULT:" << result;
+   qDebug() << "   RESULT:" << result;
 
    return result;
 }
@@ -404,13 +404,67 @@ void GraphicsSheet::areaMoved() {
 
 
 
+bool GraphicsSheet::event(QEvent *e) {
+
+    switch (e->type()) {
+        case QEvent::LayoutRequest:
+        case QEvent::Resize:
+            qDebug() << "BEFORE resize";
+            qDebug() << "   VSB:" << verticalScrollBar()->isVisible();
+            qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
+            qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->objectName();
+            qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
+            qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->objectName();
+            qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
+            break;
+    }
+
+    bool result = QGraphicsView::event(e);
+
+    switch (e->type()) {
+        case QEvent::LayoutRequest:
+        case QEvent::Resize:
+            qDebug() << "AFTER resize";
+            qDebug() << "   VSB:" << verticalScrollBar()->isVisible();
+            qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
+            qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
+            qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
+            break;
+    }
+
+    return result;
+}
+
+
+class CenterLayout : public QGridLayout {
+public:
+       CenterLayout(QWidget* parent, QWidget* center) : QGridLayout(parent) {
+           setMargin(0);
+           setHorizontalSpacing(0);
+           setVerticalSpacing(0);
+
+           setRowStretch(0, 1);
+           setRowStretch(2, 1);
+           setColumnStretch(0, 1);
+           setColumnStretch(2, 1);
+
+           addWidget(center, 1, 1);
+       }
+
+       void setGeometry(const QRect& r) {
+           QGridLayout::setGeometry(r);
+           qDebug() << r;
+       }
+};
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent) {
 
     setObjectName(QStringLiteral("MainWindow"));
     resize(1024, 768);
 
-    centralwidget = new QWidget(this);
+    QWidget *centralwidget = new QWidget(this);
 
     graphicsSheet = new GraphicsSheet(centralwidget);
     QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect(graphicsSheet);
@@ -418,20 +472,13 @@ MainWindow::MainWindow(QWidget *parent) :
     shadow->setColor(QColor(0xa0, 0xa0, 0xa0));
     graphicsSheet->setGraphicsEffect(shadow);
 
-    QGridLayout* ml = new QGridLayout(centralwidget);
-    ml->setRowStretch(0, 1);
-    ml->setMargin(0);
-    ml->setHorizontalSpacing(0);
-    ml->setVerticalSpacing(0);
+    // graphicsSheet->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
-    ml->setRowStretch(2, 1);
-    ml->setColumnStretch(0, 1);
-    ml->setColumnStretch(2, 1);
-    ml->addWidget(graphicsSheet, 1, 1);
-
+    QLayout* ml = new CenterLayout(centralwidget, graphicsSheet);
     centralwidget->setLayout(ml);
     setCentralWidget(centralwidget);
 
+/*****************************************************************************/
     menubar = new QMenuBar(this);
     menubar->setObjectName(QStringLiteral("menubar"));
     menubar->setGeometry(QRect(0, 0, 401, 21));
@@ -444,6 +491,7 @@ MainWindow::MainWindow(QWidget *parent) :
     toolBar = new QToolBar(this);
     toolBar->setObjectName(QStringLiteral("toolBar"));
     addToolBar(Qt::TopToolBarArea, toolBar);
+/*****************************************************************************/
 
 /* Initialize zoom, scale, and paper formats */
     graphicsSheet->addScale("1:10",  0.1);
@@ -495,6 +543,14 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(actionInfo, SIGNAL(triggered(bool)),
     				 this, SLOT(printInfo()));
 
+    zoomWidget->getComboBox()->setCurrentIndex(2);
+    sizeWidget->getComboBox()->setCurrentIndex(3);
+    scaleWidget->getComboBox()->setCurrentIndex(2);
+    checkbox->setChecked(true);
+
+    graphicsSheet->setColor(Qt::blue);  // A blue view
+/*****************************************************************************/
+
     GraphicsItem* item = new GraphicsItem(10, 10, 50, 50);
     graphicsSheet->scene()->addItem(item);
     item = new GraphicsItem(0, 0, 5, 5);
@@ -503,13 +559,6 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsSheet->scene()->addItem(item);
     item = new GraphicsItem(125, 100, 200, 100);
     graphicsSheet->scene()->addItem(item);
-
-    zoomWidget->getComboBox()->setCurrentIndex(2);
-    sizeWidget->getComboBox()->setCurrentIndex(3);
-    scaleWidget->getComboBox()->setCurrentIndex(2);
-    checkbox->setChecked(true);
-
-    graphicsSheet->setColor(Qt::blue);	// A blue view
 }
 
 
