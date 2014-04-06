@@ -5,10 +5,6 @@
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
 
-/* StackOverflow reference:
- * http://stackoverflow.com/questions/...
- */
-
 #include <iostream>
 #include <typeinfo>
 
@@ -23,6 +19,8 @@
 #include <QGraphicsDropShadowEffect>
 #include <QScreen>
 #include <QApplication>
+#include <QtCore/qmath.h>
+#include <QScrollbar>
 
 #include "GraphicsView.h"
 #include "LabelledComboBox.h"
@@ -30,60 +28,59 @@
 QLabel* debugConsole;
 int c = 0;
 
-GraphicsView::GraphicsView(QWidget* parent) : QGraphicsView(parent) {
-	setRenderHint(QPainter::Antialiasing);
- //   setViewportMargins(30, 30, 0, 0);
+#define RULERHEIGHT 23
+#define RULERWIDTH 23
 
-	// setAlignment(Qt::AlignTop);
+GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent) {
+	setRenderHint(QPainter::Antialiasing);
+	setAutoFillBackground(true);
+    setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    setViewportMargins(RULERWIDTH, RULERHEIGHT, 0, 0);
 
 	QScreen *srn = QApplication::screens().at(0);
-	//xDpi = (qreal)srn->physicalDotsPerInchX();
-	//yDpi = (qreal)srn->physicalDotsPerInchY();
 	xDpi = (qreal)srn->logicalDotsPerInchX();
+	// xDpi = 93;
 	yDpi = (qreal)srn->logicalDotsPerInchY();
+
+    setFrameStyle(0); // do not show a frame around the scroll area
+
+    // create widget with fixed height of 20 px and maximum width of 200
+    xScale = new ScaleWidget(this, this, ScaleWidget::Horizontal);
+    xScale->setFixedHeight(RULERHEIGHT);
+
+    // create widget with fixed width of 20 px and maximum height of 200
+    yScale = new ScaleWidget(this, this, ScaleWidget::Vertical);
+    yScale->setFixedWidth(RULERWIDTH);
+
+    edge = new ScaleEdgeWidget(this);
+    edge->setFixedSize(RULERHEIGHT, RULERWIDTH);
+
+    QObject::connect(verticalScrollBar(), SIGNAL(valueChanged(int)),
+                     this, SLOT(areaMoved()));
+    QObject::connect(horizontalScrollBar(), SIGNAL(valueChanged(int)),
+                     this, SLOT(areaMoved()));
+
+    setScene(new GraphicsScene());
 }
 
 
-void GraphicsView::drawBackground(QPainter * painter, const QRectF & rect) {
-/*	QString outStr;
-	QTextStream out(&outStr);
-	out << c++ << "  GraphicsView::sceneRect() " << sceneRect().width() << "/" << sceneRect().height()
-	           << "\n  GraphicsScene::sceneRect() " << scene()->sceneRect().width() << "/" << scene()->sceneRect().height();
-	debugConsole->setText(outStr);
-*/
-	//const int radius = 100;
-	//QLinearGradient gradient(0, 0, 0, 150);
-	//gradient.setCenter(radius, radius);
-	//gradient.setFocalPoint(radius, radius);
-	//gradient.setRadius(radius);
-	//gradient.setColorAt(0, Qt::white);
-	//gradient.setColorAt(1, Qt::darkGray);
 
-	//painter->setCompositionMode(QPainter::CompositionMode_Source);
-//	painter->setBrush(gradient);
-	painter->fillRect(rect, QBrush(Qt::white));
-	//painter->fillRect(5, 5, 145, 145, gradient);
-	//painter->fillRect(0, 0, 145, 145, QBrush(Qt::white));
-	//painter->drawEllipse(50, 50, 120, 120);
-
-//	painter->fillRect(rect, QBrush(Qt::lightGray));
-//	painter->fillRect(0, 0, 230, 300, QBrush(Qt::white));
+void GraphicsSheet::drawBackground(QPainter * painter, const QRectF & rect) {
+//	painter->fillRect(rect, QBrush(Qt::white));
 }
 
-void GraphicsView::paintEvent(QPaintEvent * event) {
-	QGraphicsView::paintEvent(event);
-}
 
-void GraphicsView::setColor(const QColor& color) {
+void GraphicsSheet::setColor(const QColor& color) {
     viewColor = color;
 }
 
-QColor GraphicsView::getColor() {
+
+QColor GraphicsSheet::getColor() {
     return viewColor;
 }
 
 
-void GraphicsView::updateSize() {
+void GraphicsSheet::updateSize() {
 	QSizeF realSize = sceneSize;
 	if (landscape) {
 		realSize = QSize(sceneSize.height(), sceneSize.width());
@@ -97,76 +94,227 @@ void GraphicsView::updateSize() {
 	float effectiveScaleX = zoomScale * xScaleDPI;
 	float effectiveScaleY = zoomScale * yScaleDPI;
 
-//	QSize viewportSize((sceneRect().width() * effectiveScaleX)  + 13,	// +1 pixel
-//			 	 	   (sceneRect().height() * effectiveScaleY) + 13);	// to overcome rounding issues
-
-	qDebug() << "DPI:" << xDpi << ", " << yDpi;
-	qDebug() << "px/mm: " << xScaleDPI << ", " << yScaleDPI;
-	qDebug() << "ZOOM SCALE:" << zoomScale;
-	qDebug() << "EFFECTIVE SCALE:" << effectiveScaleX << ", " << effectiveScaleY;
-	qDebug() << "SCENE RECT:" << sceneRect() << "/" << scene()->sceneRect();
-	QRectF scaledScene(sceneRect().x(), sceneRect().y(),
-					   sceneRect().width() * effectiveScaleX,
-					   sceneRect().height() * effectiveScaleY);
-	qDebug() << "SCALED SCENE RECT:" << scaledScene;
-	qDebug() << "SCROLLAREA MIN SIZE:" << minimumSize();
-	qDebug() << "SCROLLAREA MIN SIZE HINT:" << minimumSizeHint();
-
-//	qDebug() << "VIEWPORT SIZE:" << viewportSize;
-
-//	viewport()->setMaximumSize(viewportSize);
-
 	QTransform transform;
 	transform.scale(effectiveScaleX, effectiveScaleY);
 	setTransform(transform);
 
 	updateGeometry();
+
+//	qDebug() << "DPI:" << xDpi << ", " << yDpi;
+//	qDebug() << "px/mm: " << xScaleDPI << ", " << yScaleDPI;
+//	qDebug() << "ZOOM SCALE:" << zoomScale;
+//	qDebug() << "EFFECTIVE SCALE:" << effectiveScaleX << ", " << effectiveScaleY;
+//	qDebug() << "SCENE RECT:" << sceneRect() << "/" << scene()->sceneRect();
+	QRectF scaledScene(sceneRect().x(), sceneRect().y(),
+					   sceneRect().width() * effectiveScaleX,
+					   sceneRect().height() * effectiveScaleY);
+//	qDebug() << "SCALED SCENE RECT:" << scaledScene;
+//	qDebug() << "SCROLLAREA MIN SIZE:" << minimumSize();
+//	qDebug() << "SCROLLAREA MIN SIZE HINT:" << minimumSizeHint();
+//	qDebug() << "SCROLLAREA MAX SIZE: " << maximumSize();
+//	qDebug() << "SCROLLAREA SIZE: " << rect();
 }
 
 
-void GraphicsView::setZoom(int idx) {
-	static float values[] = {0.25, 0.5, 1.0, 2.0};
-
-	if (idx >= 0 && idx < sizeof(values)) {
-		zoomScale = values[idx];
-		updateSize();
-	}
+void GraphicsSheet::setZoom(float zoom) {
+    zoomScale = zoom;
+    updateSize();
 }
 
 
-void GraphicsView::setSize(int idx) {
-	static QSizeF sizes[] = {QSizeF(297.0, 420.0),  // mm (A3)
-							 QSizeF(210.0, 297.0),  // mm (A4)
-							 QSizeF(148, 210) };    // mm (A5)
-
-	if (idx >= 0 && idx < sizeof(sizes)) {
-		sceneSize = sizes[idx];
-		updateSize();
-	}
+void GraphicsSheet::setSize(const QSizeF& dimension) {
+    sceneSize = dimension;
+    updateSize();
 }
 
 
-void GraphicsView::setDirection(int idx) {
-	if (idx == Qt::Checked) {
-		landscape = true;
-	} else {
-		landscape = false;
-	}
-	updateSize();
+void GraphicsSheet::setDirection(int idx) {
+    if (idx == Qt::Checked) {
+        landscape = true;
+    } else {
+        landscape = false;
+    }
+    updateSize();
+}
+
+
+QSize GraphicsSheet::sizeHint() const {
+   // Default size calculation from QGraphicsSheet::sizeHint()
+   QSizeF baseSize = matrix().mapRect(sceneRect()).size();
+   baseSize += QSizeF(frameWidth() * 2, frameWidth() * 2);
+
+   //   baseSize = baseSize.boundedTo((3 * QApplication::desktop()->size()) / 4);
+
+   // before rounding through toSize(), add 0.5 to make sure to round upwards
+   // See https://bugreports.qt-project.org/browse/QTBUG-37702
+   QSize result = QSize(qCeil(baseSize.width()), qCeil(baseSize.height()));
+
+   result += QSize(RULERWIDTH, RULERHEIGHT);   // viewport margins are not yet considered!!!
+
+   qDebug() << "   RESULT:" << result;
+
+   // qDebug() << verticalScrollBar()->width();
+   result += QSize(verticalScrollBar()->isVisible()   ? 16 : 0, // verticalScrollBar()->width() : 0,
+                   horizontalScrollBar()->isVisible() ? 16 : 0); // horizontalScrollBar()->height(): 0);
+   qDebug() << "   RESULT2:" << result;
+
+   return result;
+}
+
+
+void GraphicsSheet::resizeEvent ( QResizeEvent * event ) {
+    qDebug() << "BEFORE resizeEvent";
+    qDebug() << "   VSB:" << verticalScrollBar()->minimum() << " - " << verticalScrollBar()->maximum();
+    qDebug() << "   HSB:" << horizontalScrollBar()->minimum() << " - " << horizontalScrollBar()->maximum();
+//    qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
+//    qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->objectName();
+//    qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
+//    qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->objectName();
+//    qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
+
+    QGraphicsView::resizeEvent(event);
+
+    if (verticalScrollBar()->maximum() < 16) { // <=  verticalScrollBar()->width()) {
+        verticalScrollBar()->setMaximum(0);
+    }
+    if (horizontalScrollBar()->maximum() < 16) { // <= horizontalScrollBar()->height()) {
+        horizontalScrollBar()->setMaximum(0);
+    }
+    updateGeometry();   // triggers a re-read of sizeHint()!
+
+    // the previous call recalculates the scroll bar ranges, but does not yet
+    // enable or disable the scroll bar widgets. Instead, it schedules a
+    // QueuedConnection event which will asynchronously call layoutChildren()
+    // in the private QAbstractScrollArea code. This will finally lead to
+    // showing or hiding the scroll bars, depending on their current range.
+
+    qDebug() << "AFTER resizeEvent";
+    qDebug() << "   VSB:" << verticalScrollBar()->minimum() << " - " << verticalScrollBar()->maximum();
+    qDebug() << "   HSB:" << horizontalScrollBar()->minimum() << " - " << horizontalScrollBar()->maximum();
+//    qDebug() << "   VSB:" << verticalScrollBar()->isVisible();
+//    qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
+//    qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->objectName();
+//    qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
+//    qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->objectName();
+//    qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
+
+    xScale->setGeometry(RULERWIDTH, 0, viewport()->width(), xScale->height());
+    yScale->setGeometry(0, RULERHEIGHT, yScale->width(), viewport()->height());
+}
+
+
+void GraphicsSheet::setUnit(const QString& unit) {
+    edge->setUnit(unit);
+}
+
+void GraphicsSheet::addZoom(const QString& name, float level) {
+    zoomNames.append(name);
+    zoomLevels.append(level);
+}
+
+
+QStringList GraphicsSheet::getZoomNames() const {
+    return zoomNames;
+}
+
+
+void GraphicsSheet::setZoom(int idx) {
+    if (idx >= 0 && idx < zoomLevels.size()) {
+        setZoom(zoomLevels.at(idx));
+    }
+}
+
+
+void GraphicsSheet::addScale(const QString& name, float level) {
+    scaleNames.append(name);
+    scaleLevels.append(level);
+}
+
+
+QStringList GraphicsSheet::getScaleNames() const {
+    return scaleNames;
+}
+
+
+void GraphicsSheet::setScale(int idx) {
+    if (idx >= 0 && idx < scaleLevels.size()) {
+        xScale->setScale(scaleLevels.at(idx));
+        xScale->repaint();
+        yScale->setScale(scaleLevels.at(idx));
+        yScale->repaint();
+    }
+}
+
+void GraphicsSheet::addSize(const QString& name, const QSizeF& size) {
+    sizeNames.append(name);
+    sizeDimensions.append(size);
+}
+
+
+QStringList GraphicsSheet::getSizeNames() const {
+    return sizeNames;
+}
+
+
+void GraphicsSheet::setSize(int idx) {
+    if (idx >= 0 && idx < sizeDimensions.size()) {
+        setSize(sizeDimensions[idx]);
+    }
+}
+
+
+void GraphicsSheet::areaMoved() {
+    QPoint topLeft = viewport()->rect().topLeft();
+
+    xScale->setOffset(horizontalScrollBar()->value() - topLeft.x());
+    yScale->setOffset(verticalScrollBar()->value() - topLeft.y());
 }
 
 
 
-void GraphicsView::setupViewport ( QWidget * viewport ) {
+bool GraphicsSheet::event(QEvent *e) {
 
+/*
+QObject::connect(hbar, SIGNAL(valueChanged(int)),     q, SLOT(_q_hslide(int)));
+QObject::connect(hbar, SIGNAL(rangeChanged(int,int)), q, SLOT(_q_showOrHideScrollBars()), Qt::QueuedConnection);
+*/
+    /*
+    switch (e->type()) {
+        case QEvent::LayoutRequest:
+        case QEvent::Resize:
+            qDebug() << "BEFORE resize";
+            qDebug() << "   VSB:" << verticalScrollBar()->isVisible();
+            qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
+            qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->objectName();
+            qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
+            qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->objectName();
+            qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
+            break;
+    }
+*/
+    bool result = QGraphicsView::event(e);
+/*
+    switch (e->type()) {
+        case QEvent::LayoutRequest:
+        case QEvent::Resize:
+            qDebug() << "AFTER resize";
+            qDebug() << "   VSB:" << verticalScrollBar()->isVisible();
+            qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
+            qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
+            qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
+            break;
+    }
+*/
+    return result;
 }
 
 GraphicsItem::GraphicsItem ( qreal x, qreal y, qreal width, qreal height, QGraphicsItem * parent) :
         QGraphicsRectItem(x, y, width, height, parent) {
 }
 
+
 void GraphicsItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget) {
-    GraphicsView* requestingView = dynamic_cast<GraphicsView*>(widget->parent());
+    GraphicsSheet* requestingView = dynamic_cast<GraphicsSheet*>(widget->parent());
     if (requestingView) {
         painter->setPen(requestingView->getColor());
     }
@@ -174,117 +322,243 @@ void GraphicsItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * 
     painter->drawRect(rect());
 }
 
+
+class ColoredWidget : public QWidget {
+public:
+    ColoredWidget(const  QColor& color, QWidget* parent) : QWidget(parent) {
+        QPalette pal;
+        QBrush brush(color);
+        brush.setStyle(Qt::SolidPattern);
+        pal.setBrush(QPalette::Active, QPalette::Window, brush);
+        setPalette(pal);
+        setAutoFillBackground(true);
+    }
+};
+
+
+ScaleEdgeWidget::ScaleEdgeWidget(QWidget* parent) : QWidget(parent) {
+    setAutoFillBackground(true);
+    setFont(QFont("Sans", 6));  // default font
+
+    QPalette pal = palette();
+    pal.setBrush(QPalette::Base, Qt::white);
+    pal.setBrush(QPalette::Window, Qt::white);
+    setPalette(pal);
+}
+
+void ScaleEdgeWidget::setUnit(const QString& theUnit) {
+    unit = theUnit;
+}
+
+void ScaleEdgeWidget::paintEvent ( QPaintEvent * event ) {
+    QPainter p(this);
+    p.setRenderHint(QPainter::Antialiasing);
+
+    p.setPen(Qt::darkGray);
+    p.drawLine(0, 0, width(), 0);
+    p.drawLine(1, 1, width(), 1);
+    p.drawLine(0, 0, 0, height());
+    p.drawLine(1, 1, 1, height());
+    p.drawLine(1, 1, width(), height());
+
+    QTextOption option;
+    option.setAlignment(Qt::AlignRight);
+    QRectF textBox(2, 1,
+                   20, fontMetrics().height());
+    //p.drawRect(textBox);
+    p.drawText(textBox, unit, option);
+
+    QRectF textBox2(2, 3 + fontMetrics().height(),
+                    20, fontMetrics().height());
+    //p.drawRect(textBox2);
+    p.drawText(textBox2, unit);
+}
+
+
+ScaleWidget::ScaleWidget(QWidget* parent, GraphicsSheet* view, Direction dir) :
+            QWidget(parent), theView(view), direction(dir),
+            smallTicksSize(4), mediumTicksSize(6), largeTicksSize(8), offset(0) {
+    setAutoFillBackground(true);
+    setFont(QFont("Sans", 6));  // default font
+
+    QPalette pal = palette();
+    pal.setBrush(QPalette::Base, Qt::white); /// QColor(0xf8, 0xf8, 0xf8)); //Qt::white);
+    pal.setBrush(QPalette::Window, Qt::white); // QColor(0xf8, 0xf8, 0xf8)); // Qt::white);
+    pal.setColor(QPalette::Foreground, QColor(0x80, 0x80, 0x80)); // Qt::gray);
+    setPalette(pal);
+}
+
+
+void ScaleWidget::setScale(float scale) {
+    theScale = scale;
+}
+
+
+void ScaleWidget::setOffset(int value) {
+    offset = value;
+    repaint();
+}
+
+
+void ScaleWidget::paintEvent ( QPaintEvent * event ) {
+    QPainter p(this);
+
+    QFontMetrics fm = fontMetrics();
+
+
+    if (direction == Vertical) {
+        p.setPen(Qt::lightGray);
+        p.drawLine(width() - 1, 0, width() - 1, height());
+
+        p.setPen(Qt::darkGray);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.drawLine(0, 0, 0, height());
+        p.drawLine(1, 0, 1, height() - 2);
+
+        qreal scale = theView->transform().m22();
+        QTextOption option;
+        option.setAlignment(Qt::AlignRight);
+
+        for (int y = 0;  y < (theView->viewport()->height() + offset ) / scale;  y++) {
+            float ypos = y*scale - offset;
+
+            if ( (y % 10) == 0) {
+                p.drawLine(QPointF(20 - largeTicksSize, ypos),
+                           QPointF(width() - 4, ypos));
+
+                if (y > 0) {
+                    QRectF textBox(0, ypos - fm.height(), 14, fm.height());
+                    //p.drawRect(textBox);
+                    p.drawText(textBox, QString::number(y / theScale), option);
+                }
+            } else if ( (y % 5) == 0) {
+                p.drawLine(QPointF(20 - mediumTicksSize, ypos),
+                           QPointF(width() - 4, ypos));
+            } else {
+                p.drawLine(QPointF(20 - smallTicksSize, ypos),
+                           QPointF(width() - 4, ypos));
+            }
+        }
+    } else {
+        p.setPen(Qt::lightGray);
+        p.drawLine(0, height() - 1, width(), height() - 1);
+
+        p.setPen(Qt::darkGray);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.drawLine(0, 0, width(), 0);
+        p.drawLine(0, 1, width() - 2, 1);
+
+        qreal scale = theView->transform().m11();
+        QTextOption option;
+        option.setAlignment(Qt::AlignRight);
+
+        for (int x = 0;  x < (theView->viewport()->width() + offset ) / scale;  x++) {
+            float xpos = x*scale - offset;
+
+            if ( (x % 10) == 0) {
+                p.drawLine(QPointF(xpos, 19 - largeTicksSize),
+                           QPointF(xpos, height() - 4));
+
+                if (x > 0) {
+                    QRectF textBox(xpos - 20, 3,
+                            //(x-9)*scale, 0, // 22 - largeTicksSize - fm.height(),
+                                    18, fm.height());
+                    //p.drawRect(textBox);
+                    p.drawText(textBox, QString::number(x / theScale), option);
+                }
+            } else if ( (x % 5) == 0) {
+                p.drawLine(QPointF(xpos, 19 - mediumTicksSize),
+                           QPointF(xpos, height() - 4));
+            } else {
+                p.drawLine(QPointF(xpos, 19 - smallTicksSize),
+                           QPointF(xpos, height() - 4));
+            }
+        }
+    }
+}
+
+
+class CenterLayout : public QGridLayout {
+public:
+       CenterLayout(QWidget* parent, QWidget* center) : QGridLayout(parent) {
+           setMargin(0);
+           setHorizontalSpacing(0);
+           setVerticalSpacing(0);
+
+           setRowStretch(0, 1);
+           setRowStretch(2, 1);
+           setColumnStretch(0, 1);
+           setColumnStretch(2, 1);
+
+           addWidget(center, 1, 1);
+       }
+
+       void setGeometry(const QRect& r) {
+           QGridLayout::setGeometry(r);
+           //qDebug() << r;
+       }
+};
+
+
+#if 0
+class CenterLayout : public QLayout {
+    QWidget* centralWidget;
+public:
+       CenterLayout(QWidget* parent, QWidget* center) : QLayout(parent), centralWidget(center) {
+//           setMargin(0);
+/*           setHorizontalSpacing(0);
+           setVerticalSpacing(0);
+
+           setRowStretch(0, 1);
+           setRowStretch(2, 1);
+           setColumnStretch(0, 1);
+           setColumnStretch(2, 1);
+
+           addWidget(center, 1, 1);*/
+       }
+
+       virtual QSize sizeHint() const = 0;
+
+       virtual void addItem(QLayoutItem *) = 0;
+
+       virtual QLayoutItem *itemAt(int index) const = 0;
+
+       virtual QLayoutItem *takeAt(int index) = 0;
+
+       virtual int count() const {
+           return 1;
+       }
+
+       void setGeometry(const QRect& r) {
+           qDebug() << "LAYOUT:" << r;
+           qDebug() << "  WDG:" << centralWidget->sizeHint();
+           //QGridLayout::setGeometry(r);
+           //qDebug() << r;
+       }
+};
+#endif
+
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent), scene(new QGraphicsScene()) {
-
-
-    //// green background palette for testing
-    QPalette green;
-    QBrush brush1(Qt::green);
-    brush1.setStyle(Qt::SolidPattern);
-    green.setBrush(QPalette::Active, QPalette::Base, brush1);
-    green.setBrush(QPalette::Active, QPalette::Window, brush1);
-    green.setBrush(QPalette::Inactive, QPalette::Base, brush1);
-    green.setBrush(QPalette::Inactive, QPalette::Window, brush1);
-    green.setBrush(QPalette::Disabled, QPalette::Base, brush1);
-    green.setBrush(QPalette::Disabled, QPalette::Window, brush1);
-
-    QPalette red;
-    QBrush brush(Qt::lightGray);
-    brush.setStyle(Qt::SolidPattern);
-    red.setBrush(QPalette::Active, QPalette::Base, brush);
-    red.setBrush(QPalette::Active, QPalette::Window, brush);
-    red.setBrush(QPalette::Inactive, QPalette::Base, brush);
-    red.setBrush(QPalette::Inactive, QPalette::Window, brush);
-    red.setBrush(QPalette::Disabled, QPalette::Base, brush);
-    red.setBrush(QPalette::Disabled, QPalette::Window, brush);
-
-    QPalette yellow;
-    QBrush brush3(Qt::yellow);
-    brush3.setStyle(Qt::SolidPattern);
-    yellow.setBrush(QPalette::Active, QPalette::Base, brush3);
-    yellow.setBrush(QPalette::Active, QPalette::Window, brush3);
-    yellow.setBrush(QPalette::Inactive, QPalette::Base, brush3);
-    yellow.setBrush(QPalette::Inactive, QPalette::Window, brush3);
-    yellow.setBrush(QPalette::Disabled, QPalette::Base, brush3);
-    yellow.setBrush(QPalette::Disabled, QPalette::Window, brush3);
-
+    QMainWindow(parent) {
 
     setObjectName(QStringLiteral("MainWindow"));
-    resize(640, 480);
+    resize(1024, 768);
 
-    actionX = new QAction(this);
-    actionX->setObjectName(QStringLiteral("actionX"));
+    QWidget *centralwidget = new QWidget(this);
 
-    centralwidget = new QWidget();
-
-    QFrame* graphicsWidget = new QFrame(centralwidget);
-
-    QGridLayout* ml = new QGridLayout(centralwidget);
-    ml->setRowStretch(0, 1);
-    ml->setMargin(0);
-    ml->setHorizontalSpacing(0);
-    ml->setVerticalSpacing(0);
-
-    ml->setRowStretch(2, 1);
-    ml->setColumnStretch(0, 1);
-    ml->setColumnStretch(2, 1);
-    ml->addWidget(new QWidget(), 0, 1);
-    ml->addWidget(new QWidget(), 1, 0);
-    ml->addWidget(new QWidget(), 1, 2);
-    ml->addWidget(new QWidget(), 2, 1);
-    ml->addWidget(graphicsWidget, 1, 1);
-    centralwidget->setLayout(ml);
-
-	QPalette palette;
-	palette.setColor(QPalette::Foreground, QColor(0xa0, 0xa0, 0xa0));
-	graphicsWidget->setPalette(palette);
-
-    graphicsWidget->setFrameStyle(QFrame::Box);
-    QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect(graphicsWidget);
+    graphicsSheet = new GraphicsSheet(centralwidget);
+    QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect(graphicsSheet);
     shadow->setBlurRadius(20);
     shadow->setColor(QColor(0xa0, 0xa0, 0xa0));
-    graphicsWidget->setGraphicsEffect(shadow);
-    graphicsWidget->setAutoFillBackground(true);
+    graphicsSheet->setGraphicsEffect(shadow);
 
-    QGridLayout* layout = new QGridLayout();
-    graphicsWidget->setLayout(layout);
+    // graphicsSheet->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
-    layout->setMargin(0);
-    layout->setHorizontalSpacing(0);
-    layout->setVerticalSpacing(0);
-    graphicsWidget->setObjectName(QStringLiteral("centralwidget"));
-
-    QWidget* topHeader = new QWidget(graphicsWidget);
-    topHeader->setFixedHeight(30);
-    topHeader->setPalette(green);
-    topHeader->setAutoFillBackground(true);
-//    topHeader->setMaximumWidth(430);
-
-    QWidget* leftHeader = new QWidget(graphicsWidget);
-    leftHeader->setFixedWidth(30);
-    leftHeader->setPalette(green);
-    leftHeader->setAutoFillBackground(true);
-//    leftHeader->setMaximumHeight(630);
-
-    QVBoxLayout* vbox = new QVBoxLayout();
-    vbox->addWidget(leftHeader, 1);
-    vbox->addStretch(0);
-
-    view = new GraphicsView(graphicsWidget);
-    view->setObjectName(QStringLiteral("view"));
-
-    layout->addWidget(topHeader, 0, 1);
-    layout->addLayout(vbox, 1, 0);
-    // layout->addWidget(leftHeader, 1, 0);
-    layout->addWidget(view, 1, 1);
-
-/*******************************/
-
+    QLayout* ml = new CenterLayout(centralwidget, graphicsSheet);
+    centralwidget->setLayout(ml);
     setCentralWidget(centralwidget);
 
-    view->setFrameStyle(0);	// do not show a frame around the scroll area
-
+/*****************************************************************************/
     menubar = new QMenuBar(this);
     menubar->setObjectName(QStringLiteral("menubar"));
     menubar->setGeometry(QRect(0, 0, 401, 21));
@@ -297,153 +571,83 @@ MainWindow::MainWindow(QWidget *parent) :
     toolBar = new QToolBar(this);
     toolBar->setObjectName(QStringLiteral("toolBar"));
     addToolBar(Qt::TopToolBarArea, toolBar);
+/*****************************************************************************/
 
-    toolBar->addAction(actionX);
+/* Initialize zoom, scale, and paper formats */
+    graphicsSheet->addScale("1:10",  0.1);
+    graphicsSheet->addScale("1:5",   0.2);
+    graphicsSheet->addScale("1:2",   0.5);
+    graphicsSheet->addScale("1:1",   1.0);
+    graphicsSheet->addScale("2:1",   2.0);
+    graphicsSheet->addScale("5:1",   5.0);
+    graphicsSheet->addScale("10:1", 10.0);
 
-    QMetaObject::connectSlotsByName(this);
+    LabelledComboBox* scaleWidget = new LabelledComboBox(toolBar, "Scale: ");
+    scaleWidget->getComboBox()->addItems(graphicsSheet->getScaleNames());
+    toolBar->addWidget(scaleWidget);
+    QObject::connect(scaleWidget->getComboBox(), SIGNAL(currentIndexChanged(int)),
+                     graphicsSheet, SLOT(setScale(int)));
 
-/**********************************************/
+    graphicsSheet->addZoom("50%",  0.5);
+    graphicsSheet->addZoom("75%",  0.75);
+    graphicsSheet->addZoom("100%", 1.0);
+    graphicsSheet->addZoom("125%", 1.25);
+    graphicsSheet->addZoom("150%", 1.5);
+    graphicsSheet->addZoom("200%", 2.0);
 
-    debugConsole = new QLabel();
-    debugConsole->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    debugConsole->setAlignment(Qt::AlignTop);
-    debugConsole->setFixedHeight(200);
-    debugConsole->setFixedWidth(200);
-    debugConsole->show();
-
-    LabelledComboBox* zoomWidget = new LabelledComboBox(toolBar, "Scale: ");
-    zoomWidget->getComboBox()->addItem("25%");
-    zoomWidget->getComboBox()->addItem("50%");
-    zoomWidget->getComboBox()->addItem("100%");
-    zoomWidget->getComboBox()->addItem("200%");
+    LabelledComboBox* zoomWidget = new LabelledComboBox(toolBar, "Zoom: ");
+    zoomWidget->getComboBox()->addItems(graphicsSheet->getZoomNames());
     toolBar->addWidget(zoomWidget);
     QObject::connect(zoomWidget->getComboBox(), SIGNAL(currentIndexChanged(int)),
-    				 view, SLOT(setZoom(int)));
+                     graphicsSheet, SLOT(setZoom(int)));
 
-    LabelledComboBox* sizeWidget = new LabelledComboBox(toolBar, "Size: ");
-    sizeWidget->getComboBox()->addItem("DIN A3");
-    sizeWidget->getComboBox()->addItem("DIN A4");
-    sizeWidget->getComboBox()->addItem("DIN A5");
+    graphicsSheet->setUnit("mm");
+    graphicsSheet->addSize("DIN A3", QSizeF(297.0, 420.0));
+    graphicsSheet->addSize("DIN A4", QSizeF(210.0, 297.0));
+    graphicsSheet->addSize("Letter", QSizeF(215.9, 279.4));
+    graphicsSheet->addSize("DIN A5", QSizeF(148.0, 210.0));
+
+    LabelledComboBox* sizeWidget = new LabelledComboBox(toolBar, "Sheet Size: ");
+    sizeWidget->getComboBox()->addItems(graphicsSheet->getSizeNames());
     toolBar->addWidget(sizeWidget);
     QObject::connect(sizeWidget->getComboBox(), SIGNAL(currentIndexChanged(int)),
-    				 view, SLOT(setSize(int)));
+                     graphicsSheet, SLOT(setSize(int)));
 
     QCheckBox* checkbox = new QCheckBox("Landscape: ", toolBar);
     toolBar->addWidget(checkbox);
     QObject::connect(checkbox, SIGNAL(stateChanged(int)),
-    				 view, SLOT(setDirection(int)));
+                     graphicsSheet, SLOT(setDirection(int)));
 
+    QAction* actionInfo = new QAction("Info", this);
+    toolBar->addAction(actionInfo);
+    QObject::connect(actionInfo, SIGNAL(triggered(bool)),
+    				 this, SLOT(printInfo()));
 
-/*******************************************/
-#if 0
-    // set up a graphics scene
-    QGraphicsRectItem* paper = new QGraphicsRectItem(0, 0, 230, 300);
-    paper->setBrush(Qt::white);
-    paper->setPen(Qt::NoPen); // QPen(Qt::darkGray));
-    QGraphicsDropShadowEffect* eff = new QGraphicsDropShadowEffect();
-    paper->setGraphicsEffect(eff);
-    paper->setFlag(QGraphicsItem::ItemClipsChildrenToShape); // items are NOT children of this item by default!
-    scene->addItem(paper);
+    zoomWidget->getComboBox()->setCurrentIndex(2);
+    sizeWidget->getComboBox()->setCurrentIndex(3);
+    scaleWidget->getComboBox()->setCurrentIndex(2);
+    checkbox->setChecked(true);
 
-    QGraphicsRectItem* item2 = new QGraphicsRectItem(0, -10, 230, 10);
-    scene->addItem(item2);
-    item2 = new QGraphicsRectItem(-10, 0, 10, 300);
-    scene->addItem(item2);
+    graphicsSheet->setColor(Qt::blue);  // A blue view
+/*****************************************************************************/
 
     GraphicsItem* item = new GraphicsItem(10, 10, 50, 50);
-    scene->addItem(item);
+    graphicsSheet->scene()->addItem(item);
     item = new GraphicsItem(0, 0, 5, 5);
-    scene->addItem(item);
+    graphicsSheet->scene()->addItem(item);
     item = new GraphicsItem(225, 295, 5, 5);
-    scene->addItem(item);
-    item = new GraphicsItem(125, 100, 200, 100, paper);
-    scene->addItem(item);
-#endif
-
-    view->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-
-
-//    scene->setSceneRect(0, 0, 400, 600);
-//    view->viewport()->setMaximumSize(400, 600);
-//   view->setMaximumSize(440, 640);
-
-/*
-    QWidget* topRuler = new QWidget(view);
-    topRuler->setPalette(yellow);
-    topRuler->setAutoFillBackground(true);
-    topRuler->setFixedWidth(400);
-    topRuler->setFixedHeight(30);
-    topRuler->move(30, 0);
-
-    QWidget* leftRuler = new QWidget(view);
-    leftRuler->setPalette(yellow);
-    leftRuler->setAutoFillBackground(true);
-    leftRuler->setFixedWidth(30);
-    leftRuler->setFixedHeight(600);
-    leftRuler->move(0, 30);
-*/
-    GraphicsItem* item = new GraphicsItem(10, 10, 50, 50);
-    scene->addItem(item);
-    item = new GraphicsItem(0, 0, 5, 5);
-    scene->addItem(item);
-    item = new GraphicsItem(225, 295, 5, 5);
-    scene->addItem(item);
+    graphicsSheet->scene()->addItem(item);
     item = new GraphicsItem(125, 100, 200, 100);
-    scene->addItem(item);
+    graphicsSheet->scene()->addItem(item);
+}
 
 
-// sceneRect does not affect clipping! Items still paint outside the sceneRect if necessary.
-//    scene->setSceneRect(-15, -15, 260, 320);
-    view->setScene(scene);
-
-    // initialize the sizes
-    view->setSize(1);					// A4
-    view->setDirection(Qt::Unchecked);	// portrait
-    view->setZoom(2);					// 100%
-
-#if 0
-/*	QVBoxLayout* vbox = new QVBoxLayout();
-	vbox->addWidget(leftHeader, 1);
-	vbox->addStretch(0);
-	//layout->addWidget(leftHeader, 1, 0);
-	layout->addLayout(vbox, 1, 0);
-*/
-
-
-    QWidget* drawArea = ui->view->viewport();
-    QGridLayout* layout = new QGridLayout();
-
-    QWidget* mainWidget = new QWidget();
-
-    QWidget* top = new QWidget(mainWidget);
-    top->setAutoFillBackground(true);
-    top->setFixedHeight(10);
-    QPalette pal = top->palette();
-    pal.setColor(QPalette::Window, Qt::yellow);
-    top->setPalette(pal);
-
-    QWidget* left = new QWidget(mainWidget);
-    left->setAutoFillBackground(true);
-    left->setFixedWidth(10);
-    QPalette pal2 = left->palette();
-    pal2.setColor(QPalette::Window, Qt::green);
-    left->setPalette(pal2);
-
-    mainWidget->setLayout(layout);
-    //layout->addWidget(new QLabel("Horizontal label", mainWidget), 0, 0);
-    //layout->addWidget(drawArea, 1, 0);
-    layout->addWidget(top, 0, 1);
-    layout->addWidget(left, 1, 0);
-  //  layout->addWidget(drawArea, 1, 1);
-
-
-    ui->view->setViewport(mainWidget);
-#endif
-
-    view->setColor(Qt::blue);	// A blue view
+void MainWindow::printInfo() {
+	qDebug() << "\nLAYOUT INFO:\n====================";
+	qDebug() << "   QGraphicsSheet: " << graphicsSheet->rect();
+	qDebug() << "   viewport: " << graphicsSheet->viewport()->rect();
 }
 
 
 MainWindow::~MainWindow() {
-    delete scene;
 }

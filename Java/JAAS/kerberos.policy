@@ -1,4 +1,0 @@
-grant codebase "file:bin/" {
-   permission javax.security.auth.AuthPermission
-                    "createLoginContext.KerberosLogin";
-};

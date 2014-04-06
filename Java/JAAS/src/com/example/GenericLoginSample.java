@@ -10,17 +10,14 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 /*
- * http://docs.oracle.com/javase/7/docs/jre/api/security/jaas/spec/com/sun/security/auth/module/Krb5LoginModule.html
- * http://docs.oracle.com/javase/7/docs/technotes/guides/security/jgss/single-signon.html
- * http://docs.oracle.com/javase/7/docs/technotes/guides/security/jgss/tutorials/index.html
- * http://docs.oracle.com/javase/7/docs/technotes/guides/security/jgss/tutorials/KerberosReq.html
+ * This example shows that the JAAS API is generic enough to use the same code
+ * for completely different authentication mechanisms.
+ * All we need to do is to configure the name of the login configuration in some
+ * configuration file (security.properties in this example).
  */
-public class KerberosSample {
+public class GenericLoginSample {
 
    public static void main(String[] args) {
-      System.setProperty("java.security.policy", "=kerberos.policy");
-      System.setSecurityManager(new SecurityManager());
-
       // Load security related system properties from property file
       Properties p = System.getProperties();
       try {
@@ -30,9 +27,16 @@ public class KerberosSample {
       }
       System.setProperties(p);
 
+      // read authentication and policy file configuration from the respective properties
+      String policyFile = System.getProperty("com.example.PolicyFile");
+      String loginConfig = System.getProperty("com.example.LoginConfig");
+
+      System.setProperty("java.security.policy", policyFile);
+      System.setSecurityManager(new SecurityManager());
+
       LoginContext lc = null;
       try {
-         lc = new LoginContext("KerberosLogin", new TextCallbackHandler());
+         lc = new LoginContext(loginConfig, new TextCallbackHandler());
 
          // attempt authentication
          System.err.println("Logging in ...");

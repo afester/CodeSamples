@@ -9,16 +9,10 @@ import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-/*
- * http://docs.oracle.com/javase/7/docs/jre/api/security/jaas/spec/com/sun/security/auth/module/Krb5LoginModule.html
- * http://docs.oracle.com/javase/7/docs/technotes/guides/security/jgss/single-signon.html
- * http://docs.oracle.com/javase/7/docs/technotes/guides/security/jgss/tutorials/index.html
- * http://docs.oracle.com/javase/7/docs/technotes/guides/security/jgss/tutorials/KerberosReq.html
- */
-public class KerberosSample {
+public class LDAPSample {
 
    public static void main(String[] args) {
-      System.setProperty("java.security.policy", "=kerberos.policy");
+      System.setProperty("java.security.policy", "=ldap.policy");
       System.setSecurityManager(new SecurityManager());
 
       // Load security related system properties from property file
@@ -32,7 +26,7 @@ public class KerberosSample {
 
       LoginContext lc = null;
       try {
-         lc = new LoginContext("KerberosLogin", new TextCallbackHandler());
+         lc = new LoginContext("LDAPWLSLogin", new TextCallbackHandler());
 
          // attempt authentication
          System.err.println("Logging in ...");

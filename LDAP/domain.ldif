@@ -1,0 +1,7 @@
+# Creates the top level object for the domain
+dn: dc=example,dc=com
+ObjectClass: top
+ObjectClass: dcObject
+ObjectClass: organization
+dc: example
+o : Example

@@ -1,1 +1,3 @@
 security.properties
+login.config
+kerberos.policy
