@@ -35,7 +35,7 @@ public:
 
 
     virtual QSize sizeHint() const {
-        QSize result = viewport()->sizeHint();
+        QSize result = widget()->sizeHint(); //viewport()->sizeHint();
         qDebug() << "ScrollArea::sizeHint(): " << result;
         return result;
     }
@@ -68,10 +68,42 @@ public:
         qDebug() << "Resize:" << geometry();
         qDebug() << "sizeHint:" << theChild->sizeHint();
 
-        int xpos = (width() - theChild->width()) / 2;
-        int ypos = (height() - theChild->height()) / 2;
-        theChild->setGeometry(xpos, ypos,
-                              theChild->sizeHint().width(), theChild->sizeHint().height());
+        int wid = theChild->sizeHint().width();
+        int h = theChild->sizeHint().height();
+
+        int xpos = 0;
+        int ypos = 0;
+        if (width() < theChild->sizeHint().width() &&
+            height() < theChild->sizeHint().height()) {
+            // both scrollbars required
+            xpos = 0;
+            ypos = 0;
+            wid = width();
+            h = height();
+
+        } else if (width() < theChild->sizeHint().width()) {
+            // only horizontal scroll bar required
+            wid = width();
+            xpos = 0;
+            ypos = (height() - h) / 2; // theChild->height()) / 2;
+            h += 17;
+
+        } else if (height() < theChild->sizeHint().height()) {
+            // only vertical scroll bar required
+            h = height();
+            xpos = (width() - wid) / 2;
+            ypos = 0;
+            wid += 17;
+
+        } else {
+            xpos = (width() - wid) / 2;
+            ypos = (height() - h) / 2;
+        }
+
+        qDebug() << "new geom:" << xpos <<"," << ypos << "," << wid << "," << h;
+
+        int frameWidth = 0; // !!!!
+        theChild->setGeometry(xpos, ypos, wid + frameWidth, h + frameWidth);
     }
 };
 
@@ -130,13 +162,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QWidget* viewPort = new ViewportWidget();
     viewPort->setGeometry(0, 0, viewPort->sizeHint().width(), viewPort->sizeHint().height());
+    viewPort->setMinimumSize(viewPort->sizeHint());
 
     QScrollArea* scrollArea = new ScrollArea(centralWidget);
-    scrollArea->setViewport(viewPort);
+
+    // do not draw a frame around the scroll area - otherwise, we need
+    // to add the frame width * 2 to the geometry in order to hide the scrollbars!
+    scrollArea->setFrameStyle(0);
+    scrollArea->setWidget(viewPort);
+    // scrollArea->setViewport(viewPort);
 
     centralWidget->setWidget(scrollArea);
 
-    scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOn);
+    scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAsNeeded);
+    scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded);
 
     setCentralWidget(centralWidget);
 }
