@@ -1,2 +1,10 @@
-debug
+# Common patterns
+Makefile*
+
+# Generated Qt files
+ui_*.h
+moc_*.cpp
+qrc_*.cpp
+
 release
+debug

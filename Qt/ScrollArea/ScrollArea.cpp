@@ -542,7 +542,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setObjectName(QStringLiteral("MainWindow"));
     resize(1024, 768);
-
+#if 0
     QWidget *centralwidget = new QWidget(this);
 
     graphicsSheet = new GraphicsSheet(centralwidget);
@@ -637,6 +637,7 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsSheet->scene()->addItem(item);
     item = new GraphicsItem(125, 100, 200, 100);
     graphicsSheet->scene()->addItem(item);
+#endif
 }
 
 
