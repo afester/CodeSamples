@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QPainter>
 #include <QScrollArea>
+#include <QScrollBar>
 
 #include "ScrollArea.h"
 
@@ -65,42 +66,61 @@ public:
     void resizeEvent ( QResizeEvent * event ) {
         QWidget::resizeEvent(event);
 
-        qDebug() << "Resize:" << geometry();
-        qDebug() << "sizeHint:" << theChild->sizeHint();
+        //qDebug() << "Resize:" << geometry();
+        //qDebug() << "sizeHint:" << theChild->sizeHint();
 
         int wid = theChild->sizeHint().width();
         int h = theChild->sizeHint().height();
 
         int xpos = 0;
         int ypos = 0;
-        if (width() < theChild->sizeHint().width() &&
-            height() < theChild->sizeHint().height()) {
+        if (width() < wid &&
+            height() < h) {
+
             // both scrollbars required
-            xpos = 0;
-            ypos = 0;
             wid = width();
             h = height();
 
-        } else if (width() < theChild->sizeHint().width()) {
+        } else if (width() < wid) {
             // only horizontal scroll bar required
+
+            h += theChild->horizontalScrollBar()->height();
+
             wid = width();
-            xpos = 0;
-            ypos = (height() - h) / 2; // theChild->height()) / 2;
-            h += 17;
 
-        } else if (height() < theChild->sizeHint().height()) {
+            // the new y position is based on the exended height (including scroll bars)
+            // this leads to a lesser smoothly transition from no scroll bars to scroll bars,
+            // but avoids an asymmetry once the scroll bars are shown.
+            ypos = (height() - h) / 2;
+
+            if (height() < h) { // again both required
+                xpos = 0;
+                ypos = 0;
+                h = height();
+            }
+
+        } else if (height() < h) {
             // only vertical scroll bar required
-            h = height();
-            xpos = (width() - wid) / 2;
-            ypos = 0;
-            wid += 17;
+            wid += theChild->verticalScrollBar()->width();
 
+            h = height();
+
+            // the new x position is based on the extended width (including scroll bars)
+            // this leads to a lesser smoothly transition from no scroll bars to scroll bars,
+            // but avoids an asymmetry once the scroll bars are shown.
+            xpos = (width() - wid) / 2;
+
+            if (width() < wid) {  // again both required
+                xpos = 0;
+                ypos = 0;
+                wid = width();
+            }
         } else {
             xpos = (width() - wid) / 2;
             ypos = (height() - h) / 2;
         }
 
-        qDebug() << "new geom:" << xpos <<"," << ypos << "," << wid << "," << h;
+        //qDebug() << "new geom:" << xpos <<"," << ypos << "," << wid << "," << h;
 
         int frameWidth = 0; // !!!!
         theChild->setGeometry(xpos, ypos, wid + frameWidth, h + frameWidth);
