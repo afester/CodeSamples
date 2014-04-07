@@ -11,6 +11,18 @@
 #include <QDebug>
 
 
+class ViewportWidget : public QWidget {
+
+public:
+    ViewportWidget(QWidget* parent = 0);
+
+    virtual QSize sizeHint() const;
+
+protected:
+    void paintEvent ( QPaintEvent * event );
+};
+
+
 class MainWindow : public QMainWindow {
     Q_OBJECT;
 
