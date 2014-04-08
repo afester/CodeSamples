@@ -12,6 +12,7 @@
 #include <QPainter>
 #include <QScrollArea>
 #include <QScrollBar>
+#include <QLayout>
 
 #include "ScrollArea.h"
 
@@ -29,103 +30,6 @@ public:
 };
 
 
-class ScrollArea : public QScrollArea {
-public:
-    ScrollArea(QWidget* parent) : QScrollArea(parent) {
-    }
-
-
-    virtual QSize sizeHint() const {
-        QSize result = widget()->sizeHint(); //viewport()->sizeHint();
-        qDebug() << "ScrollArea::sizeHint(): " << result;
-        return result;
-    }
-
-};
-
-
-
-class CentralWidget : public QWidget {
-    QScrollArea* theChild;
-
-public:
-    CentralWidget(QWidget* parent) : QWidget(parent) {
-        QPalette pal;
-        QBrush brush(Qt::cyan);
-        brush.setStyle(Qt::SolidPattern);
-        pal.setBrush(QPalette::Active, QPalette::Window, brush);
-        setPalette(pal);
-        setAutoFillBackground(true);
-    }
-
-
-    void setWidget(QScrollArea* wd) {
-        theChild = wd;
-    }
-
-    void resizeEvent ( QResizeEvent * event ) {
-        QWidget::resizeEvent(event);
-
-        //qDebug() << "Resize:" << geometry();
-        //qDebug() << "sizeHint:" << theChild->sizeHint();
-
-        int wid = theChild->sizeHint().width();
-        int h = theChild->sizeHint().height();
-
-        int xpos = 0;
-        int ypos = 0;
-        if (width() < wid &&
-            height() < h) {
-
-            // both scrollbars required
-            wid = width();
-            h = height();
-
-        } else if (width() < wid) {
-            // only horizontal scroll bar required
-
-            h += theChild->horizontalScrollBar()->height();
-
-            wid = width();
-
-            // the new y position is based on the exended height (including scroll bars)
-            // this leads to a lesser smoothly transition from no scroll bars to scroll bars,
-            // but avoids an asymmetry once the scroll bars are shown.
-            ypos = (height() - h) / 2;
-
-            if (height() < h) { // again both required
-                xpos = 0;
-                ypos = 0;
-                h = height();
-            }
-
-        } else if (height() < h) {
-            // only vertical scroll bar required
-            wid += theChild->verticalScrollBar()->width();
-
-            h = height();
-
-            // the new x position is based on the extended width (including scroll bars)
-            // this leads to a lesser smoothly transition from no scroll bars to scroll bars,
-            // but avoids an asymmetry once the scroll bars are shown.
-            xpos = (width() - wid) / 2;
-
-            if (width() < wid) {  // again both required
-                xpos = 0;
-                ypos = 0;
-                wid = width();
-            }
-        } else {
-            xpos = (width() - wid) / 2;
-            ypos = (height() - h) / 2;
-        }
-
-        //qDebug() << "new geom:" << xpos <<"," << ypos << "," << wid << "," << h;
-
-        int frameWidth = 0; // !!!!
-        theChild->setGeometry(xpos, ypos, wid + frameWidth, h + frameWidth);
-    }
-};
 
 ViewportWidget::ViewportWidget(QWidget* parent) : QWidget(parent) {
     setAutoFillBackground(true);
@@ -172,31 +76,145 @@ void ViewportWidget::paintEvent ( QPaintEvent * event ) {
 }
 
 
+class ScrollAreaLayout : public QLayout {
+    QLayoutItem* theItem;
+
+public:
+    ScrollAreaLayout() : theItem(0) {
+
+    }
+
+protected:
+    virtual QSize sizeHint() const {
+        if (theItem != 0) {
+            return theItem->sizeHint();
+        }
+        return QSize(-1,-1);
+    }
+
+
+    virtual void addItem(QLayoutItem *item) {
+        if (theItem == 0) {
+            theItem = item;
+        }
+    }
+
+    virtual QLayoutItem *itemAt(int index) const {
+        if (index == 0) {
+            return theItem;
+        }
+
+        return 0;
+    }
+
+    virtual QLayoutItem *takeAt(int index) {
+        QLayoutItem* result = 0;
+        if (index == 0) {
+            result = theItem;
+            theItem = 0;
+        }
+        return result;
+    }
+
+    virtual int count() const {
+        if (theItem == 0) {
+            return 0;
+        }
+        return 1;
+    }
+
+    void setGeometry ( const QRect & r )  {
+        QScrollArea* theChild = dynamic_cast<QScrollArea*>(theItem->widget());
+
+        //qDebug() << "--------------------------------------";
+        //qDebug() << "  Layout geometry:" << r;
+        //qDebug() << "  Scroll bar width: " << theChild->verticalScrollBar()->width();
+
+        int wid = theChild->sizeHint().width();
+        int h = theChild->sizeHint().height();
+        int xpos = 0;
+        int ypos = 0;
+
+        if (r.width() < wid &&
+            r.height() < h) {
+
+            // both scrollbars required
+            wid = r.width();
+            h = r.height();
+
+        } else if (r.width() < wid) {
+            // only horizontal scroll bar required
+
+            h += theChild->horizontalScrollBar()->sizeHint().height();
+
+            wid = r.width();
+
+            // the new y position is based on the extended height (including scroll bars)
+            // this leads to a lesser smoothly transition from no scroll bars to scroll bars,
+            // but avoids an asymmetry once the scroll bars are shown.
+            ypos = (r.height() - h) / 2;
+
+            if (r.height() < h) { // again both required
+                xpos = 0;
+                ypos = 0;
+                h = r.height();
+            }
+
+        } else if (r.height() < h) {
+            // only vertical scroll bar required
+            wid += theChild->verticalScrollBar()->sizeHint().width();
+
+            h = r.height();
+
+            // the new x position is based on the extended width (including scroll bars)
+            // this leads to a lesser smoothly transition from no scroll bars to scroll bars,
+            // but avoids an asymmetry once the scroll bars are shown.
+            xpos = (r.width() - wid) / 2;
+
+            if (r.width() < wid) {  // again both required
+                xpos = 0;
+                ypos = 0;
+                wid = r.width();
+            }
+        } else {
+            xpos = (r.width() - wid) / 2;
+            ypos = (r.height() - h) / 2;
+        }
+
+        int frameWidth = 0; // !!!!
+        QRect newRect = QRect(xpos, ypos, wid + frameWidth, h + frameWidth);
+        // qDebug() << "  Child geometry:" << newRect;
+
+        theChild->setGeometry(newRect);
+    }
+};
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent) {
 
     setObjectName(QStringLiteral("MainWindow"));
     resize(1024, 768);
 
-    CentralWidget* centralWidget = new CentralWidget(this);
-
     QWidget* viewPort = new ViewportWidget();
     viewPort->setGeometry(0, 0, viewPort->sizeHint().width(), viewPort->sizeHint().height());
     viewPort->setMinimumSize(viewPort->sizeHint());
 
-    QScrollArea* scrollArea = new ScrollArea(centralWidget);
-
+    QScrollArea* scrollArea = new QScrollArea();
+    scrollArea->setObjectName("ScrollArea1");
+    scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAsNeeded);
+    scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded);
     // do not draw a frame around the scroll area - otherwise, we need
     // to add the frame width * 2 to the geometry in order to hide the scrollbars!
     scrollArea->setFrameStyle(0);
     scrollArea->setWidget(viewPort);
     // scrollArea->setViewport(viewPort);
 
-    centralWidget->setWidget(scrollArea);
+    QLayout* layout = new ScrollAreaLayout();
+    layout->addWidget(scrollArea);
 
-    scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAsNeeded);
-    scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded);
-
+    QWidget* centralWidget = new ColoredWidget(Qt::cyan, this);
+    centralWidget->setLayout(layout);
     setCentralWidget(centralWidget);
 }
 
