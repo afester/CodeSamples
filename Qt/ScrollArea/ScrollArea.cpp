@@ -31,28 +31,44 @@ public:
 
 
 
-ViewportWidget::ViewportWidget(QWidget* parent) : QWidget(parent) {
-    setAutoFillBackground(true);
+CustomWidget::CustomWidget(QWidget* parent) : QWidget(parent) {
+/*    setAutoFillBackground(true);
 
     QPalette pal = palette();
     pal.setBrush(QPalette::Base, Qt::white);
     pal.setBrush(QPalette::Window, Qt::white);
-    setPalette(pal);
+    setPalette(pal);*/
 }
 
 
-QSize ViewportWidget::sizeHint() const {
-    return QSize(320, 200);
+QSize CustomWidget::sizeHint() const {
+    return QWidget::sizeHint();
+    // return QSize(320, 200);
 }
 
 
-void ViewportWidget::paintEvent ( QPaintEvent * event ) {
+void CustomWidget::paintEvent ( QPaintEvent * event ) {
+    qDebug() << "paintEvent()";
     QPainter p(this);
     p.setPen(QPen(Qt::red, 0, Qt::DashLine));
 
     // aliased rectangle is drawn to the right and below the defined points!
+#if 0
     QRect aliasedRectangle = QRect(x(), y(), width()-1, height()-1);
     p.drawRect(aliasedRectangle);
+
+    QRect topLeft = QRect(x(), y(), 10, 10);
+    QRect bottomRight = QRect(x() + width() - 11, y() + height() - 11, 10, 10);
+    p.setPen(Qt::black);
+    p.drawRect(topLeft);
+    p.drawRect(bottomRight);
+#endif
+    QRect aliasedRectangle = QRect(0, 0, 319, 199);
+    p.drawRect(aliasedRectangle);
+
+    QRect bottomRight = QRect(x() + width() - 11, y() + height() - 11, 10, 10);
+    p.setPen(Qt::black);
+    p.drawRect(bottomRight);
 }
 
 
@@ -169,33 +185,30 @@ void ScrollAreaLayout::setGeometry ( const QRect & r )  {
 
 
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     setObjectName(QStringLiteral("MainWindow"));
-    resize(1024, 768);
+    resize(400, 300);
 
-    QWidget* viewPort = new ViewportWidget();
-    viewPort->setGeometry(0, 0, viewPort->sizeHint().width(), viewPort->sizeHint().height());
-    viewPort->setMinimumSize(viewPort->sizeHint());
+    QWidget* wdg = new CustomWidget();
+//    wdg->setGeometry(0, 0, wdg->sizeHint().width(), wdg->sizeHint().height());
+    wdg->resize(320, 200);
 
-    QScrollArea* scrollArea = new QScrollArea();
+    QScrollArea* scrollArea = new QScrollArea(this);
     scrollArea->setObjectName("ScrollArea1");
     scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAsNeeded);
     scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded);
-    scrollArea->setWidget(viewPort);
-
+    scrollArea->setWidget(wdg);
+#if 0
     QLayout* layout = new ScrollAreaLayout();
     layout->addWidget(scrollArea);
 
     QWidget* centralWidget = new ColoredWidget(QColor(255, 255, 240), this);
     centralWidget->setLayout(layout);
+
     setCentralWidget(centralWidget);
-}
-
-
-void MainWindow::printInfo() {
-	qDebug() << "\nLAYOUT INFO:\n====================";
+#endif
+    setCentralWidget(scrollArea);
 }
 
 

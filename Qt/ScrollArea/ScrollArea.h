@@ -33,10 +33,10 @@ protected:
 
 
 
-class ViewportWidget : public QWidget {
+class CustomWidget : public QWidget {
 
 public:
-    ViewportWidget(QWidget* parent = 0);
+    CustomWidget(QWidget* parent = 0);
 
     virtual QSize sizeHint() const;
 
@@ -52,7 +52,4 @@ public:
 
     MainWindow(QWidget* parent);
     ~MainWindow();
-
-public slots:
-	void printInfo();
 };
