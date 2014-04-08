@@ -8,7 +8,29 @@
 
 #include <QMainWindow>
 #include <QApplication>
-#include <QDebug>
+#include <QLayout>
+
+
+class ScrollAreaLayout : public QLayout {
+    QLayoutItem* theItem;
+
+public:
+    ScrollAreaLayout();
+
+protected:
+    virtual QSize sizeHint() const;
+
+    virtual void addItem(QLayoutItem *item);
+
+    virtual QLayoutItem *itemAt(int index) const;
+
+    virtual QLayoutItem *takeAt(int index);
+
+    virtual int count() const;
+
+    virtual void setGeometry ( const QRect & r );
+};
+
 
 
 class ViewportWidget : public QWidget {
