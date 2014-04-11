@@ -3,6 +3,7 @@ package com.example;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -14,13 +15,19 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
+import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchResult;
+
 
 
 public class LDAPSample {
    private DirContext ctx; 
+ 
 
+   
+   
    public void run() {
       // create the configuration environment
       Hashtable<String, Object> env = createLdapEnv();
@@ -29,11 +36,26 @@ public class LDAPSample {
       try {
          ctx = new InitialDirContext(env);
 
-         listNode("");
+         //listNode("");
          //listNode("dc=DefaultDomain");
          //listNode("ou=myrealm,dc=DefaultDomain");
          //listNode("ou=Policies,ou=XACMLRole,ou=myrealm,dc=DefaultDomain");
          //listNode("cn=schema");
+         //listNode("uid=john.doe@mail.com,ou=people,ou=myrealm,dc=DefaultDomain");
+
+         Attributes attr = new BasicAttributes();
+         attr.put("uid",  "andreas.fester@oracle.com");
+         NamingEnumeration<SearchResult> result = ctx.search("ou=people,ou=myrealm,dc=DefaultDomain",  attr);
+         int count = 0;
+         while(result.hasMore()) {
+            count++;
+
+            SearchResult entry = result.next();
+            System.err.println(entry.getName());
+            listAttributes(entry.getAttributes().getAll());
+         }
+         System.err.println("Found: " + count + " entries.");
+
       } catch (NamingException e) {
          e.printStackTrace();
       }
@@ -81,29 +103,56 @@ public class LDAPSample {
    }
 
    
-   private void listAttributes(String cn) throws NamingException {
-      System.err.println("Attributes in \"" + cn + "\"\n====================================");
-
-      Attributes attrs = ctx.getAttributes(cn);
-      NamingEnumeration<? extends Attribute> attributes = attrs.getAll();
+   private void listAttributes(NamingEnumeration<? extends Attribute> attributes) throws NamingException {
       while(attributes.hasMore()) {
          Attribute attr = attributes.next();
 
-         List<String> attrValues = new ArrayList<>();
-         NamingEnumeration<?> attributes2 = attr.getAll();
-         while(attributes2.hasMore()) {
-            attrValues.add(attributes2.next().toString());
+         List<Object> attrValues = new ArrayList<>();
+         NamingEnumeration<?> values = attr.getAll();
+         while(values.hasMore()) {
+            attrValues.add(values.next());
          }
 
          if (attrValues.size() > 1) {
             System.err.println(attr.getID() + " = " + attrValues);
          } else {
-            System.err.println(attr.getID() + " = " + attrValues.get(0));
+            Object value = attrValues.get(0);
+            if (value instanceof byte[]) {
+               System.err.println(attr.getID() + " = ");
+
+               byte[] data = (byte[]) value;
+               HexDump dump = new HexDump();
+               dump.setPrefix("    ");
+               dump.dump(data);
+               dump.done();
+
+               String str = new String(data, StandardCharsets.US_ASCII);
+               if (str.toLowerCase().startsWith("{ssha}")) {
+                  String base64enc = str.substring(6);
+                  // System.err.println(base64enc);
+                  System.err.println("  BASE64 decoded password:");
+                  byte[] decoded = javax.xml.bind.DatatypeConverter.parseBase64Binary(base64enc);
+                  dump = new HexDump();
+                  dump.setPrefix("    ");
+                  dump.dump(decoded);
+                  dump.done();
+               }
+            } else {
+               System.err.println(attr.getID() + " = " + value);
+            }
          }
       }
    }
 
    
+   private void listAttributes(String cn) throws NamingException {
+      System.err.println("Attributes in \"" + cn + "\"\n====================================");
+
+      Attributes attrs = ctx.getAttributes(cn);
+      listAttributes(attrs.getAll());
+   }
+
+
    private void listBindings(String cn) throws NamingException {
       System.err.println("Bindings in \"" + cn + "\"\n====================================");
 
