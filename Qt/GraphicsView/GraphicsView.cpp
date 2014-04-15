@@ -69,6 +69,24 @@ void GraphicsSheet::drawBackground(QPainter * painter, const QRectF & rect) {
 }
 
 
+void GraphicsSheet::setScaleBackground(const QColor& color) {
+    QPalette pal = xScale->palette();
+    pal.setBrush(QPalette::Base, color);
+    pal.setBrush(QPalette::Window, color);
+    xScale->setPalette(pal);
+
+    pal = yScale->palette();
+    pal.setBrush(QPalette::Base, color);
+    pal.setBrush(QPalette::Window, color);
+    yScale->setPalette(pal);
+
+    pal = edge->palette();
+    pal.setBrush(QPalette::Base, color);
+    pal.setBrush(QPalette::Window, color);
+    edge->setPalette(pal);
+}
+
+
 void GraphicsSheet::setColor(const QColor& color) {
     viewColor = color;
 }
@@ -267,9 +285,11 @@ ScaleEdgeWidget::ScaleEdgeWidget(QWidget* parent) : QWidget(parent) {
     setPalette(pal);
 }
 
+
 void ScaleEdgeWidget::setUnit(const QString& theUnit) {
     unit = theUnit;
 }
+
 
 void ScaleEdgeWidget::paintEvent ( QPaintEvent * event ) {
     QPainter p(this);
@@ -303,9 +323,9 @@ ScaleWidget::ScaleWidget(QWidget* parent, GraphicsSheet* view, Direction dir) :
     setFont(QFont("Sans", 6));  // default font
 
     QPalette pal = palette();
-    pal.setBrush(QPalette::Base, Qt::white); /// QColor(0xf8, 0xf8, 0xf8)); //Qt::white);
-    pal.setBrush(QPalette::Window, Qt::white); // QColor(0xf8, 0xf8, 0xf8)); // Qt::white);
-    pal.setColor(QPalette::Foreground, QColor(0x80, 0x80, 0x80)); // Qt::gray);
+    pal.setBrush(QPalette::Base, Qt::white);
+    pal.setBrush(QPalette::Window, Qt::white);
+    pal.setColor(QPalette::Foreground, QColor(0x80, 0x80, 0x80));
     setPalette(pal);
 }
 
@@ -470,6 +490,8 @@ MainWindow::MainWindow(QWidget *parent) :
     shadow->setBlurRadius(20);
     shadow->setColor(QColor(0xa0, 0xa0, 0xa0));
     graphicsSheet->setGraphicsEffect(shadow);
+
+    graphicsSheet->setScaleBackground(QColor(0xFF, 0xFF, 0xF8));
 
     QLayout* layout = new ScrollAreaLayout();
     layout->addWidget(graphicsSheet);

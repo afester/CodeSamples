@@ -127,6 +127,7 @@ public:
 
     QColor getColor();
 
+    void setScaleBackground(const QColor& color);
 
 public slots:
     void setScale(int idx);
