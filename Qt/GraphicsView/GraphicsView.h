@@ -93,7 +93,8 @@ class GraphicsSheet : public QGraphicsView {
     float xDpi;
     float yDpi;
 
-    float zoomScale;    // e.g. 50%
+    float drawScale;    // e.g. 1:2 => 0.5
+    float zoomScale;    // e.g. 50% => 0.5
     QSizeF sceneSize;   // e.g. 148x210
     bool landscape;     // true or false (landscape or portrait)
 
@@ -115,6 +116,8 @@ public:
     QStringList getScaleNames() const;
 
     void setUnit(const QString& unit);
+
+    void setScale(float scale);
 
     void setZoom(float zoom);
 
@@ -143,8 +146,6 @@ protected:
     void resizeEvent ( QResizeEvent * event );
 
     QSize sizeHint() const;
-
-    bool event(QEvent *e);
 };
 
 

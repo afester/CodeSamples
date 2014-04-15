@@ -5,8 +5,6 @@
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
 
-#include <iostream>
-#include <typeinfo>
 
 #include <QAction>
 #include <QMenuBar>
@@ -24,14 +22,15 @@
 
 #include "GraphicsView.h"
 #include "LabelledComboBox.h"
+#include "ScrollAreaLayout.h"
 
-QLabel* debugConsole;
-int c = 0;
 
 #define RULERHEIGHT 23
 #define RULERWIDTH 23
 
-GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent) {
+GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent),
+        drawScale(1.0), zoomScale(1.0), sceneSize(100, 100), landscape(true) {
+
 	setRenderHint(QPainter::Antialiasing);
 	setAutoFillBackground(true);
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
@@ -86,38 +85,30 @@ void GraphicsSheet::updateSize() {
 		realSize = QSize(sceneSize.height(), sceneSize.width());
 	}
 
-	scene()->setSceneRect(QRectF(0, 0, realSize.width(), realSize.height()));
+	scene()->setSceneRect(QRectF(0, 0, realSize.width() / drawScale, realSize.height() / drawScale));
 
 	float xScaleDPI = xDpi / 25.4;
 	float yScaleDPI = yDpi / 25.4;
 
-	float effectiveScaleX = zoomScale * xScaleDPI;
-	float effectiveScaleY = zoomScale * yScaleDPI;
+	float effectiveScaleX = zoomScale * xScaleDPI * drawScale;
+	float effectiveScaleY = zoomScale * yScaleDPI * drawScale;
 
 	QTransform transform;
 	transform.scale(effectiveScaleX, effectiveScaleY);
 	setTransform(transform);
 
 	updateGeometry();
-
-//	qDebug() << "DPI:" << xDpi << ", " << yDpi;
-//	qDebug() << "px/mm: " << xScaleDPI << ", " << yScaleDPI;
-//	qDebug() << "ZOOM SCALE:" << zoomScale;
-//	qDebug() << "EFFECTIVE SCALE:" << effectiveScaleX << ", " << effectiveScaleY;
-//	qDebug() << "SCENE RECT:" << sceneRect() << "/" << scene()->sceneRect();
-	QRectF scaledScene(sceneRect().x(), sceneRect().y(),
-					   sceneRect().width() * effectiveScaleX,
-					   sceneRect().height() * effectiveScaleY);
-//	qDebug() << "SCALED SCENE RECT:" << scaledScene;
-//	qDebug() << "SCROLLAREA MIN SIZE:" << minimumSize();
-//	qDebug() << "SCROLLAREA MIN SIZE HINT:" << minimumSizeHint();
-//	qDebug() << "SCROLLAREA MAX SIZE: " << maximumSize();
-//	qDebug() << "SCROLLAREA SIZE: " << rect();
 }
 
 
 void GraphicsSheet::setZoom(float zoom) {
     zoomScale = zoom;
+    updateSize();
+}
+
+
+void GraphicsSheet::setScale(float scale) {
+    drawScale = scale;
     updateSize();
 }
 
@@ -143,60 +134,20 @@ QSize GraphicsSheet::sizeHint() const {
    QSizeF baseSize = matrix().mapRect(sceneRect()).size();
    baseSize += QSizeF(frameWidth() * 2, frameWidth() * 2);
 
-   //   baseSize = baseSize.boundedTo((3 * QApplication::desktop()->size()) / 4);
-
    // before rounding through toSize(), add 0.5 to make sure to round upwards
    // See https://bugreports.qt-project.org/browse/QTBUG-37702
    QSize result = QSize(qCeil(baseSize.width()), qCeil(baseSize.height()));
 
    result += QSize(RULERWIDTH, RULERHEIGHT);   // viewport margins are not yet considered!!!
 
-   qDebug() << "   RESULT:" << result;
-
-   // qDebug() << verticalScrollBar()->width();
-   result += QSize(verticalScrollBar()->isVisible()   ? 16 : 0, // verticalScrollBar()->width() : 0,
-                   horizontalScrollBar()->isVisible() ? 16 : 0); // horizontalScrollBar()->height(): 0);
-   qDebug() << "   RESULT2:" << result;
+   //qDebug() << "   RESULT:" << result;
 
    return result;
 }
 
 
 void GraphicsSheet::resizeEvent ( QResizeEvent * event ) {
-    qDebug() << "BEFORE resizeEvent";
-    qDebug() << "   VSB:" << verticalScrollBar()->minimum() << " - " << verticalScrollBar()->maximum();
-    qDebug() << "   HSB:" << horizontalScrollBar()->minimum() << " - " << horizontalScrollBar()->maximum();
-//    qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
-//    qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->objectName();
-//    qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
-//    qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->objectName();
-//    qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
-
     QGraphicsView::resizeEvent(event);
-
-    if (verticalScrollBar()->maximum() < 16) { // <=  verticalScrollBar()->width()) {
-        verticalScrollBar()->setMaximum(0);
-    }
-    if (horizontalScrollBar()->maximum() < 16) { // <= horizontalScrollBar()->height()) {
-        horizontalScrollBar()->setMaximum(0);
-    }
-    updateGeometry();   // triggers a re-read of sizeHint()!
-
-    // the previous call recalculates the scroll bar ranges, but does not yet
-    // enable or disable the scroll bar widgets. Instead, it schedules a
-    // QueuedConnection event which will asynchronously call layoutChildren()
-    // in the private QAbstractScrollArea code. This will finally lead to
-    // showing or hiding the scroll bars, depending on their current range.
-
-    qDebug() << "AFTER resizeEvent";
-    qDebug() << "   VSB:" << verticalScrollBar()->minimum() << " - " << verticalScrollBar()->maximum();
-    qDebug() << "   HSB:" << horizontalScrollBar()->minimum() << " - " << horizontalScrollBar()->maximum();
-//    qDebug() << "   VSB:" << verticalScrollBar()->isVisible();
-//    qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
-//    qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->objectName();
-//    qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
-//    qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->objectName();
-//    qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
 
     xScale->setGeometry(RULERWIDTH, 0, viewport()->width(), xScale->height());
     yScale->setGeometry(0, RULERHEIGHT, yScale->width(), viewport()->height());
@@ -238,10 +189,14 @@ QStringList GraphicsSheet::getScaleNames() const {
 
 void GraphicsSheet::setScale(int idx) {
     if (idx >= 0 && idx < scaleLevels.size()) {
-        xScale->setScale(scaleLevels.at(idx));
+        setScale(scaleLevels.at(idx));
+
+        xScale->setScale(drawScale);
         xScale->repaint();
-        yScale->setScale(scaleLevels.at(idx));
+
+        yScale->setScale(drawScale);
         yScale->repaint();
+
     }
 }
 
@@ -272,41 +227,7 @@ void GraphicsSheet::areaMoved() {
 
 
 
-bool GraphicsSheet::event(QEvent *e) {
 
-/*
-QObject::connect(hbar, SIGNAL(valueChanged(int)),     q, SLOT(_q_hslide(int)));
-QObject::connect(hbar, SIGNAL(rangeChanged(int,int)), q, SLOT(_q_showOrHideScrollBars()), Qt::QueuedConnection);
-*/
-    /*
-    switch (e->type()) {
-        case QEvent::LayoutRequest:
-        case QEvent::Resize:
-            qDebug() << "BEFORE resize";
-            qDebug() << "   VSB:" << verticalScrollBar()->isVisible();
-            qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
-            qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->objectName();
-            qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
-            qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->objectName();
-            qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
-            break;
-    }
-*/
-    bool result = QGraphicsView::event(e);
-/*
-    switch (e->type()) {
-        case QEvent::LayoutRequest:
-        case QEvent::Resize:
-            qDebug() << "AFTER resize";
-            qDebug() << "   VSB:" << verticalScrollBar()->isVisible();
-            qDebug() << "   HSB:" << horizontalScrollBar()->isVisible();
-            qDebug() << "   pVSB:" << verticalScrollBar()->parentWidget()->isVisible();
-            qDebug() << "   pHSB:" << horizontalScrollBar()->parentWidget()->isVisible();
-            break;
-    }
-*/
-    return result;
-}
 
 GraphicsItem::GraphicsItem ( qreal x, qreal y, qreal width, qreal height, QGraphicsItem * parent) :
         QGraphicsRectItem(x, y, width, height, parent) {
@@ -316,7 +237,7 @@ GraphicsItem::GraphicsItem ( qreal x, qreal y, qreal width, qreal height, QGraph
 void GraphicsItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget) {
     GraphicsSheet* requestingView = dynamic_cast<GraphicsSheet*>(widget->parent());
     if (requestingView) {
-        painter->setPen(requestingView->getColor());
+        painter->setPen(QPen(requestingView->getColor(), 0));
     }
 
     painter->drawRect(rect());
@@ -415,7 +336,7 @@ void ScaleWidget::paintEvent ( QPaintEvent * event ) {
         p.drawLine(0, 0, 0, height());
         p.drawLine(1, 0, 1, height() - 2);
 
-        qreal scale = theView->transform().m22();
+        qreal scale = theView->transform().m22() / theScale;
         QTextOption option;
         option.setAlignment(Qt::AlignRight);
 
@@ -448,7 +369,7 @@ void ScaleWidget::paintEvent ( QPaintEvent * event ) {
         p.drawLine(0, 0, width(), 0);
         p.drawLine(0, 1, width() - 2, 1);
 
-        qreal scale = theView->transform().m11();
+        qreal scale = theView->transform().m11() / theScale;
         QTextOption option;
         option.setAlignment(Qt::AlignRight);
 
@@ -477,6 +398,7 @@ void ScaleWidget::paintEvent ( QPaintEvent * event ) {
     }
 }
 
+#if 0
 
 class CenterLayout : public QGridLayout {
 public:
@@ -500,7 +422,6 @@ public:
 };
 
 
-#if 0
 class CenterLayout : public QLayout {
     QWidget* centralWidget;
 public:
@@ -544,18 +465,17 @@ MainWindow::MainWindow(QWidget *parent) :
     setObjectName(QStringLiteral("MainWindow"));
     resize(1024, 768);
 
-    QWidget *centralwidget = new QWidget(this);
-
-    graphicsSheet = new GraphicsSheet(centralwidget);
+    graphicsSheet = new GraphicsSheet(this);
     QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect(graphicsSheet);
     shadow->setBlurRadius(20);
     shadow->setColor(QColor(0xa0, 0xa0, 0xa0));
     graphicsSheet->setGraphicsEffect(shadow);
 
-    // graphicsSheet->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+    QLayout* layout = new ScrollAreaLayout();
+    layout->addWidget(graphicsSheet);
 
-    QLayout* ml = new CenterLayout(centralwidget, graphicsSheet);
-    centralwidget->setLayout(ml);
+    QWidget *centralwidget = new QWidget(this);
+    centralwidget->setLayout(layout);
     setCentralWidget(centralwidget);
 
 /*****************************************************************************/
@@ -633,10 +553,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     GraphicsItem* item = new GraphicsItem(10, 10, 50, 50);
     graphicsSheet->scene()->addItem(item);
+
     item = new GraphicsItem(0, 0, 5, 5);
     graphicsSheet->scene()->addItem(item);
+
     item = new GraphicsItem(225, 295, 5, 5);
     graphicsSheet->scene()->addItem(item);
+
     item = new GraphicsItem(125, 100, 200, 100);
     graphicsSheet->scene()->addItem(item);
 }

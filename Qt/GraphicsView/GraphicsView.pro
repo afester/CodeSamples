@@ -8,6 +8,5 @@ QT = gui core widgets
 
 CONFIG += qt warn_on debug console
 
-FORMS = GraphicsView.ui
-HEADERS = GraphicsView.h LabelledComboBox.h
-SOURCES = GraphicsView.cpp LabelledComboBox.cpp main.cpp
+HEADERS = ScrollAreaLayout.h GraphicsView.h LabelledComboBox.h
+SOURCES = ScrollAreaLayout.cpp GraphicsView.cpp LabelledComboBox.cpp main.cpp
