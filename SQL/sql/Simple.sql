@@ -33,6 +33,12 @@ LEFT OUTER JOIN City ON Person.City = City.Id
 GROUP BY City.Name
 ORDER BY City.Name;
 
+-- Select cities with their persons
+SELECT City.Name, Person.FirstName, Person.Name
+FROM City
+JOIN Person on City.Id = Person.City;
+
+
 -- If only the city id is required, the join is not necessary: 
 SELECT Person.City, COUNT(*)
 FROM Person

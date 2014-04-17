@@ -6,8 +6,6 @@
  */
 
 
-#include <QMainWindow>
-#include <QApplication>
 #include <QLayout>
 
 
@@ -29,27 +27,4 @@ protected:
     virtual int count() const;
 
     virtual void setGeometry ( const QRect & r );
-};
-
-
-
-class CustomWidget : public QWidget {
-
-public:
-    CustomWidget(QWidget* parent = 0);
-
-    virtual QSize sizeHint() const;
-
-protected:
-    void paintEvent ( QPaintEvent * event );
-};
-
-
-class MainWindow : public QMainWindow {
-    Q_OBJECT;
-
-public:
-
-    MainWindow(QWidget* parent);
-    ~MainWindow();
 };

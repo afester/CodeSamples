@@ -104,10 +104,21 @@ public class TreeNode <T> {
     * Adds a child node to this tree node.
     * 
     * @param child The child node to add.
+    * @return The child which was passed as parameter.
+    *         This allows to add child nodes in a chain, and saves 
+    *         some code if we want to add more sub children:
+    *         
+    *         TreeNode<String> root = new TreeNode<>("Root");
+    *         TreeNode<String> child1 = root.addChildren(new TreeNode<>("Child 1"));
+    *         TreeNode<String> child2 = child1.addChildren(new TreeNode<>("Child 1.1"));
+    *         child2.addChildren(new TreeNode<>("Child 1.1.1"));
+    *         child2.addChildren(new TreeNode<>("Child 1.1.2"));
+    *         child2.addChildren(new TreeNode<>("Child 1.1.3"));
     */
-   public void addChildren(TreeNode<T> child) {
+   public TreeNode<T> addChildren(TreeNode<T> child) {
       children.add(child);
       child.setParent(this);
+      return child;
    }
 
 

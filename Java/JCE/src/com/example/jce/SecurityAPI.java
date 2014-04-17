@@ -2,6 +2,7 @@
 package com.example.jce;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -38,6 +39,7 @@ public class SecurityAPI implements ActionListener {
 	private JTextArea inputField;
 	private JTextArea keyField;
 	private JHexTextArea outputField;
+	private JTextArea infoField;
 	private JButton executeButton;
 	private Service selectedService;
 
@@ -142,11 +144,18 @@ public class SecurityAPI implements ActionListener {
 		executeButton.addActionListener(this);
 
 		/* result data */
-		outputField = new JHexTextArea(10,10);
+		outputField = new JHexTextArea(10, 10);
 		centerPanel.add(outputField, new GridBagConstraints(0, 7, 2, 1, 0, 0, 
 							GridBagConstraints.CENTER, GridBagConstraints.BOTH,
 							new Insets(5, 5, 5, 5), 0, 0));
 
+		infoField = new JTextArea(5, 80);
+		infoField.setEditable(false);
+		infoField.setFont(new Font("Courier", Font.PLAIN, 10));
+      centerPanel.add(infoField, new GridBagConstraints(0, 8, 2, 1, 0, 0, 
+            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+            new Insets(5, 5, 5, 5), 0, 0));
+		
 		frame.getContentPane().add(centerPanel, BorderLayout.CENTER);
 		frame.pack();
 		frame.setVisible(true);
@@ -187,7 +196,11 @@ public class SecurityAPI implements ActionListener {
 				if (engineClass.equals(MessageDigest.class.getSimpleName())) {
 					MessageDigest md = MessageDigest.getInstance(algorithm, prov);
 					md.update(inputField.getText().getBytes());
-					outputField.setData(md.digest());
+					
+					byte[] result = md.digest();
+               outputField.setData(result);
+               
+               infoField.setText(javax.xml.bind.DatatypeConverter.printHexBinary(result));
 				} else if (engineClass.equals(SecureRandom.class.getSimpleName())) {
 					SecureRandom sr = SecureRandom.getInstance(algorithm, prov);
 //					sr.setSeed(0x12345);

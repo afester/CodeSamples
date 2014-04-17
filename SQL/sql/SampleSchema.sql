@@ -12,11 +12,14 @@ CREATE TABLE Person (
     Email VARCHAR2(256),
     City NUMBER(10)
 );
+CREATE UNIQUE INDEX PersonPK ON Person(Id);
 
 CREATE TABLE City (
     Id NUMBER(10),
-    Name VARCHAR2(100)
+    Name VARCHAR2(100),
+    ZipCode VARCHAR2(5)
 );
+CREATE UNIQUE INDEX CityPK ON City(Id);
 
 
 CREATE SEQUENCE CityPKSeq START WITH 0 MINVALUE 0 INCREMENT BY 1;
@@ -33,14 +36,30 @@ BEGIN
 END;
 /
 
-INSERT INTO City VALUES(-1, 'Karlsruhe');
-INSERT INTO City VALUES(-1, 'Frankfurt');
-INSERT INTO City VALUES(-1, 'Berlin');
-INSERT INTO City VALUES(-1, 'Stuttgart');
-INSERT INTO City VALUES(-1, 'München');
+CREATE SEQUENCE PersonPKSeq START WITH 0 MINVALUE 0 INCREMENT BY 1;
 
-INSERT INTO Person VALUES(0, 'Andreas', 'Fester', 'Andreas.Fester@gmx.de', 0);
-INSERT INTO Person VALUES(0, 'Sam', 'Example', 'Sam.Example@example.org', 1);
+CREATE OR REPLACE TRIGGER PersonPKTrigger
+BEFORE INSERT
+   ON Person
+   FOR EACH ROW
+
+BEGIN
+   :new.Id := PersonPKSeq.nextval;
+END;
+/
+
+INSERT INTO City VALUES(-1, 'Karlsruhe', '76149');
+INSERT INTO City VALUES(-1, 'Frankfurt', '60311');
+INSERT INTO City VALUES(-1, 'Berlin', '10115');
+INSERT INTO City VALUES(-1, 'Stuttgart', '70173');
+INSERT INTO City VALUES(-1, 'München', '80123');
+
+INSERT INTO Person VALUES(0, 'Andreas', 'Fester', 'Andreas.Fester@gmx.de', 
+                          (SELECT City.Id FROM City where City.Name='Karlsruhe'));
+INSERT INTO Person VALUES(0, 'Sam', 'Example', 'Sam.Example@example.org', 
+                          (SELECT City.Id FROM City where City.Name='Frankfurt'));
+INSERT INTO Person VALUES(0, 'John', 'Doe', 'John@doe.org', 
+                          (SELECT City.Id FROM City where City.Name='Frankfurt'));
 INSERT INTO Person VALUES(0, 'Ali', 'Alien', 'Ali.alien@andromeda.glx', NULL);
 INSERT INTO Person VALUES(0, 'Mars', 'Marsian', 'Mars.Marsian@mars.pln', NULL);
 
