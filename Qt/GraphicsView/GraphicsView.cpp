@@ -24,6 +24,7 @@
 #include "LabelledComboBox.h"
 #include "ScrollAreaLayout.h"
 #include "Scalewidget.h"
+#include "ScaleEdgewidget.h"
 
 #define RULERHEIGHT 23
 #define RULERWIDTH 23
@@ -274,46 +275,6 @@ public:
     }
 };
 
-
-ScaleEdgeWidget::ScaleEdgeWidget(QWidget* parent) : QWidget(parent) {
-    setAutoFillBackground(true);
-    setFont(QFont("Sans", 6));  // default font
-
-    QPalette pal = palette();
-    pal.setBrush(QPalette::Base, Qt::white);
-    pal.setBrush(QPalette::Window, Qt::white);
-    setPalette(pal);
-}
-
-
-void ScaleEdgeWidget::setUnit(const QString& theUnit) {
-    unit = theUnit;
-}
-
-
-void ScaleEdgeWidget::paintEvent ( QPaintEvent * event ) {
-    QPainter p(this);
-    p.setRenderHint(QPainter::Antialiasing);
-
-    p.setPen(Qt::darkGray);
-    p.drawLine(0, 0, width(), 0);
-    p.drawLine(1, 1, width(), 1);
-    p.drawLine(0, 0, 0, height());
-    p.drawLine(1, 1, 1, height());
-    p.drawLine(1, 1, width(), height());
-
-    QTextOption option;
-    option.setAlignment(Qt::AlignRight);
-    QRectF textBox(2, 1,
-                   20, fontMetrics().height());
-    //p.drawRect(textBox);
-    p.drawText(textBox, unit, option);
-
-    QRectF textBox2(2, 3 + fontMetrics().height(),
-                    20, fontMetrics().height());
-    //p.drawRect(textBox2);
-    p.drawText(textBox2, unit);
-}
 
 #if 0
 

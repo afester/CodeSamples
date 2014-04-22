@@ -29,19 +29,8 @@ class GraphicsScene : public QGraphicsScene {
 };
 
 
-class ScaleEdgeWidget : public QWidget {
-    QString unit;
-
-public:
-    ScaleEdgeWidget(QWidget* parent);
-
-    void setUnit(const QString& theUnit);
-
-protected:
-    void paintEvent ( QPaintEvent * event );
-};
-
 class ScaleWidget;
+class ScaleEdgeWidget;
 
 class GraphicsSheet : public QGraphicsView {
     Q_OBJECT;
@@ -121,8 +110,6 @@ protected:
 };
 
 
-class Ui_MainWindow;
-
 class MainWindow : public QMainWindow {
     Q_OBJECT;
 
@@ -133,10 +120,9 @@ class MainWindow : public QMainWindow {
     QToolBar *toolBar;
 
 public:
-
     MainWindow(QWidget* parent);
-    ~MainWindow();
 
+    ~MainWindow();
 
 public slots:
 	void printInfo();
