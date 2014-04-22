@@ -29,36 +29,6 @@ class GraphicsScene : public QGraphicsScene {
 };
 
 
-class GraphicsSheet;
-
-class ScaleWidget : public QWidget {
-    Q_OBJECT;
-
-    float theScale;
-    int offset;
-
-    int smallTicksSize;
-    int mediumTicksSize;
-    int largeTicksSize;
-
-public:
-    enum Direction{Vertical, Horizontal};
-
-    ScaleWidget(QWidget* parent, GraphicsSheet* view, Direction dir);
-
-    void setScale(float scale);
-
-    void setOffset(int value);
-
-protected:
-    void paintEvent ( QPaintEvent * event );
-
-private:
-    GraphicsSheet* theView;
-    Direction direction;
-};
-
-
 class ScaleEdgeWidget : public QWidget {
     QString unit;
 
@@ -71,6 +41,7 @@ protected:
     void paintEvent ( QPaintEvent * event );
 };
 
+class ScaleWidget;
 
 class GraphicsSheet : public QGraphicsView {
     Q_OBJECT;
