@@ -15,6 +15,8 @@ class ScaleWidget : public QWidget {
     qreal theScale;
     int offset;
 
+    qreal positionIndicator;
+
     int smallTicksSize;
     int mediumTicksSize;
     int largeTicksSize;
@@ -27,6 +29,10 @@ public:
     void setScale(qreal scale);
 
     void setOffset(int value);
+
+    qreal snapToTick(int pos);
+
+    void setPos(qreal pos);
 
 protected:
     void paintEvent ( QPaintEvent * event );

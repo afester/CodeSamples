@@ -107,6 +107,8 @@ protected:
     void resizeEvent ( QResizeEvent * event );
 
     QSize sizeHint() const;
+
+    void mouseMoveEvent ( QMouseEvent * event );
 };
 
 

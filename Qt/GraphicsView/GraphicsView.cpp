@@ -19,6 +19,7 @@
 #include <QApplication>
 #include <QtCore/qmath.h>
 #include <QScrollbar>
+#include <QMouseEvent>
 
 #include "GraphicsView.h"
 #include "LabelledComboBox.h"
@@ -36,6 +37,7 @@ GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent),
 	setAutoFillBackground(true);
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
     setViewportMargins(RULERWIDTH, RULERHEIGHT, 0, 0);
+    setMouseTracking(true);       // Enable mouse tracking to report mouse position
 
 	QScreen *srn = QApplication::screens().at(0);
 	xDpi = (qreal)srn->logicalDotsPerInchX();
@@ -245,7 +247,16 @@ void GraphicsSheet::areaMoved() {
 }
 
 
+void GraphicsSheet::mouseMoveEvent ( QMouseEvent * event ) {
+    float xSnapped = xScale->snapToTick(event->x() + horizontalScrollBar()->value());
+    float ySnapped = yScale->snapToTick(event->y() + verticalScrollBar()->value());
+    // qDebug() << "Scene coords: " << QPointF(xSnapped, ySnapped);
 
+    xScale->setPos(xSnapped);
+    yScale->setPos(ySnapped);
+
+    QGraphicsView::mouseMoveEvent(event);
+}
 
 
 GraphicsItem::GraphicsItem ( qreal x, qreal y, qreal width, qreal height, QGraphicsItem * parent) :

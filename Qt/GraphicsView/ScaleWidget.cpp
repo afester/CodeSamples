@@ -12,8 +12,9 @@
 
 ScaleWidget::ScaleWidget(QWidget* parent, GraphicsSheet* view, Direction dir) :
             QWidget(parent),
-            theScale(1.0), offset(0), smallTicksSize(4), mediumTicksSize(6),
-            largeTicksSize(8), theView(view), direction(dir)  {
+            theScale(1.0), offset(0), positionIndicator(-1),
+            smallTicksSize(4), mediumTicksSize(6), largeTicksSize(8),
+            theView(view), direction(dir)  {
     setAutoFillBackground(true);
     setFont(QFont("Sans", 6));  // default font
 
@@ -32,6 +33,22 @@ void ScaleWidget::setScale(qreal scale) {
 
 void ScaleWidget::setOffset(int value) {
     offset = value;
+    repaint();
+}
+
+
+qreal ScaleWidget::snapToTick(int pos) {
+    qreal scale = theView->transform().m22() / theScale;
+
+    int tick = qRound(pos / scale);
+
+    float result = tick / theScale;
+    return result;
+}
+
+
+void ScaleWidget::setPos(qreal pos) {
+    positionIndicator = pos;
     repaint();
 }
 
@@ -75,6 +92,14 @@ void ScaleWidget::paintEvent ( QPaintEvent * event ) {
                            QPointF(width() - 4, ypos));
             }
         }
+
+        // draw position indicator if enabled
+        if (positionIndicator >= 0) {
+            p.setPen(QPen(Qt::red, 0, Qt::DashLine));
+            float ypos = positionIndicator * theView->transform().m22() - offset;
+            p.drawLine(0, ypos, width(), ypos);
+        }
+
     } else {
         p.setPen(Qt::lightGray);
         p.drawLine(0, height() - 1, width(), height() - 1);
@@ -109,6 +134,13 @@ void ScaleWidget::paintEvent ( QPaintEvent * event ) {
                 p.drawLine(QPointF(xpos, 19 - smallTicksSize),
                            QPointF(xpos, height() - 4));
             }
+        }
+
+        // draw position indicator if enabled
+        if (positionIndicator >= 0) {
+            p.setPen(QPen(Qt::red, 0, Qt::DashLine));
+            float xpos = positionIndicator * theView->transform().m11() - offset;
+            p.drawLine(xpos, 0, xpos, height());
         }
     }
 }
