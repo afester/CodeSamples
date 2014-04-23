@@ -31,6 +31,7 @@ class GraphicsScene : public QGraphicsScene {
 
 class ScaleWidget;
 class ScaleEdgeWidget;
+class Interactor;
 
 class GraphicsSheet : public QGraphicsView {
     Q_OBJECT;
@@ -48,7 +49,8 @@ class GraphicsSheet : public QGraphicsView {
     ScaleWidget* yScale;
     ScaleEdgeWidget* edge;
 
-    QColor viewColor;
+    Interactor* currentInteractor;
+    //QColor viewColor;
 
     float xDpi;
     float yDpi;
@@ -83,11 +85,15 @@ public:
 
     void setSize(const QSizeF& dimension);
 
-    void setColor(const QColor& color);
+    //void setColor(const QColor& color);
 
-    QColor getColor();
+    //QColor getColor();
 
     void setScaleBackground(const QColor& color);
+
+    void setInteractor(Interactor* interactor);
+
+    Interactor* getInteractor();
 
 public slots:
     void setScale(int idx);
@@ -108,7 +114,15 @@ protected:
 
     QSize sizeHint() const;
 
+    void mousePressEvent ( QMouseEvent * event );
+
     void mouseMoveEvent ( QMouseEvent * event );
+
+    void mouseReleaseEvent ( QMouseEvent * event );
+
+    void wheelEvent(QWheelEvent * event );
+
+    void paste();
 };
 
 

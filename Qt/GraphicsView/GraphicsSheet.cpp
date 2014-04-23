@@ -21,17 +21,20 @@
 #include <QScrollbar>
 #include <QMouseEvent>
 
-#include "GraphicsView.h"
+#include "GraphicsSheet.h"
 #include "LabelledComboBox.h"
 #include "ScrollAreaLayout.h"
 #include "Scalewidget.h"
 #include "ScaleEdgewidget.h"
+#include "Interactor.h"
+
 
 #define RULERHEIGHT 23
 #define RULERWIDTH 23
 
 GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent),
-        drawScale(1.0), zoomScale(1.0), sceneSize(100, 100), landscape(true) {
+        drawScale(1.0), zoomScale(1.0), sceneSize(100, 100), landscape(true),
+        currentInteractor(0) {
 
 	setRenderHint(QPainter::Antialiasing);
 	setAutoFillBackground(true);
@@ -90,14 +93,14 @@ void GraphicsSheet::setScaleBackground(const QColor& color) {
 }
 
 
-void GraphicsSheet::setColor(const QColor& color) {
-    viewColor = color;
-}
+//void GraphicsSheet::setColor(const QColor& color) {
+//    viewColor = color;
+//}
 
 
-QColor GraphicsSheet::getColor() {
-    return viewColor;
-}
+//QColor GraphicsSheet::getColor() {
+//    return viewColor;
+//}
 
 
 void GraphicsSheet::updateSize() {
@@ -247,6 +250,30 @@ void GraphicsSheet::areaMoved() {
 }
 
 
+
+void GraphicsSheet::setInteractor(Interactor* interactor) {
+    this->currentInteractor = interactor;
+    if (interactor != 0) {
+        interactor->setView(this);
+    }
+}
+
+
+Interactor* GraphicsSheet::getInteractor() {
+    return currentInteractor;
+}
+
+
+void GraphicsSheet::mousePressEvent ( QMouseEvent * event ){
+    if (currentInteractor) {
+        currentInteractor->mousePressEvent(event);
+        if (!event->isAccepted()) {
+            QGraphicsView::mousePressEvent(event);
+        }
+    }
+}
+
+
 void GraphicsSheet::mouseMoveEvent ( QMouseEvent * event ) {
     float xSnapped = xScale->snapToTick(event->x() + horizontalScrollBar()->value());
     float ySnapped = yScale->snapToTick(event->y() + verticalScrollBar()->value());
@@ -255,8 +282,43 @@ void GraphicsSheet::mouseMoveEvent ( QMouseEvent * event ) {
     xScale->setPos(xSnapped);
     yScale->setPos(ySnapped);
 
-    QGraphicsView::mouseMoveEvent(event);
+    if (currentInteractor) {
+        currentInteractor->mouseMoveEvent(event);
+        if (!event->isAccepted()) {
+            QGraphicsView::mouseMoveEvent(event);
+        }
+    }
 }
+
+
+void GraphicsSheet::mouseReleaseEvent ( QMouseEvent * event ){
+    if (currentInteractor) {
+        currentInteractor->mouseReleaseEvent(event);
+        if (!event->isAccepted()) {
+            QGraphicsView::mouseReleaseEvent(event);
+        }
+    }
+}
+
+
+void GraphicsSheet::wheelEvent(QWheelEvent * event ) {
+    if (currentInteractor) {
+        currentInteractor->wheelEvent(event);
+        if (!event->isAccepted()) {
+            QGraphicsView::wheelEvent(event);
+        }
+    }
+}
+
+
+void GraphicsSheet::paste() {
+//    Log::log(Log::DEBUG, "GraphicsSheet") << "    PASTE";
+
+    if (currentInteractor) {
+        currentInteractor->paste();
+    }
+}
+
 
 
 GraphicsItem::GraphicsItem ( qreal x, qreal y, qreal width, qreal height, QGraphicsItem * parent) :
@@ -267,7 +329,7 @@ GraphicsItem::GraphicsItem ( qreal x, qreal y, qreal width, qreal height, QGraph
 void GraphicsItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget) {
     GraphicsSheet* requestingView = dynamic_cast<GraphicsSheet*>(widget->parent());
     if (requestingView) {
-        painter->setPen(QPen(requestingView->getColor(), 0));
+        painter->setPen(QPen(Qt::black, 0));
     }
 
     painter->drawRect(rect());
@@ -439,7 +501,7 @@ MainWindow::MainWindow(QWidget *parent) :
     scaleWidget->getComboBox()->setCurrentIndex(2);
     checkbox->setChecked(true);
 
-    graphicsSheet->setColor(Qt::blue);  // A blue view
+    // graphicsSheet->setColor(Qt::blue);  // A blue view
 /*****************************************************************************/
 
     GraphicsItem* item = new GraphicsItem(10, 10, 50, 50);
