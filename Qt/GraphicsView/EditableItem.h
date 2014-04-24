@@ -23,6 +23,8 @@ public:
 #endif
 
 
+class GraphicsSheet;
+
 class EditableItem : public QGraphicsRectItem {
 public:
 	enum EditHandle {NoHandle,
@@ -60,7 +62,7 @@ public:
 
 //    virtual void writeExternal(QXmlStreamWriter& writer) = 0;
 
-    virtual void calculateDraggers();
+    void invalidateDraggers();
 
     /**
      * Calculates the handle which is under the given scene position.
@@ -68,30 +70,33 @@ public:
      * @param pos The item position to check for a handle.
      * @return The handle at the given coordinates, one of the EditHandle enum values
      */
-    EditHandle getEditHandle(const QPointF& pos, EditHandles enabledHandles = AllHandlesMask);
+    EditHandle getEditHandle(GraphicsSheet* view, const QPointF& pos, EditHandles enabledHandles = AllHandlesMask);
 
     /**
      * Paints the handles for the edit operations.
      *
      * @param painter The painter to use to paint the handles
      */
-    void paintHandles(QPainter * painter, EditHandles enabledHandles = AllHandlesMask);
+    void paintHandles(GraphicsSheet* view, QPainter * painter, EditHandles enabledHandles = AllHandlesMask);
 
-    void paintCoordinates(QPainter* painter);
+    void paintCoordinates(GraphicsSheet* view, QPainter* painter);
 
     /**
      * Paints the selection border.
      *
      * @param painter The painter to use to paint the selection border.
      */
-    void paintSelectedBorder(QPainter * painter);
+   // void paintSelectedBorder(GraphicsSheet* view, QPainter * painter);
 
 protected:
 
     // @Override
     virtual void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
+    virtual void calculateDraggers(GraphicsSheet* view);
+
 private:
+    bool draggersCalculated;
 
     QRectF rotationHandle;
     QRectF topLeft;

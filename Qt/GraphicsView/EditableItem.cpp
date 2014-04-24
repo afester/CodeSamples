@@ -37,16 +37,15 @@ void ItemVisitor::visit(EditableImageframeItem* ) const {
 #endif
 
 EditableItem::EditableItem(const QPointF& pos, QGraphicsItem * parent) :
-    QGraphicsRectItem(pos.x(), pos.y(), 10, 10, parent) {
+    QGraphicsRectItem(0, 0, 10, 10, parent) {
 
-    calculateDraggers();
+    setPos(pos.x(), pos.y());
+
+    draggersCalculated = false;
     setAcceptHoverEvents(true); // TODO: Only necessary when the item is selected!
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
     setFlag(QGraphicsItem::ItemClipsToShape, true);
-
-    setPen(QPen(Qt::blue, 0));
-    setBrush(Qt::lightGray);
 }
 
 
@@ -55,23 +54,26 @@ EditableItem::EditableItem(const QRectF & rect, QGraphicsItem * parent) :
 
     setPos(rect.x(), rect.y());
 
-    calculateDraggers();
+    draggersCalculated = false;
     setAcceptHoverEvents(true); // TODO: Only necessary when the item is selected!
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
     setFlag(QGraphicsItem::ItemClipsToShape, true);
-
-    setPen(QPen(Qt::blue, 0));
-    setBrush(Qt::lightGray);
 }
 
 
-void EditableItem::calculateDraggers() {
+void EditableItem::invalidateDraggers() {
+    draggersCalculated = false;
+}
+
+void EditableItem::calculateDraggers(GraphicsSheet* view) {
     // Initialize draggers
     const qreal width = rect().width();
     const qreal height = rect().height();
     const qreal xhalf = width / 2;
     const qreal yhalf = height / 2;
+
+    // view->transform()->
     const int size = 3;
 
     rotationHandle = QRectF(xhalf - size/2, 5,        size, size);
@@ -86,7 +88,12 @@ void EditableItem::calculateDraggers() {
 }
 
 
-EditableItem::EditHandle EditableItem::getEditHandle(const QPointF& pos, EditHandles enabledHandles) {
+EditableItem::EditHandle EditableItem::getEditHandle(GraphicsSheet* view, const QPointF& pos, EditHandles enabledHandles) {
+    if (!draggersCalculated) {
+        calculateDraggers(view);
+        draggersCalculated = true;
+    }
+
     if (isSelected()) {
         if ( (enabledHandles & RotationHandleMask) && rotationHandle.contains(pos.toPoint())) {
             return RotationHandle;
@@ -120,8 +127,8 @@ static QString formatFloat(qreal number, int dec) {
     return result;
 }
 
-
-void EditableItem::paintSelectedBorder(QPainter * painter) {
+#if 0
+void EditableItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) {
     if (isSelected()) {
     	// Paint the selection border
     	painter->setBrush(Qt::NoBrush);
@@ -129,9 +136,14 @@ void EditableItem::paintSelectedBorder(QPainter * painter) {
         painter->drawRect(rect());
     }
 }
+#endif
 
+void EditableItem::paintHandles(GraphicsSheet* view, QPainter * painter, EditHandles enabledHandles) {
+    if (!draggersCalculated) {
+        calculateDraggers(view);
+        draggersCalculated = true;
+    }
 
-void EditableItem::paintHandles(QPainter * painter, EditHandles enabledHandles) {
     if (isSelected()) {
         // Paint the handles
 		painter->setBrush(QColor(173, 210, 204));
@@ -159,7 +171,7 @@ void EditableItem::paintHandles(QPainter * painter, EditHandles enabledHandles) 
 }
 
 
-void EditableItem::paintCoordinates(QPainter* painter) {
+void EditableItem::paintCoordinates(GraphicsSheet* view, QPainter* painter) {
     if (isSelected()) {
 		// Paint the coordinates
 		painter->setFont(QFont("Arial", 2, 1, false));

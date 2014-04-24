@@ -21,95 +21,6 @@
 
 #include "LabelledComboBox.h"
 
-#if 0
-GraphicsItem::GraphicsItem ( qreal x, qreal y, qreal width, qreal height, QGraphicsItem * parent) :
-        QGraphicsRectItem(x, y, width, height, parent) {
-}
-
-
-void GraphicsItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget) {
-    GraphicsSheet* requestingView = dynamic_cast<GraphicsSheet*>(widget->parent());
-    if (requestingView) {
-        painter->setPen(QPen(Qt::black, 0));
-    }
-
-    painter->drawRect(rect());
-}
-
-
-class ColoredWidget : public QWidget {
-public:
-    ColoredWidget(const  QColor& color, QWidget* parent) : QWidget(parent) {
-        QPalette pal;
-        QBrush brush(color);
-        brush.setStyle(Qt::SolidPattern);
-        pal.setBrush(QPalette::Active, QPalette::Window, brush);
-        setPalette(pal);
-        setAutoFillBackground(true);
-    }
-};
-
-#endif
-#if 0
-
-class CenterLayout : public QGridLayout {
-public:
-       CenterLayout(QWidget* parent, QWidget* center) : QGridLayout(parent) {
-           setMargin(0);
-           setHorizontalSpacing(0);
-           setVerticalSpacing(0);
-
-           setRowStretch(0, 1);
-           setRowStretch(2, 1);
-           setColumnStretch(0, 1);
-           setColumnStretch(2, 1);
-
-           addWidget(center, 1, 1);
-       }
-
-       void setGeometry(const QRect& r) {
-           QGridLayout::setGeometry(r);
-           //qDebug() << r;
-       }
-};
-
-
-class CenterLayout : public QLayout {
-    QWidget* centralWidget;
-public:
-       CenterLayout(QWidget* parent, QWidget* center) : QLayout(parent), centralWidget(center) {
-//           setMargin(0);
-/*           setHorizontalSpacing(0);
-           setVerticalSpacing(0);
-
-           setRowStretch(0, 1);
-           setRowStretch(2, 1);
-           setColumnStretch(0, 1);
-           setColumnStretch(2, 1);
-
-           addWidget(center, 1, 1);*/
-       }
-
-       virtual QSize sizeHint() const = 0;
-
-       virtual void addItem(QLayoutItem *) = 0;
-
-       virtual QLayoutItem *itemAt(int index) const = 0;
-
-       virtual QLayoutItem *takeAt(int index) = 0;
-
-       virtual int count() const {
-           return 1;
-       }
-
-       void setGeometry(const QRect& r) {
-           qDebug() << "LAYOUT:" << r;
-           qDebug() << "  WDG:" << centralWidget->sizeHint();
-           //QGridLayout::setGeometry(r);
-           //qDebug() << r;
-       }
-};
-#endif
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent) {
@@ -202,23 +113,26 @@ MainWindow::MainWindow(QWidget *parent) :
     scaleWidget->getComboBox()->setCurrentIndex(2);
     checkbox->setChecked(true);
 
-    // graphicsSheet->setColor(Qt::blue);  // A blue view
 /*****************************************************************************/
 
-    QGraphicsRectItem* item = new QGraphicsRectItem(0, 0, 50, 50);
-    item->setPos(10, 10);
+    QGraphicsRectItem* item = new EditableItem(QRectF(10, 10, 50, 50));
     item->setPen(QPen(Qt::red, 0));
-    graphicsSheet->scene()->addItem(item);
-    qDebug() << "RED RECT:" << item->x() << "/" << item->y();
-    qDebug() << "RED BOUNDINGRECT:" << item->boundingRect();
-
-    item = new QGraphicsRectItem(0, 0, 5, 5);
+    item->setBrush(Qt::lightGray);
     graphicsSheet->scene()->addItem(item);
 
-    item = new QGraphicsRectItem(225, 295, 5, 5);
+    item = new EditableItem(QRectF(0, 0, 5, 5));
+    item->setPen(QPen(Qt::blue, 0));
+    item->setBrush(Qt::lightGray);
+    graphicsSheet->scene()->addItem(item);
+
+    item = new EditableItem(QRectF(225, 295, 5, 5));
+    item->setPen(QPen(Qt::green, 0));
+    item->setBrush(Qt::lightGray);
     graphicsSheet->scene()->addItem(item);
 
     item = new EditableItem(QRectF(125, 100, 200, 100));
+    item->setPen(QPen(Qt::magenta, 0));
+    item->setBrush(Qt::lightGray);
     graphicsSheet->scene()->addItem(item);
 
     graphicsSheet->setInteractor(new EditFrameInteractor());
@@ -234,6 +148,7 @@ void MainWindow::printInfo() {
 
 MainWindow::~MainWindow() {
 }
+
 
 int main(int argc, char ** argv) {
 

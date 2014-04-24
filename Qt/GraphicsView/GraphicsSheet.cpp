@@ -17,6 +17,7 @@
 #include "Scalewidget.h"
 #include "ScaleEdgewidget.h"
 #include "Interactor.h"
+#include "EditableItem.h"
 
 #define RULERHEIGHT 23
 #define RULERWIDTH 23
@@ -58,9 +59,24 @@ GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent),
 }
 
 
-
 void GraphicsSheet::drawBackground(QPainter * painter, const QRectF & rect) {
 //	painter->fillRect(rect, QBrush(Qt::white));
+}
+
+
+void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
+    QGraphicsItem* item;
+    foreach(item, scene()->selectedItems()) {
+        EditableItem* edItem = dynamic_cast<EditableItem*>(item);
+        if (edItem) {
+            // qDebug() << edItem;
+
+            // Paint the selection border
+            painter->setBrush(Qt::NoBrush);
+            painter->setPen(QPen(Qt::green, 0, Qt::DashLine));
+            painter->drawRect(QRectF(edItem->x(), edItem->y(), edItem->rect().width(), edItem->rect().height()));
+        }
+    }
 }
 
 

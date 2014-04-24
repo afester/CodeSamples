@@ -108,7 +108,11 @@ private slots:
     void areaMoved();
 
 protected:
-    void drawBackground(QPainter * painter, const QRectF & rect);
+    // @Override
+    virtual void drawBackground(QPainter * painter, const QRectF & rect);
+
+    // @Override
+    virtual void drawForeground ( QPainter * painter, const QRectF & rect );
 
     void resizeEvent ( QResizeEvent * event );
 

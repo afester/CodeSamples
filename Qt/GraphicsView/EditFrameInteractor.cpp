@@ -26,9 +26,9 @@ EditFrameInteractor::~EditFrameInteractor() {
 
 
 void EditFrameInteractor::paintDecorations(EditableItem* item, QPainter* painter) {
-	item->paintHandles(painter, enabledHandles);
-	item->paintCoordinates(painter);
-	item->paintSelectedBorder(painter);
+	item->paintHandles(theView, painter, enabledHandles);
+	item->paintCoordinates(theView, painter);
+//	item->paintSelectedBorder(theView, painter);
 }
 
 
@@ -58,10 +58,10 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
     theFrame = dynamic_cast<EditableItem*>(item);
     if (theFrame) {
     	theFrame->setSelected(true);
-    	theFrame->calculateDraggers();
+    	theFrame->invalidateDraggers();
 
 		QPointF itemPos = theFrame->mapFromScene(scenePos);
-		editHandle = theFrame->getEditHandle(itemPos, enabledHandles);
+		editHandle = theFrame->getEditHandle(theView, itemPos, enabledHandles);
 
 		QPoint positionIndicator(-1,-1);
         QPointF pos = scenePos; // QPoint((int) floor(scenePos.x()),
@@ -140,7 +140,7 @@ void EditFrameInteractor::hoverOverEvent ( QMouseEvent * event ) {
 	//Log::log(Log::DEBUG, "EditFrameInteractor") << frameItem;
 	if (frameItem && frameItem->isSelected()) {
 		QPointF pos = frameItem->mapFromScene(scenePos);
-		EditableItem::EditHandle handle = frameItem->getEditHandle(pos, enabledHandles);
+		EditableItem::EditHandle handle = frameItem->getEditHandle(theView, pos, enabledHandles);
 		switch(handle) {
 			case EditableItem::TopLeftHandle :
 					theView->setCursor(Qt::SizeFDiagCursor);
@@ -356,7 +356,7 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
         QRectF newRect(QPointF(0,0), newSize);
         theFrame->setRect(newRect);
         theFrame->setPos(newPos);
-        theFrame->calculateDraggers();
+        theFrame->invalidateDraggers();
 
 #if 0
         // TODO HACK: special handling of text frames - make sure that the child is always centered
