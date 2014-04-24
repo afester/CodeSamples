@@ -8,7 +8,7 @@
 #include <QPainter>
 
 #include "ScaleWidget.h"
-#include "GraphicsView.h"
+#include "GraphicsSheet.h"
 
 ScaleWidget::ScaleWidget(QWidget* parent, GraphicsSheet* view, Direction dir) :
             QWidget(parent),
