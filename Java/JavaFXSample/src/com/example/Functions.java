@@ -15,6 +15,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -35,6 +36,9 @@ public class Functions extends Application {
    private double x0pos = 0;
    private double y0pos = 0;
    private double tick = 0;
+
+   double mouseXpos = -1;
+   double mouseYpos = -1;
 
    private double t = 1;
    private double dt = 0.1;
@@ -72,8 +76,8 @@ public class Functions extends Application {
       final GridPane grid = new GridPane();
       grid.setAlignment(Pos.TOP_LEFT);
       // grid.setGridLinesVisible(true);
-      
-      Scene scene = new Scene(grid, 1200, 600);
+
+      Scene scene = new Scene(grid, 1200, 800);
       primaryStage.setScene(scene);
 
       scene.getStylesheets().add
@@ -84,6 +88,29 @@ public class Functions extends Application {
       context = canvas.getGraphicsContext2D();
       context.setFill(Color.BLUE);
       context.fillRect(75, 75, 100, 100);
+      canvas.setOnMouseMoved(new EventHandler<MouseEvent>() {
+
+         @Override
+         public void handle(MouseEvent evt) {
+            mouseXpos = evt.getX();
+            mouseYpos = evt.getY();
+
+            renderScene();
+         }
+         
+      });
+      canvas.setOnMouseExited(new EventHandler<MouseEvent>() {
+
+         @Override
+         public void handle(MouseEvent arg0) {
+            mouseXpos = -1;
+            mouseYpos = -1;
+
+            renderScene();
+         }
+         
+      });
+
       grid.add(canvas, 0, 0);
 
 /********************************/
@@ -287,13 +314,14 @@ public class Functions extends Application {
       grid.add(editGrid, 1, 0);
 
       /* Add some sample functions */
-      addGraph("2*sin(x+2*t)", Color.RED);
-      addGraph("log(x)+t", Color.BLUE);
-      addGraph("e^(X+t)", Color.GREEN);
-      addGraph("x + 3*(x-t)^2 + x^3 - 1", Color.MAROON);
-      addGraph("tan(x)", Color.BLUEVIOLET);
-      addGraph("sqrt(x)", Color.YELLOWGREEN);
-      addGraph("1/x", Color.AQUA);
+      //addGraph("2*sin(x+2*t)", Color.RED);
+      //addGraph("log(x)+t", Color.BLUE);
+      //addGraph("e^(X+t)", Color.GREEN);
+      //addGraph("x + 3*(x-t)^2 + x^3 - 1", Color.MAROON);
+      //addGraph("tan(x)", Color.BLUEVIOLET);
+      //addGraph("sqrt(x)", Color.YELLOWGREEN);
+      //addGraph("1/x", Color.AQUA);
+      addGraph("sin(x) + t", Color.RED);
 
       updateValues();
       renderScene();
@@ -375,12 +403,12 @@ public class Functions extends Application {
       // draw the axis lines
 
       // Y axis
-      context.moveTo(x0pos, canvas.getHeight());
-      context.lineTo(x0pos, 0);
+      context.moveTo(x0pos + 0.5, canvas.getHeight() + 0.5);
+      context.lineTo(x0pos + 0.5, 0.5);
 
       // X axis
-      context.moveTo(paddingLeft, y0pos);
-      context.lineTo(canvas.getWidth(), y0pos);
+      context.moveTo(paddingLeft + 0.5, y0pos + 0.5);
+      context.lineTo(canvas.getWidth() + 0.5, y0pos + 0.5);
 
       // draw the y scale
       for (double y = -tick; y > startY; y -= tick) { // negative axis
@@ -418,11 +446,11 @@ public class Functions extends Application {
 
    
    private void drawYTick(double y) {
-      double ypos = y0pos - y / scalePerPixel;
+      long /*double*/ ypos = Math.round(y0pos - y / scalePerPixel);
 
       if (ypos > 20) { // do not draw a tick nearby the end of the axis!
-         context.moveTo(x0pos - 5, ypos);
-         context.lineTo(x0pos + 5, ypos);
+         context.moveTo(x0pos - 5, ypos + 0.5);
+         context.lineTo(x0pos + 5, ypos + 0.5);
 
          String value = "" + Math.round(y * 10) / 10.0;
          double textWidth = 20; // / context.measureText(value).width;
@@ -432,10 +460,10 @@ public class Functions extends Application {
 
    
    private void drawXTick(double x) {
-      double xpos = x0pos + x / scalePerPixel;
+      long /*double*/ xpos = Math.round(x0pos + x / scalePerPixel);
 
-      context.moveTo(xpos, y0pos - 5);
-      context.lineTo(xpos, y0pos + 5);
+      context.moveTo(xpos + 0.5, y0pos - 5);
+      context.lineTo(xpos + 0.5, y0pos + 5);
 
       String value = "" + Math.round(x * 10) / 10.0;
       double textWidth = 20; // / FGV.context.measureText(value).width;
@@ -457,24 +485,36 @@ public class Functions extends Application {
          drawGraph(graph);
       }
 
-      /*
-       * // draw the crosshair if (FGV.mouseXpos !== -1 && FGV.mouseYpos !== -1)
-       * { // set visual properties for the cross FGV.context.beginPath();
-       * FGV.context.strokeStyle = "red"; FGV.context.lineWidth = 0.5;
-       * FGV.context.setLineDash([ 8, 2 ]);
-       * 
-       * // draw the cross FGV.context.moveTo(FGV.mouseXpos, 0);
-       * FGV.context.lineTo(FGV.mouseXpos, FGV.canvas.height);
-       * FGV.context.moveTo(0, FGV.mouseYpos);
-       * FGV.context.lineTo(FGV.canvas.width, FGV.mouseYpos);
-       * FGV.context.stroke();
-       * 
-       * // update position values FGV.curXposNode.value = Math
-       * .round(((FGV.mouseXpos - FGV.x0pos) * FGV.scalePerPixel) * 100) / 100;
-       * FGV.curYposNode.value = Math .round(((FGV.y0pos - FGV.mouseYpos) *
-       * FGV.scalePerPixel) * 100) / 100; } else { FGV.curXposNode.value =
-       * 'n/a'; FGV.curYposNode.value = 'n/a'; }
-       */
+
+       // draw the crosshair 
+       if (mouseXpos != -1 && mouseYpos != -1) {
+          // set visual properties for the cross
+          context.beginPath();
+          context.setStroke(Color.RED);
+          context.setLineWidth(0.5);
+          // context.setLineDash([ 8, 2 ]);
+
+          // draw the cross
+          // NOTE: 
+          //    https://forums.oracle.com/thread/2465226
+          //    http://stackoverflow.com/questions/11881834/what-are-a-lines-exact-dimensions-in-javafx-2
+          //    http://docs.oracle.com/javafx/2/api/javafx/scene/Node.html
+          // A pixel has a dimension of 1.0 x 1.0 - the center of the pixel is
+          // 0.5/0.5. In order to draw sharp lines, we need to transform the
+          // coordinates to pixel centers
+          context.moveTo(mouseXpos + 0.5, 0.5);
+          context.lineTo(mouseXpos + 0.5, canvas.getHeight() + 0.5);
+          context.moveTo(0.5, mouseYpos + 0.5);
+          context.lineTo(canvas.getWidth() + 0.5, mouseYpos + 0.5);
+          context.stroke();
+ 
+          // update position values 
+          // FGV.curXposNode.value = Math.round(((FGV.mouseXpos - FGV.x0pos) * FGV.scalePerPixel) * 100) / 100;
+          // FGV.curYposNode.value = Math .round(((FGV.y0pos - FGV.mouseYpos) * FGV.scalePerPixel) * 100) / 100;
+       } else { 
+          // FGV.curXposNode.value = "n/a";
+          // FGV.curYposNode.value = "n/a";
+       }
    }
 
    
