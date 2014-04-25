@@ -104,10 +104,6 @@ EditableItem::EditHandle EditableItem::getEditHandle(GraphicsSheet* view, const 
     calculateDraggers(view);
 
     if (isSelected()) {
-        qDebug() << "  POS:" << pos.toPoint();
-        qDebug() << "  ROT:" << rotationHandle;
-
-
         if ( (enabledHandles & RotationHandleMask) && rotationHandle.contains(pos.toPoint())) {
             return RotationHandle;
         } else if ( (enabledHandles & TopLeftHandleMask) && topLeft.contains(pos.toPoint())) {
@@ -126,8 +122,11 @@ EditableItem::EditHandle EditableItem::getEditHandle(GraphicsSheet* view, const 
             return BottomLeftHandle;
         } else if ( (enabledHandles & LeftHandleMask) && left.contains(pos.toPoint())) {
         	return LeftHandle;
-        } else if ( (enabledHandles & MoveHandleMask) && rect().contains(pos.toPoint())) {
-            return MoveHandle;
+        } else {
+            QRectF itemRect = QRectF(x(), y(), rect().width(), rect().height());
+            if ( (enabledHandles & MoveHandleMask) && itemRect.contains(pos.toPoint())) {
+                return MoveHandle;
+            }
         }
     }
 

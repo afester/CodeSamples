@@ -188,8 +188,12 @@ void EditFrameInteractor::hoverOverEvent ( QMouseEvent * event ) {
 					theView->setCursor(Qt::SizeFDiagCursor);
 					break;
 
-			default :
-					theView->setCursor(Qt::OpenHandCursor);
+            case EditableItem::MoveHandle :
+                    theView->setCursor(Qt::OpenHandCursor);
+                    break;
+
+            default :
+                    theView->setCursor(Qt::ArrowCursor);
 					break;
 		}
 	} else {
