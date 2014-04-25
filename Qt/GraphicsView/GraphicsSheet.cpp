@@ -56,7 +56,7 @@ GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent),
     QObject::connect(horizontalScrollBar(), SIGNAL(valueChanged(int)),
                      this, SLOT(areaMoved()));
 
-    setScene(new GraphicsScene());
+    setScene(new QGraphicsScene());
 
     // This is currently required to properly redraw the handles which partially
     // are outside the item - TODO: !!! PERFORMANCE?
@@ -279,6 +279,12 @@ Interactor* GraphicsSheet::getInteractor() {
     return currentInteractor;
 }
 
+EditableItem* GraphicsSheet::getFocusItem() const {
+    if (scene()->selectedItems().size() > 0) {
+        return dynamic_cast<EditableItem*>(scene()->selectedItems().at(0));  // TODO!
+    }
+    return 0;
+}
 
 void GraphicsSheet::mousePressEvent ( QMouseEvent * event ){
     if (currentInteractor) {

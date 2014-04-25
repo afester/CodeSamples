@@ -30,7 +30,8 @@ public:
 	enum EditHandle {NoHandle,
 					 TopLeftHandle, TopHandle, TopRightHandle,
 					 LeftHandle, RotationHandle, RightHandle,
-					 BottomLeftHandle, BottomHandle, BottomRightHandle};
+					 BottomLeftHandle, BottomHandle, BottomRightHandle,
+	                 MoveHandle};
 
 	enum EditHandles {TopLeftHandleMask = 0x01,
 					  TopHandleMask = 0x02,
@@ -41,12 +42,16 @@ public:
 					  BottomLeftHandleMask = 0x40,
 					  BottomHandleMask = 0x80,
 					  BottomRightHandleMask = 0x100,
+					  MoveHandleMask = 0x200,
 
 					  AllHandlesMask = TopLeftHandleMask | TopHandleMask | TopRightHandleMask |
 					  	  	  	  	   LeftHandleMask | RotationHandleMask | RightHandleMask |
-					  	  	  	  	   BottomLeftHandleMask | BottomHandleMask | BottomRightHandleMask,
+					  	  	  	  	   BottomLeftHandleMask | BottomHandleMask | BottomRightHandleMask|
+					  	  	  	  	   MoveHandleMask,
 
-					  BasicHandlesMask = TopHandleMask | LeftHandleMask | RightHandleMask | BottomHandleMask
+					  BasicHandlesMask = TopHandleMask | LeftHandleMask |
+					                     RightHandleMask | BottomHandleMask |
+					                     MoveHandleMask
 					 };
 
     EditableItem(const QPointF& pos, QGraphicsItem * parent = 0);

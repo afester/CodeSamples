@@ -17,6 +17,7 @@
 #include <QApplication>
 #include <QDebug>
 
+/*
 class GraphicsItem : public QGraphicsRectItem {
 public:
     GraphicsItem ( qreal x, qreal y, qreal width, qreal height, QGraphicsItem * parent = 0 );
@@ -27,11 +28,12 @@ protected:
 
 class GraphicsScene : public QGraphicsScene {
 };
-
+*/
 
 class ScaleWidget;
 class ScaleEdgeWidget;
 class Interactor;
+class EditableItem;
 
 class GraphicsSheet : public QGraphicsView {
     Q_OBJECT;
@@ -94,6 +96,8 @@ public:
     void setInteractor(Interactor* interactor);
 
     Interactor* getInteractor();
+
+    EditableItem* getFocusItem() const;
 
 public slots:
     void setScale(int idx);
