@@ -26,7 +26,7 @@ EditFrameInteractor::~EditFrameInteractor() {
 
 
 void EditFrameInteractor::paintDecorations(EditableItem* item, QPainter* painter) {
-	item->paintHandles(theView, painter, enabledHandles);
+//	item->paintHandles(theView, painter, enabledHandles);
 	item->paintCoordinates(theView, painter);
 //	item->paintSelectedBorder(theView, painter);
 }

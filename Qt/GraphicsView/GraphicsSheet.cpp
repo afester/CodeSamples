@@ -18,6 +18,7 @@
 #include "ScaleEdgewidget.h"
 #include "Interactor.h"
 #include "EditableItem.h"
+#include "Log.h"
 
 #define RULERHEIGHT 23
 #define RULERWIDTH 23
@@ -56,6 +57,11 @@ GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent),
                      this, SLOT(areaMoved()));
 
     setScene(new GraphicsScene());
+
+    // This is currently required to properly redraw the handles which partially
+    // are outside the item - TODO: !!! PERFORMANCE?
+    // Default is QGraphicsView::MinimalViewportUpdate
+    setViewportUpdateMode ( FullViewportUpdate);
 }
 
 
@@ -65,6 +71,10 @@ void GraphicsSheet::drawBackground(QPainter * painter, const QRectF & rect) {
 
 
 void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
+    // QGraphicsView::paintEvent() only repaints the respective item area ...
+    // in order to properly redraw the handles (which are partially outside the
+    // item area), we need to use FullViewportUpdate mode
+
     QGraphicsItem* item;
     foreach(item, scene()->selectedItems()) {
         EditableItem* edItem = dynamic_cast<EditableItem*>(item);
@@ -72,9 +82,10 @@ void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
             // qDebug() << edItem;
 
             // Paint the selection border
-            painter->setBrush(Qt::NoBrush);
-            painter->setPen(QPen(Qt::green, 0, Qt::DashLine));
-            painter->drawRect(QRectF(edItem->x(), edItem->y(), edItem->rect().width(), edItem->rect().height()));
+            edItem->paintSelectedBorder(this, painter);
+
+            // paint the edit handles
+            edItem->paintHandles(this, painter, EditableItem::AllHandlesMask);
         }
     }
 }

@@ -86,7 +86,7 @@ public:
      *
      * @param painter The painter to use to paint the selection border.
      */
-   // void paintSelectedBorder(GraphicsSheet* view, QPainter * painter);
+   void paintSelectedBorder(GraphicsSheet* view, QPainter * painter);
 
 protected:
 

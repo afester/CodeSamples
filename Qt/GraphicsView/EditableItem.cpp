@@ -66,33 +66,42 @@ void EditableItem::invalidateDraggers() {
     draggersCalculated = false;
 }
 
+
 void EditableItem::calculateDraggers(GraphicsSheet* view) {
+//    if (draggersCalculated) {
+//        return;
+//    }
+
+    const qreal handleSize = 8.0;
+
+    const qreal hsize = handleSize / view->transform().m11();
+    const qreal vsize = handleSize / view->transform().m22();
+
     // Initialize draggers
+    const qreal xpos = x() - hsize/2;
+    const qreal ypos = y() - vsize/2;
     const qreal width = rect().width();
     const qreal height = rect().height();
     const qreal xhalf = width / 2;
     const qreal yhalf = height / 2;
 
-    // view->transform()->
-    const int size = 3;
+    rotationHandle = QRectF(xpos + xhalf, ypos + vsize*2, hsize, vsize);
 
-    rotationHandle = QRectF(xhalf - size/2, 5,        size, size);
-    topLeft = QRectF(0, 0,                            size, size);
-    topRight = QRectF(width  - size, 0,               size, size);
-    bottomLeft = QRectF(0, height - size,             size, size);
-    bottomRight = QRectF(width - size, height - size, size, size);
-    top = QRectF(xhalf - size/2, 0,                   size, size);
-    bottom = QRectF(xhalf - size/2, height - size,    size, size);
-    left = QRectF(0, yhalf - size/2,                  size, size);
-    right = QRectF(width - size, yhalf - size/2,      size, size);
+    topLeft =     QRectF(xpos,         ypos,          hsize, vsize);
+    topRight =    QRectF(xpos + width, ypos,          hsize, vsize);
+    bottomLeft =  QRectF(xpos,         ypos + height, hsize, vsize);
+    bottomRight = QRectF(xpos + width, ypos + height, hsize, vsize);
+    top =         QRectF(xpos + xhalf, ypos,          hsize, vsize);
+    bottom =      QRectF(xpos + xhalf, ypos + height, hsize, vsize);
+    left =        QRectF(xpos,         ypos + yhalf,  hsize, vsize);
+    right =       QRectF(xpos + width, ypos + yhalf,  hsize, vsize);
+
+    draggersCalculated = true;
 }
 
 
 EditableItem::EditHandle EditableItem::getEditHandle(GraphicsSheet* view, const QPointF& pos, EditHandles enabledHandles) {
-    if (!draggersCalculated) {
-        calculateDraggers(view);
-        draggersCalculated = true;
-    }
+    calculateDraggers(view);
 
     if (isSelected()) {
         if ( (enabledHandles & RotationHandleMask) && rotationHandle.contains(pos.toPoint())) {
@@ -127,26 +136,27 @@ static QString formatFloat(qreal number, int dec) {
     return result;
 }
 
-#if 0
+
 void EditableItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) {
     if (isSelected()) {
-    	// Paint the selection border
-    	painter->setBrush(Qt::NoBrush);
-        painter->setPen(QPen(Qt::black, 0, Qt::DashLine));
-        painter->drawRect(rect());
+        painter->setBrush(Qt::NoBrush);
+        painter->setPen(QPen(Qt::green, 0, Qt::DashLine));
+        painter->drawRect(QRectF(x(), y(), rect().width(), rect().height()));
     }
 }
-#endif
+
 
 void EditableItem::paintHandles(GraphicsSheet* view, QPainter * painter, EditHandles enabledHandles) {
-    if (!draggersCalculated) {
+/*    if (!draggersCalculated) {
         calculateDraggers(view);
         draggersCalculated = true;
     }
-
+*/
     if (isSelected()) {
+        calculateDraggers(view);
+
         // Paint the handles
-		painter->setBrush(QColor(173, 210, 204));
+		painter->setBrush(Qt::green);
 		painter->setPen(QPen(Qt::black, 0, Qt::SolidLine));	// Qt5: need to explicitly set width to 0, even though the docs claim other
 
 		if (enabledHandles & RotationHandleMask)
