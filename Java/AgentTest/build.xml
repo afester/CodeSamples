@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project AgentTest">
+    <target name="create_run_jar">
+        <jar destfile="Agent.jar" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Premain-Class" value="com.example.agent.InstrumentationAgent"/>
+            </manifest>
+            <fileset dir="C:/Users/afester/Projects/CodeSamples/Java/AgentTest/bin"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/afester/Projects/CodeSamples/nodistrib/asm-all-4.1.jar"/>
+        </jar>
+    </target>
+</project>
