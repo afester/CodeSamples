@@ -17,6 +17,7 @@
 #include <QApplication>
 #include <QDebug>
 
+/*
 class GraphicsItem : public QGraphicsRectItem {
 public:
     GraphicsItem ( qreal x, qreal y, qreal width, qreal height, QGraphicsItem * parent = 0 );
@@ -27,50 +28,12 @@ protected:
 
 class GraphicsScene : public QGraphicsScene {
 };
+*/
 
-
-class GraphicsSheet;
-
-class ScaleWidget : public QWidget {
-    Q_OBJECT;
-
-    float theScale;
-    int offset;
-
-    int smallTicksSize;
-    int mediumTicksSize;
-    int largeTicksSize;
-
-public:
-    enum Direction{Vertical, Horizontal};
-
-    ScaleWidget(QWidget* parent, GraphicsSheet* view, Direction dir);
-
-    void setScale(float scale);
-
-    void setOffset(int value);
-
-protected:
-    void paintEvent ( QPaintEvent * event );
-
-private:
-    GraphicsSheet* theView;
-    Direction direction;
-};
-
-
-class ScaleEdgeWidget : public QWidget {
-    QString unit;
-
-public:
-    ScaleEdgeWidget(QWidget* parent);
-
-    void setUnit(const QString& theUnit);
-
-protected:
-    void paintEvent ( QPaintEvent * event );
-};
-
+class ScaleWidget;
+class ScaleEdgeWidget;
+class Interactor;
+class EditableItem;
 
 class GraphicsSheet : public QGraphicsView {
     Q_OBJECT;
@@ -88,7 +51,8 @@ class GraphicsSheet : public QGraphicsView {
     ScaleWidget* yScale;
     ScaleEdgeWidget* edge;
 
-    QColor viewColor;
+    Interactor* currentInteractor;
+    //QColor viewColor;
 
     float xDpi;
     float yDpi;
@@ -123,11 +87,17 @@ public:
 
     void setSize(const QSizeF& dimension);
 
-    void setColor(const QColor& color);
+    //void setColor(const QColor& color);
 
-    QColor getColor();
+    //QColor getColor();
 
     void setScaleBackground(const QColor& color);
+
+    void setInteractor(Interactor* interactor);
+
+    Interactor* getInteractor();
+
+    EditableItem* getFocusItem() const;
 
 public slots:
     void setScale(int idx);
@@ -142,15 +112,27 @@ private slots:
     void areaMoved();
 
 protected:
-    void drawBackground(QPainter * painter, const QRectF & rect);
+    // @Override
+    virtual void drawBackground(QPainter * painter, const QRectF & rect);
+
+    // @Override
+    virtual void drawForeground ( QPainter * painter, const QRectF & rect );
 
     void resizeEvent ( QResizeEvent * event );
 
     QSize sizeHint() const;
+
+    void mousePressEvent ( QMouseEvent * event );
+
+    void mouseMoveEvent ( QMouseEvent * event );
+
+    void mouseReleaseEvent ( QMouseEvent * event );
+
+    void wheelEvent(QWheelEvent * event );
+
+    void paste();
 };
 
-
-class Ui_MainWindow;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT;
@@ -162,10 +144,9 @@ class MainWindow : public QMainWindow {
     QToolBar *toolBar;
 
 public:
-
     MainWindow(QWidget* parent);
-    ~MainWindow();
 
+    ~MainWindow();
 
 public slots:
 	void printInfo();
