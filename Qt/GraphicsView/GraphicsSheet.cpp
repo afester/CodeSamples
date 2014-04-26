@@ -10,12 +10,12 @@
 #include <QLabel>
 #include <QScreen>
 #include <QtCore/qmath.h>
-#include <QScrollbar>
+#include <QScrollBar>
 #include <QMouseEvent>
 
 #include "GraphicsSheet.h"
-#include "Scalewidget.h"
-#include "ScaleEdgewidget.h"
+#include "ScaleWidget.h"
+#include "ScaleEdgeWidget.h"
 #include "Interactor.h"
 #include "EditableItem.h"
 #include "Log.h"
@@ -57,11 +57,6 @@ GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent),
                      this, SLOT(areaMoved()));
 
     setScene(new QGraphicsScene());
-
-    // This is currently required to properly redraw the handles which partially
-    // are outside the item - TODO: !!! PERFORMANCE?
-    // Default is QGraphicsView::MinimalViewportUpdate
-    setViewportUpdateMode ( FullViewportUpdate);
 }
 
 
@@ -71,9 +66,8 @@ void GraphicsSheet::drawBackground(QPainter * painter, const QRectF & rect) {
 
 
 void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
-    // QGraphicsView::paintEvent() only repaints the respective item area ...
-    // in order to properly redraw the handles (which are partially outside the
-    // item area), we need to use FullViewportUpdate mode
+    // QGraphicsView::paintEvent() only repaints the boundingRect() area of the item.
+    // we therefore need to properly add a margin inside the item's boundingRect() method.
 
     QGraphicsItem* item;
     foreach(item, scene()->selectedItems()) {

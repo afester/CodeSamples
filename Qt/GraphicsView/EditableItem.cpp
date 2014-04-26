@@ -100,6 +100,13 @@ void EditableItem::calculateDraggers(GraphicsSheet* view) {
 }
 
 
+QRectF EditableItem::boundingRect() const {
+    QRectF result = QGraphicsRectItem::boundingRect();
+
+    return QRectF(result.x() - 2, result.y() - 2, result.width() + 4, result.height() + 4);
+}
+
+
 EditableItem::EditHandle EditableItem::getEditHandle(GraphicsSheet* view, const QPointF& pos, EditHandles enabledHandles) {
     calculateDraggers(view);
 

@@ -93,6 +93,8 @@ public:
      */
    void paintSelectedBorder(GraphicsSheet* view, QPainter * painter);
 
+   QRectF boundingRect() const;
+
 protected:
 
     // @Override
