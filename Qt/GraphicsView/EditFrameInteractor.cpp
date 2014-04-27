@@ -54,7 +54,7 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
 	theFrame = theView->getFocusItem();
 	if (theFrame) {
         QPointF itemPos = theFrame->mapFromScene(scenePos);
-        editHandle = theFrame->getEditHandle(theView, scenePos, enabledHandles);
+        editHandle = theFrame->getEditHandle(theView, itemPos, enabledHandles);
 
         QPoint positionIndicator(-1,-1);
         QPointF pos = scenePos; // QPoint((int) floor(scenePos.x()),
@@ -150,7 +150,8 @@ void EditFrameInteractor::hoverOverEvent ( QMouseEvent * event ) {
 
 	EditableItem* frameItem = theView->getFocusItem();
 	if (frameItem) {
-		EditableItem::EditHandle handle = frameItem->getEditHandle(theView, scenePos, enabledHandles);
+        QPointF itemPos = frameItem->mapFromScene(scenePos);
+		EditableItem::EditHandle handle = frameItem->getEditHandle(theView, itemPos, enabledHandles);
 		switch(handle) {
 			case EditableItem::TopLeftHandle :
 					theView->setCursor(Qt::SizeFDiagCursor);

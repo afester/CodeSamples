@@ -85,16 +85,30 @@ void EditableItem::calculateDraggers(GraphicsSheet* view) {
     const qreal xhalf = width / 2;
     const qreal yhalf = height / 2;
 
-    rotationHandle = QRectF(xpos + xhalf, ypos + vsize*2, hsize, vsize);
+    rotationHandle = //QRectF(xpos + xhalf, ypos + vsize*2, hsize, vsize);
+    				 QRectF(xhalf - hsize/2, vsize, hsize, vsize);
 
-    topLeft =     QRectF(xpos,         ypos,          hsize, vsize);
-    topRight =    QRectF(xpos + width, ypos,          hsize, vsize);
-    bottomLeft =  QRectF(xpos,         ypos + height, hsize, vsize);
-    bottomRight = QRectF(xpos + width, ypos + height, hsize, vsize);
-    top =         QRectF(xpos + xhalf, ypos,          hsize, vsize);
-    bottom =      QRectF(xpos + xhalf, ypos + height, hsize, vsize);
-    left =        QRectF(xpos,         ypos + yhalf,  hsize, vsize);
-    right =       QRectF(xpos + width, ypos + yhalf,  hsize, vsize);
+    topLeft = QRectF(-hsize/2, -vsize/2, hsize, vsize);
+    		//QRectF(xpos,         ypos,          hsize, vsize);
+
+
+    topRight =    QRectF(width - hsize/2, -vsize/2, hsize, vsize);
+    		//  QRectF(xpos + width, ypos,          hsize, vsize);
+    bottomLeft =  QRectF(-hsize/2, height - vsize/2, hsize, vsize);
+    			// QRectF(xpos,         ypos + height, hsize, vsize);
+
+    bottomRight = //QRectF(xpos + width, ypos + height, hsize, vsize);
+    			QRectF(width - hsize/2, height - vsize/2, hsize, vsize);
+    top =         //QRectF(xpos + xhalf, ypos,          hsize, vsize);
+    		QRectF(xhalf - hsize/2, -vsize/2, hsize, vsize);
+    bottom =     // QRectF(xpos + xhalf, ypos + height, hsize, vsize);
+    		QRectF(xhalf - hsize/2, height - vsize/2, hsize, vsize);
+
+    left =    //    QRectF(xpos,         ypos + yhalf,  hsize, vsize);
+    		QRectF(-hsize/2, yhalf - vsize/2, hsize, vsize);
+
+    right =   //    QRectF(xpos + width, ypos + yhalf,  hsize, vsize);
+    		QRectF(width - hsize/2, yhalf - vsize/2, hsize, vsize);
 
     draggersCalculated = true;
 }
@@ -151,9 +165,18 @@ static QString formatFloat(qreal number, int dec) {
 
 void EditableItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) {
     if (isSelected()) {
+    	painter->save();
+
         painter->setBrush(Qt::NoBrush);
         painter->setPen(QPen(Qt::green, 0, Qt::DashLine));
-        painter->drawRect(QRectF(x(), y(), rect().width(), rect().height()));
+
+        painter->translate(x() + rect().width()/2, y() + rect().height()/2);
+        painter->rotate(rotation());
+        painter->translate(-(x() + rect().width()/2), -(y() + rect().height()/2));
+
+        painter->drawRect(QRectF(x(),y(), rect().width(), rect().height()));
+
+        painter->restore();
     }
 }
 
@@ -167,9 +190,15 @@ void EditableItem::paintHandles(GraphicsSheet* view, QPainter * painter, EditHan
     if (isSelected()) {
         calculateDraggers(view);
 
+    	painter->save();
+
         // Paint the handles
 		painter->setBrush(Qt::green);
 		painter->setPen(QPen(Qt::black, 0, Qt::SolidLine));	// Qt5: need to explicitly set width to 0, even though the docs claim other
+
+        painter->translate(x() + rect().width()/2, y() + rect().height()/2);
+        painter->rotate(rotation());
+        painter->translate(-(rect().width()/2), -(rect().height()/2));
 
 		if (enabledHandles & RotationHandleMask)
 			painter->drawEllipse(rotationHandle);
@@ -189,6 +218,8 @@ void EditableItem::paintHandles(GraphicsSheet* view, QPainter * painter, EditHan
 			painter->drawRect(bottomLeft);
 		if (enabledHandles & LeftHandleMask)
 			painter->drawRect(left);
+
+		painter->restore();
     }
 }
 
@@ -251,7 +282,7 @@ void EditableItem::paintCoordinates(GraphicsSheet* view, QPainter* painter) {
 
 void EditableItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * style, QWidget *widget) {
     QGraphicsRectItem::paint(painter, style, widget);
-
+#if 0
 	GraphicsSheet* requestingView = dynamic_cast<GraphicsSheet*>(widget ? widget->parent() : 0);
 	if (requestingView) {
 		Interactor* inter = requestingView->getInteractor();
@@ -259,4 +290,5 @@ void EditableItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * 
 			inter->paintDecorations(this, painter);
 		}
 	}
+#endif
 }

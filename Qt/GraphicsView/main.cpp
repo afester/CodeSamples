@@ -117,7 +117,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QGraphicsRectItem* item = new EditableItem(QRectF(10, 10, 50, 50));
     item->setPen(QPen(Qt::red, 0));
-    item->setBrush(Qt::lightGray);
+    item->setBrush(Qt::cyan);
     graphicsSheet->scene()->addItem(item);
 
     item = new EditableItem(QRectF(0, 0, 5, 5));
