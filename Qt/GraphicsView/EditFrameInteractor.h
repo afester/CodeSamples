@@ -15,7 +15,7 @@ protected:
 
 	EditableItem* theFrame;
 	EditableItem::EditHandle editHandle;
-    QSize offset;       // mouse offset when resizing the item
+    QSizeF offset;       // mouse offset when resizing the item
     QRectF originalRect;  // original rect for undo operation
     int originalAngle;    // original rotation angle for undo operation
 

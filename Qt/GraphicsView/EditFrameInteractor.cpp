@@ -50,46 +50,46 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
         QPoint positionIndicator(-1,-1);
         switch(editHandle) {
             case EditableItem::TopLeftHandle :
-                    offset = QSize(theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
+                    offset = QSizeF(theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
                     positionIndicator = QPoint(theFrame->x(), theFrame->y());
                     break;
 
             case EditableItem::TopHandle :
-                    offset = QSize(0, theFrame->y() - scenePos.y());
+                    offset = QSizeF(0, theFrame->y() - scenePos.y());
                     positionIndicator = QPoint(-1, theFrame->y());
                     break;
 
             case EditableItem::TopRightHandle :
-                    offset = QSize(theFrame->x() + theFrame->rect().width() - scenePos.x(), theFrame->y() - scenePos.y());
+                    offset = QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(), theFrame->y() - scenePos.y());
                     positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(), theFrame->y());
                     break;
 
             case EditableItem::LeftHandle :
-                    offset = QSize(theFrame->x() - scenePos.x(), 0);
+                    offset = QSizeF(theFrame->x() - scenePos.x(), 0);
                     positionIndicator = QPoint(theFrame->x(), -1);
                     break;
 
             case EditableItem::RotationHandle :
-                    offset = QSize(0, 0);
+                    offset = QSizeF(0, 0);
                     break;
 
             case EditableItem::RightHandle :
-                    offset = QSize(theFrame->x() + theFrame->rect().width() - scenePos.x(), 0);
+                    offset = QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(), 0);
                     positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(), -1);
                     break;
 
             case EditableItem::BottomLeftHandle :
-                    offset = QSize(theFrame->x() - scenePos.x(), theFrame->y() + theFrame->rect().height() - scenePos.y());
+                    offset = QSizeF(theFrame->x() - scenePos.x(), theFrame->y() + theFrame->rect().height() - scenePos.y());
                     positionIndicator = QPoint(theFrame->x(), theFrame->y() + theFrame->rect().height());
                     break;
 
             case EditableItem::BottomHandle :
-                    offset = QSize(0, theFrame->y() + theFrame->rect().height() - scenePos.y());
+                    offset = QSizeF(0, theFrame->y() + theFrame->rect().height() - scenePos.y());
                     positionIndicator = QPoint(-1, theFrame->y() + theFrame->rect().height());
                     break;
 
             case EditableItem::BottomRightHandle :
-                    offset = QSize(theFrame->x() + theFrame->rect().width() - scenePos.x(),
+                    offset = QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(),
                                    theFrame->y() + theFrame->rect().height() - scenePos.y());
                     positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(),
                                                theFrame->y() + theFrame->rect().height());
@@ -205,10 +205,7 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 	if (theFrame) {
 		// Log::log(Log::DEBUG, "EditFrameInteractor") << "mouseMoveEvent: " << scenePos;
 
-        QPoint pos = QPoint((int) floor(scenePos.x()),
-                            (int) floor(scenePos.y()));
-        pos = QPoint(pos.x() + offset.width(),
-                     pos.y() + offset.height());
+        QPointF pos = scenePos + QPointF(offset.width(), offset.height());
 
         QPointF newPos;
         QSizeF newSize;
@@ -236,7 +233,8 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 					if (newSize.height() < 10) {
 						newSize.setHeight(10);
 					}
-					newPos = QPointF(theFrame->x(), theFrame->y() + theFrame->rect().height() - newSize.height());
+					//newPos = QPointF(theFrame->x(), theFrame->y() + theFrame->rect().height() - newSize.height());
+                    newPos = QPointF(theFrame->x(), theFrame->y());
 
 					positionIndicator = QPoint(-1, newPos.y());
 					break;
