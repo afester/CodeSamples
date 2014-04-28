@@ -67,7 +67,6 @@ public:
 
 //    virtual void writeExternal(QXmlStreamWriter& writer) = 0;
 
-    void invalidateDraggers();
 
     /**
      * Calculates the handle which is under the given scene position.
@@ -103,8 +102,6 @@ protected:
     virtual void calculateDraggers(GraphicsSheet* view);
 
 private:
-    bool draggersCalculated;
-
     QRectF rotationHandle;
     QRectF topLeft;
     QRectF topRight;

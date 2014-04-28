@@ -37,46 +37,35 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
 		return;
 	}
 
-	Log::log(Log::DEBUG, "EditFrameInteractor") << "mousePressEvent";
+	// Log::log(Log::DEBUG, "EditFrameInteractor") << "mousePressEvent";
 
 	// todo: probably create a QGraphicsSceneMouseEvent and pass this already to the interactor!
 	QPointF scenePos = theView->mapToScene(event->pos());
-
-
-	// need compile time binding since itemAt() is not virtual - KollageGraphicsScene
-	// provides a special itemAt method to handle the parent-child repationship of text items
-#if 0
-	KollageGraphicsScene* theScene = dynamic_cast<KollageGraphicsScene*>(theView->scene());
-#else
 	QGraphicsScene* theScene = theView->scene();
-#endif
-
 	theFrame = theView->getFocusItem();
 	if (theFrame) {
         QPointF itemPos = theFrame->mapFromScene(scenePos);
         editHandle = theFrame->getEditHandle(theView, itemPos, enabledHandles);
 
         QPoint positionIndicator(-1,-1);
-        QPointF pos = scenePos; // QPoint((int) floor(scenePos.x()),
-                            // (int) floor(scenePos.y()));
         switch(editHandle) {
             case EditableItem::TopLeftHandle :
-                    offset = QSize(theFrame->x() - pos.x(), theFrame->y() - pos.y());
+                    offset = QSize(theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
                     positionIndicator = QPoint(theFrame->x(), theFrame->y());
                     break;
 
             case EditableItem::TopHandle :
-                    offset = QSize(0, theFrame->y() - pos.y());
+                    offset = QSize(0, theFrame->y() - scenePos.y());
                     positionIndicator = QPoint(-1, theFrame->y());
                     break;
 
             case EditableItem::TopRightHandle :
-                    offset = QSize(theFrame->x() + theFrame->rect().width() - pos.x(), theFrame->y() - pos.y());
+                    offset = QSize(theFrame->x() + theFrame->rect().width() - scenePos.x(), theFrame->y() - scenePos.y());
                     positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(), theFrame->y());
                     break;
 
             case EditableItem::LeftHandle :
-                    offset = QSize(theFrame->x() - pos.x(), 0);
+                    offset = QSize(theFrame->x() - scenePos.x(), 0);
                     positionIndicator = QPoint(theFrame->x(), -1);
                     break;
 
@@ -85,29 +74,29 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
                     break;
 
             case EditableItem::RightHandle :
-                    offset = QSize(theFrame->x() + theFrame->rect().width() - pos.x(), 0);
+                    offset = QSize(theFrame->x() + theFrame->rect().width() - scenePos.x(), 0);
                     positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(), -1);
                     break;
 
             case EditableItem::BottomLeftHandle :
-                    offset = QSize(theFrame->x() - pos.x(), theFrame->y() + theFrame->rect().height() - pos.y());
+                    offset = QSize(theFrame->x() - scenePos.x(), theFrame->y() + theFrame->rect().height() - scenePos.y());
                     positionIndicator = QPoint(theFrame->x(), theFrame->y() + theFrame->rect().height());
                     break;
 
             case EditableItem::BottomHandle :
-                    offset = QSize(0, theFrame->y() + theFrame->rect().height() - pos.y());
+                    offset = QSize(0, theFrame->y() + theFrame->rect().height() - scenePos.y());
                     positionIndicator = QPoint(-1, theFrame->y() + theFrame->rect().height());
                     break;
 
             case EditableItem::BottomRightHandle :
-                    offset = QSize(theFrame->x() + theFrame->rect().width() - pos.x(),
-                                   theFrame->y() + theFrame->rect().height() - pos.y());
+                    offset = QSize(theFrame->x() + theFrame->rect().width() - scenePos.x(),
+                                   theFrame->y() + theFrame->rect().height() - scenePos.y());
                     positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(),
                                                theFrame->y() + theFrame->rect().height());
                     break;
 
             case EditableItem::MoveHandle:
-                    offset = QSize(theFrame->x() - pos.x(), theFrame->y() - pos.y());
+                    offset = QSize(theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
                     break;
 
             default: theFrame = 0;    // outside of all handles
@@ -136,7 +125,9 @@ if (theFrame) {
 	    theFrame = dynamic_cast<EditableItem*>(item);
 	    if (theFrame) {
 	        theFrame->setSelected(true);
-	        theFrame->invalidateDraggers();
+
+	        // prepare for immediate MOVE operation
+            offset = QSize(theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
 	    }
 	}
 }
@@ -212,16 +203,12 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 
 	// check if currently a drag is in progress
 	if (theFrame) {
-		Log::log(Log::DEBUG, "EditFrameInteractor") << "mouseMoveEvent: " << scenePos;
+		// Log::log(Log::DEBUG, "EditFrameInteractor") << "mouseMoveEvent: " << scenePos;
 
         QPoint pos = QPoint((int) floor(scenePos.x()),
                             (int) floor(scenePos.y()));
-
-        qDebug() << pos;
-
         pos = QPoint(pos.x() + offset.width(),
                      pos.y() + offset.height());
-        qDebug() << pos;
 
         QPointF newPos;
         QSizeF newSize;
@@ -369,7 +356,6 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
         QRectF newRect(QPointF(0,0), newSize);
         theFrame->setRect(newRect);
         theFrame->setPos(newPos);
-        theFrame->invalidateDraggers();
 
 #if 0
         // TODO HACK: special handling of text frames - make sure that the child is always centered
@@ -389,7 +375,7 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 
 
 void EditFrameInteractor::mouseReleaseEvent ( QMouseEvent * event ) {
-	Log::log(Log::DEBUG, "EditFrameInteractor") << "mouseReleaseEvent";
+	// Log::log(Log::DEBUG, "EditFrameInteractor") << "mouseReleaseEvent";
 
 	if (theFrame) {
 #if 0

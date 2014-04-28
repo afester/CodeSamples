@@ -41,7 +41,6 @@ EditableItem::EditableItem(const QPointF& pos, QGraphicsItem * parent) :
 
     setPos(pos.x(), pos.y());
 
-    draggersCalculated = false;
     setAcceptHoverEvents(true); // TODO: Only necessary when the item is selected!
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -54,7 +53,6 @@ EditableItem::EditableItem(const QRectF & rect, QGraphicsItem * parent) :
 
     setPos(rect.x(), rect.y());
 
-    draggersCalculated = false;
     setAcceptHoverEvents(true); // TODO: Only necessary when the item is selected!
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -62,55 +60,30 @@ EditableItem::EditableItem(const QRectF & rect, QGraphicsItem * parent) :
 }
 
 
-void EditableItem::invalidateDraggers() {
-    draggersCalculated = false;
-}
-
-
 void EditableItem::calculateDraggers(GraphicsSheet* view) {
-//    if (draggersCalculated) {
-//        return;
-//    }
-
-    const qreal handleSize = 8.0;
+    const qreal handleSize = 8.0;   // TODO: read from view property
 
     const qreal hsize = handleSize / view->transform().m11();
     const qreal vsize = handleSize / view->transform().m22();
 
     // Initialize draggers
-    const qreal xpos = x() - hsize/2;
-    const qreal ypos = y() - vsize/2;
+
     const qreal width = rect().width();
     const qreal height = rect().height();
     const qreal xhalf = width / 2;
     const qreal yhalf = height / 2;
+    const qreal hsizeHalf = hsize / 2;
+    const qreal vsizeHalf = hsize /2;
 
-    rotationHandle = //QRectF(xpos + xhalf, ypos + vsize*2, hsize, vsize);
-    				 QRectF(xhalf - hsize/2, vsize, hsize, vsize);
-
-    topLeft = QRectF(-hsize/2, -vsize/2, hsize, vsize);
-    		//QRectF(xpos,         ypos,          hsize, vsize);
-
-
-    topRight =    QRectF(width - hsize/2, -vsize/2, hsize, vsize);
-    		//  QRectF(xpos + width, ypos,          hsize, vsize);
-    bottomLeft =  QRectF(-hsize/2, height - vsize/2, hsize, vsize);
-    			// QRectF(xpos,         ypos + height, hsize, vsize);
-
-    bottomRight = //QRectF(xpos + width, ypos + height, hsize, vsize);
-    			QRectF(width - hsize/2, height - vsize/2, hsize, vsize);
-    top =         //QRectF(xpos + xhalf, ypos,          hsize, vsize);
-    		QRectF(xhalf - hsize/2, -vsize/2, hsize, vsize);
-    bottom =     // QRectF(xpos + xhalf, ypos + height, hsize, vsize);
-    		QRectF(xhalf - hsize/2, height - vsize/2, hsize, vsize);
-
-    left =    //    QRectF(xpos,         ypos + yhalf,  hsize, vsize);
-    		QRectF(-hsize/2, yhalf - vsize/2, hsize, vsize);
-
-    right =   //    QRectF(xpos + width, ypos + yhalf,  hsize, vsize);
-    		QRectF(width - hsize/2, yhalf - vsize/2, hsize, vsize);
-
-    draggersCalculated = true;
+    rotationHandle = QRectF(xhalf - hsizeHalf,  vsize,              hsize, vsize);
+    topLeft =        QRectF(-hsizeHalf,         -vsizeHalf,         hsize, vsize);
+    topRight =       QRectF(width - hsizeHalf,  -vsizeHalf,         hsize, vsize);
+    bottomLeft =     QRectF(-hsize/2,           height - vsizeHalf, hsize, vsize);
+    bottomRight =    QRectF(width - hsizeHalf,  height - vsizeHalf, hsize, vsize);
+    top =            QRectF(xhalf - hsizeHalf,  -vsizeHalf,         hsize, vsize);
+    bottom =         QRectF(xhalf - hsizeHalf,  height - vsizeHalf, hsize, vsize);
+    left =           QRectF(-hsizeHalf,         yhalf - vsizeHalf,  hsize, vsize);
+    right =          QRectF(width - hsizeHalf,  yhalf - vsizeHalf,  hsize, vsize);
 }
 
 
@@ -174,11 +147,6 @@ void EditableItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) 
 
 
 void EditableItem::paintHandles(GraphicsSheet* view, QPainter * painter, EditHandles enabledHandles) {
-/*    if (!draggersCalculated) {
-        calculateDraggers(view);
-        draggersCalculated = true;
-    }
-*/
     if (isSelected()) {
         calculateDraggers(view);
 

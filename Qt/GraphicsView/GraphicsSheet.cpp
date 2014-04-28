@@ -57,6 +57,11 @@ GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent),
                      this, SLOT(areaMoved()));
 
     setScene(new QGraphicsScene());
+
+    // TODO: There are some strange artefacts when an item is moved while
+    // partially hidden by another item. It should be sufficient to
+    // define a reasonable boundingRect, but it seems that this is not sufficient ...
+    setViewportUpdateMode(FullViewportUpdate);
 }
 
 
@@ -105,16 +110,6 @@ void GraphicsSheet::setScaleBackground(const QColor& color) {
     pal.setBrush(QPalette::Window, color);
     edge->setPalette(pal);
 }
-
-
-//void GraphicsSheet::setColor(const QColor& color) {
-//    viewColor = color;
-//}
-
-
-//QColor GraphicsSheet::getColor() {
-//    return viewColor;
-//}
 
 
 void GraphicsSheet::updateSize() {
