@@ -73,7 +73,11 @@ void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
     foreach(item, scene()->selectedItems()) {
         EditableItem* edItem = dynamic_cast<EditableItem*>(item);
         if (edItem) {
-            // qDebug() << edItem;
+
+            // set the painter's transformation so that the paint operations are
+            // executed in item coordinate space
+            QTransform trans = item->deviceTransform(QTransform());
+            painter->setWorldTransform(trans, true);
 
             // Paint the selection border
             edItem->paintSelectedBorder(this, painter);

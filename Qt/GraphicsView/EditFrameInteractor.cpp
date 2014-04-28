@@ -107,9 +107,7 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
                     break;
 
             case EditableItem::MoveHandle:
-                    qDebug() << "=> " << theFrame->x() << "/" << theFrame->y();
                     offset = QSize(theFrame->x() - pos.x(), theFrame->y() - pos.y());
-                    qDebug() << "OFFSET: " << offset;
                     break;
 
             default: theFrame = 0;    // outside of all handles

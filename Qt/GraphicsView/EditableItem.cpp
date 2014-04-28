@@ -165,18 +165,10 @@ static QString formatFloat(qreal number, int dec) {
 
 void EditableItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) {
     if (isSelected()) {
-    	painter->save();
-
         painter->setBrush(Qt::NoBrush);
         painter->setPen(QPen(Qt::green, 0, Qt::DashLine));
 
-        painter->translate(x() + rect().width()/2, y() + rect().height()/2);
-        painter->rotate(rotation());
-        painter->translate(-(x() + rect().width()/2), -(y() + rect().height()/2));
-
-        painter->drawRect(QRectF(x(),y(), rect().width(), rect().height()));
-
-        painter->restore();
+        painter->drawRect(QRectF(0, 0, rect().width(), rect().height()));
     }
 }
 
@@ -190,15 +182,9 @@ void EditableItem::paintHandles(GraphicsSheet* view, QPainter * painter, EditHan
     if (isSelected()) {
         calculateDraggers(view);
 
-    	painter->save();
-
         // Paint the handles
 		painter->setBrush(Qt::green);
 		painter->setPen(QPen(Qt::black, 0, Qt::SolidLine));	// Qt5: need to explicitly set width to 0, even though the docs claim other
-
-        painter->translate(x() + rect().width()/2, y() + rect().height()/2);
-        painter->rotate(rotation());
-        painter->translate(-(rect().width()/2), -(rect().height()/2));
 
 		if (enabledHandles & RotationHandleMask)
 			painter->drawEllipse(rotationHandle);
@@ -218,8 +204,6 @@ void EditableItem::paintHandles(GraphicsSheet* view, QPainter * painter, EditHan
 			painter->drawRect(bottomLeft);
 		if (enabledHandles & LeftHandleMask)
 			painter->drawRect(left);
-
-		painter->restore();
     }
 }
 
