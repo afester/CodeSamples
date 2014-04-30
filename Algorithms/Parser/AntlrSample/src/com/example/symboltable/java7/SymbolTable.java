@@ -1,7 +1,10 @@
-package com.example.symboltable;
+package com.example.symboltable.java7;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import com.example.symboltable.Applyable;
+import com.example.symboltable.Symbol;
 
 public class SymbolTable {
    private Map<String, Symbol> table = new HashMap<>();

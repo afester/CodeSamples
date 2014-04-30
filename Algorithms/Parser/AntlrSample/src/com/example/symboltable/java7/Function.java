@@ -1,4 +1,6 @@
-package com.example.symboltable;
+package com.example.symboltable.java7;
+
+import com.example.symboltable.Symbol;
 
 public abstract class Function extends Symbol {
    
