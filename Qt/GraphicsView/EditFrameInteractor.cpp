@@ -198,14 +198,39 @@ void EditFrameInteractor::hoverOverEvent ( QMouseEvent * event ) {
 }
 
 
+static qreal dist_Point_to_Segment(const QPointF& P, const QPointF& P0, const QPointF& P1) {
+
+     QVector2D v(P1 - P0);
+     QVector2D w(P - P0);
+
+     qreal c1 = QVector2D::dotProduct(w, v);
+     if ( c1 <= 0 )
+          return QLineF(P, P0).length();
+
+
+     qreal c2 = QVector2D::dotProduct(v,v);
+     if ( c2 <= c1 )
+          return QLineF(P, P1).length();
+
+     qreal b = c1 / c2;
+
+     QPointF Pb(P0 + (b * v).toPointF());
+
+     return QLineF(P, Pb).length();
+}
+
+
 void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
-	QPointF scenePos = theView->mapToScene(event->pos());
+    QPointF scenePos = theView->mapToScene(event->pos());
 
 	// check if currently a drag is in progress
 	if (theFrame) {
-		// Log::log(Log::DEBUG, "EditFrameInteractor") << "mouseMoveEvent: " << scenePos;
+	    QPointF itemPos = theFrame->mapFromScene(scenePos);
 
         QPointF pos = scenePos + QPointF(offset.width(), offset.height());
+
+        // map mouse pointer scene position to item coordinates
+        QPointF posInItem = theFrame->mapFromScene(scenePos);
 
         QPointF newPos;
         QSizeF newSize;
@@ -213,29 +238,83 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
         QPoint positionIndicator(-1,-1);
 
         switch(editHandle) {
-			case EditableItem::TopLeftHandle :
-					newSize =QSizeF(theFrame->rect().width() + theFrame->x() - pos.x(),
-									theFrame->rect().height() + theFrame->y() - pos.y());
+			case EditableItem::TopLeftHandle :{
+			        QPointF P3(theFrame->rect().width() / 2, theFrame->rect().height() / 2);
+			        P3 = theFrame->mapToScene(P3);
+
+			        QPointF P2 = scenePos;
+
+			        QTransform t;
+			        t.translate(P3.x(), P3.y());
+			        t.rotate(-theFrame->rotation());
+			        t.translate(-(P3.x()), -(P3.y()));
+
+                    QPointF P1 = t.map(P2); // scene coordinates
+
+                    //qDebug() << theFrame->mapFromScene(P1);
+
+/***********************************************************************************/
+                    qDebug() << "POS IN ITEM:" << posInItem;
+
+                    newSize = QSizeF(theFrame->rect().width() - posInItem.x(),
+                                     theFrame->rect().height() - posInItem.y());
+
+#if 0
+                    QPointF P5 = t.map(theFrame->pos());
+                    P5 = QPointF(P5.x() + theFrame->rect().width(),
+                                 P5.y() + theFrame->rect().height());   // lower right corner in scene coordinates
+
+					//newSize = QSizeF(theFrame->rect().width() + (theFrame->x() - P1.x()),
+					//                 theFrame->rect().height() + (theFrame->y() - P1.y()));
+
+                    //newSize = QSizeF(theFrame->rect().width(),theFrame->rect().height());
+
+                    //QPointF P4_i = QPointF(0, theFrame->rect().height());
+                    //QPointF P5_i = QPointF(theFrame->rect().width(), 0);
+
+                    //qDebug() << P4_i << " " << P5_i;
+
+                    //QPointF PI1 = theFrame->mapFromScene(P1);
+                    //qDebug() << P4_i << " " << P5_i << " => " << PI1;
+                    //qreal height = qAbs(P4_i.y() - PI1.y());
+                    //qreal width = qAbs(P5_i.x() - PI1.x());
+
+                    //qDebug() << "W:" << width << ", H:" << height;
+
+                    // QPointF PI2 = theFrame->mapFromScene(theFrame->scenePos());
+
+                    QPointF P6 = theFrame->mapFromScene(P1);    // item coordinates
+                    QPointF P7 = theFrame->mapFromScene(P5);    // item coordinates
+                    newSize = QSizeF(qAbs(P7.x() - P6.x()), qAbs(P7.y() - P6.y()));
+
+                    //newSize = QSizeF(PI1.x() - PI2.x() + theFrame->rect().width(),
+//                                     PI1.y() - PI2.y() + theFrame->rect().height());
+#endif
 					if (newSize.width() < 10) {
 						newSize.setWidth(10);
 					}
 					if (newSize.height() < 10) {
 						newSize.setHeight(10);
 					}
-					newPos = QPointF(theFrame->x() + theFrame->rect().width() - newSize.width(),
-									 theFrame->y() + theFrame->rect().height() - newSize.height());
+					//newPos = scenePos; // QPointF(theFrame->x() + theFrame->rect().width() - newSize.width(),
+									 // theFrame->y() + theFrame->rect().height() - newSize.height());
+
+					newPos = P1;
 
 					positionIndicator = QPoint(newPos.x(), newPos.y());
 					break;
-
+			}
+/*****************************/
 			case EditableItem::TopHandle :
-					newSize = QSizeF(theFrame->rect().width(), theFrame->rect().height() + theFrame->y() - pos.y());
-					if (newSize.height() < 10) {
+
+					//newSize = QSizeF(theFrame->rect().width(), theFrame->rect().height() + theFrame->y() - pos.y());
+			        newSize = QSizeF(theFrame->rect().width(), theFrame->rect().height() - posInItem.y());
+			        if (newSize.height() < 10) {
 						newSize.setHeight(10);
 					}
-					//newPos = QPointF(theFrame->x(), theFrame->y() + theFrame->rect().height() - newSize.height());
-                    newPos = QPointF(theFrame->x(), theFrame->y());
+					newPos = QPointF(theFrame->x(), theFrame->y() + posInItem.y()); // theFrame->y() + theFrame->rect().height() - newSize.height());
 
+/**********************************/
 					positionIndicator = QPoint(-1, newPos.y());
 					break;
 
@@ -295,43 +374,45 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 					}
 					break;
 
-			case EditableItem::RightHandle :					positionIndicator = QPoint(newPos.x() + newSize.width(), newPos.y() + newSize.height());
-
-					newSize = QSizeF(pos.x() - theFrame->x(), theFrame->rect().height());
+			case EditableItem::RightHandle :
+					// newSize = QSizeF(pos.x() - theFrame->x(), theFrame->rect().height());
+		            newSize = QSizeF(posInItem.x(), theFrame->rect().height());
 					if (newSize.width() < 10) {
-						newSize.setWidth(10);					positionIndicator = QPoint(newPos.x() + newSize.width(), -1);
-
+						newSize.setWidth(10);
 					}
-					newPos = QPointF(theFrame->x(), theFrame->y());
+					// newPos = QPointF(theFrame->x(), theFrame->y());
+		            newPos = QPointF(theFrame->x(), theFrame->y());
 
 					positionIndicator = QPoint(newPos.x() + newSize.width(), -1);
 					break;
 
 			case EditableItem::BottomLeftHandle :
-					newSize = QSizeF(theFrame->rect().width() + theFrame->x() - pos.x(), pos.y() - theFrame->y());
+					newSize = QSizeF(theFrame->rect().width() - posInItem.x(),
+					                 posInItem.y()); //  - theFrame->y());
 					if (newSize.width() < 10) {
 						newSize.setWidth(10);
 					}
 					if (newSize.height() < 10) {
 						newSize.setHeight(10);
 					}
-					newPos = QPointF(theFrame->x() + theFrame->rect().width() - newSize.width() , theFrame->y());
+					//newPos = QPointF(theFrame->x() + theFrame->rect().width() - newSize.width() , theFrame->y());
+					newPos = QPointF(theFrame->x() + posInItem.x(), theFrame->y());
 
 					positionIndicator = QPoint(newPos.x(), newPos.y() + newSize.height());
 					break;
 
 			case EditableItem::BottomHandle :
-					newSize = QSizeF(theFrame->rect().width(), pos.y() - theFrame->y());
-					if (newSize.height() < 10) {
-						newSize.setHeight(10);
-					}
-					newPos = QPointF(theFrame->x(), theFrame->y());
+                    newSize = QSizeF(theFrame->rect().width(), posInItem.y());
+                    if (newSize.height() < 10) {
+                        newSize.setHeight(10);
+                    }
+                    newPos = QPointF(theFrame->x(), theFrame->y());
 
-					positionIndicator = QPoint(-1, newPos.y() + newSize.height());
+                    positionIndicator = QPoint(-1, newPos.y() + newSize.height());
 					break;
 
 			case EditableItem::BottomRightHandle :
-					newSize = QSizeF(pos.x() - theFrame->x(), pos.y() - theFrame->y());
+			        newSize = QSizeF(posInItem.x(), posInItem.y());
 					if (newSize.width() < 10) {
 						newSize.setWidth(10);
 					}
@@ -352,6 +433,7 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
         }
 
         QRectF newRect(QPointF(0,0), newSize);
+        //qDebug() << "NEW RECT:" << newRect;
         theFrame->setRect(newRect);
         theFrame->setPos(newPos);
 
