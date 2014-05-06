@@ -13,6 +13,7 @@
 #include <QCheckBox>
 #include <QApplication>
 #include <QGraphicsDropShadowEffect>
+#include <QVector2D>
 
 #include "GraphicsSheet.h"
 #include "ScrollAreaLayout.h"
@@ -108,6 +109,16 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(actionInfo, SIGNAL(triggered(bool)),
                      this, SLOT(printInfo()));
 
+    QAction* actionRotate = new QAction("Rotate", this);
+    toolBar->addAction(actionRotate);
+    QObject::connect(actionRotate, SIGNAL(triggered(bool)),
+                     this, SLOT(rotateItem()));
+
+    QAction* actionResize = new QAction("ResizeHandle", this);
+    toolBar->addAction(actionResize);
+    QObject::connect(actionResize, SIGNAL(triggered(bool)),
+                     this, SLOT(resizeItem()));
+
     zoomWidget->getComboBox()->setCurrentIndex(2);
     sizeWidget->getComboBox()->setCurrentIndex(3);
     scaleWidget->getComboBox()->setCurrentIndex(2);
@@ -130,12 +141,62 @@ MainWindow::MainWindow(QWidget *parent) :
     item->setBrush(Qt::lightGray);
     graphicsSheet->scene()->addItem(item);
 
-    item = new EditableItem(QRectF(125, 100, 200, 100));
-    item->setPen(QPen(Qt::magenta, 0));
-    item->setBrush(Qt::lightGray);
-    graphicsSheet->scene()->addItem(item);
+    item1 = new EditableItem(QRectF(125, 100, 200, 100));
+
+    qreal angle = 330;
+    QPointF center2 = QPointF(item1->rect().width() / 2, item1->rect().height() / 2);
+    item1->setTransformOriginPoint(center2);
+    item1->setRotation(angle);
+
+    item1->setRotation(30);
+    item1->setPen(QPen(Qt::magenta, 0));
+    item1->setBrush(Qt::lightGray);
+    graphicsSheet->scene()->addItem(item1);
 
     graphicsSheet->setInteractor(new EditFrameInteractor());
+}
+
+#if 0
+qreal calculateDistance(const QVector2D& v, const QVector2D& w, const QVector2D& p) {
+    // Return minimum distance between line segment vw and point p
+      const float l2 = length_squared(v, w);  // i.e. |w-v|^2 -  avoid a sqrt
+      if (l2 == 0.0) return distance(p, v);   // v == w case
+
+      // Consider the line extending the segment, parameterized as v + t (w - v).
+      // We find projection of point p onto the line.
+      // It falls where t = [(p-v) . (w-v)] / |w-v|^2
+      const float t = dot(p - v, w - v) / l2;
+      if (t < 0.0) return distance(p, v);       // Beyond the 'v' end of the segment
+      else if (t > 1.0) return distance(p, w);  // Beyond the 'w' end of the segment
+      const vec2 projection = v + t * (w - v);  // Projection falls on the segment
+
+      return distance(p, projection);
+}
+#endif
+
+
+// dist_Point_to_Segment(): get the distance of a point to a segment
+//     Input:  a Point P and a Segment S (in any dimension)
+//     Return: the shortest distance from P to S
+static qreal dist_Point_to_Segment(const QPointF& P, const QPointF& P0, const QPointF& P1) {
+
+     QVector2D v(P1 - P0);
+     QVector2D w(P - P0);
+
+     qreal c1 = QVector2D::dotProduct(w, v);
+     if ( c1 <= 0 )
+          return QLineF(P, P0).length();
+
+
+     qreal c2 = QVector2D::dotProduct(v,v);
+     if ( c2 <= c1 )
+          return QLineF(P, P1).length();
+
+     qreal b = c1 / c2;
+
+     QPointF Pb(P0 + (b * v).toPointF());
+
+     return QLineF(P, Pb).length();
 }
 
 
@@ -143,7 +204,76 @@ void MainWindow::printInfo() {
     qDebug() << "\nLAYOUT INFO:\n====================";
     qDebug() << "   QGraphicsSheet: " << graphicsSheet->rect();
     qDebug() << "   viewport: " << graphicsSheet->viewport()->rect();
+
+    QPointF p1(10, 10);
+    QPointF p2(20, 20);
+    QPointF p(40, 20);
+    qreal dist = dist_Point_to_Segment(p, p1, p2);
+    qDebug() << dist;
 }
+
+
+void MainWindow::rotateItem() {
+
+}
+
+
+void MainWindow::resizeItem() {
+for (int i = 0;  i < 10;  i++) {
+    QGraphicsRectItem* theFrame = item1;
+    QPointF P1(100 - (7.0 * i)/3.0, 50 -(5.0*i)/3.0);
+
+    graphicsSheet->addPoint("P1", P1);
+    graphicsSheet->addPoint("pos", theFrame->pos());
+
+    QPointF P2i = QPointF(theFrame->rect().width(), theFrame->rect().height());
+    QPointF P2 = theFrame->mapToScene(P2i);
+
+    qDebug() << "P1:" << P1;
+    qDebug() << "P2:" << P2;
+    graphicsSheet->addPoint("P2", P2);
+
+    QTransform t;
+    t.rotate(-theFrame->rotation());
+    t.translate(-P1.x(), -P1.y());
+
+    QPointF P2t = t.map(P2);
+
+//    qDebug() << "P2t:" << P2t;  // OK
+
+/*************************/
+    QPointF P3(P2t.x()/2, P2t.y()/2);
+ //   qDebug() << "P3:" << P3;
+
+    QTransform t2;
+    t2.translate(P1.x(), P1.y());
+    t2.rotate(theFrame->rotation());
+    QPointF P3t = t2.map(P3);
+////    qDebug() << "P3t:" << P3t;      // OK
+
+    graphicsSheet->addPoint("P3t", P3t);
+
+    QTransform t3;
+    t3.translate(P3t.x(), P3t.y());
+    t3.rotate(-theFrame->rotation());
+    t3.translate(-(P3t.x()), -(P3t.y()));
+
+    QPointF newPos = t3.map(P1);
+    QSizeF newSize = QSizeF(P2t.x(), P2t.y());
+
+    graphicsSheet->addPoint("newPos", newPos);
+
+//    theFrame->setPos(newPos);
+//    theFrame->setRect(0, 0, newSize.width(), newSize.height());
+    EditableItem* item1 = new EditableItem(QRectF(newPos.x(), newPos.y(), newSize.width(), newSize.height()));
+    qreal angle = 30;
+    QPointF center2 = QPointF(item1->rect().width() / 2, item1->rect().height() / 2);
+    item1->setTransformOriginPoint(center2);
+    item1->setRotation(angle);
+    graphicsSheet->scene()->addItem(item1);
+}
+}
+
 
 
 MainWindow::~MainWindow() {

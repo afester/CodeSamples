@@ -64,10 +64,16 @@ class GraphicsSheet : public QGraphicsView {
 
     void updateSize();
 
+    QHash<QString, QPointF> points;
+
 public:
     GraphicsSheet(QWidget* parent);
 
     void addSize(const QString& name, const QSizeF& size);
+
+    void addPoint(const QString& name, const QPointF& point);
+    void drawCoordinateSystem(QPainter* painter, const QTransform& t = QTransform(), const QColor& c = Qt::black);
+    void drawPoints(QPainter* painter, const QHash<QString, QPointF>& points);
 
     QStringList getSizeNames() const;
 
@@ -142,6 +148,7 @@ class MainWindow : public QMainWindow {
     QMenuBar *menubar;
     QStatusBar *statusbar;
     QToolBar *toolBar;
+    QGraphicsRectItem* item1;
 
 public:
     MainWindow(QWidget* parent);
@@ -150,4 +157,6 @@ public:
 
 public slots:
 	void printInfo();
+    void rotateItem();
+    void resizeItem();
 };

@@ -239,67 +239,45 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 
         switch(editHandle) {
 			case EditableItem::TopLeftHandle :{
-			        QPointF P3(theFrame->rect().width() / 2, theFrame->rect().height() / 2);
-			        P3 = theFrame->mapToScene(P3);
+			        // P1 is the new upper left corner (in scene coordinates)
+			        QPointF P1 = scenePos;
 
-			        QPointF P2 = scenePos;
+			        // P2 is the fix point (in scene coordinates)
+                    QPointF P2 = theFrame->mapToScene(theFrame->rect().width(),
+                                                      theFrame->rect().height());
 
-			        QTransform t;
-			        t.translate(P3.x(), P3.y());
-			        t.rotate(-theFrame->rotation());
-			        t.translate(-(P3.x()), -(P3.y()));
+                    // transform coordinate system so that its center is at P1
+                    // we need to transform back (from global coordinates into local coordinates),
+                    // so we need to do the inverse operations (rotate -angle => translate -P1)
+                    QTransform t;
+                    t.rotate(-theFrame->rotation());
+                    t.translate(-P1.x(), -P1.y());
 
-                    QPointF P1 = t.map(P2); // scene coordinates
+                    // Map the fix point into the transformed coordinate system -
+                    // this will be the new width and height
+                    QPointF P2i = t.map(P2);
+                    newSize = QSizeF(P2i.x(), P2i.y());
 
-                    //qDebug() << theFrame->mapFromScene(P1);
+                    if (newSize.width() < 10) {
+                        newSize.setWidth(10);
+                    }
+                    if (newSize.height() < 10) {
+                        newSize.setHeight(10);
+                    }
 
-/***********************************************************************************/
-                    qDebug() << "POS IN ITEM:" << posInItem;
+                    // calculate new center point - this will become the new transformation center point
+                    QPointF P3(newSize.width()/2, newSize.height()/2);
+                    theFrame->setTransformOriginPoint(P3);
 
-                    newSize = QSizeF(theFrame->rect().width() - posInItem.x(),
-                                     theFrame->rect().height() - posInItem.y());
-
-#if 0
-                    QPointF P5 = t.map(theFrame->pos());
-                    P5 = QPointF(P5.x() + theFrame->rect().width(),
-                                 P5.y() + theFrame->rect().height());   // lower right corner in scene coordinates
-
-					//newSize = QSizeF(theFrame->rect().width() + (theFrame->x() - P1.x()),
-					//                 theFrame->rect().height() + (theFrame->y() - P1.y()));
-
-                    //newSize = QSizeF(theFrame->rect().width(),theFrame->rect().height());
-
-                    //QPointF P4_i = QPointF(0, theFrame->rect().height());
-                    //QPointF P5_i = QPointF(theFrame->rect().width(), 0);
-
-                    //qDebug() << P4_i << " " << P5_i;
-
-                    //QPointF PI1 = theFrame->mapFromScene(P1);
-                    //qDebug() << P4_i << " " << P5_i << " => " << PI1;
-                    //qreal height = qAbs(P4_i.y() - PI1.y());
-                    //qreal width = qAbs(P5_i.x() - PI1.x());
-
-                    //qDebug() << "W:" << width << ", H:" << height;
-
-                    // QPointF PI2 = theFrame->mapFromScene(theFrame->scenePos());
-
-                    QPointF P6 = theFrame->mapFromScene(P1);    // item coordinates
-                    QPointF P7 = theFrame->mapFromScene(P5);    // item coordinates
-                    newSize = QSizeF(qAbs(P7.x() - P6.x()), qAbs(P7.y() - P6.y()));
-
-                    //newSize = QSizeF(PI1.x() - PI2.x() + theFrame->rect().width(),
-//                                     PI1.y() - PI2.y() + theFrame->rect().height());
-#endif
-					if (newSize.width() < 10) {
-						newSize.setWidth(10);
-					}
-					if (newSize.height() < 10) {
-						newSize.setHeight(10);
-					}
-					//newPos = scenePos; // QPointF(theFrame->x() + theFrame->rect().width() - newSize.width(),
-									 // theFrame->y() + theFrame->rect().height() - newSize.height());
-
-					newPos = P1;
+                    // transform P1 to the new item position
+                    QTransform t2;
+                    t2.translate(P1.x(), P1.y());
+                    t2.rotate(theFrame->rotation());
+                    t2.translate(P3.x(), P3.y());
+                    t2.rotate(-theFrame->rotation());
+                    t2.translate(-P3.x(), -P3.y());
+                    t2.translate(-P1.x(), -P1.y());
+                    newPos = t2.map(P1);
 
 					positionIndicator = QPoint(newPos.x(), newPos.y());
 					break;

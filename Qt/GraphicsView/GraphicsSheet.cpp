@@ -12,6 +12,7 @@
 #include <QtCore/qmath.h>
 #include <QScrollBar>
 #include <QMouseEvent>
+#include <QHash>
 
 #include "GraphicsSheet.h"
 #include "ScaleWidget.h"
@@ -70,10 +71,57 @@ void GraphicsSheet::drawBackground(QPainter * painter, const QRectF & rect) {
 }
 
 
+void GraphicsSheet::addPoint(const QString& name, const QPointF& p) {
+    points.insert(name, p);
+}
+
+
+void GraphicsSheet::drawCoordinateSystem(QPainter* painter, const QTransform& t, const QColor& c) {
+
+    QPointF O = t.map(QPointF(0,0));
+
+    QPointF X = t.map(QPointF(50, 0));
+    QPointF Xa1 = t.map(QPointF(45, -3));
+    QPointF Xa2 = t.map(QPointF(45, 3));
+
+    QPointF Y = t.map(QPointF(0, 50));
+    QPointF Ya1 = t.map(QPointF(-3, 45));
+    QPointF Ya2 = t.map(QPointF(3, 45));
+
+    painter->setPen(c);
+
+    painter->drawLine(O, X);
+    painter->drawLine(X, Xa1);
+    painter->drawLine(X, Xa2);
+
+    painter->drawLine(O, Y);
+    painter->drawLine(Y, Ya1);
+    painter->drawLine(Y, Ya2);
+}
+
+void GraphicsSheet::drawPoints(QPainter* painter, const QHash<QString, QPointF>& points) {
+    painter->setFont(QFont("Sans", 6));
+    QHash<QString, QPointF>::const_iterator i = points.constBegin();
+    while (i != points.constEnd()) {
+        painter->setPen(Qt::red);
+        painter->drawEllipse(i.value(), 1, 1);
+
+        QString out;
+        QTextStream s(&out);
+        s << i.key() << "(" << i.value().x() << "/" << i.value().y() << ")";
+
+        painter->setPen(Qt::black);
+        painter->drawText(i.value().x(), i.value().y() - 5, out);
+
+        ++i;
+    }
+}
+
 void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
     // QGraphicsView::paintEvent() only repaints the boundingRect() area of the item.
     // we therefore need to properly add a margin inside the item's boundingRect() method.
 
+    painter->save();
     QGraphicsItem* item;
     foreach(item, scene()->selectedItems()) {
         EditableItem* edItem = dynamic_cast<EditableItem*>(item);
@@ -91,6 +139,27 @@ void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
             edItem->paintHandles(this, painter, EditableItem::AllHandlesMask);
         }
     }
+    painter->restore();
+
+    drawPoints(painter, points);
+
+    drawCoordinateSystem(painter);
+
+    QTransform t;
+
+    // Moves the coordinate system dx along the x axis and dy along the y axis
+    t.translate(163, 57);
+
+    qDebug() << t;
+    drawCoordinateSystem(painter, t, Qt::red);
+
+    QHash<QString, QPointF> mapped;
+    mapped.insert("P1", QPointF(10, 10));
+    mapped.insert("P1'", t.map(QPointF(10, 10)));
+    drawPoints(painter, mapped);
+
+//    t.rotate(-30);
+//    drawCoordinateSystem(painter, t, Qt::blue);
 }
 
 
