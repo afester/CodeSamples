@@ -116,11 +116,8 @@ EditableItem::EditHandle EditableItem::getEditHandle(GraphicsSheet* view, const 
             return BottomLeftHandle;
         } else if ( (enabledHandles & LeftHandleMask) && left.contains(pos.toPoint())) {
         	return LeftHandle;
-        } else {
-            QRectF itemRect = QRectF(x(), y(), rect().width(), rect().height());
-            if ( (enabledHandles & MoveHandleMask) && itemRect.contains(pos.toPoint())) {
+        } else if ( (enabledHandles & MoveHandleMask) && rect().contains(pos.toPoint())) {
                 return MoveHandle;
-            }
         }
     }
 
@@ -172,6 +169,344 @@ void EditableItem::paintHandles(GraphicsSheet* view, QPainter * painter, EditHan
 			painter->drawRect(bottomLeft);
 		if (enabledHandles & LeftHandleMask)
 			painter->drawRect(left);
+    }
+}
+
+
+void EditableItem::moveTopLeftHandle(const QPointF& scenePos) {
+    // P1 is the new upper left corner (in scene coordinates)
+    QPointF P1 = scenePos;
+
+    // P2 is the fix point (in scene coordinates)
+    QPointF P2 = mapToScene(rect().width(), rect().height());
+
+    // transform coordinate system so that its center is at P1
+    // we need to transform back (from global coordinates into local coordinates),
+    // so we need to do the inverse operations (rotate -angle => translate -P1)
+    QTransform t;
+    t.rotate(-rotation());
+    t.translate(-P1.x(), -P1.y());
+
+    // Map the fix point into the transformed coordinate system -
+    // this will be the new width and height
+    QPointF P2i = t.map(P2);
+    QSizeF newSize = QSizeF(P2i.x(), P2i.y());
+
+    if (newSize.width() < 10) {
+        newSize.setWidth(10);
+    }
+    if (newSize.height() < 10) {
+        newSize.setHeight(10);
+    }
+
+    // calculate new center point - this will become the new transformation center point
+    QPointF P3(newSize.width()/2, newSize.height()/2);
+
+    // transform P1 to the new item position
+    QTransform t2;
+    t2.translate(P1.x(), P1.y());
+    t2.rotate(rotation());
+    t2.translate(P3.x(), P3.y());
+    t2.rotate(-rotation());
+    t2.translate(-P3.x(), -P3.y());
+    t2.translate(-P1.x(), -P1.y());
+    QPointF newPos = t2.map(P1);
+
+    // activate new geometry
+    setPos(newPos);
+    setRect(QRectF(0, 0, newSize.width(), newSize.height()));
+    setTransformOriginPoint(P3);
+
+    //positionIndicator = QPoint(newPos.x(), newPos.y());
+}
+
+
+void EditableItem::moveRotationHandle(const QPointF& scenePos) {
+    // calculate center of rectangle (scene coordinates)
+    QPointF center = QPointF(pos().x() + rect().width() / 2,
+                             pos().y() + rect().height() / 2);
+
+    qreal deltaX = scenePos.x() - center.x();
+    qreal deltaY = center.y() - scenePos.y();
+
+    // TODO: RECHECK ANGLE CALCULATION!!!!!! Does not correctly work yet!
+
+    int angle = (atan(deltaX / deltaY) * 360) / (2*M_PI);
+
+    if (deltaY < 0 && deltaX >= 0) {
+        angle = 180 - abs(angle);
+    } else if (deltaY < 0 && deltaX <= 0) {
+        angle = 180 + angle;
+    } else if (deltaY >= 0 && deltaX <= 0) {
+        angle = 360 + angle;
+    }
+
+    // qDebug() << rect() << "/" << center << ", " << deltaX << "/" << deltaY << "=> " << angle;
+
+    // calculate center of rectangle (item coordinates)
+    QPointF center2 = QPointF(rect().width() / 2, rect().height() / 2);
+
+    // activate new geometry
+    setTransformOriginPoint(center2);
+    setRotation(angle);
+}
+
+
+void EditableItem::moveRightHandle(const QPointF& scenePos) {
+    QPointF posInItem = mapFromScene(scenePos);
+    QSizeF newSize = QSizeF(posInItem.x(), rect().height());
+    if (newSize.width() < 10) {
+        newSize.setWidth(10);
+    }
+
+    // activate new geometry
+    setRect(QRectF(0, 0, newSize.width(), newSize.height()));
+}
+
+
+void EditableItem::moveBottomHandle(const QPointF& scenePos) {
+    QPointF posInItem = mapFromScene(scenePos);
+    QSizeF newSize = QSizeF(rect().width(), posInItem.y());
+    if (newSize.height() < 10) {
+        newSize.setHeight(10);
+    }
+
+    // activate new geometry
+    setRect(QRectF(0, 0, newSize.width(), newSize.height()));
+}
+
+void EditableItem::moveBottomRightHandle(const QPointF& scenePos) {
+    QPointF posInItem = mapFromScene(scenePos);
+    QSizeF newSize = QSizeF(posInItem.x(), posInItem.y());
+    if (newSize.width() < 10) {
+        newSize.setWidth(10);
+    }
+    if (newSize.height() < 10) {
+        newSize.setHeight(10);
+    }
+
+    // activate new geometry
+    setRect(QRectF(0, 0, newSize.width(), newSize.height()));
+}
+
+
+
+void EditableItem::moveTopHandle(const QPointF& scenePos) {
+    // P1 is the new upper left corner (in scene coordinates)
+    QPointF P1 = scenePos;
+
+    // P2 is the fix point (in scene coordinates)
+    QPointF P2 = mapToScene(rect().width(), rect().height());
+
+    // transform coordinate system so that its center is at P1
+    // we need to transform back (from global coordinates into local coordinates),
+    // so we need to do the inverse operations (rotate -angle => translate -P1)
+    QTransform t;
+    t.rotate(-rotation());
+    t.translate(-P1.x(), -P1.y());
+
+    // Map the fix point into the transformed coordinate system -
+    // this will be the new height
+    QPointF P2i = t.map(P2);
+    QSizeF newSize = QSizeF(rect().width(), P2i.y());
+    if (newSize.height() < 10) {
+        newSize.setHeight(10);
+    }
+
+    // calculate new center point - this will become the new transformation center point
+    QPointF P3(newSize.width()/2, newSize.height()/2);
+
+    QTransform t2;
+    t2.translate(P2.x(), P2.y());
+    t2.rotate(rotation());
+    t2.translate(-newSize.width(), -newSize.height());
+    QPointF pos_ = t2.map(QPointF(0, 0));
+
+    // transform P1 to the new item position
+    QTransform t3;
+    t3.translate(P1.x(), P1.y());
+    t3.rotate(rotation());
+    t3.translate(P3.x(), P3.y());
+    t3.rotate(-rotation());
+    t3.translate(-P3.x(), -P3.y());
+    t3.translate(-P1.x(), -P1.y());
+    QPointF newPos = t3.map(pos_);
+
+    // activate new geometry
+    setPos(newPos);
+    setRect(QRectF(0, 0, newSize.width(), newSize.height()));
+    setTransformOriginPoint(P3);
+}
+
+
+void EditableItem::moveLeftHandle(const QPointF& scenePos) {
+    // P1 is the new upper right corner (in scene coordinates)
+    QPointF P1 = scenePos;
+
+    // P2 is the fix point (in scene coordinates)
+    QPointF P2 = mapToScene(rect().width(), rect().height());
+
+    // transform coordinate system so that its center is at P1
+    // we need to transform back (from global coordinates into local coordinates),
+    // so we need to do the inverse operations (rotate -angle => translate -P1)
+    QTransform t;
+    t.rotate(-rotation());
+    t.translate(-P1.x(), -P1.y());
+
+    // Map the fix point into the transformed coordinate system -
+    // this will be the new height
+    QPointF P2i = t.map(P2);
+    QSizeF newSize = QSizeF(P2i.x(), rect().height());
+    if (newSize.width() < 10) {
+        newSize.setWidth(10);
+    }
+
+    // calculate new center point - this will become the new transformation center point
+    QPointF P3(newSize.width()/2, newSize.height()/2);
+
+    QTransform t2;
+    t2.translate(P2.x(), P2.y());
+    t2.rotate(rotation());
+    t2.translate(-newSize.width(), -newSize.height());
+    QPointF pos_ = t2.map(QPointF(0, 0));
+
+    // transform P1 to the new item position
+    QTransform t3;
+    t3.translate(P1.x(), P1.y());
+    t3.rotate(rotation());
+    t3.translate(P3.x(), P3.y());
+    t3.rotate(-rotation());
+    t3.translate(-P3.x(), -P3.y());
+    t3.translate(-P1.x(), -P1.y());
+    QPointF newPos = t3.map(pos_);
+
+    // activate new geometry
+    setPos(newPos);
+    setRect(QRectF(0, 0, newSize.width(), newSize.height()));
+    setTransformOriginPoint(P3);
+}
+
+
+void EditableItem::moveTopRightHandle(const QPointF& scenePos) {
+#if 0
+#endif
+}
+
+void EditableItem::moveBottomLeftHandle(const QPointF& scenePos) {
+#if 0
+        case EditableItem::BottomLeftHandle :
+                newSize = QSizeF(theFrame->rect().width() - posInItem.x(),
+                                 posInItem.y()); //  - theFrame->y());
+                if (newSize.width() < 10) {
+                    newSize.setWidth(10);
+                }
+                if (newSize.height() < 10) {
+                    newSize.setHeight(10);
+                }
+                //newPos = QPointF(theFrame->x() + theFrame->rect().width() - newSize.width() , theFrame->y());
+                newPos = QPointF(theFrame->x() + posInItem.x(), theFrame->y());
+
+                positionIndicator = QPoint(newPos.x(), newPos.y() + newSize.height());
+                break;
+#endif
+}
+
+
+void EditableItem::moveHandle(EditHandle editHandle, const QPointF& scenePos) {
+    QPointF newPos;
+    QSizeF newSize;
+
+    switch(editHandle) {
+        case EditableItem::TopLeftHandle :
+                moveTopLeftHandle(scenePos);
+                break;
+
+        case EditableItem::TopHandle :
+                moveTopHandle(scenePos);
+                break;
+
+        case EditableItem::TopRightHandle :
+                moveTopRightHandle(scenePos);
+                break;
+
+        case EditableItem::LeftHandle :
+                moveLeftHandle(scenePos);
+                break;
+
+        case EditableItem::BottomLeftHandle :
+                moveBottomLeftHandle(scenePos);
+                break;
+
+        case EditableItem::RotationHandle :
+                moveRotationHandle(scenePos);
+                break;
+
+        case EditableItem::RightHandle :
+                moveRightHandle(scenePos);
+                break;
+
+        case EditableItem::BottomHandle :
+                moveBottomHandle(scenePos);
+                break;
+
+        case EditableItem::BottomRightHandle :
+                moveBottomRightHandle(scenePos);
+                break;
+
+        case EditableItem::MoveHandle:
+                setPos(scenePos.x(), scenePos.y());
+                break;
+    }
+
+}
+
+
+void EditableItem::setCursor(GraphicsSheet* theView, EditHandle handle) {
+
+    switch(handle) {
+        case EditableItem::TopLeftHandle :
+                theView->setCursor(Qt::SizeFDiagCursor);
+                break;
+
+        case EditableItem::TopHandle :
+                theView->setCursor(Qt::SizeVerCursor);
+                break;
+
+        case EditableItem::TopRightHandle :
+                theView->setCursor(Qt::SizeBDiagCursor);
+                break;
+
+        case EditableItem::LeftHandle :
+                theView->setCursor(Qt::SizeHorCursor);
+                break;
+
+        case EditableItem::RotationHandle :
+                theView->setCursor(Qt::PointingHandCursor);  // TODO: Create rotation cursor
+                break;
+
+        case EditableItem::RightHandle :
+                theView->setCursor(Qt::SizeHorCursor);
+                break;
+
+        case EditableItem::BottomLeftHandle :
+                theView->setCursor(Qt::SizeBDiagCursor);
+                break;
+
+        case EditableItem::BottomHandle :
+                theView->setCursor(Qt::SizeVerCursor);
+                break;
+
+        case EditableItem::BottomRightHandle :
+                theView->setCursor(Qt::SizeFDiagCursor);
+                break;
+
+        case EditableItem::MoveHandle :
+                theView->setCursor(Qt::OpenHandCursor);
+                break;
+
+        default :
+                theView->setCursor(Qt::ArrowCursor);
+                break;
     }
 }
 

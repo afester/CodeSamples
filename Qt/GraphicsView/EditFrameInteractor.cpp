@@ -50,22 +50,22 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
         QPoint positionIndicator(-1,-1);
         switch(editHandle) {
             case EditableItem::TopLeftHandle :
-                    offset = QSizeF(theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
+                    offset = QSizeF(0, 0); // theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
                     positionIndicator = QPoint(theFrame->x(), theFrame->y());
                     break;
 
             case EditableItem::TopHandle :
-                    offset = QSizeF(0, theFrame->y() - scenePos.y());
+                    offset = QSizeF(0, 0); // QSizeF(0, theFrame->y() - scenePos.y());
                     positionIndicator = QPoint(-1, theFrame->y());
                     break;
 
             case EditableItem::TopRightHandle :
-                    offset = QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(), theFrame->y() - scenePos.y());
+                    offset = QSizeF(0, 0); // QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(), theFrame->y() - scenePos.y());
                     positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(), theFrame->y());
                     break;
 
             case EditableItem::LeftHandle :
-                    offset = QSizeF(theFrame->x() - scenePos.x(), 0);
+                    offset = QSizeF(0, 0); // QSizeF(theFrame->x() - scenePos.x(), 0);
                     positionIndicator = QPoint(theFrame->x(), -1);
                     break;
 
@@ -74,23 +74,23 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
                     break;
 
             case EditableItem::RightHandle :
-                    offset = QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(), 0);
+                    offset = QSizeF(0, 0); // QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(), 0);
                     positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(), -1);
                     break;
 
             case EditableItem::BottomLeftHandle :
-                    offset = QSizeF(theFrame->x() - scenePos.x(), theFrame->y() + theFrame->rect().height() - scenePos.y());
+                    offset = QSizeF(0, 0); // QSizeF(theFrame->x() - scenePos.x(), theFrame->y() + theFrame->rect().height() - scenePos.y());
                     positionIndicator = QPoint(theFrame->x(), theFrame->y() + theFrame->rect().height());
                     break;
 
             case EditableItem::BottomHandle :
-                    offset = QSizeF(0, theFrame->y() + theFrame->rect().height() - scenePos.y());
+                    offset = QSizeF(0, 0); // QSizeF(0, theFrame->y() + theFrame->rect().height() - scenePos.y());
                     positionIndicator = QPoint(-1, theFrame->y() + theFrame->rect().height());
                     break;
 
             case EditableItem::BottomRightHandle :
-                    offset = QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(),
-                                   theFrame->y() + theFrame->rect().height() - scenePos.y());
+                    offset = QSizeF(0, 0); // QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(),
+                                   //theFrame->y() + theFrame->rect().height() - scenePos.y());
                     positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(),
                                                theFrame->y() + theFrame->rect().height());
                     break;
@@ -141,51 +141,7 @@ void EditFrameInteractor::hoverOverEvent ( QMouseEvent * event ) {
 	if (frameItem) {
         QPointF itemPos = frameItem->mapFromScene(scenePos);
 		EditableItem::EditHandle handle = frameItem->getEditHandle(theView, itemPos, enabledHandles);
-		switch(handle) {
-			case EditableItem::TopLeftHandle :
-					theView->setCursor(Qt::SizeFDiagCursor);
-					break;
-
-			case EditableItem::TopHandle :
-					theView->setCursor(Qt::SizeVerCursor);
-					break;
-
-			case EditableItem::TopRightHandle :
-					theView->setCursor(Qt::SizeBDiagCursor);
-					break;
-
-			case EditableItem::LeftHandle :
-					theView->setCursor(Qt::SizeHorCursor);
-					break;
-
-			case EditableItem::RotationHandle :
-					theView->setCursor(Qt::PointingHandCursor);  // TODO: Create rotation cursor
-					break;
-
-			case EditableItem::RightHandle :
-					theView->setCursor(Qt::SizeHorCursor);
-					break;
-
-			case EditableItem::BottomLeftHandle :
-					theView->setCursor(Qt::SizeBDiagCursor);
-					break;
-
-			case EditableItem::BottomHandle :
-					theView->setCursor(Qt::SizeVerCursor);
-					break;
-
-			case EditableItem::BottomRightHandle :
-					theView->setCursor(Qt::SizeFDiagCursor);
-					break;
-
-            case EditableItem::MoveHandle :
-                    theView->setCursor(Qt::OpenHandCursor);
-                    break;
-
-            default :
-                    theView->setCursor(Qt::ArrowCursor);
-					break;
-		}
+		frameItem->setCursor(theView, handle);
 	} else {
 		theView->setCursor(Qt::ArrowCursor);
 	}
@@ -225,195 +181,9 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 
 	// check if currently a drag is in progress
 	if (theFrame) {
-	    QPointF itemPos = theFrame->mapFromScene(scenePos);
-
         QPointF pos = scenePos + QPointF(offset.width(), offset.height());
-
-        // map mouse pointer scene position to item coordinates
-        QPointF posInItem = theFrame->mapFromScene(scenePos);
-
-        QPointF newPos;
-        QSizeF newSize;
-
         QPoint positionIndicator(-1,-1);
-
-        switch(editHandle) {
-			case EditableItem::TopLeftHandle :{
-			        // P1 is the new upper left corner (in scene coordinates)
-			        QPointF P1 = scenePos;
-
-			        // P2 is the fix point (in scene coordinates)
-                    QPointF P2 = theFrame->mapToScene(theFrame->rect().width(),
-                                                      theFrame->rect().height());
-
-                    // transform coordinate system so that its center is at P1
-                    // we need to transform back (from global coordinates into local coordinates),
-                    // so we need to do the inverse operations (rotate -angle => translate -P1)
-                    QTransform t;
-                    t.rotate(-theFrame->rotation());
-                    t.translate(-P1.x(), -P1.y());
-
-                    // Map the fix point into the transformed coordinate system -
-                    // this will be the new width and height
-                    QPointF P2i = t.map(P2);
-                    newSize = QSizeF(P2i.x(), P2i.y());
-
-                    if (newSize.width() < 10) {
-                        newSize.setWidth(10);
-                    }
-                    if (newSize.height() < 10) {
-                        newSize.setHeight(10);
-                    }
-
-                    // calculate new center point - this will become the new transformation center point
-                    QPointF P3(newSize.width()/2, newSize.height()/2);
-                    theFrame->setTransformOriginPoint(P3);
-
-                    // transform P1 to the new item position
-                    QTransform t2;
-                    t2.translate(P1.x(), P1.y());
-                    t2.rotate(theFrame->rotation());
-                    t2.translate(P3.x(), P3.y());
-                    t2.rotate(-theFrame->rotation());
-                    t2.translate(-P3.x(), -P3.y());
-                    t2.translate(-P1.x(), -P1.y());
-                    newPos = t2.map(P1);
-
-					positionIndicator = QPoint(newPos.x(), newPos.y());
-					break;
-			}
-/*****************************/
-			case EditableItem::TopHandle :
-
-					//newSize = QSizeF(theFrame->rect().width(), theFrame->rect().height() + theFrame->y() - pos.y());
-			        newSize = QSizeF(theFrame->rect().width(), theFrame->rect().height() - posInItem.y());
-			        if (newSize.height() < 10) {
-						newSize.setHeight(10);
-					}
-					newPos = QPointF(theFrame->x(), theFrame->y() + posInItem.y()); // theFrame->y() + theFrame->rect().height() - newSize.height());
-
-/**********************************/
-					positionIndicator = QPoint(-1, newPos.y());
-					break;
-
-			case EditableItem::TopRightHandle :
-					newSize = QSizeF(pos.x() - theFrame->x(), theFrame->rect().height() + theFrame->y() - pos.y());
-					if (newSize.width() < 10) {
-						newSize.setWidth(10);
-					}
-					if (newSize.height() < 10) {
-						newSize.setHeight(10);
-					}
-					newPos = QPointF(theFrame->x(), theFrame->y() + theFrame->rect().height() - newSize.height());
-
-					positionIndicator = QPoint(newPos.x() + newSize.width(), newPos.y());
-					break;
-
-			case EditableItem::LeftHandle :
-                	newSize = QSizeF(theFrame->rect().width() + theFrame->x() - pos.x(), theFrame->rect().height());
-                	if (newSize.width() < 10) {
-                		newSize.setWidth(10);
-                	}
-                	newPos = QPointF(theFrame->x() + theFrame->rect().width() - newSize.width() , theFrame->y());
-
-                	positionIndicator = QPoint(newPos.x(), -1);
-                	break;
-
-			case EditableItem::RotationHandle : {
-						// position and size remains the same
-						newPos = theFrame->pos();
-						newSize = QSizeF(theFrame->rect().width(), theFrame->rect().height());
-
-						// calculate center of rectangle (scene coordinates)
-						QPointF center = QPointF(theFrame->pos().x() + theFrame->rect().width() / 2,
-												 theFrame->pos().y() + theFrame->rect().height() / 2);
-
-						qreal deltaX = pos.x() - center.x();
-						qreal deltaY = center.y() - pos.y();
-
-						// TODO: RECHECK ANGLE CALCULATION!!!!!! Does not correctly work yet!
-
-						int angle = (atan(deltaX / deltaY) * 360) / (2*M_PI);
-
-						if (deltaY < 0 && deltaX >= 0) {
-							angle = 180 - abs(angle);
-						} else if (deltaY < 0 && deltaX <= 0) {
-							angle = 180 + angle;
-						} else if (deltaY >= 0 && deltaX <= 0) {
-							angle = 360 + angle;
-						}
-
-						// qDebug() << rect() << "/" << center << ", " << deltaX << "/" << deltaY << "=> " << angle;
-
-						// calculate center of rectangle (item coordinates)
-						QPointF center2 = QPointF(theFrame->rect().width() / 2, theFrame->rect().height() / 2);
-						theFrame->setTransformOriginPoint(center2);
-						theFrame->setRotation(angle);
-					}
-					break;
-
-			case EditableItem::RightHandle :
-					// newSize = QSizeF(pos.x() - theFrame->x(), theFrame->rect().height());
-		            newSize = QSizeF(posInItem.x(), theFrame->rect().height());
-					if (newSize.width() < 10) {
-						newSize.setWidth(10);
-					}
-					// newPos = QPointF(theFrame->x(), theFrame->y());
-		            newPos = QPointF(theFrame->x(), theFrame->y());
-
-					positionIndicator = QPoint(newPos.x() + newSize.width(), -1);
-					break;
-
-			case EditableItem::BottomLeftHandle :
-					newSize = QSizeF(theFrame->rect().width() - posInItem.x(),
-					                 posInItem.y()); //  - theFrame->y());
-					if (newSize.width() < 10) {
-						newSize.setWidth(10);
-					}
-					if (newSize.height() < 10) {
-						newSize.setHeight(10);
-					}
-					//newPos = QPointF(theFrame->x() + theFrame->rect().width() - newSize.width() , theFrame->y());
-					newPos = QPointF(theFrame->x() + posInItem.x(), theFrame->y());
-
-					positionIndicator = QPoint(newPos.x(), newPos.y() + newSize.height());
-					break;
-
-			case EditableItem::BottomHandle :
-                    newSize = QSizeF(theFrame->rect().width(), posInItem.y());
-                    if (newSize.height() < 10) {
-                        newSize.setHeight(10);
-                    }
-                    newPos = QPointF(theFrame->x(), theFrame->y());
-
-                    positionIndicator = QPoint(-1, newPos.y() + newSize.height());
-					break;
-
-			case EditableItem::BottomRightHandle :
-			        newSize = QSizeF(posInItem.x(), posInItem.y());
-					if (newSize.width() < 10) {
-						newSize.setWidth(10);
-					}
-					if (newSize.height() < 10) {
-						newSize.setHeight(10);
-					}
-					newPos = QPointF(theFrame->x(), theFrame->y());
-
-					positionIndicator = QPoint(newPos.x() + newSize.width(), newPos.y() + newSize.height());
-					break;
-
-			default :   /* Move */
-					newPos = QPointF(pos.x(), pos.y());
-					newSize = QSizeF(theFrame->rect().width(), theFrame->rect().height());
-
-					positionIndicator = QPoint(newPos.x(), newPos.y());
-					break;
-        }
-
-        QRectF newRect(QPointF(0,0), newSize);
-        //qDebug() << "NEW RECT:" << newRect;
-        theFrame->setRect(newRect);
-        theFrame->setPos(newPos);
+        theFrame->moveHandle(editHandle, pos);
 
 #if 0
         // TODO HACK: special handling of text frames - make sure that the child is always centered
@@ -425,7 +195,9 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 
 
         theView->setPositionIndicators(positionIndicator);
+
 #endif
+
 	} else {
 		hoverOverEvent(event);
 	}

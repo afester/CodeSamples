@@ -83,6 +83,10 @@ public:
      */
     void paintHandles(GraphicsSheet* view, QPainter * painter, EditHandles enabledHandles = AllHandlesMask);
 
+    void moveHandle(EditHandle editHandle, const QPointF& scenePos);
+
+    void setCursor(GraphicsSheet* theView, EditHandle handle);
+
     void paintCoordinates(GraphicsSheet* view, QPainter* painter);
 
     /**
@@ -102,6 +106,16 @@ protected:
     virtual void calculateDraggers(GraphicsSheet* view);
 
 private:
+    void moveTopLeftHandle(const QPointF& scenePos);
+    void moveRotationHandle(const QPointF& scenePos);
+    void moveRightHandle(const QPointF& scenePos);
+    void moveBottomHandle(const QPointF& scenePos);
+    void moveBottomRightHandle(const QPointF& scenePos);
+    void moveTopHandle(const QPointF& scenePos);
+    void moveTopRightHandle(const QPointF& scenePos);
+    void moveLeftHandle(const QPointF& scenePos);
+    void moveBottomLeftHandle(const QPointF& scenePos);
+
     QRectF rotationHandle;
     QRectF topLeft;
     QRectF topRight;
