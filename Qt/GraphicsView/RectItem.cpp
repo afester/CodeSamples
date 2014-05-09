@@ -10,7 +10,7 @@
 #include <math.h>
 
 
-#include "EditableItem.h"
+#include "RectItem.h"
 // #include "KollageGraphicsScene.h"
 #include "GraphicsSheet.h"
 // #include "Log.h"
@@ -21,7 +21,7 @@ void ItemVisitor::visitSelectedItems(QGraphicsScene* scene) {
     QList<QGraphicsItem*> selectedItems = scene->selectedItems();
     QGraphicsItem* item;
     foreach(item, selectedItems) {
-        EditableItem* theItem = dynamic_cast<EditableItem*>(item);
+        RectItem* theItem = dynamic_cast<RectItem*>(item);
         if (theItem) {
             theItem->accept(*this);
         }
@@ -36,7 +36,7 @@ void ItemVisitor::visit(EditableImageframeItem* ) const {
 }
 #endif
 
-EditableItem::EditableItem(const QPointF& pos, QGraphicsItem * parent) :
+RectItem::RectItem(const QPointF& pos, QGraphicsItem * parent) :
     QGraphicsRectItem(0, 0, 10, 10, parent) {
 
     setPos(pos.x(), pos.y());
@@ -48,7 +48,7 @@ EditableItem::EditableItem(const QPointF& pos, QGraphicsItem * parent) :
 }
 
 
-EditableItem::EditableItem(const QRectF & rect, QGraphicsItem * parent) :
+RectItem::RectItem(const QRectF & rect, QGraphicsItem * parent) :
     QGraphicsRectItem(0, 0, rect.width(), rect.height(), parent){
 
     setPos(rect.x(), rect.y());
@@ -60,7 +60,7 @@ EditableItem::EditableItem(const QRectF & rect, QGraphicsItem * parent) :
 }
 
 
-void EditableItem::calculateDraggers(GraphicsSheet* view) {
+void RectItem::calculateDraggers(GraphicsSheet* view) {
     const qreal handleSize = 8.0;   // TODO: read from view property
 
     const qreal hsize = handleSize / view->transform().m11();
@@ -87,16 +87,18 @@ void EditableItem::calculateDraggers(GraphicsSheet* view) {
 }
 
 
-QRectF EditableItem::boundingRect() const {
+QRectF RectItem::boundingRect() const {
     QRectF result = QGraphicsRectItem::boundingRect();
 
     return QRectF(result.x() - 2, result.y() - 2, result.width() + 4, result.height() + 4);
 }
 
 
-EditableItem::EditHandle EditableItem::getEditHandle(GraphicsSheet* view, const QPointF& pos, EditHandles enabledHandles) {
+/*EditableItem::EditHandle*/ unsigned int RectItem::getEditHandle(GraphicsSheet* view, const QPointF& scenePos, unsigned int /*EditHandles */ enabledHandles) {
     calculateDraggers(view);
 
+
+    QPointF pos = mapFromScene(scenePos);
     if (isSelected()) {
         if ( (enabledHandles & RotationHandleMask) && rotationHandle.contains(pos.toPoint())) {
             return RotationHandle;
@@ -133,7 +135,7 @@ static QString formatFloat(qreal number, int dec) {
 }
 
 
-void EditableItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) {
+void RectItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) {
     if (isSelected()) {
         painter->setBrush(Qt::NoBrush);
         painter->setPen(QPen(Qt::green, 0, Qt::DashLine));
@@ -143,7 +145,7 @@ void EditableItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) 
 }
 
 
-void EditableItem::paintHandles(GraphicsSheet* view, QPainter * painter, EditHandles enabledHandles) {
+void RectItem::paintHandles(GraphicsSheet* view, QPainter * painter, unsigned int /*EditHandles*/ enabledHandles) {
     if (isSelected()) {
         calculateDraggers(view);
 
@@ -173,7 +175,7 @@ void EditableItem::paintHandles(GraphicsSheet* view, QPainter * painter, EditHan
 }
 
 
-void EditableItem::moveTopLeftHandle(const QPointF& scenePos) {
+void RectItem::moveTopLeftHandle(const QPointF& scenePos) {
     // P1 is the new upper left corner (in scene coordinates)
     QPointF P1 = scenePos;
 
@@ -221,7 +223,7 @@ void EditableItem::moveTopLeftHandle(const QPointF& scenePos) {
 }
 
 
-void EditableItem::moveRotationHandle(const QPointF& scenePos) {
+void RectItem::moveRotationHandle(const QPointF& scenePos) {
     // calculate center of rectangle (scene coordinates)
     QPointF center = QPointF(pos().x() + rect().width() / 2,
                              pos().y() + rect().height() / 2);
@@ -252,7 +254,7 @@ void EditableItem::moveRotationHandle(const QPointF& scenePos) {
 }
 
 
-void EditableItem::moveRightHandle(const QPointF& scenePos) {
+void RectItem::moveRightHandle(const QPointF& scenePos) {
     QPointF posInItem = mapFromScene(scenePos);
     QSizeF newSize = QSizeF(posInItem.x(), rect().height());
     if (newSize.width() < 10) {
@@ -264,7 +266,7 @@ void EditableItem::moveRightHandle(const QPointF& scenePos) {
 }
 
 
-void EditableItem::moveBottomHandle(const QPointF& scenePos) {
+void RectItem::moveBottomHandle(const QPointF& scenePos) {
     QPointF posInItem = mapFromScene(scenePos);
     QSizeF newSize = QSizeF(rect().width(), posInItem.y());
     if (newSize.height() < 10) {
@@ -275,7 +277,7 @@ void EditableItem::moveBottomHandle(const QPointF& scenePos) {
     setRect(QRectF(0, 0, newSize.width(), newSize.height()));
 }
 
-void EditableItem::moveBottomRightHandle(const QPointF& scenePos) {
+void RectItem::moveBottomRightHandle(const QPointF& scenePos) {
     QPointF posInItem = mapFromScene(scenePos);
     QSizeF newSize = QSizeF(posInItem.x(), posInItem.y());
     if (newSize.width() < 10) {
@@ -291,7 +293,7 @@ void EditableItem::moveBottomRightHandle(const QPointF& scenePos) {
 
 
 
-void EditableItem::moveTopHandle(const QPointF& scenePos) {
+void RectItem::moveTopHandle(const QPointF& scenePos) {
     // P1 is the new upper left corner (in scene coordinates)
     QPointF P1 = scenePos;
 
@@ -339,7 +341,7 @@ void EditableItem::moveTopHandle(const QPointF& scenePos) {
 }
 
 
-void EditableItem::moveLeftHandle(const QPointF& scenePos) {
+void RectItem::moveLeftHandle(const QPointF& scenePos) {
     // P1 is the new upper right corner (in scene coordinates)
     QPointF P1 = scenePos;
 
@@ -387,14 +389,14 @@ void EditableItem::moveLeftHandle(const QPointF& scenePos) {
 }
 
 
-void EditableItem::moveTopRightHandle(const QPointF& scenePos) {
+void RectItem::moveTopRightHandle(const QPointF& scenePos) {
 #if 0
 #endif
 }
 
-void EditableItem::moveBottomLeftHandle(const QPointF& scenePos) {
+void RectItem::moveBottomLeftHandle(const QPointF& scenePos) {
 #if 0
-        case EditableItem::BottomLeftHandle :
+        case RectItem::BottomLeftHandle :
                 newSize = QSizeF(theFrame->rect().width() - posInItem.x(),
                                  posInItem.y()); //  - theFrame->y());
                 if (newSize.width() < 10) {
@@ -411,49 +413,93 @@ void EditableItem::moveBottomLeftHandle(const QPointF& scenePos) {
 #endif
 }
 
+QSizeF RectItem::getHandleOffset(unsigned int editHandle, const QPointF& scenePos) {
+    switch(editHandle) {
+        case RectItem::TopLeftHandle :
+                return QSizeF(0, 0); // theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
+                //positionIndicator = QPoint(theFrame->x(), theFrame->y());
 
-void EditableItem::moveHandle(EditHandle editHandle, const QPointF& scenePos) {
+        case RectItem::TopHandle :
+                return QSizeF(0, 0); // QSizeF(0, theFrame->y() - scenePos.y());
+                //positionIndicator = QPoint(-1, theFrame->y());
+
+        case RectItem::TopRightHandle :
+                return QSizeF(0, 0); // QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(), theFrame->y() - scenePos.y());
+               // positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(), theFrame->y());
+
+        case RectItem::LeftHandle :
+                return QSizeF(0, 0); // QSizeF(theFrame->x() - scenePos.x(), 0);
+                //positionIndicator = QPoint(theFrame->x(), -1);
+
+        case RectItem::RotationHandle :
+                return QSizeF(0, 0);
+
+        case RectItem::RightHandle :
+                return QSizeF(0, 0); // QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(), 0);
+                //positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(), -1);
+
+        case RectItem::BottomLeftHandle :
+                return QSizeF(0, 0); // QSizeF(theFrame->x() - scenePos.x(), theFrame->y() + theFrame->rect().height() - scenePos.y());
+                //positionIndicator = QPoint(theFrame->x(), theFrame->y() + theFrame->rect().height());
+
+        case RectItem::BottomHandle :
+                return QSizeF(0, 0); // QSizeF(0, theFrame->y() + theFrame->rect().height() - scenePos.y());
+               // positionIndicator = QPoint(-1, theFrame->y() + theFrame->rect().height());
+
+        case RectItem::BottomRightHandle :
+                return QSizeF(0, 0); // QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(),
+                               //theFrame->y() + theFrame->rect().height() - scenePos.y());
+               // positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(),
+            //                               theFrame->y() + theFrame->rect().height());
+
+        case RectItem::MoveHandle:
+                return QSize(x() - scenePos.x(), y() - scenePos.y());
+                break;
+    }
+}
+
+void RectItem::moveHandle(unsigned int /*EditHandle*/ editHandle, const QPointF& scenePos) {
     QPointF newPos;
     QSizeF newSize;
 
     switch(editHandle) {
-        case EditableItem::TopLeftHandle :
+        case RectItem::TopLeftHandle :
                 moveTopLeftHandle(scenePos);
                 break;
 
-        case EditableItem::TopHandle :
+        case RectItem::TopHandle :
                 moveTopHandle(scenePos);
                 break;
 
-        case EditableItem::TopRightHandle :
+        case RectItem::TopRightHandle :
                 moveTopRightHandle(scenePos);
                 break;
 
-        case EditableItem::LeftHandle :
+        case RectItem::LeftHandle :
                 moveLeftHandle(scenePos);
                 break;
 
-        case EditableItem::BottomLeftHandle :
+        case RectItem::BottomLeftHandle :
                 moveBottomLeftHandle(scenePos);
                 break;
 
-        case EditableItem::RotationHandle :
+        case RectItem::RotationHandle :
                 moveRotationHandle(scenePos);
                 break;
 
-        case EditableItem::RightHandle :
+        case RectItem::RightHandle :
                 moveRightHandle(scenePos);
                 break;
 
-        case EditableItem::BottomHandle :
+        case RectItem::BottomHandle :
                 moveBottomHandle(scenePos);
                 break;
 
-        case EditableItem::BottomRightHandle :
+        case RectItem::BottomRightHandle :
                 moveBottomRightHandle(scenePos);
                 break;
 
-        case EditableItem::MoveHandle:
+        case RectItem::MoveHandle:
                 setPos(scenePos.x(), scenePos.y());
                 break;
     }
@@ -461,46 +507,46 @@ void EditableItem::moveHandle(EditHandle editHandle, const QPointF& scenePos) {
 }
 
 
-void EditableItem::setCursor(GraphicsSheet* theView, EditHandle handle) {
+void RectItem::setCursor(GraphicsSheet* theView, unsigned int /*EditHandle*/ handle) {
 
     switch(handle) {
-        case EditableItem::TopLeftHandle :
+        case RectItem::TopLeftHandle :
                 theView->setCursor(Qt::SizeFDiagCursor);
                 break;
 
-        case EditableItem::TopHandle :
+        case RectItem::TopHandle :
                 theView->setCursor(Qt::SizeVerCursor);
                 break;
 
-        case EditableItem::TopRightHandle :
+        case RectItem::TopRightHandle :
                 theView->setCursor(Qt::SizeBDiagCursor);
                 break;
 
-        case EditableItem::LeftHandle :
+        case RectItem::LeftHandle :
                 theView->setCursor(Qt::SizeHorCursor);
                 break;
 
-        case EditableItem::RotationHandle :
+        case RectItem::RotationHandle :
                 theView->setCursor(Qt::PointingHandCursor);  // TODO: Create rotation cursor
                 break;
 
-        case EditableItem::RightHandle :
+        case RectItem::RightHandle :
                 theView->setCursor(Qt::SizeHorCursor);
                 break;
 
-        case EditableItem::BottomLeftHandle :
+        case RectItem::BottomLeftHandle :
                 theView->setCursor(Qt::SizeBDiagCursor);
                 break;
 
-        case EditableItem::BottomHandle :
+        case RectItem::BottomHandle :
                 theView->setCursor(Qt::SizeVerCursor);
                 break;
 
-        case EditableItem::BottomRightHandle :
+        case RectItem::BottomRightHandle :
                 theView->setCursor(Qt::SizeFDiagCursor);
                 break;
 
-        case EditableItem::MoveHandle :
+        case RectItem::MoveHandle :
                 theView->setCursor(Qt::OpenHandCursor);
                 break;
 
@@ -510,8 +556,8 @@ void EditableItem::setCursor(GraphicsSheet* theView, EditHandle handle) {
     }
 }
 
-
-void EditableItem::paintCoordinates(GraphicsSheet* view, QPainter* painter) {
+#if 0
+void RectItem::paintCoordinates(GraphicsSheet* view, QPainter* painter) {
     if (isSelected()) {
 		// Paint the coordinates
 		painter->setFont(QFont("Arial", 2, 1, false));
@@ -565,10 +611,11 @@ void EditableItem::paintCoordinates(GraphicsSheet* view, QPainter* painter) {
 		painter->drawText(textPos, size);
     }
 }
+#endif
 
-
-void EditableItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * style, QWidget *widget) {
+void RectItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * style, QWidget *widget) {
     QGraphicsRectItem::paint(painter, style, widget);
+
 #if 0
 	GraphicsSheet* requestingView = dynamic_cast<GraphicsSheet*>(widget ? widget->parent() : 0);
 	if (requestingView) {

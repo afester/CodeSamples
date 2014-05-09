@@ -17,7 +17,8 @@
 
 #include "GraphicsSheet.h"
 #include "ScrollAreaLayout.h"
-#include "EditableItem.h"
+#include "RectItem.h"
+#include "LineItem.h"
 #include "EditFrameInteractor.h"
 
 #include "LabelledComboBox.h"
@@ -126,22 +127,22 @@ MainWindow::MainWindow(QWidget *parent) :
 
 /*****************************************************************************/
 
-    QGraphicsRectItem* item = new EditableItem(QRectF(10, 10, 50, 50));
+    QGraphicsRectItem* item = new RectItem(QRectF(10, 10, 50, 50));
     item->setPen(QPen(Qt::red, 0));
     item->setBrush(Qt::cyan);
     graphicsSheet->scene()->addItem(item);
 
-    item = new EditableItem(QRectF(0, 0, 5, 5));
+    item = new RectItem(QRectF(0, 0, 5, 5));
     item->setPen(QPen(Qt::blue, 0));
     item->setBrush(Qt::lightGray);
     graphicsSheet->scene()->addItem(item);
 
-    item = new EditableItem(QRectF(225, 295, 5, 5));
+    item = new RectItem(QRectF(225, 295, 5, 5));
     item->setPen(QPen(Qt::green, 0));
     item->setBrush(Qt::lightGray);
     graphicsSheet->scene()->addItem(item);
 
-    item1 = new EditableItem(QRectF(125, 100, 200, 100));
+    item1 = new RectItem(QRectF(125, 100, 200, 100));
 
     qreal angle = 330;
     QPointF center2 = QPointF(item1->rect().width() / 2, item1->rect().height() / 2);
@@ -152,6 +153,9 @@ MainWindow::MainWindow(QWidget *parent) :
     item1->setPen(QPen(Qt::magenta, 0));
     item1->setBrush(Qt::lightGray);
     graphicsSheet->scene()->addItem(item1);
+
+    LineItem* item2 = new LineItem(QPointF(30, 30), QPointF(100, 200));
+    graphicsSheet->scene()->addItem(item2);
 
     graphicsSheet->setInteractor(new EditFrameInteractor());
 }
@@ -265,7 +269,7 @@ for (int i = 0;  i < 10;  i++) {
 
 //    theFrame->setPos(newPos);
 //    theFrame->setRect(0, 0, newSize.width(), newSize.height());
-    EditableItem* item1 = new EditableItem(QRectF(newPos.x(), newPos.y(), newSize.width(), newSize.height()));
+    RectItem* item1 = new RectItem(QRectF(newPos.x(), newPos.y(), newSize.width(), newSize.height()));
     qreal angle = 30;
     QPointF center2 = QPointF(item1->rect().width() / 2, item1->rect().height() / 2);
     item1->setTransformOriginPoint(center2);

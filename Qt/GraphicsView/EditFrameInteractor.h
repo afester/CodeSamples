@@ -6,15 +6,15 @@
 #include <QRectF>
 
 #include "Interactor.h"
-#include "EditableItem.h"
+#include "RectItem.h"
 
 
 class EditFrameInteractor : public Interactor {
 protected:
-	EditableItem::EditHandles enabledHandles;
+	RectItem::EditHandles enabledHandles;
 
-	EditableItem* theFrame;
-	EditableItem::EditHandle editHandle;
+	InteractableItem* theFrame;
+	unsigned int editHandle;
     QSizeF offset;       // mouse offset when resizing the item
     QRectF originalRect;  // original rect for undo operation
     int originalAngle;    // original rotation angle for undo operation
@@ -27,7 +27,7 @@ public:
 	void hoverOverEvent ( QMouseEvent * event );
 
 	// @Override
-	virtual void paintDecorations(EditableItem* item, QPainter* painter);
+	virtual void paintDecorations(RectItem* item, QPainter* painter);
 
 	// @Override
     virtual void mouseMoveEvent ( QMouseEvent* event );

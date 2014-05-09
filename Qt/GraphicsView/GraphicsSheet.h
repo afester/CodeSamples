@@ -33,7 +33,7 @@ class GraphicsScene : public QGraphicsScene {
 class ScaleWidget;
 class ScaleEdgeWidget;
 class Interactor;
-class EditableItem;
+class InteractableItem;
 
 class GraphicsSheet : public QGraphicsView {
     Q_OBJECT;
@@ -103,7 +103,7 @@ public:
 
     Interactor* getInteractor();
 
-    EditableItem* getFocusItem() const;
+    InteractableItem* getFocusItem() const;
 
 public slots:
     void setScale(int idx);

@@ -18,7 +18,7 @@
 #include "ScaleWidget.h"
 #include "ScaleEdgeWidget.h"
 #include "Interactor.h"
-#include "EditableItem.h"
+#include "RectItem.h"
 #include "Log.h"
 
 #define RULERHEIGHT 23
@@ -124,7 +124,7 @@ void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
     painter->save();
     QGraphicsItem* item;
     foreach(item, scene()->selectedItems()) {
-        EditableItem* edItem = dynamic_cast<EditableItem*>(item);
+        InteractableItem* edItem = dynamic_cast<InteractableItem*>(item);
         if (edItem) {
 
             // set the painter's transformation so that the paint operations are
@@ -136,7 +136,14 @@ void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
             edItem->paintSelectedBorder(this, painter);
 
             // paint the edit handles
-            edItem->paintHandles(this, painter, EditableItem::AllHandlesMask);
+            edItem->paintHandles(this, painter, RectItem::AllHandlesMask);
+
+#if 0
+            // DEBUG: draw the shape of the item
+            painter->setPen(QPen(Qt::blue, 0, Qt::DotLine));
+            painter->setBrush(Qt::NoBrush);
+            painter->drawPath(item->shape());
+#endif
         }
     }
     painter->restore();
@@ -150,7 +157,7 @@ void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
     // Moves the coordinate system dx along the x axis and dy along the y axis
     t.translate(163, 57);
 
-    qDebug() << t;
+//    qDebug() << t;
     drawCoordinateSystem(painter, t, Qt::red);
 
     QHash<QString, QPointF> mapped;
@@ -341,9 +348,9 @@ Interactor* GraphicsSheet::getInteractor() {
     return currentInteractor;
 }
 
-EditableItem* GraphicsSheet::getFocusItem() const {
+InteractableItem* GraphicsSheet::getFocusItem() const {
     if (scene()->selectedItems().size() > 0) {
-        return dynamic_cast<EditableItem*>(scene()->selectedItems().at(0));  // TODO!
+        return dynamic_cast<InteractableItem*>(scene()->selectedItems().at(0));  // TODO!
     }
     return 0;
 }

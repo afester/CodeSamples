@@ -4,6 +4,7 @@
 #include <QGraphicsRectItem>
 #include <QPointF>
 #include <QUndoCommand>
+#include "InteractableItem.h"
 
 #if 0
 class QXmlStreamWriter;
@@ -25,7 +26,7 @@ public:
 
 class GraphicsSheet;
 
-class EditableItem : public QGraphicsRectItem {
+class RectItem : public QGraphicsRectItem, public InteractableItem {
 public:
 	enum EditHandle {NoHandle,
 					 TopLeftHandle, TopHandle, TopRightHandle,
@@ -54,9 +55,9 @@ public:
 					                     MoveHandleMask
 					 };
 
-    EditableItem(const QPointF& pos, QGraphicsItem * parent = 0);
+    RectItem(const QPointF& pos, QGraphicsItem * parent = 0);
 
-    EditableItem(const QRectF & rect, QGraphicsItem * parent = 0);
+    RectItem(const QRectF & rect, QGraphicsItem * parent = 0);
 
     /**
      * Accepts the visit from an ItemVisitor.
@@ -68,26 +69,22 @@ public:
 //    virtual void writeExternal(QXmlStreamWriter& writer) = 0;
 
 
-    /**
-     * Calculates the handle which is under the given scene position.
-     *
-     * @param pos The item position to check for a handle.
-     * @return The handle at the given coordinates, one of the EditHandle enum values
-     */
-    EditHandle getEditHandle(GraphicsSheet* view, const QPointF& pos, EditHandles enabledHandles = AllHandlesMask);
+    // @Override
+    unsigned int /*EditHandle*/ getEditHandle(GraphicsSheet* view, const QPointF& pos, unsigned int /*EditHandles*/ enabledHandles = AllHandlesMask);
 
-    /**
-     * Paints the handles for the edit operations.
-     *
-     * @param painter The painter to use to paint the handles
-     */
-    void paintHandles(GraphicsSheet* view, QPainter * painter, EditHandles enabledHandles = AllHandlesMask);
+    // @Override
+    void paintHandles(GraphicsSheet* view, QPainter * painter, unsigned int/*EditHandles */ enabledHandles = AllHandlesMask);
 
-    void moveHandle(EditHandle editHandle, const QPointF& scenePos);
+    // @Override
+    QSizeF getHandleOffset(unsigned int editHandle, const QPointF& scenePos);
 
-    void setCursor(GraphicsSheet* theView, EditHandle handle);
+    // @Override
+    void moveHandle(unsigned int /*EditHandle*/ editHandle, const QPointF& scenePos);
 
-    void paintCoordinates(GraphicsSheet* view, QPainter* painter);
+    // @Override
+    void setCursor(GraphicsSheet* theView, unsigned int /*EditHandle*/ handle);
+
+//    void paintCoordinates(GraphicsSheet* view, QPainter* painter);
 
     /**
      * Paints the selection border.
@@ -96,6 +93,7 @@ public:
      */
    void paintSelectedBorder(GraphicsSheet* view, QPainter * painter);
 
+   void setItemSelected(bool b) { setSelected(b); }
    QRectF boundingRect() const;
 
 protected:

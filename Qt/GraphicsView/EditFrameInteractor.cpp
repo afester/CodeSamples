@@ -16,7 +16,7 @@
 #include "Log.h"
 #include "GraphicsSheet.h"
 
-EditFrameInteractor::EditFrameInteractor() : theFrame(0), originalAngle(0), enabledHandles(EditableItem::AllHandlesMask)  {
+EditFrameInteractor::EditFrameInteractor() : theFrame(0), originalAngle(0), enabledHandles(RectItem::AllHandlesMask)  {
 
 }
 
@@ -25,7 +25,7 @@ EditFrameInteractor::~EditFrameInteractor() {
 }
 
 
-void EditFrameInteractor::paintDecorations(EditableItem* item, QPainter* painter) {
+void EditFrameInteractor::paintDecorations(RectItem* item, QPainter* painter) {
 //	item->paintHandles(theView, painter, enabledHandles);
 //	item->paintCoordinates(theView, painter);
 //	item->paintSelectedBorder(theView, painter);
@@ -44,74 +44,30 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
 	QGraphicsScene* theScene = theView->scene();
 	theFrame = theView->getFocusItem();
 	if (theFrame) {
-        QPointF itemPos = theFrame->mapFromScene(scenePos);
-        editHandle = theFrame->getEditHandle(theView, itemPos, enabledHandles);
+/*****************************/
 
+        // QPointF itemPos = theFrame->mapFromScene(scenePos);
+        editHandle = theFrame->getEditHandle(theView, scenePos, enabledHandles);
+        if (editHandle == 0) { // RectItem::NoHandle) {
+
+        theFrame = 0;    // outside of all handles
+
+
+        } else {
         QPoint positionIndicator(-1,-1);
-        switch(editHandle) {
-            case EditableItem::TopLeftHandle :
-                    offset = QSizeF(0, 0); // theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
-                    positionIndicator = QPoint(theFrame->x(), theFrame->y());
-                    break;
-
-            case EditableItem::TopHandle :
-                    offset = QSizeF(0, 0); // QSizeF(0, theFrame->y() - scenePos.y());
-                    positionIndicator = QPoint(-1, theFrame->y());
-                    break;
-
-            case EditableItem::TopRightHandle :
-                    offset = QSizeF(0, 0); // QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(), theFrame->y() - scenePos.y());
-                    positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(), theFrame->y());
-                    break;
-
-            case EditableItem::LeftHandle :
-                    offset = QSizeF(0, 0); // QSizeF(theFrame->x() - scenePos.x(), 0);
-                    positionIndicator = QPoint(theFrame->x(), -1);
-                    break;
-
-            case EditableItem::RotationHandle :
-                    offset = QSizeF(0, 0);
-                    break;
-
-            case EditableItem::RightHandle :
-                    offset = QSizeF(0, 0); // QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(), 0);
-                    positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(), -1);
-                    break;
-
-            case EditableItem::BottomLeftHandle :
-                    offset = QSizeF(0, 0); // QSizeF(theFrame->x() - scenePos.x(), theFrame->y() + theFrame->rect().height() - scenePos.y());
-                    positionIndicator = QPoint(theFrame->x(), theFrame->y() + theFrame->rect().height());
-                    break;
-
-            case EditableItem::BottomHandle :
-                    offset = QSizeF(0, 0); // QSizeF(0, theFrame->y() + theFrame->rect().height() - scenePos.y());
-                    positionIndicator = QPoint(-1, theFrame->y() + theFrame->rect().height());
-                    break;
-
-            case EditableItem::BottomRightHandle :
-                    offset = QSizeF(0, 0); // QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(),
-                                   //theFrame->y() + theFrame->rect().height() - scenePos.y());
-                    positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(),
-                                               theFrame->y() + theFrame->rect().height());
-                    break;
-
-            case EditableItem::MoveHandle:
-                    offset = QSize(theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
-                    break;
-
-            default: theFrame = 0;    // outside of all handles
-                    break;
+        offset = theFrame->getHandleOffset(editHandle, scenePos);
         }
 
 if (theFrame) {
         // save current values for undo
-        originalRect.setRect(theFrame->x(), theFrame->y(),
-                             theFrame->rect().width(), theFrame->rect().height());
-        originalAngle = theFrame->rotation();
+//        originalRect.setRect(theFrame->x(), theFrame->y(),
+//                             theFrame->rect().width(), theFrame->rect().height());
+//        originalAngle = theFrame->rotation();
 #if 0
         theView->setPositionIndicators(positionIndicator);
 #endif
 }
+/*****************************/
 
 	}
 
@@ -122,12 +78,13 @@ if (theFrame) {
 	    theView->scene()->clearSelection();
 
 	    QGraphicsItem* item = theScene->itemAt(scenePos, QTransform());
-	    theFrame = dynamic_cast<EditableItem*>(item);
+	    theFrame = dynamic_cast<InteractableItem*>(item);
 	    if (theFrame) {
-	        theFrame->setSelected(true);
+	        // qDebug() << item;
+	        theFrame->setItemSelected(true);
 
 	        // prepare for immediate MOVE operation
-            offset = QSize(theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
+            offset = QSizeF(0, 0); // QSize(theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
 	    }
 	}
 }
@@ -137,10 +94,10 @@ if (theFrame) {
 void EditFrameInteractor::hoverOverEvent ( QMouseEvent * event ) {
 	QPointF scenePos = theView->mapToScene(event->pos());
 
-	EditableItem* frameItem = theView->getFocusItem();
+	InteractableItem* frameItem = dynamic_cast<InteractableItem*>(theView->getFocusItem());
 	if (frameItem) {
-        QPointF itemPos = frameItem->mapFromScene(scenePos);
-		EditableItem::EditHandle handle = frameItem->getEditHandle(theView, itemPos, enabledHandles);
+        // QPointF itemPos = frameItem->mapFromScene(scenePos);
+		unsigned int handle = frameItem->getEditHandle(theView, scenePos, enabledHandles);
 		frameItem->setCursor(theView, handle);
 	} else {
 		theView->setCursor(Qt::ArrowCursor);
@@ -261,7 +218,7 @@ void EditFrameInteractor::paste() {
 				if (reader.name() == "imageFrame") {
 					// Create new item - TODO: Layout??
 					CellLayout cell;
-					EditableItem* item = EditableImageframeItem::readExternal(reader, cell);
+					RectItem* item = EditableImageframeItem::readExternal(reader, cell);
 					item->setPos(item->x() + 10, item->y() + 10);
 
 // TODO!!!!!
@@ -272,7 +229,7 @@ void EditFrameInteractor::paste() {
                     theScene->getUndoStack()->push(undo);
 				} else if (reader.name() == "textFrame") {
 					// Create new item
-					EditableItem* item = EditableTextItem::readExternal(reader);
+					RectItem* item = EditableTextItem::readExternal(reader);
 					item->setPos(item->x() + 10, item->y() + 10);
 
 // TODO!!!!!

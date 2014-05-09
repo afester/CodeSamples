@@ -6,7 +6,7 @@
 class QPainter;
 class QMouseEvent;
 class QWheelEvent;
-class EditableItem;
+class RectItem;
 class GraphicsSheet;
 
 class Interactor : public QObject {
@@ -23,7 +23,7 @@ public:
 	 * Paints the item decorations for this interactor.
 	 * TODO: not sure if this is a good approach from an architectural perspective
 	 */
-	virtual void paintDecorations(EditableItem* item, QPainter* painter);
+	virtual void paintDecorations(RectItem* item, QPainter* painter);
 
     virtual void mouseMoveEvent ( QMouseEvent* event ) = 0;
 

@@ -9,7 +9,7 @@ void Interactor::setView(GraphicsSheet* view) {
 }
 
 
-void Interactor::paintDecorations(EditableItem* item, QPainter* painter) {
+void Interactor::paintDecorations(RectItem* item, QPainter* painter) {
 }
 
 
