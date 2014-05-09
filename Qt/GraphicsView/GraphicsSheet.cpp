@@ -62,7 +62,7 @@ GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent),
     // TODO: There are some strange artefacts when an item is moved while
     // partially hidden by another item. It should be sufficient to
     // define a reasonable boundingRect, but it seems that this is not sufficient ...
-    setViewportUpdateMode(FullViewportUpdate);
+//    setViewportUpdateMode(FullViewportUpdate);
 }
 
 
@@ -99,6 +99,7 @@ void GraphicsSheet::drawCoordinateSystem(QPainter* painter, const QTransform& t,
     painter->drawLine(Y, Ya2);
 }
 
+
 void GraphicsSheet::drawPoints(QPainter* painter, const QHash<QString, QPointF>& points) {
     painter->setFont(QFont("Sans", 6));
     QHash<QString, QPointF>::const_iterator i = points.constBegin();
@@ -116,6 +117,7 @@ void GraphicsSheet::drawPoints(QPainter* painter, const QHash<QString, QPointF>&
         ++i;
     }
 }
+
 
 void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
     // QGraphicsView::paintEvent() only repaints the boundingRect() area of the item.
@@ -148,6 +150,8 @@ void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
     }
     painter->restore();
 
+#if 0
+// DEBUG: draw some points and coordinate systems
     drawPoints(painter, points);
 
     drawCoordinateSystem(painter);
@@ -167,6 +171,7 @@ void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
 
 //    t.rotate(-30);
 //    drawCoordinateSystem(painter, t, Qt::blue);
+#endif
 }
 
 

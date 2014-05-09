@@ -3,6 +3,7 @@
 #include <QGraphicsScene>
 #include <QCursor>
 #include <QRectF>
+#include <QStyleOptionGraphicsItem>
 #include <QPointF>
 #include <QAction>
 #include <QTextStream>
@@ -89,7 +90,6 @@ void RectItem::calculateDraggers(GraphicsSheet* view) {
 
 QRectF RectItem::boundingRect() const {
     QRectF result = QGraphicsRectItem::boundingRect();
-
     return QRectF(result.x() - 2, result.y() - 2, result.width() + 4, result.height() + 4);
 }
 
@@ -614,7 +614,12 @@ void RectItem::paintCoordinates(GraphicsSheet* view, QPainter* painter) {
 #endif
 
 void RectItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * style, QWidget *widget) {
-    QGraphicsRectItem::paint(painter, style, widget);
+    // reset the selected state when painting - this is a workaround
+    // to avoid that QGraphicsRectItem::paint draws the selection rectangle
+    QStyleOptionGraphicsItem option2 = *style;
+    option2.state = 0;
+
+    QGraphicsRectItem::paint(painter, &option2, widget);
 
 #if 0
 	GraphicsSheet* requestingView = dynamic_cast<GraphicsSheet*>(widget ? widget->parent() : 0);

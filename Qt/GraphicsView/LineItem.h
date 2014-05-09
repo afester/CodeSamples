@@ -53,9 +53,11 @@ public:
 
 //    virtual void writeExternal(QXmlStreamWriter& writer) = 0;
 
-   QRectF boundingRect() const;
 #endif
 protected:
+
+   // @Override
+   virtual QRectF boundingRect() const;
 
    // @Override
    virtual QPainterPath shape () const;

@@ -94,7 +94,6 @@ public:
    void paintSelectedBorder(GraphicsSheet* view, QPainter * painter);
 
    void setItemSelected(bool b) { setSelected(b); }
-   QRectF boundingRect() const;
 
 protected:
 
@@ -102,6 +101,20 @@ protected:
     virtual void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
     virtual void calculateDraggers(GraphicsSheet* view);
+
+    // @Override
+    virtual QRectF boundingRect() const;
+
+    // @Override
+QPainterPath shape () const {
+QPainterPath path;
+
+QRectF r = rect();
+r.adjust(-2,-2,2,2);
+path.addRect(r);
+
+return path;
+}
 
 private:
     void moveTopLeftHandle(const QPointF& scenePos);

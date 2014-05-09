@@ -175,6 +175,11 @@ void LineItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * styl
     QGraphicsLineItem::paint(painter, &option2, widget);
 }
 
+QRectF LineItem::boundingRect() const {
+     QRectF result = QGraphicsLineItem::boundingRect();
+     return QRectF(result.x() - 2, result.y() - 2, result.width() + 4, result.height() + 4);
+}
+
 
 QPainterPath LineItem::shape () const {
     // calculate a "ribbon" around the line which makes selecting
