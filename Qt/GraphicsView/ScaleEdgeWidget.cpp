@@ -27,6 +27,8 @@ void ScaleEdgeWidget::setUnit(const QString& theUnit) {
 
 
 void ScaleEdgeWidget::paintEvent ( QPaintEvent * event ) {
+    Q_UNUSED(event);
+
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
 

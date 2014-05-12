@@ -25,10 +25,15 @@ public:
 protected:
     void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget);
 };
+*/
 
 class GraphicsScene : public QGraphicsScene {
+public:
+    GraphicsScene();
+
+    QGraphicsItem* getItemAt(const QPointF & position);
 };
-*/
+
 
 class ScaleWidget;
 class ScaleEdgeWidget;
@@ -51,9 +56,6 @@ class GraphicsSheet : public QGraphicsView {
     ScaleWidget* yScale;
     ScaleEdgeWidget* edge;
 
-    Interactor* currentInteractor;
-    //QColor viewColor;
-
     float xDpi;
     float yDpi;
 
@@ -61,6 +63,7 @@ class GraphicsSheet : public QGraphicsView {
     float zoomScale;    // e.g. 50% => 0.5
     QSizeF sceneSize;   // e.g. 148x210
     bool landscape;     // true or false (landscape or portrait)
+    Interactor* currentInteractor;
 
     void updateSize();
 

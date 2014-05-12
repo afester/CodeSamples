@@ -19,6 +19,7 @@
 #include "ScrollAreaLayout.h"
 #include "RectItem.h"
 #include "LineItem.h"
+#include "TextItem.h"
 #include "EditFrameInteractor.h"
 
 #include "LabelledComboBox.h"
@@ -143,12 +144,8 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsSheet->scene()->addItem(item);
 
     item1 = new RectItem(QRectF(125, 100, 200, 100));
-
-    qreal angle = 330;
     QPointF center2 = QPointF(item1->rect().width() / 2, item1->rect().height() / 2);
     item1->setTransformOriginPoint(center2);
-    item1->setRotation(angle);
-
     item1->setRotation(30);
     item1->setPen(QPen(Qt::magenta, 0));
     item1->setBrush(Qt::lightGray);
@@ -156,6 +153,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
     LineItem* item2 = new LineItem(QPointF(30, 30), QPointF(100, 200));
     graphicsSheet->scene()->addItem(item2);
+
+    TextItem* item3 = new TextItem(QPoint(200, 50)); // , 100, 50));
+    item3->setInternalFont(QFont("Arial", 24, 0, false));
+    item3->setPen(QPen(Qt::darkRed, 2));
+    item3->setBrush(QColor(255, 255, 240));
+    item3->setText("Hg - Hello World");
+    item3->setInternalDefaultTextColor(Qt::red);
+    graphicsSheet->scene()->addItem(item3);
+
+    LineItem* li1 = new LineItem(QPointF(0, 100), QPointF(100, 100));
+    li1->setPen(QPen(Qt::red, 0));
+    LineItem* li2 = new LineItem(QPointF(0, 104.23), QPointF(100, 104.23));
+    li2->setPen(QPen(Qt::red, 0));
+    graphicsSheet->scene()->addItem(li1);
+    graphicsSheet->scene()->addItem(li2);
 
     graphicsSheet->setInteractor(new EditFrameInteractor());
 }
@@ -267,14 +279,13 @@ for (int i = 0;  i < 10;  i++) {
 
     graphicsSheet->addPoint("newPos", newPos);
 
-//    theFrame->setPos(newPos);
-//    theFrame->setRect(0, 0, newSize.width(), newSize.height());
     RectItem* item1 = new RectItem(QRectF(newPos.x(), newPos.y(), newSize.width(), newSize.height()));
     qreal angle = 30;
     QPointF center2 = QPointF(item1->rect().width() / 2, item1->rect().height() / 2);
     item1->setTransformOriginPoint(center2);
     item1->setRotation(angle);
     graphicsSheet->scene()->addItem(item1);
+
 }
 }
 

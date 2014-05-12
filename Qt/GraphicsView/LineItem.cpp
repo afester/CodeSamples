@@ -155,6 +155,8 @@ void LineItem::setCursor(GraphicsSheet* theView, unsigned int /*EditHandle*/ han
 
 
 void LineItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter){
+    Q_UNUSED(view);
+
     if (isSelected()) {
         painter->setBrush(Qt::NoBrush);
         painter->setPen(QPen(Qt::green, 0, Qt::DashLine));

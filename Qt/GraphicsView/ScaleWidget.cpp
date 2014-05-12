@@ -54,6 +54,8 @@ void ScaleWidget::setPos(qreal pos) {
 
 
 void ScaleWidget::paintEvent ( QPaintEvent * event ) {
+    Q_UNUSED(event);
+
     QPainter p(this);
 
     QFontMetrics fm = fontMetrics();

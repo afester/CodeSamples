@@ -28,15 +28,15 @@ public:
 
     LineItem(const QPointF& pos1, const QPointF& pos2, QGraphicsItem * parent = 0);
 
-    unsigned int /*EditHandle*/ getEditHandle(GraphicsSheet* view, const QPointF& pos, unsigned int /*EditHandles*/ enabledHandles = AllHandlesMask);
+    AbstractEditHandle getEditHandle(GraphicsSheet* view, const QPointF& pos, AbstractEditHandle enabledHandles = AllHandlesMask);
 
-    void paintHandles(GraphicsSheet* view, QPainter * painter, unsigned int/*EditHandles */ enabledHandles = AllHandlesMask);
+    void paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles = AllHandlesMask);
 
-    QSizeF getHandleOffset(unsigned int editHandle, const QPointF& scenePos);
+    QSizeF getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos);
 
-    void moveHandle(unsigned int /*EditHandle*/ editHandle, const QPointF& scenePos);
+    void moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos);
 
-    void setCursor(GraphicsSheet* theView, unsigned int /*EditHandle*/ handle);
+    void setCursor(GraphicsSheet* theView, AbstractEditHandle handle);
 
     void paintCoordinates(GraphicsSheet* view, QPainter* painter);
 

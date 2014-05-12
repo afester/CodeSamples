@@ -24,6 +24,24 @@
 #define RULERHEIGHT 23
 #define RULERWIDTH 23
 
+GraphicsScene::GraphicsScene() : QGraphicsScene()  {
+}
+
+
+QGraphicsItem* GraphicsScene::getItemAt(const QPointF & position) {
+    QGraphicsItem* itm = QGraphicsScene::itemAt ( position, QTransform());
+    if (itm) {
+        // special case for the parent/child relationship of text frames
+        if (itm->parentItem()) {
+            itm = itm->parentItem();
+        }
+    }
+
+    return itm;
+}
+
+
+
 GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent),
         drawScale(1.0), zoomScale(1.0), sceneSize(100, 100), landscape(true),
         currentInteractor(0) {
@@ -57,16 +75,13 @@ GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent),
     QObject::connect(horizontalScrollBar(), SIGNAL(valueChanged(int)),
                      this, SLOT(areaMoved()));
 
-    setScene(new QGraphicsScene());
-
-    // TODO: There are some strange artefacts when an item is moved while
-    // partially hidden by another item. It should be sufficient to
-    // define a reasonable boundingRect, but it seems that this is not sufficient ...
-//    setViewportUpdateMode(FullViewportUpdate);
+    setScene(new GraphicsScene());
 }
 
 
 void GraphicsSheet::drawBackground(QPainter * painter, const QRectF & rect) {
+    Q_UNUSED(painter);
+    Q_UNUSED(rect);
 //	painter->fillRect(rect, QBrush(Qt::white));
 }
 
@@ -120,6 +135,8 @@ void GraphicsSheet::drawPoints(QPainter* painter, const QHash<QString, QPointF>&
 
 
 void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
+    Q_UNUSED(rect);
+
     // QGraphicsView::paintEvent() only repaints the boundingRect() area of the item.
     // we therefore need to properly add a margin inside the item's boundingRect() method.
 

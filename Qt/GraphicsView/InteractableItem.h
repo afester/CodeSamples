@@ -4,18 +4,23 @@
 class QPointF;
 class GraphicsSheet;
 
+typedef unsigned int AbstractEditHandle;
+
+
 class InteractableItem {
 public:
 
-    virtual /*EditHandle*/ unsigned int getEditHandle(GraphicsSheet* view, const QPointF& pos, /*EditHandles*/ unsigned int enabledHandles = 0xffff) = 0;
+    virtual ~InteractableItem() {};
 
-    virtual void paintHandles(GraphicsSheet* view, QPainter * painter, /*EditHandles*/ unsigned int enabledHandles = 0xffff) = 0; // AllHandlesMask);
+    virtual AbstractEditHandle getEditHandle(GraphicsSheet* view, const QPointF& pos, AbstractEditHandle enabledHandles = 0xffff) = 0;
 
-    virtual QSizeF getHandleOffset(unsigned int editHandle, const QPointF& scenePos) = 0;
+    virtual void paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles = 0xffff) = 0;
 
-    virtual void moveHandle(/*EditHandle*/ unsigned int editHandle, const QPointF& scenePos) = 0;
+    virtual QSizeF getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos) = 0;
 
-    virtual void setCursor(GraphicsSheet* theView, /*EditHandle*/ unsigned int handle) = 0;
+    virtual void moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos) = 0;
+
+    virtual void setCursor(GraphicsSheet* theView, AbstractEditHandle handle) = 0;
 
     virtual void paintSelectedBorder(GraphicsSheet* view, QPainter * painter) = 0;
 

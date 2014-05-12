@@ -126,16 +126,18 @@ QRectF RectItem::boundingRect() const {
     return NoHandle;
 }
 
-
+#if 0
 static QString formatFloat(qreal number, int dec) {
     QString result;
     QTextStream format(&result);
     format << fixed << qSetRealNumberPrecision(dec) << number;
     return result;
 }
-
+#endif
 
 void RectItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) {
+    Q_UNUSED(view);
+
     if (isSelected()) {
         painter->setBrush(Qt::NoBrush);
         painter->setPen(QPen(Qt::green, 0, Qt::DashLine));
@@ -390,11 +392,13 @@ void RectItem::moveLeftHandle(const QPointF& scenePos) {
 
 
 void RectItem::moveTopRightHandle(const QPointF& scenePos) {
+    Q_UNUSED(scenePos);
 #if 0
 #endif
 }
 
 void RectItem::moveBottomLeftHandle(const QPointF& scenePos) {
+    Q_UNUSED(scenePos);
 #if 0
         case RectItem::BottomLeftHandle :
                 newSize = QSizeF(theFrame->rect().width() - posInItem.x(),
@@ -456,6 +460,8 @@ QSizeF RectItem::getHandleOffset(unsigned int editHandle, const QPointF& scenePo
                 return QSize(x() - scenePos.x(), y() - scenePos.y());
                 break;
     }
+
+    return QSize(0, 0);
 }
 
 void RectItem::moveHandle(unsigned int /*EditHandle*/ editHandle, const QPointF& scenePos) {

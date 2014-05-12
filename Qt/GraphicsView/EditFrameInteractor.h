@@ -11,13 +11,14 @@
 
 class EditFrameInteractor : public Interactor {
 protected:
-	RectItem::EditHandles enabledHandles;
 
 	InteractableItem* theFrame;
-	unsigned int editHandle;
+    int originalAngle;    // original rotation angle for undo operation
+    AbstractEditHandle enabledHandles;
+
+	AbstractEditHandle editHandle;
     QSizeF offset;       // mouse offset when resizing the item
     QRectF originalRect;  // original rect for undo operation
-    int originalAngle;    // original rotation angle for undo operation
 
 public:
 	EditFrameInteractor();
@@ -25,9 +26,6 @@ public:
 	virtual ~EditFrameInteractor();
 
 	void hoverOverEvent ( QMouseEvent * event );
-
-	// @Override
-	virtual void paintDecorations(RectItem* item, QPainter* painter);
 
 	// @Override
     virtual void mouseMoveEvent ( QMouseEvent* event );

@@ -19,12 +19,6 @@ public:
 
 	void setView(GraphicsSheet* view);
 
-	/**
-	 * Paints the item decorations for this interactor.
-	 * TODO: not sure if this is a good approach from an architectural perspective
-	 */
-	virtual void paintDecorations(RectItem* item, QPainter* painter);
-
     virtual void mouseMoveEvent ( QMouseEvent* event ) = 0;
 
     virtual void mousePressEvent ( QMouseEvent* event ) = 0;

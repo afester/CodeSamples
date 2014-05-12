@@ -9,11 +9,8 @@ void Interactor::setView(GraphicsSheet* view) {
 }
 
 
-void Interactor::paintDecorations(RectItem* item, QPainter* painter) {
-}
-
-
 void Interactor::wheelEvent ( QWheelEvent* event ) {
+    Q_UNUSED(event);
 }
 
 

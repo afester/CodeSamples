@@ -16,19 +16,11 @@
 #include "Log.h"
 #include "GraphicsSheet.h"
 
-EditFrameInteractor::EditFrameInteractor() : theFrame(0), originalAngle(0), enabledHandles(RectItem::AllHandlesMask)  {
+EditFrameInteractor::EditFrameInteractor() : theFrame(0), originalAngle(0), enabledHandles(0xffff)  {
 
 }
 
 EditFrameInteractor::~EditFrameInteractor() {
-
-}
-
-
-void EditFrameInteractor::paintDecorations(RectItem* item, QPainter* painter) {
-//	item->paintHandles(theView, painter, enabledHandles);
-//	item->paintCoordinates(theView, painter);
-//	item->paintSelectedBorder(theView, painter);
 }
 
 
@@ -41,7 +33,7 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
 
 	// todo: probably create a QGraphicsSceneMouseEvent and pass this already to the interactor!
 	QPointF scenePos = theView->mapToScene(event->pos());
-	QGraphicsScene* theScene = theView->scene();
+	GraphicsScene* theScene = dynamic_cast<GraphicsScene*>(theView->scene());
 	theFrame = theView->getFocusItem();
 	if (theFrame) {
 /*****************************/
@@ -77,7 +69,7 @@ if (theFrame) {
 	    // frame is clicked or not, clear the current selection
 	    theView->scene()->clearSelection();
 
-	    QGraphicsItem* item = theScene->itemAt(scenePos, QTransform());
+	    QGraphicsItem* item = theScene->getItemAt(scenePos); // , QTransform());
 	    theFrame = dynamic_cast<InteractableItem*>(item);
 	    if (theFrame) {
 	        // qDebug() << item;
@@ -111,28 +103,6 @@ void EditFrameInteractor::hoverOverEvent ( QMouseEvent * event ) {
 }
 
 
-static qreal dist_Point_to_Segment(const QPointF& P, const QPointF& P0, const QPointF& P1) {
-
-     QVector2D v(P1 - P0);
-     QVector2D w(P - P0);
-
-     qreal c1 = QVector2D::dotProduct(w, v);
-     if ( c1 <= 0 )
-          return QLineF(P, P0).length();
-
-
-     qreal c2 = QVector2D::dotProduct(v,v);
-     if ( c2 <= c1 )
-          return QLineF(P, P1).length();
-
-     qreal b = c1 / c2;
-
-     QPointF Pb(P0 + (b * v).toPointF());
-
-     return QLineF(P, Pb).length();
-}
-
-
 void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
     QPointF scenePos = theView->mapToScene(event->pos());
 
@@ -140,7 +110,13 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 	if (theFrame) {
         QPointF pos = scenePos + QPointF(offset.width(), offset.height());
         QPoint positionIndicator(-1,-1);
-        theFrame->moveHandle(editHandle, pos);
+
+        qDebug() << "-------------";
+        qDebug() << pos;
+        QPointF pos2 = QPointF(pos.toPoint());  // correct only for scale 1:1
+        qDebug() << pos2;
+
+        theFrame->moveHandle(editHandle, pos2);
 
 #if 0
         // TODO HACK: special handling of text frames - make sure that the child is always centered
@@ -162,6 +138,8 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 
 
 void EditFrameInteractor::mouseReleaseEvent ( QMouseEvent * event ) {
+    Q_UNUSED(event);
+
 	// Log::log(Log::DEBUG, "EditFrameInteractor") << "mouseReleaseEvent";
 
 	if (theFrame) {
