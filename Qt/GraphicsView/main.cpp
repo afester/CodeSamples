@@ -155,7 +155,7 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsSheet->scene()->addItem(item2);
 
     TextItem* item3 = new TextItem(QPoint(200, 50)); // , 100, 50));
-    item3->setInternalFont(QFont("Arial", 24, 0, false));
+    item3->setInternalFont(QFont("Arial", 12, 0, false));
     item3->setPen(QPen(Qt::darkRed, 2));
     item3->setBrush(QColor(255, 255, 240));
     item3->setText("Hg - Hello World");

@@ -56,8 +56,8 @@ class GraphicsSheet : public QGraphicsView {
     ScaleWidget* yScale;
     ScaleEdgeWidget* edge;
 
-    float xDpi;
-    float yDpi;
+    float xScaleDPI;
+    float yScaleDPI;
 
     float drawScale;    // e.g. 1:2 => 0.5
     float zoomScale;    // e.g. 50% => 0.5

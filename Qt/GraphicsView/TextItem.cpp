@@ -1,3 +1,5 @@
+#include <QApplication>
+#include <QScreen>
 #include <QGraphicsScene>
 #include <QXmlStreamWriter>
 #include <QStyleOptionGraphicsItem>
@@ -13,14 +15,21 @@
 class InternalTextItem : public QGraphicsTextItem {
 public:
     InternalTextItem(QGraphicsItem * parent) : QGraphicsTextItem(parent) {
-        setScale(0.29);  // scale down the text item to accommodate the world-device transformation
+        // calculate the scale for the text item - this is the same
+        // calculation as in GraphicsSheet::GraphicsSheet, so this should
+        // be located in some common convenience method
+        QScreen *srn = QApplication::screens().at(0);
+        qreal scale = 25.4 / srn->logicalDotsPerInchY();
+        setScale(scale);
     }
+
 
     void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = 0 ){
         QStyleOptionGraphicsItem option2 = *option;
-      //  option2.state = 0;
+        option2.state = 0;
         QGraphicsTextItem::paint(painter, &option2, widget);
     }
+
 
     // @Override
     virtual void focusOutEvent ( QFocusEvent * event ) {
@@ -32,6 +41,7 @@ public:
 
     	QGraphicsTextItem::focusOutEvent(event);
     }
+
 
     int type () const {
         return InternalTextItemType;

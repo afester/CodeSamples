@@ -53,9 +53,9 @@ GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent),
     setMouseTracking(true);       // Enable mouse tracking to report mouse position
 
 	QScreen *srn = QApplication::screens().at(0);
-	xDpi = (qreal)srn->logicalDotsPerInchX();
+    xScaleDPI = srn->logicalDotsPerInchX() / 25.4;
 	// xDpi = 93;
-	yDpi = (qreal)srn->logicalDotsPerInchY();
+    yScaleDPI = srn->logicalDotsPerInchY() / 25.4;
 
     setFrameStyle(0); // do not show a frame around the scroll area
 
@@ -217,9 +217,6 @@ void GraphicsSheet::updateSize() {
 	}
 
 	scene()->setSceneRect(QRectF(0, 0, realSize.width() / drawScale, realSize.height() / drawScale));
-
-	float xScaleDPI = xDpi / 25.4;
-	float yScaleDPI = yDpi / 25.4;
 
 	float effectiveScaleX = zoomScale * xScaleDPI * drawScale;
 	float effectiveScaleY = zoomScale * yScaleDPI * drawScale;
