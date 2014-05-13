@@ -60,6 +60,9 @@ protected:
     // @Override
     virtual void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget);
 #endif
+
+    virtual void moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos);
+
 private:
 
     Qt::Alignment alignment;

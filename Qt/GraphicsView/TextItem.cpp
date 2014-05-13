@@ -129,6 +129,12 @@ void TextItem::centerTextItem() {
 }
 
 
+void TextItem::moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos) {
+    RectItem::moveHandle(editHandle, scenePos);
+    centerTextItem();
+}
+
+
 void TextItem::setInternalAlignment(Qt::Alignment align) {
 	// Store alignment
 	alignment = align;
