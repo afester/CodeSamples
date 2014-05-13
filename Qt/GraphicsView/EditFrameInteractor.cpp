@@ -9,16 +9,13 @@
 #include <math.h>
 
 //#include "Commands.h"
-//#include "KollageGraphicsScene.h"
-//#include "EditableImageframeItem.h"
-//#include "EditableTextItem.h"
 #include "EditFrameInteractor.h"
 #include "Log.h"
 #include "GraphicsSheet.h"
 
-EditFrameInteractor::EditFrameInteractor() : theFrame(0), originalAngle(0), enabledHandles(0xffff)  {
-
+EditFrameInteractor::EditFrameInteractor() : theItem(0), originalAngle(0), enabledHandles(0xffff), editHandle(0)  {
 }
+
 
 EditFrameInteractor::~EditFrameInteractor() {
 }
@@ -34,46 +31,35 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
 	// todo: probably create a QGraphicsSceneMouseEvent and pass this already to the interactor!
 	QPointF scenePos = theView->mapToScene(event->pos());
 	GraphicsScene* theScene = dynamic_cast<GraphicsScene*>(theView->scene());
-	theFrame = theView->getFocusItem();
-	if (theFrame) {
-/*****************************/
-
-        // QPointF itemPos = theFrame->mapFromScene(scenePos);
-        editHandle = theFrame->getEditHandle(theView, scenePos, enabledHandles);
-        if (editHandle == 0) { // RectItem::NoHandle) {
-
-        theFrame = 0;    // outside of all handles
-
-
+	theItem = theView->getFocusItem();
+	if (theItem) {
+        editHandle = theItem->getEditHandle(theView, scenePos, enabledHandles);
+        if (editHandle == 0) {
+            theItem = 0;    // outside of all handles
         } else {
-        QPoint positionIndicator(-1,-1);
-        offset = theFrame->getHandleOffset(editHandle, scenePos);
-        }
+            QPoint positionIndicator(-1,-1);
+            offset = theItem->getHandleOffset(editHandle, scenePos);
 
-if (theFrame) {
-        // save current values for undo
-//        originalRect.setRect(theFrame->x(), theFrame->y(),
-//                             theFrame->rect().width(), theFrame->rect().height());
-//        originalAngle = theFrame->rotation();
+            // save current values for undo
+    //        originalRect.setRect(theFrame->x(), theFrame->y(),
+    //                             theFrame->rect().width(), theFrame->rect().height());
+    //        originalAngle = theFrame->rotation();
 #if 0
-        theView->setPositionIndicators(positionIndicator);
+            theView->setPositionIndicators(positionIndicator);
 #endif
-}
-/*****************************/
-
+        }
 	}
 
-	if (theFrame == 0) {
+	if (theItem == 0) {
 
 	    // currently, single selection only - independent of whether a
 	    // frame is clicked or not, clear the current selection
 	    theView->scene()->clearSelection();
 
-	    QGraphicsItem* item = theScene->getItemAt(scenePos); // , QTransform());
-	    theFrame = dynamic_cast<InteractableItem*>(item);
-	    if (theFrame) {
-	        // qDebug() << item;
-	        theFrame->setItemSelected(true);
+	    QGraphicsItem* item = theScene->getItemAt(scenePos);
+	    theItem = dynamic_cast<InteractableItem*>(item);
+	    if (theItem) {
+	        theItem->setItemSelected(true);
 
 	        // prepare for immediate MOVE operation
             offset = QSizeF(0, 0); // QSize(theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
@@ -107,30 +93,19 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
     QPointF scenePos = theView->mapToScene(event->pos());
 
 	// check if currently a drag is in progress
-	if (theFrame) {
+	if (theItem) {
         QPointF pos = scenePos + QPointF(offset.width(), offset.height());
         QPoint positionIndicator(-1,-1);
-
+#if 0
         qDebug() << "-------------";
         qDebug() << pos;
         QPointF pos2 = QPointF(pos.toPoint());  // correct only for scale 1:1
         qDebug() << pos2;
-
-        theFrame->moveHandle(editHandle, pos2);
-
-#if 0
-        // TODO HACK: special handling of text frames - make sure that the child is always centered
-        EditableTextItem* textItem = dynamic_cast<EditableTextItem*>(theFrame);
-        if (textItem) {
-        	textItem->centerTextItem();
-        }
-
-
-
-        theView->setPositionIndicators(positionIndicator);
-
 #endif
 
+        theItem->moveHandle(editHandle, pos);
+
+        // theView->setPositionIndicators(positionIndicator);
 	} else {
 		hoverOverEvent(event);
 	}
@@ -142,17 +117,17 @@ void EditFrameInteractor::mouseReleaseEvent ( QMouseEvent * event ) {
 
 	// Log::log(Log::DEBUG, "EditFrameInteractor") << "mouseReleaseEvent";
 
-	if (theFrame) {
+	if (theItem) {
 #if 0
 	    KollageGraphicsScene* theScene = dynamic_cast<KollageGraphicsScene*>(theView->scene());
 
         // check if original position/size is different from new position/size
         // if so, then create an undo object. Otherwise, ignore.
-        QRectF newRect(theFrame->x(), theFrame->y(),
-                       theFrame->rect().width(), theFrame->rect().height());
-        int newAngle = theFrame->rotation();
+        QRectF newRect(theItem->x(), theItem->y(),
+                       theItem->rect().width(), theItem->rect().height());
+        int newAngle = theItem->rotation();
         if (newRect != originalRect || newAngle != originalAngle) {
-            QUndoCommand* undo = new EditDoneCommand(originalRect, originalAngle, theFrame);
+            QUndoCommand* undo = new EditDoneCommand(originalRect, originalAngle, theItem);
             theScene->getUndoStack()->push(undo);
         }
 
@@ -162,7 +137,7 @@ void EditFrameInteractor::mouseReleaseEvent ( QMouseEvent * event ) {
         theView->setPositionIndicators(positionIndicator);
 #endif
 
-		theFrame = 0;
+		theItem = 0;
 	}
 }
 

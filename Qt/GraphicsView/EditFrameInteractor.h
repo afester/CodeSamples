@@ -12,7 +12,7 @@
 class EditFrameInteractor : public Interactor {
 protected:
 
-	InteractableItem* theFrame;
+	InteractableItem* theItem;
     int originalAngle;    // original rotation angle for undo operation
     AbstractEditHandle enabledHandles;
 
