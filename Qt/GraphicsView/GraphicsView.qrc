@@ -1,0 +1,10 @@
+<RCC>
+  <qresource prefix="Icons">
+    <file>file-load.png</file>
+    <file>file-save.png</file>
+    <file>file-save-as.png</file>
+    <file>object-select.png</file>
+    <file>object-newrect.png</file>
+    <file>object-newtext.png</file>
+  </qresource>
+</RCC>

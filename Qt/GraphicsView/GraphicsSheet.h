@@ -5,27 +5,9 @@
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
 
-/* StackOverflow reference:
- * http://stackoverflow.com/questions/...
- */
-
-#include <QMainWindow>
 #include <QGraphicsView>
-#include <QGraphicsItem>
-#include <QVBoxLayout>
-#include <QDesktopWidget>
-#include <QApplication>
-#include <QDebug>
 
-/*
-class GraphicsItem : public QGraphicsRectItem {
-public:
-    GraphicsItem ( qreal x, qreal y, qreal width, qreal height, QGraphicsItem * parent = 0 );
-
-protected:
-    void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget);
-};
-*/
+class QGraphicsItem;
 
 class GraphicsScene : public QGraphicsScene {
 public:
@@ -140,26 +122,4 @@ protected:
     void wheelEvent(QWheelEvent * event );
 
     void paste();
-};
-
-
-class MainWindow : public QMainWindow {
-    Q_OBJECT;
-
-    QAction *actionX;
-    GraphicsSheet* graphicsSheet;
-    QMenuBar *menubar;
-    QStatusBar *statusbar;
-    QToolBar *toolBar;
-    QGraphicsRectItem* item1;
-
-public:
-    MainWindow(QWidget* parent);
-
-    ~MainWindow();
-
-public slots:
-	void printInfo();
-    void rotateItem();
-    void resizeItem();
 };

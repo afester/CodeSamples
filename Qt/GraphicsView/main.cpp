@@ -14,6 +14,7 @@
 #include <QApplication>
 #include <QGraphicsDropShadowEffect>
 #include <QVector2D>
+#include <QDebug>
 
 #include "GraphicsSheet.h"
 #include "ScrollAreaLayout.h"
@@ -21,8 +22,8 @@
 #include "LineItem.h"
 #include "TextItem.h"
 #include "EditFrameInteractor.h"
-
 #include "LabelledComboBox.h"
+#include "MainWindow.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -101,11 +102,57 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(sizeWidget->getComboBox(), SIGNAL(currentIndexChanged(int)),
                      graphicsSheet, SLOT(setSize(int)));
 
-    QCheckBox* checkbox = new QCheckBox("Landscape: ", toolBar);
+    QCheckBox* checkbox = new QCheckBox("Landscape", toolBar);
     toolBar->addWidget(checkbox);
     QObject::connect(checkbox, SIGNAL(stateChanged(int)),
                      graphicsSheet, SLOT(setDirection(int)));
 
+    QIcon icon;
+    icon.addFile(QStringLiteral(":/Icons/file-load.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionLoad = new QAction(icon, "", this);
+    toolBar->addAction(actionLoad);
+
+    QIcon icon2;
+    icon2.addFile(QStringLiteral(":/Icons/file-save.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionSave = new QAction(icon2, "", this);
+    toolBar->addAction(actionSave);
+
+    QIcon icon3;
+    icon3.addFile(QStringLiteral(":/Icons/file-save-as.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionSaveAs = new QAction(icon3, "", this);
+    toolBar->addAction(actionSaveAs);
+
+    QIcon icon4;
+    icon4.addFile(QStringLiteral(":/Icons/object-select.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionSelect = new QAction(icon4, "", this);
+    actionSelect->setCheckable(true);
+    toolBar->addAction(actionSelect);
+
+    QIcon icon5;
+    icon5.addFile(QStringLiteral(":/Icons/oject-newline.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionNewLineItem = new QAction(icon5, "", this);
+    actionNewLineItem->setCheckable(true);
+    toolBar->addAction(actionNewLineItem);
+
+    QIcon icon6;
+    icon6.addFile(QStringLiteral(":/Icons/object-newrect.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionNewRectItem = new QAction(icon6, "", this);
+    actionNewRectItem->setCheckable(true);
+    toolBar->addAction(actionNewRectItem);
+
+    QIcon icon7;
+    icon7.addFile(QStringLiteral(":/Icons/object-newtext.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionNewTextItem = new QAction(icon7, "", this);
+    actionNewTextItem->setCheckable(true);
+    toolBar->addAction(actionNewTextItem);
+
+    QActionGroup* actionGroup = new QActionGroup(this);
+    actionGroup->addAction(actionSelect);
+    actionGroup->addAction(actionNewLineItem);
+    actionGroup->addAction(actionNewRectItem);
+    actionGroup->addAction(actionNewTextItem);
+
+#if 0
     QAction* actionInfo = new QAction("Info", this);
     toolBar->addAction(actionInfo);
     QObject::connect(actionInfo, SIGNAL(triggered(bool)),
@@ -120,6 +167,7 @@ MainWindow::MainWindow(QWidget *parent) :
     toolBar->addAction(actionResize);
     QObject::connect(actionResize, SIGNAL(triggered(bool)),
                      this, SLOT(resizeItem()));
+#endif
 
     zoomWidget->getComboBox()->setCurrentIndex(2);
     sizeWidget->getComboBox()->setCurrentIndex(3);

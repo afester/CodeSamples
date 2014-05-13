@@ -7,6 +7,7 @@
 
 
 #include <QDebug>
+#include <QApplication>
 #include <QLabel>
 #include <QScreen>
 #include <QtCore/qmath.h>
