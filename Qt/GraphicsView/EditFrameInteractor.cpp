@@ -57,6 +57,7 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
 	    // currently, single selection only - independent of whether an
 	    // item is clicked or not, clear the current selection
 	    theView->scene()->clearSelection();
+	    theView->scene()->setFocusItem(0);
 
 	    QGraphicsItem* item = theScene->getItemAt(scenePos);
 	    theItem = dynamic_cast<InteractableItem*>(item);
