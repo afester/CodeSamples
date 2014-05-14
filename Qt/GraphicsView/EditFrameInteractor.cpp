@@ -26,11 +26,9 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
 		return;
 	}
 
-	// Log::log(Log::DEBUG, "EditFrameInteractor") << "mousePressEvent";
-
-	// todo: probably create a QGraphicsSceneMouseEvent and pass this already to the interactor!
 	QPointF scenePos = theView->mapToScene(event->pos());
 	GraphicsScene* theScene = dynamic_cast<GraphicsScene*>(theView->scene());
+
 	theItem = theView->getFocusItem();
 	if (theItem) {
         editHandle = theItem->getEditHandle(theView, scenePos, enabledHandles);
@@ -47,13 +45,15 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
 #if 0
             theView->setPositionIndicators(positionIndicator);
 #endif
+
         }
 	}
 
+	// no item currently selected / focused
 	if (theItem == 0) {
 
-	    // currently, single selection only - independent of whether a
-	    // frame is clicked or not, clear the current selection
+	    // currently, single selection only - independent of whether an
+	    // item is clicked or not, clear the current selection
 	    theView->scene()->clearSelection();
 
 	    QGraphicsItem* item = theScene->getItemAt(scenePos);
@@ -62,11 +62,11 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
 	        theItem->setItemSelected(true);
 
 	        // prepare for immediate MOVE operation
-            offset = QSizeF(0, 0); // QSize(theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
+	        editHandle = 1;     // TODO: use common "super" enum
+            offset = theItem->getHandleOffset(editHandle, scenePos);
 	    }
 	}
 }
-
 
 
 void EditFrameInteractor::hoverOverEvent ( QMouseEvent * event ) {

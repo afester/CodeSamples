@@ -10,13 +10,12 @@ class GraphicsSheet;
 
 class LineItem : public QGraphicsLineItem, public InteractableItem {
 public:
-	enum EditHandle {NoHandle,
-					 P1Handle, P2Handle,
-	                 MoveHandle};
+	enum EditHandle {NoHandle, MoveHandle,  // TODO: move in common "super" enum
+					 P1Handle, P2Handle};
 
-	enum EditHandles {P1HandleMask   = 0x1,
-					  P2HandleMask   = 0x2,
-					  MoveHandleMask = 0x4,
+	enum EditHandles {MoveHandleMask = 0x1,
+	                  P1HandleMask   = 0x2,
+					  P2HandleMask   = 0x4,
 
 					  AllHandlesMask = P1HandleMask | P2HandleMask |
 					  	  	  	  	   MoveHandleMask,

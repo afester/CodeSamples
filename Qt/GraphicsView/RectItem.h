@@ -28,22 +28,21 @@ class GraphicsSheet;
 
 class RectItem : public QGraphicsRectItem, public InteractableItem {
 public:
-	enum EditHandle {NoHandle,
+	enum EditHandle {NoHandle, MoveHandle,              // TODO: Move in common "super" enum
 					 TopLeftHandle, TopHandle, TopRightHandle,
 					 LeftHandle, RotationHandle, RightHandle,
-					 BottomLeftHandle, BottomHandle, BottomRightHandle,
-	                 MoveHandle};
+					 BottomLeftHandle, BottomHandle, BottomRightHandle};
 
-	enum EditHandles {TopLeftHandleMask = 0x01,
-					  TopHandleMask = 0x02,
-					  TopRightHandleMask = 0x04,
-					  LeftHandleMask = 0x08,
-					  RotationHandleMask = 0x10,
-					  RightHandleMask = 0x20,
-					  BottomLeftHandleMask = 0x40,
-					  BottomHandleMask = 0x80,
-					  BottomRightHandleMask = 0x100,
-					  MoveHandleMask = 0x200,
+	enum EditHandles {MoveHandleMask        = 0x001,
+	                  TopLeftHandleMask     = 0x002,
+					  TopHandleMask         = 0x004,
+					  TopRightHandleMask    = 0x008,
+					  LeftHandleMask        = 0x010,
+					  RotationHandleMask    = 0x020,
+					  RightHandleMask       = 0x040,
+					  BottomLeftHandleMask  = 0x080,
+					  BottomHandleMask      = 0x100,
+					  BottomRightHandleMask = 0x200,
 
 					  AllHandlesMask = TopLeftHandleMask | TopHandleMask | TopRightHandleMask |
 					  	  	  	  	   LeftHandleMask | RotationHandleMask | RightHandleMask |
