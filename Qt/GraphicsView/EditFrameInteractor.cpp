@@ -34,6 +34,8 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
         editHandle = theItem->getEditHandle(theView, scenePos, enabledHandles);
         if (editHandle == 0) {
             theItem = 0;    // outside of all handles
+        } else if (editHandle == 11) {  // TODO: enum/constant!!!
+            event->ignore();
         } else {
             QPoint positionIndicator(-1,-1);
             offset = theItem->getHandleOffset(editHandle, scenePos);
@@ -64,6 +66,7 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
 	        // prepare for immediate MOVE operation
 	        editHandle = 1;     // TODO: use common "super" enum
             offset = theItem->getHandleOffset(editHandle, scenePos);
+            theItem->setCursor(theView, editHandle);
 	    }
 	}
 }
@@ -74,8 +77,7 @@ void EditFrameInteractor::hoverOverEvent ( QMouseEvent * event ) {
 
 	InteractableItem* frameItem = dynamic_cast<InteractableItem*>(theView->getFocusItem());
 	if (frameItem) {
-        // QPointF itemPos = frameItem->mapFromScene(scenePos);
-		unsigned int handle = frameItem->getEditHandle(theView, scenePos, enabledHandles);
+		AbstractEditHandle handle = frameItem->getEditHandle(theView, scenePos, enabledHandles);
 		frameItem->setCursor(theView, handle);
 	} else {
 		theView->setCursor(Qt::ArrowCursor);
@@ -94,18 +96,23 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 
 	// check if currently a drag is in progress
 	if (theItem) {
-        QPointF pos = scenePos + QPointF(offset.width(), offset.height());
-        QPoint positionIndicator(-1,-1);
+
+	    if (editHandle == 11) {  // TODO: enum/constant!!!
+	        event->ignore();
+	    } else {
+            QPointF pos = scenePos + QPointF(offset.width(), offset.height());
+            QPoint positionIndicator(-1,-1);
 #if 0
-        qDebug() << "-------------";
-        qDebug() << pos;
-        QPointF pos2 = QPointF(pos.toPoint());  // correct only for scale 1:1
-        qDebug() << pos2;
+            qDebug() << "-------------";
+            qDebug() << pos;
+            QPointF pos2 = QPointF(pos.toPoint());  // correct only for scale 1:1
+            qDebug() << pos2;
 #endif
 
-        theItem->moveHandle(editHandle, pos);
+            theItem->moveHandle(editHandle, pos);
 
-        // theView->setPositionIndicators(positionIndicator);
+            // theView->setPositionIndicators(positionIndicator);
+	    }
 	} else {
 		hoverOverEvent(event);
 	}
@@ -118,24 +125,29 @@ void EditFrameInteractor::mouseReleaseEvent ( QMouseEvent * event ) {
 	// Log::log(Log::DEBUG, "EditFrameInteractor") << "mouseReleaseEvent";
 
 	if (theItem) {
+        if (editHandle == 11) {  // TODO: enum/constant!!!
+            event->ignore();
+        } else {
+
 #if 0
-	    KollageGraphicsScene* theScene = dynamic_cast<KollageGraphicsScene*>(theView->scene());
+            KollageGraphicsScene* theScene = dynamic_cast<KollageGraphicsScene*>(theView->scene());
 
-        // check if original position/size is different from new position/size
-        // if so, then create an undo object. Otherwise, ignore.
-        QRectF newRect(theItem->x(), theItem->y(),
-                       theItem->rect().width(), theItem->rect().height());
-        int newAngle = theItem->rotation();
-        if (newRect != originalRect || newAngle != originalAngle) {
-            QUndoCommand* undo = new EditDoneCommand(originalRect, originalAngle, theItem);
-            theScene->getUndoStack()->push(undo);
-        }
+            // check if original position/size is different from new position/size
+            // if so, then create an undo object. Otherwise, ignore.
+            QRectF newRect(theItem->x(), theItem->y(),
+                           theItem->rect().width(), theItem->rect().height());
+            int newAngle = theItem->rotation();
+            if (newRect != originalRect || newAngle != originalAngle) {
+                QUndoCommand* undo = new EditDoneCommand(originalRect, originalAngle, theItem);
+                theScene->getUndoStack()->push(undo);
+            }
 
-    	QPointF scenePos = theView->mapToScene(event->pos());
-        QPoint positionIndicator = QPoint((int) floor(scenePos.x()),
-                            			  (int) floor(scenePos.y()));
-        theView->setPositionIndicators(positionIndicator);
+            QPointF scenePos = theView->mapToScene(event->pos());
+            QPoint positionIndicator = QPoint((int) floor(scenePos.x()),
+                                              (int) floor(scenePos.y()));
+            theView->setPositionIndicators(positionIndicator);
 #endif
+        }
 
 		theItem = 0;
 	}

@@ -69,19 +69,19 @@ public:
 
 
     // @Override
-    AbstractEditHandle getEditHandle(GraphicsSheet* view, const QPointF& pos, AbstractEditHandle enabledHandles = AllHandlesMask);
+    virtual AbstractEditHandle getEditHandle(GraphicsSheet* view, const QPointF& pos, AbstractEditHandle enabledHandles = AllHandlesMask);
 
     // @Override
-    void paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles = AllHandlesMask);
+    virtual void paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles = AllHandlesMask);
 
     // @Override
-    QSizeF getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos);
+    virtual QSizeF getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos);
 
     // @Override
-    void moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos);
+    virtual void moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos);
 
     // @Override
-    void setCursor(GraphicsSheet* theView, AbstractEditHandle handle);
+    virtual void setCursor(GraphicsSheet* theView, AbstractEditHandle handle);
 
 //    void paintCoordinates(GraphicsSheet* view, QPainter* painter);
 

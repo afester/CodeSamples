@@ -1,4 +1,5 @@
 #include "Interactor.h"
+#include <QWheelEvent>
 
 Interactor::~Interactor() {
 }
@@ -10,7 +11,7 @@ void Interactor::setView(GraphicsSheet* view) {
 
 
 void Interactor::wheelEvent ( QWheelEvent* event ) {
-    Q_UNUSED(event);
+    event->ignore();
 }
 
 

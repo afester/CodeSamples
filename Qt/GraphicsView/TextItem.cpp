@@ -8,8 +8,10 @@
 #include <QTextBlockFormat>
 #include <QTextCursor>
 #include <QPainter>
+#include <QDebug>
 
 #include "TextItem.h"
+#include "GraphicsSheet.h"
 
 
 class InternalTextItem : public QGraphicsTextItem {
@@ -33,6 +35,7 @@ public:
 
     // @Override
     virtual void focusOutEvent ( QFocusEvent * event ) {
+        qDebug() << "focusOutEvent";
     	// clear the current selection
     	// See also http://qt-project.org/forums/viewthread/7322
     	QTextCursor t = textCursor();
@@ -129,9 +132,28 @@ void TextItem::centerTextItem() {
 }
 
 
+AbstractEditHandle TextItem::getEditHandle(GraphicsSheet* view, const QPointF& pos, AbstractEditHandle enabledHandles){
+    QPointF check = textItem->mapFromScene(pos);
+    if (textItem->contains(check)) {
+        return CursorHandle;
+    }
+
+    return RectItem::getEditHandle(view, pos, enabledHandles);
+}
+
+
 void TextItem::moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos) {
     RectItem::moveHandle(editHandle, scenePos);
     centerTextItem();
+}
+
+
+void TextItem::setCursor(GraphicsSheet* theView, AbstractEditHandle handle) {
+    if (handle == CursorHandle) {
+        theView->setCursor(Qt::IBeamCursor);
+    } else {
+        RectItem::setCursor(theView, handle);
+    }
 }
 
 

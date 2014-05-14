@@ -513,7 +513,7 @@ void RectItem::moveHandle(unsigned int /*EditHandle*/ editHandle, const QPointF&
 }
 
 
-void RectItem::setCursor(GraphicsSheet* theView, unsigned int /*EditHandle*/ handle) {
+void RectItem::setCursor(GraphicsSheet* theView, AbstractEditHandle handle) {
 
     switch(handle) {
         case RectItem::TopLeftHandle :

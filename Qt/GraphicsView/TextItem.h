@@ -12,6 +12,34 @@ static const int InternalTextItemType = QGraphicsItem::UserType + 10000;
 
 class TextItem : public RectItem {
 public:
+    enum EditHandle {NoHandle, MoveHandle,              // TODO: Move in common "super" enum
+                     TopLeftHandle, TopHandle, TopRightHandle,
+                     LeftHandle, RotationHandle, RightHandle,
+                     BottomLeftHandle, BottomHandle, BottomRightHandle,
+                     CursorHandle};
+
+    enum EditHandles {MoveHandleMask        = 0x001,
+                      TopLeftHandleMask     = 0x002,
+                      TopHandleMask         = 0x004,
+                      TopRightHandleMask    = 0x008,
+                      LeftHandleMask        = 0x010,
+                      RotationHandleMask    = 0x020,
+                      RightHandleMask       = 0x040,
+                      BottomLeftHandleMask  = 0x080,
+                      BottomHandleMask      = 0x100,
+                      BottomRightHandleMask = 0x200,
+                      CursorHandleMask      = 0x400,
+
+                      AllHandlesMask = TopLeftHandleMask | TopHandleMask | TopRightHandleMask |
+                                       LeftHandleMask | RotationHandleMask | RightHandleMask |
+                                       BottomLeftHandleMask | BottomHandleMask | BottomRightHandleMask|
+                                       MoveHandleMask | CursorHandleMask,
+
+                      BasicHandlesMask = TopHandleMask | LeftHandleMask |
+                                         RightHandleMask | BottomHandleMask |
+                                         MoveHandleMask | CursorHandleMask
+                     };
+
     TextItem(const QPoint& pos, QGraphicsItem * parent = 0);
 
 #if 0
@@ -61,7 +89,14 @@ protected:
     virtual void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget);
 #endif
 
+    // @Override
+    virtual AbstractEditHandle getEditHandle(GraphicsSheet* view, const QPointF& pos, AbstractEditHandle enabledHandles = AllHandlesMask);
+
+    // @Override
     virtual void moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos);
+
+    // @Override
+    virtual void setCursor(GraphicsSheet* theView, AbstractEditHandle handle);
 
 private:
 
