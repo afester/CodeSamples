@@ -6,7 +6,7 @@
 TEMPLATE = app
 QT = gui core widgets
 
-CONFIG += qt warn_on
-FORMS = Canvas.ui
-HEADERS = Canvas.h MainWindow.h
-SOURCES = Canvas.cpp MainWindow.cpp main.cpp
+CONFIG += qt warn_on debug console
+
+HEADERS = WidgetSample.h
+SOURCES = WidgetSample.cpp main.cpp
