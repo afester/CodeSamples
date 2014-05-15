@@ -22,12 +22,14 @@
 #include "LineItem.h"
 #include "TextItem.h"
 #include "EditFrameInteractor.h"
+#include "NewRectItemInteractor.h"
 #include "LabelledComboBox.h"
 #include "MainWindow.h"
 
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
+    selectInteractor(0), newLineItemInteractor(0),
+    newRectItemInteractor(0), newTextItemInteractor(0) {
 
     setObjectName(QStringLiteral("MainWindow"));
     resize(1024, 768);
@@ -109,48 +111,56 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QIcon icon;
     icon.addFile(QStringLiteral(":/Icons/file-load.png"), QSize(), QIcon::Normal, QIcon::Off);
-    actionLoad = new QAction(icon, "", this);
+    actionLoad = new QAction(icon, "Load drawing ...", this);
     toolBar->addAction(actionLoad);
+    QObject::connect(actionLoad, SIGNAL(triggered()), this, SLOT(doActionLoad()));
 
     QIcon icon2;
     icon2.addFile(QStringLiteral(":/Icons/file-save.png"), QSize(), QIcon::Normal, QIcon::Off);
-    actionSave = new QAction(icon2, "", this);
+    actionSave = new QAction(icon2, "Save drawing", this);
     toolBar->addAction(actionSave);
+    QObject::connect(actionSave, SIGNAL(triggered()), this, SLOT(doActionSave()));
 
     QIcon icon3;
     icon3.addFile(QStringLiteral(":/Icons/file-save-as.png"), QSize(), QIcon::Normal, QIcon::Off);
-    actionSaveAs = new QAction(icon3, "", this);
+    actionSaveAs = new QAction(icon3, "Save drawing as ...", this);
     toolBar->addAction(actionSaveAs);
+    QObject::connect(actionSaveAs, SIGNAL(triggered()), this, SLOT(doActionSaveAs()));
 
     QIcon icon4;
     icon4.addFile(QStringLiteral(":/Icons/object-select.png"), QSize(), QIcon::Normal, QIcon::Off);
-    actionSelect = new QAction(icon4, "", this);
+    actionSelect = new QAction(icon4, "Edit object", this);
     actionSelect->setCheckable(true);
     toolBar->addAction(actionSelect);
+    QObject::connect(actionSelect, SIGNAL(triggered()), this, SLOT(doActionSelect()));
 
     QIcon icon5;
-    icon5.addFile(QStringLiteral(":/Icons/oject-newline.png"), QSize(), QIcon::Normal, QIcon::Off);
-    actionNewLineItem = new QAction(icon5, "", this);
+    icon5.addFile(QStringLiteral(":/Icons/object-newline.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionNewLineItem = new QAction(icon5, "New line", this);
     actionNewLineItem->setCheckable(true);
     toolBar->addAction(actionNewLineItem);
+    QObject::connect(actionNewLineItem, SIGNAL(triggered()), this, SLOT(doActionNewLineItem()));
 
     QIcon icon6;
     icon6.addFile(QStringLiteral(":/Icons/object-newrect.png"), QSize(), QIcon::Normal, QIcon::Off);
-    actionNewRectItem = new QAction(icon6, "", this);
+    actionNewRectItem = new QAction(icon6, "New rectangle", this);
     actionNewRectItem->setCheckable(true);
     toolBar->addAction(actionNewRectItem);
+    QObject::connect(actionNewRectItem, SIGNAL(triggered()), this, SLOT(doActionNewRectItem()));
 
     QIcon icon7;
     icon7.addFile(QStringLiteral(":/Icons/object-newtext.png"), QSize(), QIcon::Normal, QIcon::Off);
-    actionNewTextItem = new QAction(icon7, "", this);
+    actionNewTextItem = new QAction(icon7, "New text rectangle", this);
     actionNewTextItem->setCheckable(true);
     toolBar->addAction(actionNewTextItem);
+    QObject::connect(actionNewTextItem, SIGNAL(triggered()), this, SLOT(doActionNewTextItem()));
 
     QActionGroup* actionGroup = new QActionGroup(this);
     actionGroup->addAction(actionSelect);
     actionGroup->addAction(actionNewLineItem);
     actionGroup->addAction(actionNewRectItem);
     actionGroup->addAction(actionNewTextItem);
+    actionSelect->setChecked(true);
 
 #if 0
     QAction* actionInfo = new QAction("Info", this);
@@ -217,7 +227,12 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsSheet->scene()->addItem(li1);
     graphicsSheet->scene()->addItem(li2);
 
-    graphicsSheet->setInteractor(new EditFrameInteractor());
+    selectInteractor = new EditFrameInteractor();
+    //newLineItemInteractor = new NewLineItemInteractor();
+    newRectItemInteractor = new NewRectItemInteractor();
+    //newTextItemInteractor = new NewTextItemInteractor();
+
+    graphicsSheet->setInteractor(selectInteractor);
 }
 
 #if 0
@@ -236,7 +251,6 @@ qreal calculateDistance(const QVector2D& v, const QVector2D& w, const QVector2D&
 
       return distance(p, projection);
 }
-#endif
 
 
 // dist_Point_to_Segment(): get the distance of a point to a segment
@@ -262,7 +276,6 @@ static qreal dist_Point_to_Segment(const QPointF& P, const QPointF& P0, const QP
 
      return QLineF(P, Pb).length();
 }
-
 
 void MainWindow::printInfo() {
     qDebug() << "\nLAYOUT INFO:\n====================";
@@ -336,7 +349,35 @@ for (int i = 0;  i < 10;  i++) {
 
 }
 }
+#endif
 
+void MainWindow::doActionLoad(){
+    qDebug() << "LOAD";
+}
+
+void MainWindow::doActionSave(){
+    qDebug() << "SAVE";
+}
+
+void MainWindow::doActionSaveAs(){
+    qDebug() << "SAVE AS";
+}
+
+void MainWindow::doActionSelect(){
+    graphicsSheet->setInteractor(selectInteractor);
+}
+
+void MainWindow::doActionNewLineItem(){
+    graphicsSheet->setInteractor(newLineItemInteractor);
+}
+
+void MainWindow::doActionNewRectItem(){
+    graphicsSheet->setInteractor(newRectItemInteractor);
+}
+
+void MainWindow::doActionNewTextItem(){
+    graphicsSheet->setInteractor(newTextItemInteractor);
+}
 
 
 MainWindow::~MainWindow() {

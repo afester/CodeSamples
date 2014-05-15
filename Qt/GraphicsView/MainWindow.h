@@ -9,6 +9,7 @@
 
 class GraphicsSheet;
 class QGraphicsRectItem;
+class Interactor;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT;
@@ -28,13 +29,28 @@ class MainWindow : public QMainWindow {
     QToolBar *toolBar;
     QGraphicsRectItem* item1;
 
+    Interactor* selectInteractor;
+    Interactor* newLineItemInteractor;
+    Interactor* newRectItemInteractor;
+    Interactor* newTextItemInteractor;
+
 public:
     MainWindow(QWidget* parent);
 
     ~MainWindow();
 
 public slots:
+#if 0
 	void printInfo();
     void rotateItem();
     void resizeItem();
+#endif
+
+    void doActionLoad();
+    void doActionSave();
+    void doActionSaveAs();
+    void doActionSelect();
+    void doActionNewLineItem();
+    void doActionNewRectItem();
+    void doActionNewTextItem();
 };
