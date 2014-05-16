@@ -1,41 +1,42 @@
 #include <QMouseEvent>
 
 #include "GraphicsSheet.h"
-#include "RectItem.h"
-#include "NewRectItemInteractor.h"
+#include "TextItem.h"
+#include "NewTextItemInteractor.h"
 #include "Log.h"
 
-NewRectItemInteractor::NewRectItemInteractor()  {
+NewTextItemInteractor::NewTextItemInteractor()  {
 }
 
 
-NewRectItemInteractor::~NewRectItemInteractor() {
+NewTextItemInteractor::~NewTextItemInteractor() {
 }
 
 
-void NewRectItemInteractor::mousePressEvent ( QMouseEvent * event ) {
+void NewTextItemInteractor::mousePressEvent ( QMouseEvent * event ) {
 	if (event->button() != Qt::LeftButton) {
 		return;
 	}
 
-	// Log::log(Log::DEBUG, "NewRectItemInteractor") << "mousePressEvent";
+	// Log::log(Log::DEBUG, "NewTextItemInteractor") << "mousePressEvent";
 
 	QPointF scenePos = theView->mapToScene(event->pos());
 //    QPoint pos = QPoint((int) floor(scenePos.x()),
 //                        (int) floor(scenePos.y()));
 //	KollageGraphicsScene* theScene = dynamic_cast<KollageGraphicsScene*>(theView->scene());
 
-	RectItem* newItem = new RectItem(scenePos);
+	TextItem* newItem = new TextItem(scenePos);
     theView->scene()->clearSelection();
     theItem = newItem;
     theView->scene()->addItem(newItem);
     theItem->setItemSelected(true);
+    newItem->setText("Text");
     // theFrame->setZValue(theScene->zOrder++);
 	editHandle = RectItem::BottomRightHandle;
 	offset = QSize(0,0);
 }
 
-void NewRectItemInteractor::mouseReleaseEvent ( QMouseEvent* ) {
+void NewTextItemInteractor::mouseReleaseEvent ( QMouseEvent* ) {
 	// Log::log(Log::DEBUG, "EditFrameInteractor") << "mouseReleaseEvent";
 
 	if (theItem) {

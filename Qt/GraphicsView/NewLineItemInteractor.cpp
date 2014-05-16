@@ -1,19 +1,19 @@
 #include <QMouseEvent>
 
 #include "GraphicsSheet.h"
-#include "RectItem.h"
-#include "NewRectItemInteractor.h"
+#include "LineItem.h"
+#include "NewLineItemInteractor.h"
 #include "Log.h"
 
-NewRectItemInteractor::NewRectItemInteractor()  {
+NewLineItemInteractor::NewLineItemInteractor()  {
 }
 
 
-NewRectItemInteractor::~NewRectItemInteractor() {
+NewLineItemInteractor::~NewLineItemInteractor() {
 }
 
 
-void NewRectItemInteractor::mousePressEvent ( QMouseEvent * event ) {
+void NewLineItemInteractor::mousePressEvent ( QMouseEvent * event ) {
 	if (event->button() != Qt::LeftButton) {
 		return;
 	}
@@ -25,17 +25,17 @@ void NewRectItemInteractor::mousePressEvent ( QMouseEvent * event ) {
 //                        (int) floor(scenePos.y()));
 //	KollageGraphicsScene* theScene = dynamic_cast<KollageGraphicsScene*>(theView->scene());
 
-	RectItem* newItem = new RectItem(scenePos);
+	LineItem* newItem = new LineItem(scenePos, scenePos);
     theView->scene()->clearSelection();
     theItem = newItem;
     theView->scene()->addItem(newItem);
     theItem->setItemSelected(true);
     // theFrame->setZValue(theScene->zOrder++);
-	editHandle = RectItem::BottomRightHandle;
+	editHandle = LineItem::P2Handle;
 	offset = QSize(0,0);
 }
 
-void NewRectItemInteractor::mouseReleaseEvent ( QMouseEvent* ) {
+void NewLineItemInteractor::mouseReleaseEvent ( QMouseEvent* ) {
 	// Log::log(Log::DEBUG, "EditFrameInteractor") << "mouseReleaseEvent";
 
 	if (theItem) {

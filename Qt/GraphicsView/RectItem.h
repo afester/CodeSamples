@@ -56,7 +56,7 @@ public:
 
     RectItem(const QPointF& pos, QGraphicsItem * parent = 0);
 
-    RectItem(const QRectF & rect, QGraphicsItem * parent = 0);
+    RectItem(const QRectF& rect, QGraphicsItem * parent = 0);
 
     /**
      * Accepts the visit from an ItemVisitor.
@@ -99,7 +99,7 @@ protected:
     // @Override
     virtual void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
-    virtual void calculateDraggers(GraphicsSheet* view);
+    virtual void calculateHandles(GraphicsSheet* view);
 
     // @Override
     virtual QRectF boundingRect() const;

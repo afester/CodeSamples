@@ -4,6 +4,7 @@
 #include <QClipboard>
 #include <QMouseEvent>
 #include <QGraphicsView>
+#include <QGraphicsItem>
 #include <QUndoCommand>
 #include <QMimeData>
 #include <math.h>

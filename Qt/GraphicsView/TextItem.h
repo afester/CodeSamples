@@ -40,7 +40,7 @@ public:
                                          MoveHandleMask | CursorHandleMask
                      };
 
-    TextItem(const QPoint& pos, QGraphicsItem * parent = 0);
+    TextItem(const QPointF& pos, QGraphicsItem * parent = 0);
 
 #if 0
 

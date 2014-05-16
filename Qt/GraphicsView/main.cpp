@@ -23,6 +23,8 @@
 #include "TextItem.h"
 #include "EditFrameInteractor.h"
 #include "NewRectItemInteractor.h"
+#include "NewLineItemInteractor.h"
+#include "NewTextItemInteractor.h"
 #include "LabelledComboBox.h"
 #include "MainWindow.h"
 
@@ -228,9 +230,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     graphicsSheet->scene()->addItem(li2);
 
     selectInteractor = new EditFrameInteractor();
-    //newLineItemInteractor = new NewLineItemInteractor();
+    newLineItemInteractor = new NewLineItemInteractor();
     newRectItemInteractor = new NewRectItemInteractor();
-    //newTextItemInteractor = new NewTextItemInteractor();
+    newTextItemInteractor = new NewTextItemInteractor();
 
     graphicsSheet->setInteractor(selectInteractor);
 }

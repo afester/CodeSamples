@@ -149,6 +149,7 @@ void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
 
             // set the painter's transformation so that the paint operations are
             // executed in item coordinate space
+            painter->save();
             QTransform trans = item->deviceTransform(QTransform());
             painter->setWorldTransform(trans, true);
 
@@ -157,6 +158,12 @@ void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
 
             // paint the edit handles
             edItem->paintHandles(this, painter, RectItem::AllHandlesMask);
+            painter->restore();
+
+            QHash<QString, QPointF> mapped;
+            mapped.insert("pos", item->pos());
+            mapped.insert("rot", item->mapToScene(item->transformOriginPoint()));
+            drawPoints(painter, mapped);
 
 #if 0
             // DEBUG: draw the shape of the item

@@ -6,7 +6,7 @@
 #include <QRectF>
 
 #include "Interactor.h"
-#include "RectItem.h"
+#include "InteractableItem.h"
 
 
 class EditFrameInteractor : public Interactor {

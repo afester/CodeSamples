@@ -35,7 +35,7 @@ public:
 
     // @Override
     virtual void focusOutEvent ( QFocusEvent * event ) {
-        qDebug() << "focusOutEvent";
+        // qDebug() << "focusOutEvent";
     	// clear the current selection
     	// See also http://qt-project.org/forums/viewthread/7322
     	QTextCursor t = textCursor();
@@ -52,7 +52,7 @@ public:
 };
 
 
-TextItem::TextItem(const QPoint& pos, QGraphicsItem * parent) :
+TextItem::TextItem(const QPointF& pos, QGraphicsItem * parent) :
         RectItem(QRectF(pos.x(), pos.y(), 50, 30), parent), alignment(Qt::AlignHCenter) {
 
     textItem = new InternalTextItem (this);

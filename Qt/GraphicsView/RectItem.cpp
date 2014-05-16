@@ -61,13 +61,13 @@ RectItem::RectItem(const QRectF & rect, QGraphicsItem * parent) :
 }
 
 
-void RectItem::calculateDraggers(GraphicsSheet* view) {
+void RectItem::calculateHandles(GraphicsSheet* view) {
     const qreal handleSize = 8.0;   // TODO: read from view property
 
     const qreal hsize = handleSize / view->transform().m11();
     const qreal vsize = handleSize / view->transform().m22();
 
-    // Initialize draggers
+    // Initialize handles
 
     const qreal width = rect().width();
     const qreal height = rect().height();
@@ -94,9 +94,8 @@ QRectF RectItem::boundingRect() const {
 }
 
 
-/*EditableItem::EditHandle*/ unsigned int RectItem::getEditHandle(GraphicsSheet* view, const QPointF& scenePos, unsigned int /*EditHandles */ enabledHandles) {
-    calculateDraggers(view);
-
+AbstractEditHandle RectItem::getEditHandle(GraphicsSheet* view, const QPointF& scenePos, unsigned int /*EditHandles */ enabledHandles) {
+    calculateHandles(view);
 
     QPointF pos = mapFromScene(scenePos);
     if (isSelected()) {
@@ -147,9 +146,9 @@ void RectItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) {
 }
 
 
-void RectItem::paintHandles(GraphicsSheet* view, QPainter * painter, unsigned int /*EditHandles*/ enabledHandles) {
+void RectItem::paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles) {
     if (isSelected()) {
-        calculateDraggers(view);
+        calculateHandles(view);
 
         // Paint the handles
 		painter->setBrush(Qt::green);
@@ -263,6 +262,9 @@ void RectItem::moveRightHandle(const QPointF& scenePos) {
         newSize.setWidth(10);
     }
 
+
+    // PENDING: Calculate new pos and new rotationCenter
+
     // activate new geometry
     setRect(QRectF(0, 0, newSize.width(), newSize.height()));
 }
@@ -275,9 +277,12 @@ void RectItem::moveBottomHandle(const QPointF& scenePos) {
         newSize.setHeight(10);
     }
 
+    // PENDING: Calculate new pos and new rotationCenter
+
     // activate new geometry
     setRect(QRectF(0, 0, newSize.width(), newSize.height()));
 }
+
 
 void RectItem::moveBottomRightHandle(const QPointF& scenePos) {
     QPointF posInItem = mapFromScene(scenePos);
@@ -288,6 +293,8 @@ void RectItem::moveBottomRightHandle(const QPointF& scenePos) {
     if (newSize.height() < 10) {
         newSize.setHeight(10);
     }
+
+    // PENDING: Calculate new pos and new rotationCenter
 
     // activate new geometry
     setRect(QRectF(0, 0, newSize.width(), newSize.height()));
@@ -392,13 +399,11 @@ void RectItem::moveLeftHandle(const QPointF& scenePos) {
 
 
 void RectItem::moveTopRightHandle(const QPointF& scenePos) {
-    Q_UNUSED(scenePos);
-#if 0
-#endif
+
 }
 
 void RectItem::moveBottomLeftHandle(const QPointF& scenePos) {
-    Q_UNUSED(scenePos);
+
 #if 0
         case RectItem::BottomLeftHandle :
                 newSize = QSizeF(theFrame->rect().width() - posInItem.x(),
@@ -417,7 +422,7 @@ void RectItem::moveBottomLeftHandle(const QPointF& scenePos) {
 #endif
 }
 
-QSizeF RectItem::getHandleOffset(unsigned int editHandle, const QPointF& scenePos) {
+QSizeF RectItem::getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos) {
     switch(editHandle) {
         case RectItem::TopLeftHandle :
                 return QSizeF(0, 0); // theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
@@ -464,7 +469,8 @@ QSizeF RectItem::getHandleOffset(unsigned int editHandle, const QPointF& scenePo
     return QSize(0, 0);
 }
 
-void RectItem::moveHandle(unsigned int /*EditHandle*/ editHandle, const QPointF& scenePos) {
+
+void RectItem::moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos) {
     QPointF newPos;
     QSizeF newSize;
 
@@ -624,7 +630,6 @@ void RectItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * styl
     // to avoid that QGraphicsRectItem::paint draws the selection rectangle
     QStyleOptionGraphicsItem option2 = *style;
     option2.state = 0;
-
     QGraphicsRectItem::paint(painter, &option2, widget);
 
 #if 0
