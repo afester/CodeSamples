@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsScene>
@@ -176,53 +177,6 @@ void RectItem::paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEdi
 }
 
 
-void RectItem::moveTopLeftHandle(const QPointF& scenePos) {
-    // P1 is the new upper left corner (in scene coordinates)
-    QPointF P1 = scenePos;
-
-    // P2 is the fix point (in scene coordinates)
-    QPointF P2 = mapToScene(rect().width(), rect().height());
-
-    // transform coordinate system so that its center is at P1
-    // we need to transform back (from global coordinates into local coordinates),
-    // so we need to do the inverse operations (rotate -angle => translate -P1)
-    QTransform t;
-    t.rotate(-rotation());
-    t.translate(-P1.x(), -P1.y());
-
-    // Map the fix point into the transformed coordinate system -
-    // this will be the new width and height
-    QPointF P2i = t.map(P2);
-    QSizeF newSize = QSizeF(P2i.x(), P2i.y());
-
-    if (newSize.width() < 10) {
-        newSize.setWidth(10);
-    }
-    if (newSize.height() < 10) {
-        newSize.setHeight(10);
-    }
-
-    // calculate new center point - this will become the new transformation center point
-    QPointF P3(newSize.width()/2, newSize.height()/2);
-
-    // transform P1 to the new item position
-    QTransform t2;
-    t2.translate(P1.x(), P1.y());
-    t2.rotate(rotation());
-    t2.translate(P3.x(), P3.y());
-    t2.rotate(-rotation());
-    t2.translate(-P3.x(), -P3.y());
-    t2.translate(-P1.x(), -P1.y());
-    QPointF newPos = t2.map(P1);
-
-    // activate new geometry
-    setPos(newPos);
-    setRect(QRectF(0, 0, newSize.width(), newSize.height()));
-    setTransformOriginPoint(P3);
-
-    //positionIndicator = QPoint(newPos.x(), newPos.y());
-}
-
 
 void RectItem::moveRotationHandle(const QPointF& scenePos) {
     // calculate center of rectangle (scene coordinates)
@@ -255,6 +209,231 @@ void RectItem::moveRotationHandle(const QPointF& scenePos) {
 }
 
 
+void RectItem::moveTopLeftHandle(const QPointF& scenePos) {
+    // P1 is the new upper left corner (in scene coordinates)
+    QPointF P1 = scenePos;
+
+    // P2 is the fix point (in scene coordinates)
+    QPointF P2 = mapToScene(rect().width(), rect().height());
+
+/**********************************/
+// Identical code to moveBottomRightHandle!!!!!!
+
+    // transform coordinate system so that its center is at P1
+    // we need to transform back (from global coordinates into local coordinates),
+    // so we need to do the inverse operations (rotate -angle => translate -P1)
+    QTransform t;
+    t.rotate(-rotation());
+    t.translate(-P1.x(), -P1.y());
+
+    // Map the fix point into the transformed coordinate system -
+    // this will be the new width and height
+    QPointF P2i = t.map(P2);
+    QSizeF newSize = QSizeF(P2i.x(), P2i.y());
+
+    if (newSize.width() < 10) {
+        newSize.setWidth(10);
+    }
+    if (newSize.height() < 10) {
+        newSize.setHeight(10);
+    }
+
+    // calculate new center point - this will become the new transformation center point
+    QPointF P3(newSize.width()/2, newSize.height()/2);
+
+    // transform P1 to the new item position
+    QTransform t2;
+
+    // from scene coordinates into item coordinates
+    t2.translate(P1.x(), P1.y());
+    t2.rotate(rotation());
+
+    // from P1 to new position
+    t2.translate(P3.x(), P3.y());
+    t2.rotate(-rotation());
+
+    // back to scene coordinates
+    t2.translate(-P3.x(), -P3.y());
+    t2.translate(-P1.x(), -P1.y());
+    QPointF newPos = t2.map(P1);
+
+    // activate new geometry
+    setPos(newPos);
+    setRect(QRectF(0, 0, newSize.width(), newSize.height()));
+    setTransformOriginPoint(P3);
+/**********************************/
+}
+
+
+void RectItem::moveBottomRightHandle(const QPointF& scenePos) {
+    // P1 is the new upper left corner (in scene coordinates)
+    QPointF P2 = scenePos;
+
+    // P2 is the fix point (in scene coordinates)
+    QPointF P1 = mapToScene(0, 0);
+
+/***************************/
+// identical code to moveTopLeftHandle!!!!!
+
+    // transform coordinate system so that its center is at P1
+    // we need to transform back (from global coordinates into local coordinates),
+    // so we need to do the inverse operations (rotate -angle => translate -P1)
+    QTransform t;
+    t.rotate(-rotation());
+    t.translate(-P1.x(), -P1.y());
+
+    // Map the fix point into the transformed coordinate system -
+    // this will be the new width and height
+    QPointF P2i = t.map(P2);
+    QSizeF newSize = QSizeF(P2i.x(), P2i.y());
+
+    if (newSize.width() < 10) {
+        newSize.setWidth(10);
+    }
+    if (newSize.height() < 10) {
+        newSize.setHeight(10);
+    }
+
+    // calculate new center point - this will become the new transformation center point
+    QPointF P3(newSize.width()/2, newSize.height()/2);
+
+    // transform P1 to the new item position
+    QTransform t2;
+
+    t2.translate(P1.x(), P1.y());
+    t2.rotate(rotation());
+    t2.translate(P3.x(), P3.y());
+    t2.rotate(-rotation());
+    t2.translate(-P3.x(), -P3.y());
+    t2.translate(-P1.x(), -P1.y());
+    QPointF newPos = t2.map(P1);
+
+    // activate new geometry
+    setPos(newPos);
+    setRect(QRectF(0, 0, newSize.width(), newSize.height()));
+    setTransformOriginPoint(P3);
+/***************************/
+}
+
+
+void RectItem::moveTopRightHandle(const QPointF& scenePos) {
+    // P1 is the new upper left corner (in scene coordinates)
+    QPointF P2 = scenePos;
+
+    // P2 is the fix point (in scene coordinates)
+    QPointF P1 = mapToScene(0, rect().height());
+
+/**********************************/
+// Identical code to moveBottomLeftHandle!!!!!!
+
+    // transform coordinate system so that its center is at P1
+    // we need to transform back (from global coordinates into local coordinates),
+    // so we need to do the inverse operations (rotate -angle => translate -P1)
+    QTransform t;
+    t.rotate(-rotation());
+    t.translate(-P1.x(), -P1.y());
+
+    // Map the fix point into the transformed coordinate system -
+    // this will be the new width and height
+    QPointF P2i = t.map(P2);
+    QSizeF newSize = QSizeF(qAbs(P2i.x()), qAbs(P2i.y()));
+    if (newSize.width() < 10) {
+        newSize.setWidth(10);
+    }
+    if (newSize.height() < 10) {
+        newSize.setHeight(10);
+    }
+
+    // calculate new center point - this will become the new transformation center point
+    QPointF P3(newSize.width()/2, newSize.height()/2);
+
+    QTransform qt;
+    qt.translate(P1.x(), P1.y());
+    qt.rotate(rotation());
+
+    QPointF P1x = qt.map(QPointF(0, P2i.y()));
+
+    // transform P1 to the new item position
+    QTransform t2;
+
+    t2.translate(P1x.x(), P1x.y());
+    t2.rotate(rotation());
+    t2.translate(P3.x(), P3.y());
+    t2.rotate(-rotation());
+    t2.translate(-P3.x(), -P3.y());
+    t2.translate(-P1x.x(), -P1x.y());
+    QPointF newPos = t2.map(P1x);
+
+    // activate new geometry
+    setPos(newPos);
+    setRect(QRectF(0, 0, newSize.width(), newSize.height()));
+    setTransformOriginPoint(P3);
+/**********************************/
+}
+
+
+void RectItem::moveBottomLeftHandle(const QPointF& scenePos) {
+    // P1 is the new upper left corner (in scene coordinates)
+    QPointF P1 = scenePos;
+
+    // P2 is the fix point (in scene coordinates)
+    QPointF P2 = mapToScene(rect().width(), 0);
+
+/**********************************/
+// Identical code to moveTopRightHandle!!!!!!
+
+    // transform coordinate system so that its center is at P1
+    // we need to transform back (from global coordinates into local coordinates),
+    // so we need to do the inverse operations (rotate -angle => translate -P1)
+    QTransform t;
+    t.rotate(-rotation());
+    t.translate(-P1.x(), -P1.y());
+
+    qDebug() << "X:" << t.map(P1);
+    qDebug() << "X2:" << t.map(P2);
+
+    // Map the fix point into the transformed coordinate system -
+    // this will be the new width and height
+    QPointF P2i = t.map(P2);
+    qDebug() << P2i;
+    QSizeF newSize = QSizeF(qAbs(P2i.x()), qAbs(P2i.y()));
+    qDebug() << newSize;
+
+    if (newSize.width() < 10) {
+        newSize.setWidth(10);
+    }
+    if (newSize.height() < 10) {
+        newSize.setHeight(10);
+    }
+
+    // calculate new center point - this will become the new transformation center point
+    QPointF P3(newSize.width()/2, newSize.height()/2);
+
+    QTransform qt;
+    qt.translate(P1.x(), P1.y());
+    qt.rotate(rotation());
+
+    QPointF P1x = qt.map(QPointF(0, P2i.y()));
+
+    // transform P1 to the new item position
+    QTransform t2;
+
+    t2.translate(P1x.x(), P1x.y());
+    t2.rotate(rotation());
+    t2.translate(P3.x(), P3.y());
+    t2.rotate(-rotation());
+    t2.translate(-P3.x(), -P3.y());
+    t2.translate(-P1x.x(), -P1x.y());
+    QPointF newPos = t2.map(P1x);
+
+    // activate new geometry
+    setPos(newPos);
+    setRect(QRectF(0, 0, newSize.width(), newSize.height()));
+    setTransformOriginPoint(P3);
+/**********************************/
+}
+
+
 void RectItem::moveRightHandle(const QPointF& scenePos) {
     QPointF posInItem = mapFromScene(scenePos);
     QSizeF newSize = QSizeF(posInItem.x(), rect().height());
@@ -262,10 +441,25 @@ void RectItem::moveRightHandle(const QPointF& scenePos) {
         newSize.setWidth(10);
     }
 
+    // calculate new center point - this will become the new transformation center point
+    QPointF P3(newSize.width()/2, newSize.height()/2);
 
-    // PENDING: Calculate new pos and new rotationCenter
+    // P1 is the fix point (in scene coordinates)
+    QPointF P1 = mapToScene(0, 0);
+
+    // transform P1 to the new item position
+    QTransform t3;
+    t3.translate(P1.x(), P1.y());
+    t3.rotate(rotation());
+    t3.translate(P3.x(), P3.y());
+    t3.rotate(-rotation());
+    t3.translate(-P3.x(), -P3.y());
+    t3.translate(-P1.x(), -P1.y());
+    QPointF newPos = t3.map(P1);
 
     // activate new geometry
+    setTransformOriginPoint(P3);
+    setPos(newPos);
     setRect(QRectF(0, 0, newSize.width(), newSize.height()));
 }
 
@@ -277,29 +471,27 @@ void RectItem::moveBottomHandle(const QPointF& scenePos) {
         newSize.setHeight(10);
     }
 
-    // PENDING: Calculate new pos and new rotationCenter
+    // calculate new center point - this will become the new transformation center point
+    QPointF P3(newSize.width()/2, newSize.height()/2);
+
+    // P1 is the fix point (in scene coordinates)
+    QPointF P1 = mapToScene(0, 0);
+
+    // transform P1 to the new item position
+    QTransform t3;
+    t3.translate(P1.x(), P1.y());
+    t3.rotate(rotation());
+    t3.translate(P3.x(), P3.y());
+    t3.rotate(-rotation());
+    t3.translate(-P3.x(), -P3.y());
+    t3.translate(-P1.x(), -P1.y());
+    QPointF newPos = t3.map(P1);
 
     // activate new geometry
+    setTransformOriginPoint(P3);
+    setPos(newPos);
     setRect(QRectF(0, 0, newSize.width(), newSize.height()));
 }
-
-
-void RectItem::moveBottomRightHandle(const QPointF& scenePos) {
-    QPointF posInItem = mapFromScene(scenePos);
-    QSizeF newSize = QSizeF(posInItem.x(), posInItem.y());
-    if (newSize.width() < 10) {
-        newSize.setWidth(10);
-    }
-    if (newSize.height() < 10) {
-        newSize.setHeight(10);
-    }
-
-    // PENDING: Calculate new pos and new rotationCenter
-
-    // activate new geometry
-    setRect(QRectF(0, 0, newSize.width(), newSize.height()));
-}
-
 
 
 void RectItem::moveTopHandle(const QPointF& scenePos) {
@@ -351,7 +543,6 @@ void RectItem::moveTopHandle(const QPointF& scenePos) {
 
 
 void RectItem::moveLeftHandle(const QPointF& scenePos) {
-    // P1 is the new upper right corner (in scene coordinates)
     QPointF P1 = scenePos;
 
     // P2 is the fix point (in scene coordinates)
@@ -397,30 +588,6 @@ void RectItem::moveLeftHandle(const QPointF& scenePos) {
     setTransformOriginPoint(P3);
 }
 
-
-void RectItem::moveTopRightHandle(const QPointF& scenePos) {
-
-}
-
-void RectItem::moveBottomLeftHandle(const QPointF& scenePos) {
-
-#if 0
-        case RectItem::BottomLeftHandle :
-                newSize = QSizeF(theFrame->rect().width() - posInItem.x(),
-                                 posInItem.y()); //  - theFrame->y());
-                if (newSize.width() < 10) {
-                    newSize.setWidth(10);
-                }
-                if (newSize.height() < 10) {
-                    newSize.setHeight(10);
-                }
-                //newPos = QPointF(theFrame->x() + theFrame->rect().width() - newSize.width() , theFrame->y());
-                newPos = QPointF(theFrame->x() + posInItem.x(), theFrame->y());
-
-                positionIndicator = QPoint(newPos.x(), newPos.y() + newSize.height());
-                break;
-#endif
-}
 
 QSizeF RectItem::getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos) {
     switch(editHandle) {
