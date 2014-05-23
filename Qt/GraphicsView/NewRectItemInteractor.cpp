@@ -32,7 +32,7 @@ void NewRectItemInteractor::mousePressEvent ( QMouseEvent * event ) {
     theItem->setItemSelected(true);
     // theFrame->setZValue(theScene->zOrder++);
 	editHandle = RectItem::BottomRightHandle;
-	offset = QSize(0,0);
+	offset = QPointF(0,0);
 }
 
 void NewRectItemInteractor::mouseReleaseEvent ( QMouseEvent* ) {

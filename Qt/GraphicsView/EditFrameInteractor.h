@@ -17,7 +17,7 @@ protected:
     AbstractEditHandle enabledHandles;
 
 	AbstractEditHandle editHandle;
-    QSizeF offset;       // mouse offset when resizing the item
+    QPointF offset;       // mouse offset when resizing the item
     QRectF originalRect;  // original rect for undo operation
 
 public:

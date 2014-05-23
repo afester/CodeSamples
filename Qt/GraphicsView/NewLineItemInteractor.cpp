@@ -32,7 +32,7 @@ void NewLineItemInteractor::mousePressEvent ( QMouseEvent * event ) {
     theItem->setItemSelected(true);
     // theFrame->setZValue(theScene->zOrder++);
 	editHandle = LineItem::P2Handle;
-	offset = QSize(0,0);
+	offset = QPointF(0,0);
 }
 
 void NewLineItemInteractor::mouseReleaseEvent ( QMouseEvent* ) {

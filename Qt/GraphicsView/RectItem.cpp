@@ -65,27 +65,23 @@ RectItem::RectItem(const QRectF & rect, QGraphicsItem * parent) :
 void RectItem::calculateHandles(GraphicsSheet* view) {
     const qreal handleSize = 8.0;   // TODO: read from view property
 
-    const qreal hsize = handleSize / view->transform().m11();
-    const qreal vsize = handleSize / view->transform().m22();
-
-    // Initialize handles
+    hsize = handleSize / view->transform().m11();
+    vsize = handleSize / view->transform().m22();
 
     const qreal width = rect().width();
     const qreal height = rect().height();
     const qreal xhalf = width / 2;
     const qreal yhalf = height / 2;
-    const qreal hsizeHalf = hsize / 2;
-    const qreal vsizeHalf = hsize /2;
 
-    rotationHandle = QRectF(xhalf - hsizeHalf,  vsize,              hsize, vsize);
-    topLeft =        QRectF(-hsizeHalf,         -vsizeHalf,         hsize, vsize);
-    topRight =       QRectF(width - hsizeHalf,  -vsizeHalf,         hsize, vsize);
-    bottomLeft =     QRectF(-hsize/2,           height - vsizeHalf, hsize, vsize);
-    bottomRight =    QRectF(width - hsizeHalf,  height - vsizeHalf, hsize, vsize);
-    top =            QRectF(xhalf - hsizeHalf,  -vsizeHalf,         hsize, vsize);
-    bottom =         QRectF(xhalf - hsizeHalf,  height - vsizeHalf, hsize, vsize);
-    left =           QRectF(-hsizeHalf,         yhalf - vsizeHalf,  hsize, vsize);
-    right =          QRectF(width - hsizeHalf,  yhalf - vsizeHalf,  hsize, vsize);
+    rotationHandle = QPointF(xhalf, 2*vsize);
+    topLeft        = QPointF(0, 0);
+    topRight       = QPointF(width, 0);
+    bottomLeft     = QPointF(0, height);
+    bottomRight    = QPointF(width, height);
+    top            = QPointF(xhalf, 0);
+    bottom         = QPointF(xhalf, height);
+    left           = QPointF(0, yhalf);
+    right          = QPointF(width, yhalf);
 }
 
 
@@ -99,24 +95,25 @@ AbstractEditHandle RectItem::getEditHandle(GraphicsSheet* view, const QPointF& s
     calculateHandles(view);
 
     QPointF pos = mapFromScene(scenePos);
+    QRectF area = QRectF(pos.x() - hsize/2, pos.y() - vsize/2, hsize, vsize);
     if (isSelected()) {
-        if ( (enabledHandles & RotationHandleMask) && rotationHandle.contains(pos.toPoint())) {
+        if ( (enabledHandles & RotationHandleMask) && area.contains(rotationHandle)) { // rotationHandle.contains(pos.toPoint())) {
             return RotationHandle;
-        } else if ( (enabledHandles & TopLeftHandleMask) && topLeft.contains(pos.toPoint())) {
+        } else if ( (enabledHandles & TopLeftHandleMask) && area.contains(topLeft)) { //  topLeft.contains(pos.toPoint())) {
         	return TopLeftHandle;
-        } else if ( (enabledHandles & TopHandleMask) && top.contains(pos.toPoint())) {
+        } else if ( (enabledHandles & TopHandleMask) && area.contains(top)) { // top.contains(pos.toPoint())) {
         	return TopHandle;
-        } else if ( (enabledHandles & TopRightHandleMask) && topRight.contains(pos.toPoint())) {
+        } else if ( (enabledHandles & TopRightHandleMask) && area.contains(topRight)) { // .contains(pos.toPoint())) {
         	return TopRightHandle;
-        } else if ( (enabledHandles & RightHandleMask) && right.contains(pos.toPoint())) {
+        } else if ( (enabledHandles & RightHandleMask) && area.contains(right)) { // .contains(pos.toPoint())) {
         	return RightHandle;
-        } else if ( (enabledHandles & BottomRightHandleMask) && bottomRight.contains(pos.toPoint())) {
+        } else if ( (enabledHandles & BottomRightHandleMask) && area.contains(bottomRight)) { // .contains(pos.toPoint())) {
         	return BottomRightHandle;
-        } else if ( (enabledHandles & BottomHandleMask) && bottom.contains(pos.toPoint())) {
+        } else if ( (enabledHandles & BottomHandleMask) && area.contains(bottom)) { // .contains(pos.toPoint())) {
         	return BottomHandle;
-        } else if ( (enabledHandles & BottomLeftHandleMask) && bottomLeft.contains(pos.toPoint())) {
+        } else if ( (enabledHandles & BottomLeftHandleMask) && area.contains(bottomLeft)) { // .contains(pos.toPoint())) {
             return BottomLeftHandle;
-        } else if ( (enabledHandles & LeftHandleMask) && left.contains(pos.toPoint())) {
+        } else if ( (enabledHandles & LeftHandleMask) && area.contains(left)) { // .contains(pos.toPoint())) {
         	return LeftHandle;
         } else if ( (enabledHandles & MoveHandleMask) && rect().contains(pos.toPoint())) {
                 return MoveHandle;
@@ -156,26 +153,25 @@ void RectItem::paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEdi
 		painter->setPen(QPen(Qt::black, 0, Qt::SolidLine));	// Qt5: need to explicitly set width to 0, even though the docs claim other
 
 		if (enabledHandles & RotationHandleMask)
-			painter->drawEllipse(rotationHandle);
+			painter->drawEllipse(rotationHandle, hsize/2, vsize/2);
 		if (enabledHandles & TopLeftHandleMask)
-			painter->drawRect(topLeft);
+			painter->drawRect(QRectF(topLeft.x() - hsize/2, topLeft.y() - vsize/2, hsize, vsize));
 		if (enabledHandles & TopHandleMask)
-			painter->drawRect(top);
+		    painter->drawRect(QRectF(top.x() - hsize/2, top.y() - vsize/2, hsize, vsize));
 		if (enabledHandles & TopRightHandleMask)
-			painter->drawRect(topRight);
+            painter->drawRect(QRectF(topRight.x() - hsize/2, topRight.y() - vsize/2, hsize, vsize));
 		if (enabledHandles & RightHandleMask)
-			painter->drawRect(right);
+		    painter->drawRect(QRectF(right.x() - hsize/2, right.y() - vsize/2, hsize, vsize));
 		if (enabledHandles & BottomRightHandleMask)
-			painter->drawRect(bottomRight);
+            painter->drawRect(QRectF(bottomRight.x() - hsize/2, bottomRight.y() - vsize/2, hsize, vsize));
 		if (enabledHandles & BottomHandleMask)
-			painter->drawRect(bottom);
+            painter->drawRect(QRectF(bottom.x() - hsize/2, bottom.y() - vsize/2, hsize, vsize));
 		if (enabledHandles & BottomLeftHandleMask)
-			painter->drawRect(bottomLeft);
+            painter->drawRect(QRectF(bottomLeft.x() - hsize/2, bottomLeft.y() - vsize/2, hsize, vsize));
 		if (enabledHandles & LeftHandleMask)
-			painter->drawRect(left);
+            painter->drawRect(QRectF(left.x() - hsize/2, left.y() - vsize/2, hsize, vsize));
     }
 }
-
 
 
 void RectItem::moveRotationHandle(const QPointF& scenePos) {
@@ -370,51 +366,51 @@ void RectItem::moveLeftHandle(const QPointF& P2) {
 }
 
 
-QSizeF RectItem::getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos) {
+QPointF RectItem::getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos) {
+    QPointF ref = scenePos;
+
     switch(editHandle) {
         case RectItem::TopLeftHandle :
-                return QSizeF(0, 0); // theFrame->x() - scenePos.x(), theFrame->y() - scenePos.y());
-                //positionIndicator = QPoint(theFrame->x(), theFrame->y());
+            ref = mapToScene(topLeft);
+            break;
 
         case RectItem::TopHandle :
-                return QSizeF(0, 0); // QSizeF(0, theFrame->y() - scenePos.y());
-                //positionIndicator = QPoint(-1, theFrame->y());
+            ref = mapToScene(top);
+            break;
 
         case RectItem::TopRightHandle :
-                return QSizeF(0, 0); // QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(), theFrame->y() - scenePos.y());
-               // positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(), theFrame->y());
+            ref = mapToScene(topRight);
+            break;
 
         case RectItem::LeftHandle :
-                return QSizeF(0, 0); // QSizeF(theFrame->x() - scenePos.x(), 0);
-                //positionIndicator = QPoint(theFrame->x(), -1);
+            ref = mapToScene(left);
+            break;
 
         case RectItem::RotationHandle :
-                return QSizeF(0, 0);
+            break;
 
         case RectItem::RightHandle :
-                return QSizeF(0, 0); // QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(), 0);
-                //positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(), -1);
+            ref = mapToScene(right);
+            break;
 
         case RectItem::BottomLeftHandle :
-                return QSizeF(0, 0); // QSizeF(theFrame->x() - scenePos.x(), theFrame->y() + theFrame->rect().height() - scenePos.y());
-                //positionIndicator = QPoint(theFrame->x(), theFrame->y() + theFrame->rect().height());
+            ref = mapToScene(bottomLeft);
+            break;
 
         case RectItem::BottomHandle :
-                return QSizeF(0, 0); // QSizeF(0, theFrame->y() + theFrame->rect().height() - scenePos.y());
-               // positionIndicator = QPoint(-1, theFrame->y() + theFrame->rect().height());
+            ref = mapToScene(bottom);
+            break;
 
         case RectItem::BottomRightHandle :
-                return QSizeF(0, 0); // QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(),
-                               //theFrame->y() + theFrame->rect().height() - scenePos.y());
-               // positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(),
-            //                               theFrame->y() + theFrame->rect().height());
+            ref = mapToScene(bottomRight);
+            break;
 
         case RectItem::MoveHandle:
-                return QSize(x() - scenePos.x(), y() - scenePos.y());
-                break;
+            ref = pos();
+            break;
     }
 
-    return QSize(0, 0);
+    return ref - scenePos;
 }
 
 

@@ -102,7 +102,7 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 	    if (editHandle == 11) {  // TODO: enum/constant!!!
 	        event->ignore();
 	    } else {
-            QPointF pos = scenePos + QPointF(offset.width(), offset.height());
+            QPointF pos = scenePos + offset; // QPointF(offset.width(), offset.height());
             QPoint positionIndicator(-1,-1);
 #if 0
             qDebug() << "-------------";

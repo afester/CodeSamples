@@ -75,7 +75,7 @@ public:
     virtual void paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles = AllHandlesMask);
 
     // @Override
-    virtual QSizeF getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos);
+    virtual QPointF getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos);
 
     // @Override
     virtual void moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos);
@@ -117,6 +117,7 @@ return path;
 
 private:
     void activateGeometry(const QSizeF& newSize, const QPointF& pos1);
+
     void moveTopLeftHandle(const QPointF& scenePos);
     void moveRotationHandle(const QPointF& scenePos);
     void moveRightHandle(const QPointF& scenePos);
@@ -127,15 +128,19 @@ private:
     void moveLeftHandle(const QPointF& scenePos);
     void moveBottomLeftHandle(const QPointF& scenePos);
 
-    QRectF rotationHandle;
-    QRectF topLeft;
-    QRectF topRight;
-    QRectF bottomLeft;
-    QRectF bottomRight;
-    QRectF top;
-    QRectF bottom;
-    QRectF left;
-    QRectF right;
+    // the size of the visible edit handle
+    qreal hsize, vsize;
+
+    // The item coordinates of each edit handle
+    QPointF rotationHandle;
+    QPointF topLeft;
+    QPointF topRight;
+    QPointF bottomLeft;
+    QPointF bottomRight;
+    QPointF top;
+    QPointF bottom;
+    QPointF left;
+    QPointF right;
 };
 
 #endif

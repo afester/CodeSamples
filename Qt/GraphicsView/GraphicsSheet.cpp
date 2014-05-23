@@ -160,10 +160,13 @@ void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
             edItem->paintHandles(this, painter, RectItem::AllHandlesMask);
             painter->restore();
 
+#if 0
+            // DEBUG: draw key points of the item (position and rotation center)
             QHash<QString, QPointF> mapped;
             mapped.insert("pos", item->pos());
             mapped.insert("rot", item->mapToScene(item->transformOriginPoint()));
             drawPoints(painter, mapped);
+#endif
 
 #if 0
             // DEBUG: draw the shape of the item

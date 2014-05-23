@@ -31,7 +31,7 @@ public:
 
     void paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles = AllHandlesMask);
 
-    QSizeF getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos);
+    QPointF getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos);
 
     void moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos);
 

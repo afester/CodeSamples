@@ -40,7 +40,7 @@ void LineItem::calculateHandles(GraphicsSheet* view) {
 }
 
 
-unsigned int /*EditHandle*/ LineItem::getEditHandle(GraphicsSheet* view, const QPointF& scenePos, unsigned int /*EditHandles*/ enabledHandles){
+AbstractEditHandle LineItem::getEditHandle(GraphicsSheet* view, const QPointF& scenePos, unsigned int /*EditHandles*/ enabledHandles){
     if (isSelected()) {
         calculateHandles(view);
         QPointF pos = mapFromScene(scenePos);
@@ -57,7 +57,7 @@ unsigned int /*EditHandle*/ LineItem::getEditHandle(GraphicsSheet* view, const Q
     return NoHandle;
 }
 
-void LineItem::paintHandles(GraphicsSheet* view, QPainter * painter, unsigned int/*EditHandles */ enabledHandles){
+void LineItem::paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles){
     if (isSelected()) {
         calculateHandles(view);
 
@@ -74,7 +74,8 @@ void LineItem::paintHandles(GraphicsSheet* view, QPainter * painter, unsigned in
 }
 
 
-QSizeF LineItem::getHandleOffset(unsigned int editHandle, const QPointF& scenePos) {
+QPointF LineItem::getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos) {
+#if 0
     switch(editHandle) {
         case P1Handle :
                 return QSizeF(0, 0); // QSizeF(theFrame->x() - scenePos.x(), 0);
@@ -88,8 +89,9 @@ QSizeF LineItem::getHandleOffset(unsigned int editHandle, const QPointF& scenePo
         case MoveHandle:
                 return QSize(x() - scenePos.x(), y() - scenePos.y());
     }
+#endif
 
-    return QSize();
+    return QPointF();
 }
 
 

@@ -16,7 +16,7 @@ public:
 
     virtual void paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles = 0xffff) = 0;
 
-    virtual QSizeF getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos) = 0;
+    virtual QPointF getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos) = 0;
 
     virtual void moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos) = 0;
 
