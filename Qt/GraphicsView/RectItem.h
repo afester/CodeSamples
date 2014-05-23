@@ -116,6 +116,7 @@ return path;
 }
 
 private:
+    void activateGeometry(const QSizeF& newSize, const QPointF& pos1);
     void moveTopLeftHandle(const QPointF& scenePos);
     void moveRotationHandle(const QPointF& scenePos);
     void moveRightHandle(const QPointF& scenePos);
