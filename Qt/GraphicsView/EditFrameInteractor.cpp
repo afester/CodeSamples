@@ -7,6 +7,7 @@
 #include <QGraphicsItem>
 #include <QUndoCommand>
 #include <QMimeData>
+#include <QDebug>
 #include <math.h>
 
 //#include "Commands.h"
@@ -94,25 +95,26 @@ void EditFrameInteractor::hoverOverEvent ( QMouseEvent * event ) {
 
 
 void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
-    QPointF scenePos = theView->mapToScene(event->pos());
 
 	// check if currently a drag is in progress
 	if (theItem) {
-
 	    if (editHandle == 11) {  // TODO: enum/constant!!!
 	        event->ignore();
 	    } else {
-            QPointF pos = scenePos + offset; // QPointF(offset.width(), offset.height());
-            QPoint positionIndicator(-1,-1);
-#if 0
-            qDebug() << "-------------";
-            qDebug() << pos;
-            QPointF pos2 = QPointF(pos.toPoint());  // correct only for scale 1:1
-            qDebug() << pos2;
-#endif
+	        // Map the view mouse position into the corresponding scene coordinates
+	        QPointF scenePos = theView->mapToScene(event->pos());
 
-            theItem->moveHandle(editHandle, pos);
+	        // consider the offset from the real drag point within the handle area
+	        scenePos += offset;
 
+	        // snap the position to the defined snap points
+            QPointF snappedPos = theView->snap(scenePos);
+qDebug() << scenePos << " => " << snappedPos;
+
+            // move the handle to the new position
+            theItem->moveHandle(editHandle, snappedPos);
+
+            // QPoint positionIndicator(-1,-1);
             // theView->setPositionIndicators(positionIndicator);
 	    }
 	} else {

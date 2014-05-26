@@ -33,7 +33,7 @@ void NewTextItemInteractor::mousePressEvent ( QMouseEvent * event ) {
     newItem->setText("Text");
     // theFrame->setZValue(theScene->zOrder++);
 	editHandle = RectItem::BottomRightHandle;
-	offset = QSize(0,0);
+	offset = QPointF(0,0);
 }
 
 void NewTextItemInteractor::mouseReleaseEvent ( QMouseEvent* ) {

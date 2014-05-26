@@ -21,6 +21,7 @@ class ScaleWidget;
 class ScaleEdgeWidget;
 class Interactor;
 class InteractableItem;
+class Snapper;
 
 class GraphicsSheet : public QGraphicsView {
     Q_OBJECT;
@@ -45,7 +46,9 @@ class GraphicsSheet : public QGraphicsView {
     float zoomScale;    // e.g. 50% => 0.5
     QSizeF sceneSize;   // e.g. 148x210
     bool landscape;     // true or false (landscape or portrait)
-    Interactor* currentInteractor;
+
+    Interactor* interactor;
+    Snapper* snapper;
 
     void updateSize();
 
@@ -78,10 +81,6 @@ public:
 
     void setSize(const QSizeF& dimension);
 
-    //void setColor(const QColor& color);
-
-    //QColor getColor();
-
     void setScaleBackground(const QColor& color);
 
     void setInteractor(Interactor* interactor);
@@ -89,6 +88,10 @@ public:
     Interactor* getInteractor();
 
     InteractableItem* getFocusItem() const;
+
+    void setSnapper(Snapper* snapper);
+
+    virtual QPointF snap(const QPointF& pos);
 
 public slots:
     void setScale(int idx);

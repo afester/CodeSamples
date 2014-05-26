@@ -19,8 +19,9 @@
 #include "ScaleWidget.h"
 #include "ScaleEdgeWidget.h"
 #include "Interactor.h"
-#include "RectItem.h"
+#include "Snapper.h"
 #include "Log.h"
+#include "RectItem.h"
 
 #define RULERHEIGHT 23
 #define RULERWIDTH 23
@@ -45,7 +46,7 @@ QGraphicsItem* GraphicsScene::getItemAt(const QPointF & position) {
 
 GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent),
         drawScale(1.0), zoomScale(1.0), sceneSize(100, 100), landscape(true),
-        currentInteractor(0) {
+        interactor(0), snapper(0) {
 
 	setRenderHint(QPainter::Antialiasing);
 	setAutoFillBackground(true);
@@ -367,7 +368,7 @@ void GraphicsSheet::areaMoved() {
 
 
 void GraphicsSheet::setInteractor(Interactor* interactor) {
-    this->currentInteractor = interactor;
+    this->interactor = interactor;
     if (interactor != 0) {
         interactor->setView(this);
     }
@@ -375,8 +376,9 @@ void GraphicsSheet::setInteractor(Interactor* interactor) {
 
 
 Interactor* GraphicsSheet::getInteractor() {
-    return currentInteractor;
+    return interactor;
 }
+
 
 InteractableItem* GraphicsSheet::getFocusItem() const {
     if (scene()->selectedItems().size() > 0) {
@@ -385,9 +387,24 @@ InteractableItem* GraphicsSheet::getFocusItem() const {
     return 0;
 }
 
+
+void GraphicsSheet::setSnapper(Snapper* snapper) {
+    this->snapper = snapper;
+}
+
+
+QPointF GraphicsSheet::snap(const QPointF& pos) {
+    if (snapper != 0) {
+        return snapper->snap(pos);
+    }
+
+    return pos;
+}
+
+
 void GraphicsSheet::mousePressEvent ( QMouseEvent * event ){
-    if (currentInteractor) {
-        currentInteractor->mousePressEvent(event);
+    if (interactor) {
+        interactor->mousePressEvent(event);
         if (!event->isAccepted()) {
             QGraphicsView::mousePressEvent(event);
         }
@@ -403,8 +420,8 @@ void GraphicsSheet::mouseMoveEvent ( QMouseEvent * event ) {
     xScale->setPos(xSnapped);
     yScale->setPos(ySnapped);
 
-    if (currentInteractor) {
-        currentInteractor->mouseMoveEvent(event);
+    if (interactor) {
+        interactor->mouseMoveEvent(event);
         if (!event->isAccepted()) {
             QGraphicsView::mouseMoveEvent(event);
         }
@@ -413,8 +430,8 @@ void GraphicsSheet::mouseMoveEvent ( QMouseEvent * event ) {
 
 
 void GraphicsSheet::mouseReleaseEvent ( QMouseEvent * event ){
-    if (currentInteractor) {
-        currentInteractor->mouseReleaseEvent(event);
+    if (interactor) {
+        interactor->mouseReleaseEvent(event);
         if (!event->isAccepted()) {
             QGraphicsView::mouseReleaseEvent(event);
         }
@@ -423,8 +440,8 @@ void GraphicsSheet::mouseReleaseEvent ( QMouseEvent * event ){
 
 
 void GraphicsSheet::wheelEvent(QWheelEvent * event ) {
-    if (currentInteractor) {
-        currentInteractor->wheelEvent(event);
+    if (interactor) {
+        interactor->wheelEvent(event);
         if (!event->isAccepted()) {
             QGraphicsView::wheelEvent(event);
         }
@@ -435,7 +452,7 @@ void GraphicsSheet::wheelEvent(QWheelEvent * event ) {
 void GraphicsSheet::paste() {
 //    Log::log(Log::DEBUG, "GraphicsSheet") << "    PASTE";
 
-    if (currentInteractor) {
-        currentInteractor->paste();
+    if (interactor) {
+        interactor->paste();
     }
 }

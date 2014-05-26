@@ -18,13 +18,17 @@
 
 #include "GraphicsSheet.h"
 #include "ScrollAreaLayout.h"
+
 #include "RectItem.h"
 #include "LineItem.h"
 #include "TextItem.h"
+
 #include "EditFrameInteractor.h"
 #include "NewRectItemInteractor.h"
 #include "NewLineItemInteractor.h"
 #include "NewTextItemInteractor.h"
+#include "Snapper.h"
+
 #include "LabelledComboBox.h"
 #include "MainWindow.h"
 
@@ -235,7 +239,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     newTextItemInteractor = new NewTextItemInteractor();
 
     graphicsSheet->setInteractor(selectInteractor);
+    graphicsSheet->setSnapper(new UnitSnapper());
 }
+
 
 #if 0
 qreal calculateDistance(const QVector2D& v, const QVector2D& w, const QVector2D& p) {
