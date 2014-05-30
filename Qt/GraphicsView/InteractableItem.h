@@ -25,6 +25,8 @@ public:
     virtual void paintSelectedBorder(GraphicsSheet* view, QPainter * painter) = 0;
 
     virtual void setItemSelected(bool sel) = 0;
+
+    virtual QPointF getNearestEdge(GraphicsSheet* theView, const QPointF& scenePos) = 0;
 };
 
 #endif

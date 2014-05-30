@@ -253,6 +253,11 @@ void GraphicsSheet::setScale(float scale) {
 }
 
 
+qreal GraphicsSheet::getScale() {
+    return drawScale;
+}
+
+
 void GraphicsSheet::setSize(const QSizeF& dimension) {
     sceneSize = dimension;
     updateSize();
@@ -390,6 +395,7 @@ InteractableItem* GraphicsSheet::getFocusItem() const {
 
 void GraphicsSheet::setSnapper(Snapper* snapper) {
     this->snapper = snapper;
+    this->snapper->setView(this);
 }
 
 
@@ -399,6 +405,12 @@ QPointF GraphicsSheet::snap(const QPointF& pos) {
     }
 
     return pos;
+}
+
+
+void GraphicsSheet::setPositionIndicators(const QPointF& pos) {
+    xScale->setPos(pos.x());
+    yScale->setPos(pos.y());
 }
 
 
@@ -413,13 +425,14 @@ void GraphicsSheet::mousePressEvent ( QMouseEvent * event ){
 
 
 void GraphicsSheet::mouseMoveEvent ( QMouseEvent * event ) {
+#if 0
     float xSnapped = xScale->snapToTick(event->x() + horizontalScrollBar()->value());
     float ySnapped = yScale->snapToTick(event->y() + verticalScrollBar()->value());
     // qDebug() << "Scene coords: " << QPointF(xSnapped, ySnapped);
 
     xScale->setPos(xSnapped);
     yScale->setPos(ySnapped);
-
+#endif
     if (interactor) {
         interactor->mouseMoveEvent(event);
         if (!event->isAccepted()) {

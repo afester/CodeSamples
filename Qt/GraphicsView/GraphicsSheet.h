@@ -77,6 +77,8 @@ public:
 
     void setScale(float scale);
 
+    qreal getScale();
+
     void setZoom(float zoom);
 
     void setSize(const QSizeF& dimension);
@@ -92,6 +94,8 @@ public:
     void setSnapper(Snapper* snapper);
 
     virtual QPointF snap(const QPointF& pos);
+
+    void setPositionIndicators(const QPointF& pos);
 
 public slots:
     void setScale(int idx);

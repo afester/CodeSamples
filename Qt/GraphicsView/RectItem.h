@@ -83,6 +83,9 @@ public:
     // @Override
     virtual void setCursor(GraphicsSheet* theView, AbstractEditHandle handle);
 
+    // @Override
+    virtual QPointF getNearestEdge(GraphicsSheet* theView, const QPointF& scenePos);
+
 //    void paintCoordinates(GraphicsSheet* view, QPainter* painter);
 
     /**

@@ -39,17 +39,16 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
         } else if (editHandle == 11) {  // TODO: enum/constant!!!
             event->ignore();
         } else {
-            QPoint positionIndicator(-1,-1);
             offset = theItem->getHandleOffset(editHandle, scenePos);
 
             // save current values for undo
-    //        originalRect.setRect(theFrame->x(), theFrame->y(),
-    //                             theFrame->rect().width(), theFrame->rect().height());
-    //        originalAngle = theFrame->rotation();
 #if 0
-            theView->setPositionIndicators(positionIndicator);
+            originalRect.setRect(theFrame->x(), theFrame->y(),
+                                 theFrame->rect().width(), theFrame->rect().height());
+            originalAngle = theFrame->rotation();
 #endif
 
+            theView->setPositionIndicators(scenePos);
         }
 	}
 
@@ -86,6 +85,7 @@ void EditFrameInteractor::hoverOverEvent ( QMouseEvent * event ) {
 		theView->setCursor(Qt::ArrowCursor);
 	}
 
+
 #if 0
 	QPoint pos = QPoint((int) floor(scenePos.x()),
 						(int) floor(scenePos.y()));
@@ -114,8 +114,8 @@ qDebug() << scenePos << " => " << snappedPos;
             // move the handle to the new position
             theItem->moveHandle(editHandle, snappedPos);
 
-            // QPoint positionIndicator(-1,-1);
-            // theView->setPositionIndicators(positionIndicator);
+            //QPointF positionIndicator();
+            theView->setPositionIndicators(snappedPos);
 	    }
 	} else {
 		hoverOverEvent(event);
@@ -145,12 +145,8 @@ void EditFrameInteractor::mouseReleaseEvent ( QMouseEvent * event ) {
                 QUndoCommand* undo = new EditDoneCommand(originalRect, originalAngle, theItem);
                 theScene->getUndoStack()->push(undo);
             }
-
-            QPointF scenePos = theView->mapToScene(event->pos());
-            QPoint positionIndicator = QPoint((int) floor(scenePos.x()),
-                                              (int) floor(scenePos.y()));
-            theView->setPositionIndicators(positionIndicator);
 #endif
+            theView->setPositionIndicators(QPointF(-1, -1));;
         }
 
 		theItem = 0;

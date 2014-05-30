@@ -239,7 +239,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     newTextItemInteractor = new NewTextItemInteractor();
 
     graphicsSheet->setInteractor(selectInteractor);
-    graphicsSheet->setSnapper(new UnitSnapper());
+    graphicsSheet->setSnapper(new EdgeSnapper(new GridSnapper()));
 }
 
 

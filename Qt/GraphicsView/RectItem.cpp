@@ -97,6 +97,7 @@ AbstractEditHandle RectItem::getEditHandle(GraphicsSheet* view, const QPointF& s
     QPointF pos = mapFromScene(scenePos);
     QRectF area = QRectF(pos.x() - hsize/2, pos.y() - vsize/2, hsize, vsize);
     if (isSelected()) {
+
         if ( (enabledHandles & RotationHandleMask) && area.contains(rotationHandle)) { // rotationHandle.contains(pos.toPoint())) {
             return RotationHandle;
         } else if ( (enabledHandles & TopLeftHandleMask) && area.contains(topLeft)) { //  topLeft.contains(pos.toPoint())) {
@@ -511,6 +512,37 @@ void RectItem::setCursor(GraphicsSheet* theView, AbstractEditHandle handle) {
                 break;
     }
 }
+
+QPointF RectItem::getNearestEdge(GraphicsSheet* view, const QPointF& scenePos) {
+    QPointF pos = mapFromScene(scenePos);
+
+    // topLeft, topRight, bottomRight, bottomLeft
+    // QPointF p1 = scenePos - topLeft;
+
+    calculateHandles(view);
+
+    qreal min = (pos - topLeft).manhattanLength();
+    qreal l2 = (pos - topRight).manhattanLength();
+    qreal l3 = (pos - bottomRight).manhattanLength();
+    qreal l4 = (pos - bottomLeft).manhattanLength();
+    qDebug() << min << ", " << l2<<", "<<l3<<", "<<l4;
+
+    QPointF result = topLeft;
+    if (l2 < min) {
+        result = topRight;
+        min = l2;
+    }
+    if (l3 < min) {
+        result = bottomRight;
+        min = l3;
+    }
+    if (l4 < min) {
+        result = bottomLeft;
+    }
+
+    return mapToScene(result);
+}
+
 
 #if 0
 void RectItem::paintCoordinates(GraphicsSheet* view, QPainter* painter) {

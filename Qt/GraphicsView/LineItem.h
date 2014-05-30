@@ -42,6 +42,10 @@ public:
     void paintSelectedBorder(GraphicsSheet* view, QPainter * painter);
 
     void setItemSelected(bool b) { setSelected(b); }
+
+    // @Override
+    virtual QPointF getNearestEdge(GraphicsSheet* theView, const QPointF& scenePos);
+
 #if 0
     /**
      * Accepts the visit from an ItemVisitor.
