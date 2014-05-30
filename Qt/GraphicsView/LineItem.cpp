@@ -25,29 +25,16 @@ LineItem::LineItem(const QPointF& pos1, const QPointF& pos2, QGraphicsItem * par
 }
 
 
-void LineItem::calculateHandles(GraphicsSheet* view) {
-    const qreal handleSize = 8.0;   // TODO: read from view property
-
-    const qreal hsize = handleSize / view->transform().m11();
-    const qreal vsize = handleSize / view->transform().m22();
-
-    // Initialize handles
-    const qreal hsizeHalf = hsize / 2;
-    const qreal vsizeHalf = hsize /2;
-
-    p1Handle = QRectF(line().p1().x() - hsizeHalf, line().p1().y() - vsizeHalf, hsize, vsize);
-    p2Handle = QRectF(line().p2().x() - hsizeHalf, line().p2().y() - vsizeHalf, hsize, vsize);
-}
-
-
-AbstractEditHandle LineItem::getEditHandle(GraphicsSheet* view, const QPointF& scenePos, unsigned int /*EditHandles*/ enabledHandles){
+AbstractEditHandle LineItem::getEditHandle(GraphicsSheet* view, const QPointF& scenePos, AbstractEditHandle enabledHandles){
     if (isSelected()) {
-        calculateHandles(view);
+        QSizeF handleSize = view->getHandleSize();
         QPointF pos = mapFromScene(scenePos);
+        QRectF area = QRectF(pos.x() - handleSize.width() / 2, pos.y() - handleSize.height() / 2,
+                             handleSize.width(), handleSize.height());
 
-        if ( (enabledHandles & P2HandleMask) && p2Handle.contains(pos.toPoint())) {
+        if ( (enabledHandles & P2HandleMask) && area.contains(line().p2())) {
             return P2Handle;
-        } else if ( (enabledHandles & P1HandleMask) && p1Handle.contains(pos.toPoint())) {
+        } else if ( (enabledHandles & P1HandleMask) && area.contains(line().p1())) {
             return P1Handle;
         } else if ( (enabledHandles & MoveHandleMask) && shape().contains(pos.toPoint())) {
             return MoveHandle;
@@ -57,45 +44,51 @@ AbstractEditHandle LineItem::getEditHandle(GraphicsSheet* view, const QPointF& s
     return NoHandle;
 }
 
+
 void LineItem::paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles){
     if (isSelected()) {
-        calculateHandles(view);
+        QSizeF handleSize = view->getHandleSize();
 
         // Paint the handles
         painter->setBrush(Qt::green);
         painter->setPen(QPen(Qt::black, 0, Qt::SolidLine));
 
         if (enabledHandles & P2HandleMask)
-            painter->drawRect(p2Handle);
+            painter->drawRect(QRectF(line().p2().x() - handleSize.width() / 2,
+                                     line().p2().y() - handleSize.height() / 2,
+                                     handleSize.width(), handleSize.height()));
         if (enabledHandles & P1HandleMask)
-            painter->drawRect(p1Handle);
+            painter->drawRect(QRectF(line().p1().x() - handleSize.width() / 2,
+                                     line().p1().y() - handleSize.height() / 2,
+                                     handleSize.width(), handleSize.height()));
     }
 
 }
 
 
 QPointF LineItem::getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos) {
-#if 0
+    QPointF ref = scenePos;
+
+
     switch(editHandle) {
         case P1Handle :
-                return QSizeF(0, 0); // QSizeF(theFrame->x() - scenePos.x(), 0);
-                //positionIndicator = QPoint(theFrame->x(), -1);
+            ref = mapToScene(line().p1());
+            break;
 
         case P2Handle :
-                return QSizeF(0, 0); // QSizeF(theFrame->x() + theFrame->rect().width() - scenePos.x(), 0);
-                //positionIndicator = QPoint(theFrame->x() + theFrame->rect().width(), -1);
-            //                               theFrame->y() + theFrame->rect().height());
+            ref = mapToScene(line().p2());
+            break;
 
         case MoveHandle:
-                return QSize(x() - scenePos.x(), y() - scenePos.y());
+            ref = pos();
+            break;
     }
-#endif
 
-    return QPointF();
+    return ref - scenePos;
 }
 
 
-void LineItem::moveHandle(unsigned int /*EditHandle*/ editHandle, const QPointF& scenePos){
+void LineItem::moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos){
 
     switch(editHandle) {
         case LineItem::P1Handle : {
@@ -153,6 +146,23 @@ void LineItem::setCursor(GraphicsSheet* theView, unsigned int /*EditHandle*/ han
                 break;
     }
 
+}
+
+
+QPointF LineItem::getNearestEdge(GraphicsSheet* theView, const QPointF& scenePos) {
+    QPointF pos = mapFromScene(scenePos);
+
+    qreal l1 = (pos - line().p1()).manhattanLength();
+    qreal l2 = (pos - line().p2()).manhattanLength();
+
+    QPointF result;
+    if (l1 < l2) {
+        result = line().p1();
+    } else {
+        result = line().p2();
+    }
+
+    return mapToScene(result);
 }
 
 

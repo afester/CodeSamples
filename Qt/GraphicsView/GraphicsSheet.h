@@ -97,6 +97,11 @@ public:
 
     void setPositionIndicators(const QPointF& pos);
 
+    /**
+     * @return The size of a handle for an interactable item.
+     */
+    QSizeF getHandleSize();
+
 public slots:
     void setScale(int idx);
 

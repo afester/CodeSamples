@@ -108,15 +108,7 @@ protected:
     virtual QRectF boundingRect() const;
 
     // @Override
-QPainterPath shape () const {
-QPainterPath path;
-
-QRectF r = rect();
-r.adjust(-2,-2,2,2);
-path.addRect(r);
-
-return path;
-}
+    virtual QPainterPath shape () const;
 
 private:
     void activateGeometry(const QSizeF& newSize, const QPointF& pos1);
@@ -130,9 +122,6 @@ private:
     void moveTopRightHandle(const QPointF& scenePos);
     void moveLeftHandle(const QPointF& scenePos);
     void moveBottomLeftHandle(const QPointF& scenePos);
-
-    // the size of the visible edit handle
-    qreal hsize, vsize;
 
     // The item coordinates of each edit handle
     QPointF rotationHandle;

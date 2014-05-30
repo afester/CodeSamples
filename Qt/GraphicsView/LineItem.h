@@ -67,13 +67,6 @@ protected:
 
    // @Override
    void paint ( QPainter * painter, const QStyleOptionGraphicsItem * style, QWidget *widget);
-
-private:
-    void calculateHandles(GraphicsSheet* view);
-
-    QRectF p1Handle;
-    QRectF p2Handle;
-
 };
 
 #endif

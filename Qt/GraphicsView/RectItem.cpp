@@ -63,17 +63,12 @@ RectItem::RectItem(const QRectF & rect, QGraphicsItem * parent) :
 
 
 void RectItem::calculateHandles(GraphicsSheet* view) {
-    const qreal handleSize = 8.0;   // TODO: read from view property
-
-    hsize = handleSize / view->transform().m11();
-    vsize = handleSize / view->transform().m22();
-
     const qreal width = rect().width();
     const qreal height = rect().height();
     const qreal xhalf = width / 2;
     const qreal yhalf = height / 2;
 
-    rotationHandle = QPointF(xhalf, 2*vsize);
+    rotationHandle = QPointF(xhalf, 2 * view->getHandleSize().height());
     topLeft        = QPointF(0, 0);
     topRight       = QPointF(width, 0);
     bottomLeft     = QPointF(0, height);
@@ -91,12 +86,25 @@ QRectF RectItem::boundingRect() const {
 }
 
 
-AbstractEditHandle RectItem::getEditHandle(GraphicsSheet* view, const QPointF& scenePos, unsigned int /*EditHandles */ enabledHandles) {
-    calculateHandles(view);
+QPainterPath RectItem::shape () const {
+    QPainterPath path;
 
-    QPointF pos = mapFromScene(scenePos);
-    QRectF area = QRectF(pos.x() - hsize/2, pos.y() - vsize/2, hsize, vsize);
+    QRectF r = rect();
+    r.adjust(-2,-2,2,2);
+    path.addRect(r);
+
+    return path;
+}
+
+
+AbstractEditHandle RectItem::getEditHandle(GraphicsSheet* view, const QPointF& scenePos, unsigned int /*EditHandles */ enabledHandles) {
     if (isSelected()) {
+        calculateHandles(view);
+
+        QSizeF handleSize = view->getHandleSize();
+        QPointF pos = mapFromScene(scenePos);
+        QRectF area = QRectF(pos.x() - handleSize.width() / 2, pos.y() - handleSize.height() / 2,
+                             handleSize.width(), handleSize.height());
 
         if ( (enabledHandles & RotationHandleMask) && area.contains(rotationHandle)) { // rotationHandle.contains(pos.toPoint())) {
             return RotationHandle;
@@ -117,7 +125,7 @@ AbstractEditHandle RectItem::getEditHandle(GraphicsSheet* view, const QPointF& s
         } else if ( (enabledHandles & LeftHandleMask) && area.contains(left)) { // .contains(pos.toPoint())) {
         	return LeftHandle;
         } else if ( (enabledHandles & MoveHandleMask) && rect().contains(pos.toPoint())) {
-                return MoveHandle;
+            return MoveHandle;
         }
     }
 
@@ -153,24 +161,25 @@ void RectItem::paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEdi
 		painter->setBrush(Qt::green);
 		painter->setPen(QPen(Qt::black, 0, Qt::SolidLine));	// Qt5: need to explicitly set width to 0, even though the docs claim other
 
+		QSizeF handleSize = view->getHandleSize();
 		if (enabledHandles & RotationHandleMask)
-			painter->drawEllipse(rotationHandle, hsize/2, vsize/2);
+			painter->drawEllipse(rotationHandle, handleSize.width() / 2, handleSize.height() / 2);
 		if (enabledHandles & TopLeftHandleMask)
-			painter->drawRect(QRectF(topLeft.x() - hsize/2, topLeft.y() - vsize/2, hsize, vsize));
+			painter->drawRect(QRectF(topLeft.x() - handleSize.width()/2,     topLeft.y() - handleSize.height()/2, handleSize.width(), handleSize.height()));
 		if (enabledHandles & TopHandleMask)
-		    painter->drawRect(QRectF(top.x() - hsize/2, top.y() - vsize/2, hsize, vsize));
+		    painter->drawRect(QRectF(top.x() - handleSize.width()/2,         top.y() - handleSize.height()/2, handleSize.width(), handleSize.height()));
 		if (enabledHandles & TopRightHandleMask)
-            painter->drawRect(QRectF(topRight.x() - hsize/2, topRight.y() - vsize/2, hsize, vsize));
+            painter->drawRect(QRectF(topRight.x() - handleSize.width()/2,    topRight.y() - handleSize.height()/2, handleSize.width(), handleSize.height()));
 		if (enabledHandles & RightHandleMask)
-		    painter->drawRect(QRectF(right.x() - hsize/2, right.y() - vsize/2, hsize, vsize));
+		    painter->drawRect(QRectF(right.x() - handleSize.width()/2,       right.y() - handleSize.height()/2, handleSize.width(), handleSize.height()));
 		if (enabledHandles & BottomRightHandleMask)
-            painter->drawRect(QRectF(bottomRight.x() - hsize/2, bottomRight.y() - vsize/2, hsize, vsize));
+            painter->drawRect(QRectF(bottomRight.x() - handleSize.width()/2, bottomRight.y() - handleSize.height()/2, handleSize.width(), handleSize.height()));
 		if (enabledHandles & BottomHandleMask)
-            painter->drawRect(QRectF(bottom.x() - hsize/2, bottom.y() - vsize/2, hsize, vsize));
+            painter->drawRect(QRectF(bottom.x() - handleSize.width()/2,      bottom.y() - handleSize.height()/2, handleSize.width(), handleSize.height()));
 		if (enabledHandles & BottomLeftHandleMask)
-            painter->drawRect(QRectF(bottomLeft.x() - hsize/2, bottomLeft.y() - vsize/2, hsize, vsize));
+            painter->drawRect(QRectF(bottomLeft.x() - handleSize.width()/2,  bottomLeft.y() - handleSize.height()/2, handleSize.width(), handleSize.height()));
 		if (enabledHandles & LeftHandleMask)
-            painter->drawRect(QRectF(left.x() - hsize/2, left.y() - vsize/2, hsize, vsize));
+            painter->drawRect(QRectF(left.x() - handleSize.width()/2,        left.y() - handleSize.height()/2, handleSize.width(), handleSize.height()));
     }
 }
 
@@ -525,7 +534,7 @@ QPointF RectItem::getNearestEdge(GraphicsSheet* view, const QPointF& scenePos) {
     qreal l2 = (pos - topRight).manhattanLength();
     qreal l3 = (pos - bottomRight).manhattanLength();
     qreal l4 = (pos - bottomLeft).manhattanLength();
-    qDebug() << min << ", " << l2<<", "<<l3<<", "<<l4;
+    // qDebug() << min << ", " << l2<<", "<<l3<<", "<<l4;
 
     QPointF result = topLeft;
     if (l2 < min) {

@@ -58,7 +58,7 @@ QPointF EdgeSnapper::snap(const QPointF& pos) {
     qreal minDist = 4.0; // minimum distance
     QPointF result = pos;
     bool found = false;
-    qDebug() << "Items: " << items.size() - 1;
+    //qDebug() << "Items: " << items.size() - 1;
     foreach(QGraphicsItem* item, items) {
         InteractableItem* iItem =  dynamic_cast<InteractableItem*>(item);
         if (iItem && iItem != theView->getFocusItem()) {  // TODO: Better approach to filter out current item?

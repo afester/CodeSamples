@@ -414,6 +414,13 @@ void GraphicsSheet::setPositionIndicators(const QPointF& pos) {
 }
 
 
+QSizeF GraphicsSheet::getHandleSize() {
+    const qreal handleSize = 8.0;   // TODO: read from view property
+    return QSizeF(handleSize / transform().m11(),
+                  handleSize / transform().m22());
+}
+
+
 void GraphicsSheet::mousePressEvent ( QMouseEvent * event ){
     if (interactor) {
         interactor->mousePressEvent(event);
