@@ -7,5 +7,7 @@
     <file>object-newline.png</file>
     <file>object-newrect.png</file>
     <file>object-newtext.png</file>
+    <file>object-newcircle.png</file>
+    <file>object-newellipse.png</file>
   </qresource>
 </RCC>

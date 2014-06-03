@@ -11,9 +11,7 @@
 
 #include <math.h>
 
-
-#include "RectItem.h"
-// #include "KollageGraphicsScene.h"
+#include "EllipseItem.h"
 #include "GraphicsSheet.h"
 #include "Interactor.h"
 
@@ -22,7 +20,7 @@ void ItemVisitor::visitSelectedItems(QGraphicsScene* scene) {
     QList<QGraphicsItem*> selectedItems = scene->selectedItems();
     QGraphicsItem* item;
     foreach(item, selectedItems) {
-        RectItem* theItem = dynamic_cast<RectItem*>(item);
+        EllipseItem* theItem = dynamic_cast<EllipseItem*>(item);
         if (theItem) {
             theItem->accept(*this);
         }
@@ -37,8 +35,8 @@ void ItemVisitor::visit(EditableImageframeItem* ) const {
 }
 #endif
 
-RectItem::RectItem(const QPointF& pos, QGraphicsItem * parent) :
-    QGraphicsRectItem(0, 0, 10, 10, parent) {
+EllipseItem::EllipseItem(const QPointF& pos, QGraphicsItem * parent) :
+    QGraphicsEllipseItem(-5, -5, 5, 5, parent) {
 
     setPos(pos.x(), pos.y());
 
@@ -49,10 +47,10 @@ RectItem::RectItem(const QPointF& pos, QGraphicsItem * parent) :
 }
 
 
-RectItem::RectItem(const QRectF & rect, QGraphicsItem * parent) :
-    QGraphicsRectItem(0, 0, rect.width(), rect.height(), parent){
+EllipseItem::EllipseItem(const QRectF & rect, QGraphicsItem * parent) :
+    QGraphicsEllipseItem(-rect.width(), -rect.height(), rect.width(), rect.height(), parent){
 
-    setPos(rect.x(), rect.y());
+    setPos(rect.x() + rect.width()/2, rect.y()+rect.height()/2);
 
     setAcceptHoverEvents(true); // TODO: Only necessary when the item is selected!
     setFlag(QGraphicsItem::ItemIsSelectable, true);
@@ -61,31 +59,31 @@ RectItem::RectItem(const QRectF & rect, QGraphicsItem * parent) :
 }
 
 
-void RectItem::calculateHandles(GraphicsSheet* view) {
+void EllipseItem::calculateHandles(GraphicsSheet* view) {
     const qreal width = rect().width();
     const qreal height = rect().height();
     const qreal xhalf = width / 2;
     const qreal yhalf = height / 2;
 
-    rotationHandle = QPointF(xhalf, 2 * view->getHandleSize().height());
-    topLeft        = QPointF(0, 0);
-    topRight       = QPointF(width, 0);
-    bottomLeft     = QPointF(0, height);
-    bottomRight    = QPointF(width, height);
-    top            = QPointF(xhalf, 0);
-    bottom         = QPointF(xhalf, height);
-    left           = QPointF(0, yhalf);
-    right          = QPointF(width, yhalf);
+    rotationHandle = QPointF(0, -yhalf + 2 * view->getHandleSize().height());
+    topLeft        = QPointF(-xhalf, -yhalf);
+    topRight       = QPointF(xhalf, -yhalf);
+    bottomLeft     = QPointF(-xhalf, yhalf);
+    bottomRight    = QPointF(xhalf, yhalf);
+    top            = QPointF(0, -yhalf);
+    bottom         = QPointF(0, yhalf);
+    left           = QPointF(-xhalf, 0);
+    right          = QPointF(xhalf, 0);
 }
 
 
-QRectF RectItem::boundingRect() const {
-    QRectF result = QGraphicsRectItem::boundingRect();
+QRectF EllipseItem::boundingRect() const {
+    QRectF result = QGraphicsEllipseItem::boundingRect();
     return QRectF(result.x() - 2, result.y() - 2, result.width() + 4, result.height() + 4);
 }
 
 
-QPainterPath RectItem::shape () const {
+QPainterPath EllipseItem::shape () const {
     QPainterPath path;
 
     QRectF r = rect();
@@ -96,7 +94,7 @@ QPainterPath RectItem::shape () const {
 }
 
 
-AbstractEditHandle RectItem::getEditHandle(GraphicsSheet* view, const QPointF& scenePos, unsigned int /*EditHandles */ enabledHandles) {
+AbstractEditHandle EllipseItem::getEditHandle(GraphicsSheet* view, const QPointF& scenePos, unsigned int /*EditHandles */ enabledHandles) {
     if (isSelected()) {
         calculateHandles(view);
 
@@ -105,23 +103,23 @@ AbstractEditHandle RectItem::getEditHandle(GraphicsSheet* view, const QPointF& s
         QRectF area = QRectF(pos.x() - handleSize.width() / 2, pos.y() - handleSize.height() / 2,
                              handleSize.width(), handleSize.height());
 
-        if ( (enabledHandles & RotationHandleMask) && area.contains(rotationHandle)) { // rotationHandle.contains(pos.toPoint())) {
+        if ( (enabledHandles & RotationHandleMask) && area.contains(rotationHandle)) {
             return RotationHandle;
-        } else if ( (enabledHandles & TopLeftHandleMask) && area.contains(topLeft)) { //  topLeft.contains(pos.toPoint())) {
+        } else if ( (enabledHandles & TopLeftHandleMask) && area.contains(topLeft)) {
         	return TopLeftHandle;
-        } else if ( (enabledHandles & TopHandleMask) && area.contains(top)) { // top.contains(pos.toPoint())) {
+        } else if ( (enabledHandles & TopHandleMask) && area.contains(top)) {
         	return TopHandle;
-        } else if ( (enabledHandles & TopRightHandleMask) && area.contains(topRight)) { // .contains(pos.toPoint())) {
+        } else if ( (enabledHandles & TopRightHandleMask) && area.contains(topRight)) {
         	return TopRightHandle;
-        } else if ( (enabledHandles & RightHandleMask) && area.contains(right)) { // .contains(pos.toPoint())) {
+        } else if ( (enabledHandles & RightHandleMask) && area.contains(right)) {
         	return RightHandle;
-        } else if ( (enabledHandles & BottomRightHandleMask) && area.contains(bottomRight)) { // .contains(pos.toPoint())) {
+        } else if ( (enabledHandles & BottomRightHandleMask) && area.contains(bottomRight)) {
         	return BottomRightHandle;
-        } else if ( (enabledHandles & BottomHandleMask) && area.contains(bottom)) { // .contains(pos.toPoint())) {
+        } else if ( (enabledHandles & BottomHandleMask) && area.contains(bottom)) {
         	return BottomHandle;
-        } else if ( (enabledHandles & BottomLeftHandleMask) && area.contains(bottomLeft)) { // .contains(pos.toPoint())) {
+        } else if ( (enabledHandles & BottomLeftHandleMask) && area.contains(bottomLeft)) {
             return BottomLeftHandle;
-        } else if ( (enabledHandles & LeftHandleMask) && area.contains(left)) { // .contains(pos.toPoint())) {
+        } else if ( (enabledHandles & LeftHandleMask) && area.contains(left)) {
         	return LeftHandle;
         } else if ( (enabledHandles & MoveHandleMask) && rect().contains(pos.toPoint())) {
             return MoveHandle;
@@ -140,18 +138,26 @@ static QString formatFloat(qreal number, int dec) {
 }
 #endif
 
-void RectItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) {
+void EllipseItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) {
     Q_UNUSED(view);
 
     if (isSelected()) {
         painter->setBrush(Qt::NoBrush);
         painter->setPen(QPen(Qt::green, 0, Qt::DashLine));
         painter->drawRect(rect());
+
+        // draw a center cross
+        QSizeF handleSize = view->getHandleSize() / 2;
+        painter->setPen(QPen(Qt::green, 0, Qt::SolidLine));
+        painter->drawLine(QPointF(-handleSize.width(), 0),
+                          QPointF(handleSize.width(), 0));
+        painter->drawLine(QPointF(0, -handleSize.height()),
+                          QPointF(0, handleSize.height()));
     }
 }
 
 
-void RectItem::paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles) {
+void EllipseItem::paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles) {
     if (isSelected()) {
         calculateHandles(view);
 
@@ -182,7 +188,7 @@ void RectItem::paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEdi
 }
 
 
-void RectItem::moveRotationHandle(const QPointF& scenePos) {
+void EllipseItem::moveRotationHandle(const QPointF& scenePos) {
     // calculate center of rectangle (scene coordinates)
     QPointF center = QPointF(pos().x() + rect().width() / 2,
                              pos().y() + rect().height() / 2);
@@ -204,216 +210,147 @@ void RectItem::moveRotationHandle(const QPointF& scenePos) {
 
     // qDebug() << rect() << "/" << center << ", " << deltaX << "/" << deltaY << "=> " << angle;
 
-    // calculate center of rectangle (item coordinates)
-    QPointF center2 = QPointF(rect().width() / 2, rect().height() / 2);
-
-    // activate new geometry
-    setTransformOriginPoint(center2);
     setRotation(angle);
 }
 
 
-void RectItem::activateGeometry(const QSizeF& newSize, const QPointF& pos1) {
-    QPointF P3(newSize.width()/2, newSize.height()/2);
+void EllipseItem::moveTopLeftHandle(const QPointF& P2) {
+    // position in item - note that rotation center is fixed at 0/0 and the
+    // position does not change!
+    QPointF posInItem = mapFromScene(P2);
 
-    // transform P1 to the new item position
-    QTransform t2;
-    t2.translate(pos1.x(), pos1.y());
-    t2.rotate(rotation());
-    t2.translate(P3.x(), P3.y());
-    t2.rotate(-rotation());
-    t2.translate(-P3.x(), -P3.y());
-    t2.translate(-pos1.x(), -pos1.y());
-    QPointF newPos = t2.map(pos1);
+    qreal xradius = qMax(-posInItem.x(), 5.0);
+    qreal yradius = qMax(-posInItem.y(), 5.0);
 
-    // activate new geometry
-    setPos(newPos);
-    setRect(QRectF(0, 0, newSize.width(), newSize.height()));
-    setTransformOriginPoint(P3);
+    setRect(QRectF(-xradius, -yradius, 2*xradius, 2*yradius));
 }
 
 
-void RectItem::moveTopLeftHandle(const QPointF& P2) {
+void EllipseItem::moveBottomRightHandle(const QPointF& P2) {
 
-    QPointF P1 = mapToScene(rect().width(), rect().height());   // fix point
+    // position in item - note that rotation center is fixed at 0/0 and the
+    // position does not change!
+    QPointF posInItem = mapFromScene(P2);
 
-    QTransform t;
-    t.rotate(-rotation());
-    t.translate(-P1.x(), -P1.y());
+    qreal xradius = qMax(posInItem.x(), 5.0);
+    qreal yradius = qMax(posInItem.y(), 5.0);
 
-    QPointF P2i = t.map(P2);
-    QSizeF newSize = QSizeF(-P2i.x(), -P2i.y()).expandedTo(QSizeF(10, 10));
-
-    QTransform t_;
-    t_.translate(P1.x(), P1.y());
-    t_.rotate(rotation());
-    QPointF pos1 = t_.map(QPointF(-newSize.width(), -newSize.height()));
-
-    activateGeometry(newSize, pos1);
+    setRect(QRectF(-xradius, -yradius, 2*xradius, 2*yradius));
 }
 
 
-void RectItem::moveBottomRightHandle(const QPointF& P2) {
+void EllipseItem::moveTopRightHandle(const QPointF& P2) {
+    // position in item - note that rotation center is fixed at 0/0 and the
+    // position does not change!
+    QPointF posInItem = mapFromScene(P2);
 
-    QPointF pos1 = mapToScene(0, 0);      // fix point
+    qreal xradius = qMax(posInItem.x(), 5.0);
+    qreal yradius = qMax(-posInItem.y(), 5.0);
 
-    // transform coordinate system so that its center is at P1
-    // we need to transform back (from global coordinates into local coordinates),
-    // so we need to do the inverse operations (rotate -angle => translate -P1)
-    QTransform t;
-    t.rotate(-rotation());
-    t.translate(-pos1.x(), -pos1.y());
-
-    // Map the fix point into the transformed coordinate system -
-    // this will be the new width and height
-    QPointF P2i = t.map(P2);
-    QSizeF newSize = QSizeF(P2i.x(), P2i.y()).expandedTo(QSizeF(10, 10));
-
-    activateGeometry(newSize, pos1);
+    setRect(QRectF(-xradius, -yradius, 2*xradius, 2*yradius));
 }
 
 
-void RectItem::moveTopRightHandle(const QPointF& P2) {
+void EllipseItem::moveBottomLeftHandle(const QPointF& P2) {
+    // position in item - note that rotation center is fixed at 0/0 and the
+    // position does not change!
+    QPointF posInItem = mapFromScene(P2);
 
-    QPointF P1 = mapToScene(0, rect().height());    // fix point
+    qreal xradius = qMax(-posInItem.x(), 5.0);
+    qreal yradius = qMax(posInItem.y(), 5.0);
 
-    QTransform t;
-    t.rotate(-rotation());
-    t.translate(-P1.x(), -P1.y());
-
-    QPointF P2i = t.map(P2);
-    QSizeF newSize = QSizeF(P2i.x(), -P2i.y()).expandedTo(QSizeF(10, 10));
-
-    QTransform t_;
-    t_.translate(P1.x(), P1.y());
-    t_.rotate(rotation());
-    QPointF pos1 = t_.map(QPointF(0, -newSize.height()));
-
-    activateGeometry(newSize, pos1);
+    setRect(QRectF(-xradius, -yradius, 2*xradius, 2*yradius));
 }
 
 
-void RectItem::moveBottomLeftHandle(const QPointF& P2) {
-
-    QPointF P1 = mapToScene(rect().width(), 0);   // fix point
-
-    QTransform t;
-    t.rotate(-rotation());
-    t.translate(-P1.x(), -P1.y());
-
-    QPointF P2i = t.map(P2);
-    QSizeF newSize = QSizeF(-P2i.x(), P2i.y()).expandedTo(QSizeF(10, 10));
-
-    QTransform t_;
-    t_.translate(P1.x(), P1.y());
-    t_.rotate(rotation());
-    QPointF pos1 = t_.map(QPointF(-newSize.width(), 0));
-
-    activateGeometry(newSize, pos1);
-}
-
-
-void RectItem::moveRightHandle(const QPointF& scenePos) {
-
-    QPointF pos1 = mapToScene(0, 0);    // fix point
-
+void EllipseItem::moveRightHandle(const QPointF& scenePos) {
+    // position in item - note that rotation center is fixed at 0/0 and the
+    // position does not change!
     QPointF posInItem = mapFromScene(scenePos);
-    QSizeF newSize = QSizeF(posInItem.x(), rect().height()).expandedTo(QSizeF(10, 10));
 
-    activateGeometry(newSize, pos1);
+    qreal xradius = qMax(posInItem.x(), 5.0);
+    qreal yradius = rect().height()/2; //  qMax(posInItem.y(), 5.0);
+
+    setRect(QRectF(-xradius, -yradius, 2*xradius, 2*yradius));
 }
 
 
-void RectItem::moveBottomHandle(const QPointF& scenePos) {
-
-    QPointF pos1 = mapToScene(0, 0);    // fix point
-
+void EllipseItem::moveBottomHandle(const QPointF& scenePos) {
+    // position in item - note that rotation center is fixed at 0/0 and the
+    // position does not change!
     QPointF posInItem = mapFromScene(scenePos);
-    QSizeF newSize = QSizeF(rect().width(), posInItem.y()).expandedTo(QSizeF(10, 10));
 
-    activateGeometry(newSize, pos1);
+    qreal xradius = rect().width()/2; // qMax(posInItem.x(), 5.0);
+    qreal yradius = qMax(posInItem.y(), 5.0); // rect().height()/2; //  qMax(posInItem.y(), 5.0);
+
+    setRect(QRectF(-xradius, -yradius, 2*xradius, 2*yradius));
 }
 
 
-void RectItem::moveTopHandle(const QPointF& P2) {
+void EllipseItem::moveTopHandle(const QPointF& P2) {
+    // position in item - note that rotation center is fixed at 0/0 and the
+    // position does not change!
+    QPointF posInItem = mapFromScene(P2);
 
-    QPointF P1 = mapToScene(0, rect().height());    // fix point
+    qreal xradius = rect().width()/2; // qMax(posInItem.x(), 5.0);
+    qreal yradius = qMax(-posInItem.y(), 5.0); // rect().height()/2; //  qMax(posInItem.y(), 5.0);
 
-    QTransform t;
-    t.rotate(-rotation());
-    t.translate(-P1.x(), -P1.y());
-
-    QPointF P2i = t.map(P2);
-    QSizeF newSize = QSizeF(rect().width(), -P2i.y()).expandedTo(QSizeF(10, 10));
-
-    QTransform t_;
-    t_.translate(P1.x(), P1.y());
-    t_.rotate(rotation());
-    QPointF pos1 = t_.map(QPointF(0, -newSize.height()));
-
-    activateGeometry(newSize, pos1);
+    setRect(QRectF(-xradius, -yradius, 2*xradius, 2*yradius));
 }
 
 
-void RectItem::moveLeftHandle(const QPointF& P2) {
-    QPointF P1 = mapToScene(rect().width(), rect().height());    // fix point
+void EllipseItem::moveLeftHandle(const QPointF& P2) {
+    // position in item - note that rotation center is fixed at 0/0 and the
+    // position does not change!
+    QPointF posInItem = mapFromScene(P2);
 
-    QTransform t;
-    t.rotate(-rotation());
-    t.translate(-P1.x(), -P1.y());
+    qreal xradius = qMax(-posInItem.x(), 5.0);
+    qreal yradius = rect().height()/2; //  qMax(posInItem.y(), 5.0);
 
-    QPointF P2i = t.map(P2);
-    QSizeF newSize = QSizeF(-P2i.x(), rect().height()).expandedTo(QSizeF(10, 10));
-
-    QTransform t_;
-    t_.translate(P1.x(), P1.y());
-    t_.rotate(rotation());
-    QPointF pos1 = t_.map(QPointF(-newSize.width(), -newSize.height()));
-
-    activateGeometry(newSize, pos1);
+    setRect(QRectF(-xradius, -yradius, 2*xradius, 2*yradius));
 }
 
 
-QPointF RectItem::getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos) {
+QPointF EllipseItem::getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos) {
     QPointF ref = scenePos;
 
     switch(editHandle) {
-        case RectItem::TopLeftHandle :
+        case EllipseItem::TopLeftHandle :
             ref = mapToScene(topLeft);
             break;
 
-        case RectItem::TopHandle :
+        case EllipseItem::TopHandle :
             ref = mapToScene(top);
             break;
 
-        case RectItem::TopRightHandle :
+        case EllipseItem::TopRightHandle :
             ref = mapToScene(topRight);
             break;
 
-        case RectItem::LeftHandle :
+        case EllipseItem::LeftHandle :
             ref = mapToScene(left);
             break;
 
-        case RectItem::RotationHandle :
+        case EllipseItem::RotationHandle :
             break;
 
-        case RectItem::RightHandle :
+        case EllipseItem::RightHandle :
             ref = mapToScene(right);
             break;
 
-        case RectItem::BottomLeftHandle :
+        case EllipseItem::BottomLeftHandle :
             ref = mapToScene(bottomLeft);
             break;
 
-        case RectItem::BottomHandle :
+        case EllipseItem::BottomHandle :
             ref = mapToScene(bottom);
             break;
 
-        case RectItem::BottomRightHandle :
+        case EllipseItem::BottomRightHandle :
             ref = mapToScene(bottomRight);
             break;
 
-        case RectItem::MoveHandle:
+        case EllipseItem::MoveHandle:
             ref = pos();
             break;
     }
@@ -422,48 +359,48 @@ QPointF RectItem::getHandleOffset(AbstractEditHandle editHandle, const QPointF& 
 }
 
 
-void RectItem::moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos) {
+void EllipseItem::moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos) {
     QPointF newPos;
     QSizeF newSize;
 
     switch(editHandle) {
-        case RectItem::TopLeftHandle :
+        case EllipseItem::TopLeftHandle :
                 moveTopLeftHandle(scenePos);
                 break;
 
-        case RectItem::TopHandle :
+        case EllipseItem::TopHandle :
                 moveTopHandle(scenePos);
                 break;
 
-        case RectItem::TopRightHandle :
+        case EllipseItem::TopRightHandle :
                 moveTopRightHandle(scenePos);
                 break;
 
-        case RectItem::LeftHandle :
+        case EllipseItem::LeftHandle :
                 moveLeftHandle(scenePos);
                 break;
 
-        case RectItem::BottomLeftHandle :
+        case EllipseItem::BottomLeftHandle :
                 moveBottomLeftHandle(scenePos);
                 break;
 
-        case RectItem::RotationHandle :
+        case EllipseItem::RotationHandle :
                 moveRotationHandle(scenePos);
                 break;
 
-        case RectItem::RightHandle :
+        case EllipseItem::RightHandle :
                 moveRightHandle(scenePos);
                 break;
 
-        case RectItem::BottomHandle :
+        case EllipseItem::BottomHandle :
                 moveBottomHandle(scenePos);
                 break;
 
-        case RectItem::BottomRightHandle :
+        case EllipseItem::BottomRightHandle :
                 moveBottomRightHandle(scenePos);
                 break;
 
-        case RectItem::MoveHandle:
+        case EllipseItem::MoveHandle:
                 setPos(scenePos.x(), scenePos.y());
                 break;
     }
@@ -471,46 +408,46 @@ void RectItem::moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos
 }
 
 
-void RectItem::setCursor(GraphicsSheet* theView, AbstractEditHandle handle) {
+void EllipseItem::setCursor(GraphicsSheet* theView, AbstractEditHandle handle) {
 
     switch(handle) {
-        case RectItem::TopLeftHandle :
+        case EllipseItem::TopLeftHandle :
                 theView->setCursor(Qt::SizeFDiagCursor);
                 break;
 
-        case RectItem::TopHandle :
+        case EllipseItem::TopHandle :
                 theView->setCursor(Qt::SizeVerCursor);
                 break;
 
-        case RectItem::TopRightHandle :
+        case EllipseItem::TopRightHandle :
                 theView->setCursor(Qt::SizeBDiagCursor);
                 break;
 
-        case RectItem::LeftHandle :
+        case EllipseItem::LeftHandle :
                 theView->setCursor(Qt::SizeHorCursor);
                 break;
 
-        case RectItem::RotationHandle :
+        case EllipseItem::RotationHandle :
                 theView->setCursor(Qt::PointingHandCursor);  // TODO: Create rotation cursor
                 break;
 
-        case RectItem::RightHandle :
+        case EllipseItem::RightHandle :
                 theView->setCursor(Qt::SizeHorCursor);
                 break;
 
-        case RectItem::BottomLeftHandle :
+        case EllipseItem::BottomLeftHandle :
                 theView->setCursor(Qt::SizeBDiagCursor);
                 break;
 
-        case RectItem::BottomHandle :
+        case EllipseItem::BottomHandle :
                 theView->setCursor(Qt::SizeVerCursor);
                 break;
 
-        case RectItem::BottomRightHandle :
+        case EllipseItem::BottomRightHandle :
                 theView->setCursor(Qt::SizeFDiagCursor);
                 break;
 
-        case RectItem::MoveHandle :
+        case EllipseItem::MoveHandle :
                 theView->setCursor(Qt::OpenHandCursor);
                 break;
 
@@ -520,7 +457,7 @@ void RectItem::setCursor(GraphicsSheet* theView, AbstractEditHandle handle) {
     }
 }
 
-QPointF RectItem::getNearestEdge(GraphicsSheet* view, const QPointF& scenePos) {
+QPointF EllipseItem::getNearestEdge(GraphicsSheet* view, const QPointF& scenePos) {
     QPointF pos = mapFromScene(scenePos);
 
     // topLeft, topRight, bottomRight, bottomLeft
@@ -552,7 +489,7 @@ QPointF RectItem::getNearestEdge(GraphicsSheet* view, const QPointF& scenePos) {
 
 
 #if 0
-void RectItem::paintCoordinates(GraphicsSheet* view, QPainter* painter) {
+void EllipseItem::paintCoordinates(GraphicsSheet* view, QPainter* painter) {
     if (isSelected()) {
 		// Paint the coordinates
 		painter->setFont(QFont("Arial", 2, 1, false));
@@ -608,12 +545,12 @@ void RectItem::paintCoordinates(GraphicsSheet* view, QPainter* painter) {
 }
 #endif
 
-void RectItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * style, QWidget *widget) {
+void EllipseItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * style, QWidget *widget) {
     // reset the selected state when painting - this is a workaround
-    // to avoid that QGraphicsRectItem::paint draws the selection rectangle
+    // to avoid that QGraphicsEllipseItem::paint draws the selection rectangle
     QStyleOptionGraphicsItem option2 = *style;
     option2.state = 0;
-    QGraphicsRectItem::paint(painter, &option2, widget);
+    QGraphicsEllipseItem::paint(painter, &option2, widget);
 
 #if 0
 	GraphicsSheet* requestingView = dynamic_cast<GraphicsSheet*>(widget ? widget->parent() : 0);

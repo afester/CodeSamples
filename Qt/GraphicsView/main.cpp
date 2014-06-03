@@ -19,14 +19,18 @@
 #include "GraphicsSheet.h"
 #include "ScrollAreaLayout.h"
 
-#include "RectItem.h"
 #include "LineItem.h"
+#include "RectItem.h"
+#include "CircleItem.h"
 #include "TextItem.h"
 
 #include "EditFrameInteractor.h"
 #include "NewRectItemInteractor.h"
 #include "NewLineItemInteractor.h"
 #include "NewTextItemInteractor.h"
+#include "NewCircleItemInteractor.h"
+#include "NewEllipseItemInteractor.h"
+
 #include "Snapper.h"
 
 #include "LabelledComboBox.h"
@@ -161,11 +165,27 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     toolBar->addAction(actionNewTextItem);
     QObject::connect(actionNewTextItem, SIGNAL(triggered()), this, SLOT(doActionNewTextItem()));
 
+    QIcon icon8;
+    icon8.addFile(QStringLiteral(":/Icons/object-newcircle.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionNewCircleItem = new QAction(icon8, "New circle", this);
+    actionNewCircleItem->setCheckable(true);
+    toolBar->addAction(actionNewCircleItem);
+    QObject::connect(actionNewCircleItem, SIGNAL(triggered()), this, SLOT(doActionNewCircleItem()));
+
+    QIcon icon9;
+    icon9.addFile(QStringLiteral(":/Icons/object-newellipse.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionNewEllipseItem = new QAction(icon9, "New ellipse", this);
+    actionNewEllipseItem->setCheckable(true);
+    toolBar->addAction(actionNewEllipseItem);
+    QObject::connect(actionNewEllipseItem, SIGNAL(triggered()), this, SLOT(doActionNewEllipseItem()));
+
     QActionGroup* actionGroup = new QActionGroup(this);
     actionGroup->addAction(actionSelect);
     actionGroup->addAction(actionNewLineItem);
     actionGroup->addAction(actionNewRectItem);
     actionGroup->addAction(actionNewTextItem);
+    actionGroup->addAction(actionNewCircleItem);
+    actionGroup->addAction(actionNewEllipseItem);
     actionSelect->setChecked(true);
 
 #if 0
@@ -233,10 +253,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     graphicsSheet->scene()->addItem(li1);
     graphicsSheet->scene()->addItem(li2);
 
+    CircleItem* citem = new CircleItem(QPointF(200, 200), 75);
+    citem->setPen(QPen(Qt::blue, 0));
+    citem->setBrush(Qt::yellow);
+    graphicsSheet->scene()->addItem(citem);
+
     selectInteractor = new EditFrameInteractor();
     newLineItemInteractor = new NewLineItemInteractor();
     newRectItemInteractor = new NewRectItemInteractor();
     newTextItemInteractor = new NewTextItemInteractor();
+    newCircleItemInteractor = new NewCircleItemInteractor();
+    QObject::connect(newCircleItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
+    newEllipseItemInteractor = new NewEllipseItemInteractor();
+    QObject::connect(newEllipseItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
 
     graphicsSheet->setInteractor(selectInteractor);
     graphicsSheet->setSnapper(new EdgeSnapper(new GridSnapper()));
@@ -371,6 +400,11 @@ void MainWindow::doActionSaveAs(){
     qDebug() << "SAVE AS";
 }
 
+void MainWindow::toggleActionSelect() {
+    actionSelect->setChecked(true);
+    doActionSelect();
+}
+
 void MainWindow::doActionSelect(){
     graphicsSheet->setInteractor(selectInteractor);
 }
@@ -385,6 +419,14 @@ void MainWindow::doActionNewRectItem(){
 
 void MainWindow::doActionNewTextItem(){
     graphicsSheet->setInteractor(newTextItemInteractor);
+}
+
+void MainWindow::doActionNewCircleItem(){
+    graphicsSheet->setInteractor(newCircleItemInteractor);
+}
+
+void MainWindow::doActionNewEllipseItem(){
+    graphicsSheet->setInteractor(newEllipseItemInteractor);
 }
 
 
