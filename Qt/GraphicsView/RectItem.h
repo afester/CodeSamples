@@ -27,6 +27,7 @@ public:
 class GraphicsSheet;
 
 class RectItem : public QGraphicsRectItem, public InteractableItem {
+
 public:
 	enum EditHandle {NoHandle, MoveHandle,              // TODO: Move in common "super" enum
 					 TopLeftHandle, TopHandle, TopRightHandle,
@@ -54,9 +55,20 @@ public:
 					                     MoveHandleMask
 					 };
 
+
+	/**
+	 * Default constructor for deserialization
+	 */
+	RectItem();
+
     RectItem(const QPointF& pos, QGraphicsItem * parent = 0);
 
     RectItem(const QRectF& rect, QGraphicsItem * parent = 0);
+
+    /**
+     * Factory function to create a RectItem instance.
+     */
+    static QGraphicsItem* create();
 
     /**
      * Accepts the visit from an ItemVisitor.
@@ -65,8 +77,11 @@ public:
      */
 //    virtual void accept(const ItemVisitor& visitor) = 0;
 
-//    virtual void writeExternal(QXmlStreamWriter& writer) = 0;
+    // @Override
+    virtual void writeExternal(QXmlStreamWriter& writer);
 
+    // @Override
+    virtual void readExternal(QXmlStreamReader& reader);
 
     // @Override
     virtual AbstractEditHandle getEditHandle(GraphicsSheet* view, const QPointF& pos, AbstractEditHandle enabledHandles = AllHandlesMask);
@@ -86,7 +101,6 @@ public:
     // @Override
     virtual QPointF getNearestEdge(GraphicsSheet* theView, const QPointF& scenePos);
 
-//    void paintCoordinates(GraphicsSheet* view, QPainter* painter);
 
     /**
      * Paints the selection border.

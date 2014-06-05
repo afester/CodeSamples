@@ -6,14 +6,43 @@
  */
 
 #include <QGraphicsView>
+#include <QHash>
+
+typedef  QGraphicsItem* (*FACTORY_FUNCTION)();
+
+class GraphicsItemFactory {
+    QHash<QString, FACTORY_FUNCTION> factoryFunctions;
+
+public:
+    GraphicsItemFactory();
+
+    void registerItemClass(const QString& className, FACTORY_FUNCTION fac);
+
+    QGraphicsItem* createItem(const QString& className);
+};
+
+
 
 class QGraphicsItem;
+class QXmlStreamReader;
+class QXmlStreamWriter;
 
 class GraphicsScene : public QGraphicsScene {
 public:
     GraphicsScene();
 
     QGraphicsItem* getItemAt(const QPointF & position);
+
+    void readExternal(QXmlStreamReader& reader);
+
+    void writeExternal(QXmlStreamWriter& writer);
+
+    void saveToFile(const QString& fileName);
+
+    void loadFromFile(const QString& fileName);
+
+private:
+    GraphicsItemFactory* itemFactory;
 };
 
 

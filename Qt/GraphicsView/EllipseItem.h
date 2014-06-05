@@ -54,9 +54,17 @@ public:
 					                     MoveHandleMask
 					 };
 
+
+	EllipseItem();
+
     EllipseItem(const QPointF& pos, QGraphicsItem * parent = 0);
 
     EllipseItem(const QRectF& rect, QGraphicsItem * parent = 0);
+
+    /**
+     * Factory function to create a LineItem instance.
+     */
+    static QGraphicsItem* create();
 
     /**
      * Accepts the visit from an ItemVisitor.
@@ -65,8 +73,11 @@ public:
      */
 //    virtual void accept(const ItemVisitor& visitor) = 0;
 
-//    virtual void writeExternal(QXmlStreamWriter& writer) = 0;
+    // @Override
+    virtual void readExternal(QXmlStreamReader& writer);
 
+    // @Override
+    virtual void writeExternal(QXmlStreamWriter& writer);
 
     // @Override
     virtual AbstractEditHandle getEditHandle(GraphicsSheet* view, const QPointF& pos, AbstractEditHandle enabledHandles = AllHandlesMask);

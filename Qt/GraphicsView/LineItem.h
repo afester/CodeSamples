@@ -25,7 +25,15 @@ public:
 					                     MoveHandleMask
 					 };
 
+	LineItem();
+
     LineItem(const QPointF& pos1, const QPointF& pos2, QGraphicsItem * parent = 0);
+
+    /**
+     * Factory function to create a LineItem instance.
+     */
+    static QGraphicsItem* create();
+
 
     AbstractEditHandle getEditHandle(GraphicsSheet* view, const QPointF& pos, AbstractEditHandle enabledHandles = AllHandlesMask);
 
@@ -46,7 +54,6 @@ public:
     // @Override
     virtual QPointF getNearestEdge(GraphicsSheet* theView, const QPointF& scenePos);
 
-#if 0
     /**
      * Accepts the visit from an ItemVisitor.
      *
@@ -54,9 +61,12 @@ public:
      */
 //    virtual void accept(const ItemVisitor& visitor) = 0;
 
-//    virtual void writeExternal(QXmlStreamWriter& writer) = 0;
+    // @Override
+    virtual void writeExternal(QXmlStreamWriter& writer);
 
-#endif
+    // @Override
+    virtual void readExternal(QXmlStreamReader& reader);
+
 protected:
 
    // @Override

@@ -52,6 +52,21 @@ public:
 };
 
 
+TextItem::TextItem() : RectItem(), alignment(Qt::AlignHCenter) {
+    textItem = new InternalTextItem (this);
+    textItem->setTextInteractionFlags(Qt::TextEditorInteraction);
+
+    // This item is focusable and passes the focus on to the child item
+    setFlag (QGraphicsItem::ItemIsFocusable);
+    setFocusProxy(textItem);
+
+    setFiltersChildEvents(true);
+    setInternalAlignment(Qt::AlignHCenter);
+
+    centerTextItem();
+}
+
+
 TextItem::TextItem(const QPointF& pos, QGraphicsItem * parent) :
         RectItem(QRectF(pos.x(), pos.y(), 50, 30), parent), alignment(Qt::AlignHCenter) {
 
@@ -67,6 +82,12 @@ TextItem::TextItem(const QPointF& pos, QGraphicsItem * parent) :
 
     centerTextItem();
 }
+
+
+QGraphicsItem* TextItem::create() {
+    return new TextItem();
+}
+
 
 #if 0
 void EditableTextItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget) {
@@ -251,10 +272,11 @@ EditableTextItem* EditableTextItem::readExternal(QXmlStreamReader& reader) {
 
     return item;
 }
+#endif
 
 
-void EditableTextItem::writeExternal(QXmlStreamWriter& writer) {
-    writer.writeStartElement("textFrame");
+void TextItem::writeExternal(QXmlStreamWriter& writer) {
+    writer.writeStartElement("TextItem");
 
     writer.writeAttribute("xpos", QString::number(x()));
     writer.writeAttribute("ypos", QString::number(y()));
@@ -272,4 +294,3 @@ void EditableTextItem::writeExternal(QXmlStreamWriter& writer) {
 
     writer.writeEndElement(); // textFrame
 }
-#endif

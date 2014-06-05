@@ -14,6 +14,8 @@
 #include <QScrollBar>
 #include <QMouseEvent>
 #include <QHash>
+#include <QXmlStreamWriter>
+#include <QXmlStreamReader>
 
 #include "GraphicsSheet.h"
 #include "ScaleWidget.h"
@@ -21,12 +23,46 @@
 #include "Interactor.h"
 #include "Snapper.h"
 #include "Log.h"
+
 #include "RectItem.h"
+#include "LineItem.h"
+#include "EllipseItem.h"
+#include "CircleItem.h"
+#include "TextItem.h"
 
 #define RULERHEIGHT 23
 #define RULERWIDTH 23
 
+
+GraphicsItemFactory::GraphicsItemFactory() {
+
+}
+
+
+void GraphicsItemFactory::registerItemClass(const QString& className, FACTORY_FUNCTION fac) {
+    factoryFunctions.insert(className, fac);
+}
+
+
+QGraphicsItem* GraphicsItemFactory::createItem(const QString& className) {
+    QGraphicsItem* result = 0;
+
+    FACTORY_FUNCTION fac = factoryFunctions.value(className);
+    if (fac) {
+        result = fac();
+    }
+
+    return result;
+}
+
+
 GraphicsScene::GraphicsScene() : QGraphicsScene()  {
+    itemFactory = new GraphicsItemFactory();
+    itemFactory->registerItemClass("RectItem", RectItem::create);
+    itemFactory->registerItemClass("LineItem", LineItem::create);
+    itemFactory->registerItemClass("EllipseItem", EllipseItem::create);
+    itemFactory->registerItemClass("CircleItem", CircleItem::create);
+    itemFactory->registerItemClass("TextItem", TextItem::create);
 }
 
 
@@ -42,6 +78,89 @@ QGraphicsItem* GraphicsScene::getItemAt(const QPointF & position) {
     return itm;
 }
 
+
+void GraphicsScene::writeExternal(QXmlStreamWriter& writer) {
+    writer.writeStartDocument();
+
+    writer.writeStartElement(metaObject()->className());
+    writer.writeAttribute("width", QString::number(width()));
+    writer.writeAttribute("height", QString::number(height()));
+    writer.writeAttribute("bgColor", backgroundBrush().color().name());
+//    writer.writeAttribute("borderWidth", QString::number(getBorderWidth()));
+
+    QList<QGraphicsItem*> allItems = items(Qt::AscendingOrder);
+    QGraphicsItem* item;
+    foreach(item, allItems) {
+        if (item->parentItem() == 0) {
+            InteractableItem* writableItem = dynamic_cast<InteractableItem*>(item);
+            if (writableItem) {
+                writableItem->writeExternal(writer);
+            }
+        }
+    }
+
+    writer.writeEndElement();
+    writer.writeEndDocument();
+}
+
+
+void GraphicsScene::saveToFile(const QString& fileName) {
+    // Create output XML stream
+    QFile destFile(fileName);
+    destFile.open(QIODevice::WriteOnly | QIODevice::Text);
+
+    QXmlStreamWriter writer(&destFile);
+    writer.setAutoFormatting(true);
+
+    writeExternal(writer);
+
+    destFile.close();
+
+//    undoStack->clear();
+}
+
+
+void GraphicsScene::readExternal(QXmlStreamReader& reader) {
+//    undoStack->clear();
+    clear();
+
+//    zOrder = 0;
+
+    while(!reader.atEnd()) {
+        QXmlStreamReader::TokenType type = reader.readNext();
+        if (type == QXmlStreamReader::StartElement) {
+            QString elementName = reader.name().toString();
+            if (elementName == metaObject()->className()) {
+                QString width = reader.attributes().value("width").toString();
+                QString height = reader.attributes().value("height").toString();
+                QString bgColor = reader.attributes().value("bgColor").toString();
+                QString borderWidth = reader.attributes().value("borderWidth").toString();
+
+                setSceneRect(QRectF(0, 0, width.toInt(), height.toInt()));
+                setBackgroundBrush(QColor(bgColor));
+            } else {
+                QGraphicsItem* item = itemFactory->createItem(elementName);
+                InteractableItem* readableItem = dynamic_cast<InteractableItem*>(item);
+                if (readableItem) {
+                    qDebug() << item;
+                    readableItem->readExternal(reader);
+                    // item->setZValue(zOrder++);
+                    addItem(item);
+                }
+            }
+        }
+    }
+}
+
+
+void GraphicsScene::loadFromFile(const QString& fileName) {
+    // load the given file into the scene
+    QFile srcFile(fileName);
+    srcFile.open(QIODevice::ReadOnly | QIODevice::Text);
+    QXmlStreamReader stream(&srcFile);
+    readExternal(stream);
+    srcFile.close();
+}
 
 
 GraphicsSheet::GraphicsSheet(QWidget* parent) : QGraphicsView(parent),
@@ -302,6 +421,7 @@ void GraphicsSheet::resizeEvent ( QResizeEvent * event ) {
 void GraphicsSheet::setUnit(const QString& unit) {
     edge->setUnit(unit);
 }
+
 
 void GraphicsSheet::addZoom(const QString& name, float level) {
     zoomNames.append(name);

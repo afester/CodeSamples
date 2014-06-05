@@ -40,7 +40,14 @@ public:
                                          MoveHandleMask | CursorHandleMask
                      };
 
+    TextItem();
+
     TextItem(const QPointF& pos, QGraphicsItem * parent = 0);
+
+    /**
+     * Factory function to create a TextItem instance.
+     */
+    static QGraphicsItem* create();
 
 #if 0
 
@@ -48,8 +55,10 @@ public:
 
     static EditableTextItem* readExternal(QXmlStreamReader& reader);
 
-    virtual void writeExternal(QXmlStreamWriter& writer);
 #endif
+
+    // @Override
+    virtual void writeExternal(QXmlStreamWriter& writer);
 
     virtual void setText(const QString& text);
 

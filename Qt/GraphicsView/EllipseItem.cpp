@@ -8,6 +8,7 @@
 #include <QPointF>
 #include <QAction>
 #include <QTextStream>
+#include <QXmlStreamWriter>
 
 #include <math.h>
 
@@ -35,6 +36,13 @@ void ItemVisitor::visit(EditableImageframeItem* ) const {
 }
 #endif
 
+EllipseItem::EllipseItem() : QGraphicsEllipseItem(0) {
+    setAcceptHoverEvents(true); // TODO: Only necessary when the item is selected!
+    setFlag(QGraphicsItem::ItemIsSelectable, true);
+    setFlag(QGraphicsItem::ItemIsMovable, true);
+    setFlag(QGraphicsItem::ItemClipsToShape, true);
+}
+
 EllipseItem::EllipseItem(const QPointF& pos, QGraphicsItem * parent) :
     QGraphicsEllipseItem(-5, -5, 5, 5, parent) {
 
@@ -56,6 +64,11 @@ EllipseItem::EllipseItem(const QRectF & rect, QGraphicsItem * parent) :
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
     setFlag(QGraphicsItem::ItemClipsToShape, true);
+}
+
+
+QGraphicsItem* EllipseItem::create() {
+    return new EllipseItem();
 }
 
 
@@ -561,4 +574,28 @@ void EllipseItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * s
 		}
 	}
 #endif
+}
+
+
+void EllipseItem::writeExternal(QXmlStreamWriter& writer) {
+    writer.writeStartElement("EllipseItem");
+    writer.writeAttribute("xpos", QString::number(x()));
+    writer.writeAttribute("ypos", QString::number(y()));
+    writer.writeAttribute("xradius", QString::number(rect().width()/2));
+    writer.writeAttribute("yradius", QString::number(rect().height()/2));
+    writer.writeAttribute("rotation", QString::number(rotation()));
+    writer.writeEndElement();
+}
+
+
+void EllipseItem::readExternal(QXmlStreamReader& reader) {
+    qreal xpos = reader.attributes().value("xpos").toFloat();
+    qreal ypos = reader.attributes().value("ypos").toFloat();
+    qreal xradius = reader.attributes().value("xradius").toFloat();
+    qreal yradius = reader.attributes().value("yradius").toFloat();
+    qreal rotationAttr = reader.attributes().value("rotation").toFloat();
+
+    setPos(xpos, ypos);
+    setRect(-xradius, -yradius, xradius, yradius);
+    setRotation(rotationAttr);
 }

@@ -3,6 +3,8 @@
 
 class QPointF;
 class GraphicsSheet;
+class QXmlStreamWriter;
+class QXmlStreamReader;
 
 typedef unsigned int AbstractEditHandle;
 
@@ -27,6 +29,10 @@ public:
     virtual void setItemSelected(bool sel) = 0;
 
     virtual QPointF getNearestEdge(GraphicsSheet* theView, const QPointF& scenePos) = 0;
+
+// Interface: Serializable
+    virtual void writeExternal(QXmlStreamWriter& writer) = 0;
+    virtual void readExternal(QXmlStreamReader& reader) {} //  = 0;
 };
 
 #endif

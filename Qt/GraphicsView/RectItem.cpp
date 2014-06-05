@@ -1,19 +1,16 @@
 #include <QDebug>
 #include <QPainter>
-#include <QGraphicsSceneMouseEvent>
 #include <QGraphicsScene>
 #include <QCursor>
 #include <QRectF>
 #include <QStyleOptionGraphicsItem>
 #include <QPointF>
-#include <QAction>
-#include <QTextStream>
+#include <QXmlStreamWriter>
+#include <QXmlStreamReader>
 
 #include <math.h>
 
-
 #include "RectItem.h"
-// #include "KollageGraphicsScene.h"
 #include "GraphicsSheet.h"
 #include "Interactor.h"
 
@@ -37,6 +34,14 @@ void ItemVisitor::visit(EditableImageframeItem* ) const {
 }
 #endif
 
+
+RectItem::RectItem() : QGraphicsRectItem(0) {
+    setAcceptHoverEvents(true); // TODO: Only necessary when the item is selected!
+    setFlag(QGraphicsItem::ItemIsSelectable, true);
+    setFlag(QGraphicsItem::ItemIsMovable, true);
+    setFlag(QGraphicsItem::ItemClipsToShape, true);
+}
+
 RectItem::RectItem(const QPointF& pos, QGraphicsItem * parent) :
     QGraphicsRectItem(0, 0, 10, 10, parent) {
 
@@ -58,6 +63,38 @@ RectItem::RectItem(const QRectF & rect, QGraphicsItem * parent) :
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
     setFlag(QGraphicsItem::ItemClipsToShape, true);
+}
+
+
+QGraphicsItem* RectItem::create() {
+    return new RectItem();
+}
+
+
+void RectItem::writeExternal(QXmlStreamWriter& writer) {
+    writer.writeStartElement("RectItem");
+
+    writer.writeAttribute("xpos", QString::number(x()));
+    writer.writeAttribute("ypos", QString::number(y()));
+    writer.writeAttribute("width", QString::number(rect().width()));
+    writer.writeAttribute("height", QString::number(rect().height()));
+    writer.writeAttribute("rotation", QString::number(rotation()));
+
+    writer.writeEndElement();
+}
+
+
+void RectItem::readExternal(QXmlStreamReader& reader) {
+    QString xpos = reader.attributes().value("xpos").toString();
+    QString ypos = reader.attributes().value("ypos").toString();
+    QString width = reader.attributes().value("width").toString();
+    QString height = reader.attributes().value("height").toString();
+    QString rotationAttr = reader.attributes().value("rotation").toString();
+
+    setPos(xpos.toFloat(), ypos.toFloat());
+    setRect(0, 0, width.toFloat(), height.toFloat());
+    setRotation(rotationAttr.toFloat());
+    setTransformOriginPoint(rect().width()/2, rect().height()/2);
 }
 
 
@@ -131,14 +168,6 @@ AbstractEditHandle RectItem::getEditHandle(GraphicsSheet* view, const QPointF& s
     return NoHandle;
 }
 
-#if 0
-static QString formatFloat(qreal number, int dec) {
-    QString result;
-    QTextStream format(&result);
-    format << fixed << qSetRealNumberPrecision(dec) << number;
-    return result;
-}
-#endif
 
 void RectItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) {
     Q_UNUSED(view);
@@ -520,6 +549,7 @@ void RectItem::setCursor(GraphicsSheet* theView, AbstractEditHandle handle) {
     }
 }
 
+
 QPointF RectItem::getNearestEdge(GraphicsSheet* view, const QPointF& scenePos) {
     QPointF pos = mapFromScene(scenePos);
 
@@ -551,77 +581,10 @@ QPointF RectItem::getNearestEdge(GraphicsSheet* view, const QPointF& scenePos) {
 }
 
 
-#if 0
-void RectItem::paintCoordinates(GraphicsSheet* view, QPainter* painter) {
-    if (isSelected()) {
-		// Paint the coordinates
-		painter->setFont(QFont("Arial", 2, 1, false));
-		QFontMetrics fontMetrics(painter->fontMetrics());
-
-		QString upperLeft = formatFloat(this->pos().x(), 1) + "/" +
-							formatFloat(this->pos().y(), 1);
-		QSize textSize = fontMetrics.size(0, upperLeft);
-		QRectF upperLeftRect = QRectF(3, 3, textSize.width() + 1, textSize.height());
-
-		QString lowerRight =
-				formatFloat(this->pos().x() + this->rect().width(), 1) + "/" +
-				formatFloat(this->pos().y() + this->rect().height(), 1);
-		textSize = fontMetrics.size(0, lowerRight);
-		QRectF lowerRightRect =
-				QRectF(this->rect().width() - textSize.width() - 3,
-					   this->rect().height() - textSize.height() - 3,
-					   textSize.width() + 1, textSize.height());
-
-		QString size = formatFloat(this->rect().width(), 1) + " x " +
-					   formatFloat(this->rect().height(), 1);
-		textSize = fontMetrics.size(0, size);
-		QRectF sizeRect =
-				QRectF((this->rect().width() - textSize.width()) / 2,
-					   (this->rect().height() - textSize.height()) / 2,
-						textSize.width() + 1, textSize.height());
-
-		// visualize upper left corner, lower right corner, width and height
-		QPointF textPos = upperLeftRect.bottomLeft();
-		textPos += QPointF(1.0, -1.0);
-		painter->fillRect(upperLeftRect, Qt::lightGray);
-		painter->setPen(Qt::white);
-		painter->drawRect(upperLeftRect);
-		painter->setPen(Qt::black);
-		painter->drawText(textPos, upperLeft);
-
-		textPos = lowerRightRect.bottomLeft();
-		textPos += QPointF(1.0, -1.0);
-		painter->fillRect(lowerRightRect, Qt::lightGray);
-		painter->setPen(Qt::white);
-		painter->drawRect(lowerRightRect);
-		painter->setPen(Qt::black);
-		painter->drawText(textPos, lowerRight);
-
-		textPos = sizeRect.bottomLeft();
-		textPos += QPointF(1.0, -1.0);
-		painter->fillRect(sizeRect, Qt::lightGray);
-		painter->setPen(Qt::white);
-		painter->drawRect(sizeRect);
-		painter->setPen(Qt::black);
-		painter->drawText(textPos, size);
-    }
-}
-#endif
-
 void RectItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * style, QWidget *widget) {
     // reset the selected state when painting - this is a workaround
     // to avoid that QGraphicsRectItem::paint draws the selection rectangle
     QStyleOptionGraphicsItem option2 = *style;
     option2.state = 0;
     QGraphicsRectItem::paint(painter, &option2, widget);
-
-#if 0
-	GraphicsSheet* requestingView = dynamic_cast<GraphicsSheet*>(widget ? widget->parent() : 0);
-	if (requestingView) {
-		Interactor* inter = requestingView->getInteractor();
-		if (inter) {
-			inter->paintDecorations(this, painter);
-		}
-	}
-#endif
 }

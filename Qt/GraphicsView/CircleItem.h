@@ -49,9 +49,16 @@ public:
 					                     MoveHandleMask
 					 };
 
+	CircleItem();
+
     CircleItem(const QPointF& pos, QGraphicsItem * parent = 0);
 
     CircleItem(const QPointF& pos, qreal radius, QGraphicsItem * parent = 0);
+
+    /**
+     * Factory function to create a CircleItem instance.
+     */
+    static QGraphicsItem* create();
 
     /**
      * Accepts the visit from an ItemVisitor.
@@ -60,8 +67,11 @@ public:
      */
 //    virtual void accept(const ItemVisitor& visitor) = 0;
 
-//    virtual void writeExternal(QXmlStreamWriter& writer) = 0;
+    // @Override
+    virtual void readExternal(QXmlStreamReader& writer);
 
+    // @Override
+    virtual void writeExternal(QXmlStreamWriter& writer);
 
     // @Override
     virtual AbstractEditHandle getEditHandle(GraphicsSheet* view, const QPointF& pos, AbstractEditHandle enabledHandles = AllHandlesMask);

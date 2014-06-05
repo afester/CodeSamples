@@ -388,13 +388,18 @@ for (int i = 0;  i < 10;  i++) {
 }
 #endif
 
+
 void MainWindow::doActionLoad(){
-    qDebug() << "LOAD";
+    GraphicsScene* scene = dynamic_cast<GraphicsScene*>(graphicsSheet->scene());
+    scene->loadFromFile("sample.drw");
 }
 
+
 void MainWindow::doActionSave(){
-    qDebug() << "SAVE";
+    GraphicsScene* scene = dynamic_cast<GraphicsScene*>(graphicsSheet->scene());
+    scene->saveToFile("sample.drw");
 }
+
 
 void MainWindow::doActionSaveAs(){
     qDebug() << "SAVE AS";

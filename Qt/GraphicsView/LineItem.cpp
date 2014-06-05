@@ -5,12 +5,20 @@
 #include <QStyleOptionGraphicsItem>
 #include <QCursor>
 #include <QPointF>
+#include <QXmlStreamWriter>
 
 #include <math.h>
 
 #include "LineItem.h"
 #include "GraphicsSheet.h"
 #include "Interactor.h"
+
+LineItem::LineItem() : QGraphicsLineItem(0) {
+    setAcceptHoverEvents(true); // TODO: Only necessary when the item is selected!
+    setFlag(QGraphicsItem::ItemIsSelectable, true);
+    setFlag(QGraphicsItem::ItemIsMovable, true);
+    setFlag(QGraphicsItem::ItemClipsToShape, true);
+}
 
 
 LineItem::LineItem(const QPointF& pos1, const QPointF& pos2, QGraphicsItem * parent) :
@@ -22,6 +30,11 @@ LineItem::LineItem(const QPointF& pos1, const QPointF& pos2, QGraphicsItem * par
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
     setFlag(QGraphicsItem::ItemClipsToShape, true);
+}
+
+
+QGraphicsItem* LineItem::create() {
+    return new LineItem();
 }
 
 
@@ -222,4 +235,39 @@ QPainterPath LineItem::shape () const {
     path.closeSubpath();
 
     return path;
+}
+
+
+void LineItem::writeExternal(QXmlStreamWriter& writer) {
+    writer.writeStartElement("LineItem");
+
+
+    QPointF p1 = mapToScene(line().p1());
+    QPointF p2 = mapToScene(line().p2());
+
+    writer.writeAttribute("x1", QString::number(p1.x()));
+    writer.writeAttribute("y1", QString::number(p1.y()));
+    writer.writeAttribute("x2", QString::number(p2.x()));
+    writer.writeAttribute("y2", QString::number(p2.y()));
+    writer.writeEndElement();
+}
+
+
+void LineItem::readExternal(QXmlStreamReader& reader) {
+    QString sx1 = reader.attributes().value("x1").toString();
+    QString sy1 = reader.attributes().value("y1").toString();
+    QString sx2 = reader.attributes().value("x2").toString();
+    QString sy2 = reader.attributes().value("y2").toString();
+
+    qreal x1 = sx1.toFloat();
+    qreal y1 = sy1.toFloat();
+    qreal x2 = sx2.toFloat();
+    qreal y2 = sy2.toFloat();
+
+    QPointF itemPos(qMin(x1, x2), qMin(y1, y2));
+    QPointF p1 = QPointF(x1, y1) - itemPos;
+    QPointF p2 = QPointF(x2, y2) - itemPos;
+
+    setPos(itemPos);
+    setLine(QLineF(p1, p2));
 }

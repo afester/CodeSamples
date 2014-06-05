@@ -6,6 +6,7 @@
 #include <QRectF>
 #include <QStyleOptionGraphicsItem>
 #include <QPointF>
+#include <QXmlStreamWriter>
 
 #include <math.h>
 
@@ -33,6 +34,15 @@ void ItemVisitor::visit(EditableImageframeItem* ) const {
 }
 #endif
 
+
+CircleItem::CircleItem() : QGraphicsEllipseItem(0) {
+    setAcceptHoverEvents(true); // TODO: Only necessary when the item is selected!
+    setFlag(QGraphicsItem::ItemIsSelectable, true);
+    setFlag(QGraphicsItem::ItemIsMovable, true);
+    setFlag(QGraphicsItem::ItemClipsToShape, true);
+}
+
+
 CircleItem::CircleItem(const QPointF& pos, QGraphicsItem * parent) :
     QGraphicsEllipseItem(-5, -5, 10, 10, parent) {
 
@@ -58,6 +68,11 @@ CircleItem::CircleItem(const QPointF& cpos, qreal radius, QGraphicsItem * parent
     setFlag(QGraphicsItem::ItemClipsToShape, true);
 
     radHandle = QPointF(radius, 0);
+}
+
+
+QGraphicsItem* CircleItem::create() {
+    return new CircleItem();
 }
 
 
@@ -250,4 +265,24 @@ void CircleItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * st
 		}
 	}
 #endif
+}
+
+
+void CircleItem::writeExternal(QXmlStreamWriter& writer) {
+    writer.writeStartElement("CircleItem");
+    writer.writeAttribute("xpos", QString::number(x()));
+    writer.writeAttribute("ypos", QString::number(y()));
+    writer.writeAttribute("radius", QString::number(rect().width()/2));
+    writer.writeEndElement();
+}
+
+
+void CircleItem::readExternal(QXmlStreamReader& reader) {
+    qreal xpos = reader.attributes().value("xpos").toFloat();
+    qreal ypos = reader.attributes().value("ypos").toFloat();
+    qreal radius = reader.attributes().value("radius").toFloat();
+
+    setPos(xpos, ypos);
+    setRect(-radius, -radius, radius*2, radius*2);
+    radHandle = QPointF(radius, 0);
 }
