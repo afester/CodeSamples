@@ -249,20 +249,23 @@ void LineItem::writeExternal(QXmlStreamWriter& writer) {
     writer.writeAttribute("y1", QString::number(p1.y()));
     writer.writeAttribute("x2", QString::number(p2.x()));
     writer.writeAttribute("y2", QString::number(p2.y()));
+    writer.writeAttribute("color", pen().color().name());
+    writer.writeAttribute("style", QString::number(pen().style()));
+    writer.writeAttribute("width", QString::number(pen().widthF()));
+
     writer.writeEndElement();
 }
 
 
 void LineItem::readExternal(QXmlStreamReader& reader) {
-    QString sx1 = reader.attributes().value("x1").toString();
-    QString sy1 = reader.attributes().value("y1").toString();
-    QString sx2 = reader.attributes().value("x2").toString();
-    QString sy2 = reader.attributes().value("y2").toString();
+    qreal x1 = reader.attributes().value("x1").toFloat();
+    qreal y1 = reader.attributes().value("y1").toFloat();
+    qreal x2 = reader.attributes().value("x2").toFloat();
+    qreal y2 = reader.attributes().value("y2").toFloat();
 
-    qreal x1 = sx1.toFloat();
-    qreal y1 = sy1.toFloat();
-    qreal x2 = sx2.toFloat();
-    qreal y2 = sy2.toFloat();
+    QColor color = QColor(reader.attributes().value("color").toString());
+    Qt::PenStyle style = static_cast<Qt::PenStyle>(reader.attributes().value("style").toInt());
+    qreal width = reader.attributes().value("width").toFloat();
 
     QPointF itemPos(qMin(x1, x2), qMin(y1, y2));
     QPointF p1 = QPointF(x1, y1) - itemPos;
@@ -270,4 +273,5 @@ void LineItem::readExternal(QXmlStreamReader& reader) {
 
     setPos(itemPos);
     setLine(QLineF(p1, p2));
+    setPen(QPen(color, width, style));
 }

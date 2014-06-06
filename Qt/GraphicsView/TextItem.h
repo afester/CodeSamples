@@ -60,6 +60,9 @@ public:
     // @Override
     virtual void writeExternal(QXmlStreamWriter& writer);
 
+    // @Override
+    virtual void readExternal(QXmlStreamReader& reader);
+
     virtual void setText(const QString& text);
 
 #if 0

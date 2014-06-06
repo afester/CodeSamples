@@ -80,21 +80,33 @@ void RectItem::writeExternal(QXmlStreamWriter& writer) {
     writer.writeAttribute("height", QString::number(rect().height()));
     writer.writeAttribute("rotation", QString::number(rotation()));
 
+    writer.writeAttribute("background-color", brush().color().name());
+    writer.writeAttribute("border-color", pen().color().name());
+    writer.writeAttribute("border-style", QString::number(pen().style()));
+    writer.writeAttribute("border-width", QString::number(pen().widthF()));
+
     writer.writeEndElement();
 }
 
 
 void RectItem::readExternal(QXmlStreamReader& reader) {
-    QString xpos = reader.attributes().value("xpos").toString();
-    QString ypos = reader.attributes().value("ypos").toString();
-    QString width = reader.attributes().value("width").toString();
-    QString height = reader.attributes().value("height").toString();
-    QString rotationAttr = reader.attributes().value("rotation").toString();
+    qreal xpos = reader.attributes().value("xpos").toFloat();
+    qreal ypos = reader.attributes().value("ypos").toFloat();
+    qreal width = reader.attributes().value("width").toFloat();
+    qreal height = reader.attributes().value("height").toFloat();
+    qreal rotation = reader.attributes().value("rotation").toFloat();
 
-    setPos(xpos.toFloat(), ypos.toFloat());
-    setRect(0, 0, width.toFloat(), height.toFloat());
-    setRotation(rotationAttr.toFloat());
+    QColor color = QColor(reader.attributes().value("background-color").toString());
+    QColor borderColor = QColor(reader.attributes().value("border-color").toString());
+    Qt::PenStyle borderStyle = static_cast<Qt::PenStyle>(reader.attributes().value("border-style").toInt());
+    qreal borderWidth = reader.attributes().value("border-width").toFloat();
+
+    setPos(xpos, ypos);
+    setRect(0, 0, width, height);
+    setRotation(rotation);
     setTransformOriginPoint(rect().width()/2, rect().height()/2);
+    setPen(QPen(borderColor, borderWidth, borderStyle));
+    setBrush(QBrush(color));
 }
 
 

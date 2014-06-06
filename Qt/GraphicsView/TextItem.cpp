@@ -49,6 +49,19 @@ public:
     int type () const {
         return InternalTextItemType;
     }
+
+
+    // Set the alignment of all blocks to the given alignment
+    void setAlignment(Qt::Alignment align) {
+        QTextDocument* textDocument = document();
+        for (QTextBlock it = textDocument->begin(); it != textDocument->end(); it = it.next()) {
+            QTextCursor cur(it);
+            QTextBlockFormat format = cur.blockFormat();
+            format.setAlignment(align);
+            cur.setBlockFormat(format);
+        }
+    }
+
 };
 
 
@@ -283,14 +296,56 @@ void TextItem::writeExternal(QXmlStreamWriter& writer) {
     writer.writeAttribute("width", QString::number(rect().width()));
     writer.writeAttribute("height", QString::number(rect().height()));
     writer.writeAttribute("rotation", QString::number(rotation()));
+    writer.writeAttribute("background-color", brush().color().name());
+    writer.writeAttribute("border-color", pen().color().name());
+    writer.writeAttribute("border-style", QString::number(pen().style()));
+    writer.writeAttribute("border-width", QString::number(pen().widthF()));
 
-    writer.writeStartElement("text");
+    writer.writeStartElement("Text");
     writer.writeAttribute("font", textItem->font().toString());
     writer.writeAttribute("align", QString::number(alignment));
     writer.writeAttribute("textColor", textItem->defaultTextColor().name());
-
     writer.writeCharacters(textItem->toPlainText());
-    writer.writeEndElement(); // text
+    writer.writeEndElement();
 
-    writer.writeEndElement(); // textFrame
+    writer.writeEndElement();
+}
+
+
+void TextItem::readExternal(QXmlStreamReader& reader) {
+    RectItem::readExternal(reader);
+    reader.readNext();  // skip characters
+
+    // read the text
+    QXmlStreamReader::TokenType type = reader.readNext();
+    if (type == QXmlStreamReader::StartElement && reader.name() == "Text") {
+        // get the font
+        QString fontDesc = reader.attributes().value("font").toString();
+        QFont font;
+        font.fromString(fontDesc);
+
+        // get the alignment
+        alignment = static_cast<Qt::Alignment>(reader.attributes().value("align").toInt());
+        switch(alignment) {
+            case Qt::AlignLeft : break;
+            case Qt::AlignHCenter : break;
+            case Qt::AlignRight : break;
+            default : alignment = Qt::AlignLeft; break;
+        }
+
+        // get the color
+        QString color = reader.attributes().value("textColor").toString();
+
+        // read text and set it (before activating the properties, especially the alignment!)
+        reader.readNext();
+        textItem->setPlainText(reader.text().toString());
+
+        // activate properties
+        textItem->setFont(font);
+        textItem->setAlignment(alignment);
+        textItem->setDefaultTextColor(QColor(color));
+
+        // layout the text
+        centerTextItem();
+    }
 }

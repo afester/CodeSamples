@@ -212,51 +212,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 
 /*****************************************************************************/
 
-    QGraphicsRectItem* item = new RectItem(QRectF(10, 10, 50, 50));
-    item->setPen(QPen(Qt::red, 0));
-    item->setBrush(Qt::cyan);
-    graphicsSheet->scene()->addItem(item);
-
-    item = new RectItem(QRectF(0, 0, 5, 5));
-    item->setPen(QPen(Qt::blue, 0));
-    item->setBrush(Qt::lightGray);
-    graphicsSheet->scene()->addItem(item);
-
-    item = new RectItem(QRectF(225, 295, 5, 5));
-    item->setPen(QPen(Qt::green, 0));
-    item->setBrush(Qt::lightGray);
-    graphicsSheet->scene()->addItem(item);
-
-    item1 = new RectItem(QRectF(125, 100, 200, 100));
-    QPointF center2 = QPointF(item1->rect().width() / 2, item1->rect().height() / 2);
-    item1->setTransformOriginPoint(center2);
-    item1->setRotation(30);
-    item1->setPen(QPen(Qt::magenta, 0));
-    item1->setBrush(Qt::lightGray);
-    graphicsSheet->scene()->addItem(item1);
-
-    LineItem* item2 = new LineItem(QPointF(30, 30), QPointF(100, 200));
-    graphicsSheet->scene()->addItem(item2);
-
-    TextItem* item3 = new TextItem(QPoint(200, 50)); // , 100, 50));
-    item3->setInternalFont(QFont("Arial", 12, 0, false));
-    item3->setPen(QPen(Qt::darkRed, 2));
-    item3->setBrush(QColor(255, 255, 240));
-    item3->setText("Hg - Hello World");
-    item3->setInternalDefaultTextColor(Qt::red);
-    graphicsSheet->scene()->addItem(item3);
-
-    LineItem* li1 = new LineItem(QPointF(0, 100), QPointF(100, 100));
-    li1->setPen(QPen(Qt::red, 0));
-    LineItem* li2 = new LineItem(QPointF(0, 104.23), QPointF(100, 104.23));
-    li2->setPen(QPen(Qt::red, 0));
-    graphicsSheet->scene()->addItem(li1);
-    graphicsSheet->scene()->addItem(li2);
-
-    CircleItem* citem = new CircleItem(QPointF(200, 200), 75);
-    citem->setPen(QPen(Qt::blue, 0));
-    citem->setBrush(Qt::yellow);
-    graphicsSheet->scene()->addItem(citem);
+    GraphicsScene* scene = dynamic_cast<GraphicsScene*>(graphicsSheet->scene());
+    scene->loadFromFile("sample.drw");
 
     selectInteractor = new EditFrameInteractor();
     newLineItemInteractor = new NewLineItemInteractor();
@@ -267,52 +224,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     newEllipseItemInteractor = new NewEllipseItemInteractor();
     QObject::connect(newEllipseItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
 
+
     graphicsSheet->setInteractor(selectInteractor);
     graphicsSheet->setSnapper(new EdgeSnapper(new GridSnapper()));
 }
 
 
 #if 0
-qreal calculateDistance(const QVector2D& v, const QVector2D& w, const QVector2D& p) {
-    // Return minimum distance between line segment vw and point p
-      const float l2 = length_squared(v, w);  // i.e. |w-v|^2 -  avoid a sqrt
-      if (l2 == 0.0) return distance(p, v);   // v == w case
-
-      // Consider the line extending the segment, parameterized as v + t (w - v).
-      // We find projection of point p onto the line.
-      // It falls where t = [(p-v) . (w-v)] / |w-v|^2
-      const float t = dot(p - v, w - v) / l2;
-      if (t < 0.0) return distance(p, v);       // Beyond the 'v' end of the segment
-      else if (t > 1.0) return distance(p, w);  // Beyond the 'w' end of the segment
-      const vec2 projection = v + t * (w - v);  // Projection falls on the segment
-
-      return distance(p, projection);
-}
-
-
-// dist_Point_to_Segment(): get the distance of a point to a segment
-//     Input:  a Point P and a Segment S (in any dimension)
-//     Return: the shortest distance from P to S
-static qreal dist_Point_to_Segment(const QPointF& P, const QPointF& P0, const QPointF& P1) {
-
-     QVector2D v(P1 - P0);
-     QVector2D w(P - P0);
-
-     qreal c1 = QVector2D::dotProduct(w, v);
-     if ( c1 <= 0 )
-          return QLineF(P, P0).length();
-
-
-     qreal c2 = QVector2D::dotProduct(v,v);
-     if ( c2 <= c1 )
-          return QLineF(P, P1).length();
-
-     qreal b = c1 / c2;
-
-     QPointF Pb(P0 + (b * v).toPointF());
-
-     return QLineF(P, Pb).length();
-}
 
 void MainWindow::printInfo() {
     qDebug() << "\nLAYOUT INFO:\n====================";
@@ -324,11 +242,6 @@ void MainWindow::printInfo() {
     QPointF p(40, 20);
     qreal dist = dist_Point_to_Segment(p, p1, p2);
     qDebug() << dist;
-}
-
-
-void MainWindow::rotateItem() {
-
 }
 
 

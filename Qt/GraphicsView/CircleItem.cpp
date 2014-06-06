@@ -270,9 +270,16 @@ void CircleItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * st
 
 void CircleItem::writeExternal(QXmlStreamWriter& writer) {
     writer.writeStartElement("CircleItem");
+
     writer.writeAttribute("xpos", QString::number(x()));
     writer.writeAttribute("ypos", QString::number(y()));
     writer.writeAttribute("radius", QString::number(rect().width()/2));
+
+    writer.writeAttribute("background-color", brush().color().name());
+    writer.writeAttribute("border-color", pen().color().name());
+    writer.writeAttribute("border-style", QString::number(pen().style()));
+    writer.writeAttribute("border-width", QString::number(pen().widthF()));
+
     writer.writeEndElement();
 }
 
@@ -282,7 +289,15 @@ void CircleItem::readExternal(QXmlStreamReader& reader) {
     qreal ypos = reader.attributes().value("ypos").toFloat();
     qreal radius = reader.attributes().value("radius").toFloat();
 
+    QColor color = QColor(reader.attributes().value("background-color").toString());
+    QColor borderColor = QColor(reader.attributes().value("border-color").toString());
+    Qt::PenStyle borderStyle = static_cast<Qt::PenStyle>(reader.attributes().value("border-style").toInt());
+    qreal borderWidth = reader.attributes().value("border-width").toFloat();
+
     setPos(xpos, ypos);
     setRect(-radius, -radius, radius*2, radius*2);
+    setPen(QPen(borderColor, borderWidth, borderStyle));
+    setBrush(QBrush(color));
+
     radHandle = QPointF(radius, 0);
 }

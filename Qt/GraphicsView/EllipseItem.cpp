@@ -596,6 +596,6 @@ void EllipseItem::readExternal(QXmlStreamReader& reader) {
     qreal rotationAttr = reader.attributes().value("rotation").toFloat();
 
     setPos(xpos, ypos);
-    setRect(-xradius, -yradius, xradius, yradius);
+    setRect(-xradius, -yradius, xradius*2, yradius*2);
     setRotation(rotationAttr);
 }
