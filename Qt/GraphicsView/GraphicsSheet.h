@@ -4,6 +4,8 @@
  * http://creativecommons.org/licenses/by/3.0/ or send a letter to Creative 
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
+#ifndef GRAPHICSSHEET_H
+#define GRAPHICSSHEET_H
 
 #include <QGraphicsView>
 #include <QHash>
@@ -164,3 +166,5 @@ protected:
 
     void paste();
 };
+
+#endif

@@ -22,14 +22,11 @@
 #include "LineItem.h"
 #include "RectItem.h"
 #include "CircleItem.h"
+#include "EllipseItem.h"
 #include "TextItem.h"
 
 #include "EditFrameInteractor.h"
-#include "NewRectItemInteractor.h"
-#include "NewLineItemInteractor.h"
-#include "NewTextItemInteractor.h"
-#include "NewCircleItemInteractor.h"
-#include "NewEllipseItemInteractor.h"
+#include "NewItemInteractor.h"
 
 #include "Snapper.h"
 
@@ -216,12 +213,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     scene->loadFromFile("sample.drw");
 
     selectInteractor = new EditFrameInteractor();
-    newLineItemInteractor = new NewLineItemInteractor();
-    newRectItemInteractor = new NewRectItemInteractor();
-    newTextItemInteractor = new NewTextItemInteractor();
-    newCircleItemInteractor = new NewCircleItemInteractor();
+    newLineItemInteractor = new NewItemInteractor(LineItem::create, LineItem::P2Handle);
+    QObject::connect(newLineItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
+    newRectItemInteractor = new NewItemInteractor(RectItem::create, RectItem::BottomRightHandle);
+    QObject::connect(newRectItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
+    newTextItemInteractor = new NewItemInteractor(TextItem::create, TextItem::BottomRightHandle);
+    QObject::connect(newTextItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
+    newCircleItemInteractor = new NewItemInteractor(CircleItem::create, CircleItem::RadHandle);
     QObject::connect(newCircleItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
-    newEllipseItemInteractor = new NewEllipseItemInteractor();
+    newEllipseItemInteractor = new NewItemInteractor(EllipseItem::create, EllipseItem::BottomRightHandle);
     QObject::connect(newEllipseItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
 
 

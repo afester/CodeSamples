@@ -1,41 +1,40 @@
 #include <QMouseEvent>
 
 #include "GraphicsSheet.h"
-#include "RectItem.h"
-#include "NewRectItemInteractor.h"
+#include "CircleItem.h"
+#include "NewItemInteractor.h"
 #include "Log.h"
 
-NewRectItemInteractor::NewRectItemInteractor()  {
+NewItemInteractor::NewItemInteractor(FACTORY_FUNCTION factory, AbstractEditHandle handle) :
+itemFactory(factory) {
+    editHandle = handle;
 }
 
 
-NewRectItemInteractor::~NewRectItemInteractor() {
+NewItemInteractor::~NewItemInteractor() {
 }
 
 
-void NewRectItemInteractor::mousePressEvent ( QMouseEvent * event ) {
+void NewItemInteractor::mousePressEvent ( QMouseEvent * event ) {
 	if (event->button() != Qt::LeftButton) {
 		return;
 	}
 
-	// Log::log(Log::DEBUG, "NewRectItemInteractor") << "mousePressEvent";
-
 	QPointF scenePos = theView->mapToScene(event->pos());
-//    QPoint pos = QPoint((int) floor(scenePos.x()),
-//                        (int) floor(scenePos.y()));
-//	KollageGraphicsScene* theScene = dynamic_cast<KollageGraphicsScene*>(theView->scene());
 
-	RectItem* newItem = new RectItem(scenePos);
+	QGraphicsItem* newItem = itemFactory(); // new CircleItem(scenePos);
+	newItem->setPos(scenePos);
     theView->scene()->clearSelection();
-    theItem = newItem;
+    theItem = dynamic_cast<InteractableItem*>(newItem);
     theView->scene()->addItem(newItem);
     theItem->setItemSelected(true);
     // theFrame->setZValue(theScene->zOrder++);
-	editHandle = RectItem::BottomRightHandle;
+	// editHandle = CircleItem::RadHandle;
 	offset = QPointF(0,0);
 }
 
-void NewRectItemInteractor::mouseReleaseEvent ( QMouseEvent* ) {
+
+void NewItemInteractor::mouseReleaseEvent ( QMouseEvent* ) {
 	// Log::log(Log::DEBUG, "EditFrameInteractor") << "mouseReleaseEvent";
 
 	if (theItem) {
@@ -45,9 +44,8 @@ void NewRectItemInteractor::mouseReleaseEvent ( QMouseEvent* ) {
         QUndoCommand* undo = new NewItemCommand(theScene, theFrame);
         theScene->getUndoStack()->push(undo);
         theFrame->setSelected(true);
-
-        emit editDone();
 #endif
 		theItem = 0;
+        emit editDone();
 	}
 }
