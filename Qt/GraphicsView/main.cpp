@@ -25,7 +25,7 @@
 #include "EllipseItem.h"
 #include "TextItem.h"
 
-#include "EditFrameInteractor.h"
+#include "EditItemInteractor.h"
 #include "NewItemInteractor.h"
 
 #include "Snapper.h"
@@ -212,7 +212,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     GraphicsScene* scene = dynamic_cast<GraphicsScene*>(graphicsSheet->scene());
     scene->loadFromFile("sample.drw");
 
-    selectInteractor = new EditFrameInteractor();
+    selectInteractor = new EditItemInteractor();
     newLineItemInteractor = new NewItemInteractor(LineItem::create, LineItem::P2Handle);
     QObject::connect(newLineItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
     newRectItemInteractor = new NewItemInteractor(RectItem::create, RectItem::BottomRightHandle);

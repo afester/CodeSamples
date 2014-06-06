@@ -1,10 +1,10 @@
 #ifndef NEWITEMINTERACTOR_H
 #define NEWITEMINTERACTOR_H
 
-#include "EditFrameInteractor.h"
+#include "EditItemInteractor.h"
 #include "GraphicsSheet.h"  // FACTORY_FUNCTION
 
-class NewItemInteractor : public EditFrameInteractor {
+class NewItemInteractor : public EditItemInteractor {
 	Q_OBJECT;
 
 	FACTORY_FUNCTION itemFactory;

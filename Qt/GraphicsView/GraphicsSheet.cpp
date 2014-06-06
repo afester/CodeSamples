@@ -86,7 +86,6 @@ void GraphicsScene::writeExternal(QXmlStreamWriter& writer) {
     writer.writeAttribute("width", QString::number(width()));
     writer.writeAttribute("height", QString::number(height()));
     writer.writeAttribute("bgColor", backgroundBrush().color().name());
-//    writer.writeAttribute("borderWidth", QString::number(getBorderWidth()));
 
     QList<QGraphicsItem*> allItems = items(Qt::AscendingOrder);
     QGraphicsItem* item;
@@ -142,7 +141,6 @@ void GraphicsScene::readExternal(QXmlStreamReader& reader) {
                 QGraphicsItem* item = itemFactory->createItem(elementName);
                 InteractableItem* readableItem = dynamic_cast<InteractableItem*>(item);
                 if (readableItem) {
-                    qDebug() << item;
                     readableItem->readExternal(reader);
                     // item->setZValue(zOrder++);
                     addItem(item);

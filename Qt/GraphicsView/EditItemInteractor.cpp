@@ -11,19 +11,19 @@
 #include <math.h>
 
 //#include "Commands.h"
-#include "EditFrameInteractor.h"
+#include "EditItemInteractor.h"
 #include "Log.h"
 #include "GraphicsSheet.h"
 
-EditFrameInteractor::EditFrameInteractor() : theItem(0), originalAngle(0), enabledHandles(0xffff), editHandle(0)  {
+EditItemInteractor::EditItemInteractor() : theItem(0), originalAngle(0), enabledHandles(0xffff), editHandle(0)  {
 }
 
 
-EditFrameInteractor::~EditFrameInteractor() {
+EditItemInteractor::~EditItemInteractor() {
 }
 
 
-void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
+void EditItemInteractor::mousePressEvent ( QMouseEvent * event ) {
 	if (event->button() != Qt::LeftButton) {
 		return;
 	}
@@ -74,7 +74,7 @@ void EditFrameInteractor::mousePressEvent ( QMouseEvent * event ) {
 }
 
 
-void EditFrameInteractor::hoverOverEvent ( QMouseEvent * event ) {
+void EditItemInteractor::hoverOverEvent ( QMouseEvent * event ) {
 	QPointF scenePos = theView->mapToScene(event->pos());
 
 	InteractableItem* frameItem = dynamic_cast<InteractableItem*>(theView->getFocusItem());
@@ -94,7 +94,7 @@ void EditFrameInteractor::hoverOverEvent ( QMouseEvent * event ) {
 }
 
 
-void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
+void EditItemInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 
 	// check if currently a drag is in progress
 	if (theItem) {
@@ -109,7 +109,6 @@ void EditFrameInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 
 	        // snap the position to the defined snap points
             QPointF snappedPos = theView->snap(scenePos);
-qDebug() << scenePos << " => " << snappedPos;
 
             // move the handle to the new position
             theItem->moveHandle(editHandle, snappedPos);
@@ -123,7 +122,7 @@ qDebug() << scenePos << " => " << snappedPos;
 }
 
 
-void EditFrameInteractor::mouseReleaseEvent ( QMouseEvent * event ) {
+void EditItemInteractor::mouseReleaseEvent ( QMouseEvent * event ) {
     Q_UNUSED(event);
 
 	// Log::log(Log::DEBUG, "EditFrameInteractor") << "mouseReleaseEvent";
@@ -154,7 +153,7 @@ void EditFrameInteractor::mouseReleaseEvent ( QMouseEvent * event ) {
 }
 
 
-void EditFrameInteractor::paste() {
+void EditItemInteractor::paste() {
 #if 0
     const QClipboard *clipboard = QApplication::clipboard();
     const QMimeData *mimeData = clipboard->mimeData();

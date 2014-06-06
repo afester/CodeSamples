@@ -1,5 +1,5 @@
-#ifndef EDITFRAMEINTERACTOR_H
-#define EDITFRAMEINTERACTOR_H
+#ifndef EDITITEMINTERACTOR_H
+#define EDITITEMINTERACTOR_H
 
 
 #include <QSize>
@@ -9,7 +9,7 @@
 #include "InteractableItem.h"
 
 
-class EditFrameInteractor : public Interactor {
+class EditItemInteractor : public Interactor {
 protected:
 
 	InteractableItem* theItem;
@@ -21,9 +21,9 @@ protected:
     QRectF originalRect;  // original rect for undo operation
 
 public:
-	EditFrameInteractor();
+	EditItemInteractor();
 
-	virtual ~EditFrameInteractor();
+	virtual ~EditItemInteractor();
 
 	void hoverOverEvent ( QMouseEvent * event );
 
