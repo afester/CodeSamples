@@ -24,6 +24,7 @@
 #include "CircleItem.h"
 #include "EllipseItem.h"
 #include "TextItem.h"
+#include "BezierItem.h"
 
 #include "EditItemInteractor.h"
 #include "NewItemInteractor.h"
@@ -176,6 +177,31 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     toolBar->addAction(actionNewEllipseItem);
     QObject::connect(actionNewEllipseItem, SIGNAL(triggered()), this, SLOT(doActionNewEllipseItem()));
 
+    QIcon icon10;
+    icon10.addFile(QStringLiteral(":/Icons/object-newbezier.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionNewBezierItem = new QAction(icon10, "New bezier curve", this);
+    actionNewBezierItem->setCheckable(true);
+    toolBar->addAction(actionNewBezierItem);
+    QObject::connect(actionNewBezierItem, SIGNAL(triggered()), this, SLOT(doActionNewBezierItem()));
+
+    QIcon icon11;
+    icon11.addFile(QStringLiteral(":/Icons/object-delete.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionDeleteItem = new QAction(icon11, "Delete selected objects", this);
+    toolBar->addAction(actionDeleteItem);
+    QObject::connect(actionDeleteItem, SIGNAL(triggered()), graphicsSheet, SLOT(deleteSelectedItems()));
+
+    QIcon icon12;
+    icon12.addFile(QStringLiteral(":/Icons/edit-redo.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionRedo = new QAction(icon12, "Redo last undone action", this);
+    toolBar->addAction(actionRedo);
+    QObject::connect(actionRedo, SIGNAL(triggered()), this, SLOT(doActionRedo()));
+
+    QIcon icon13;
+    icon13.addFile(QStringLiteral(":/Icons/edit-undo.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionUndo = new QAction(icon13, "Undo last action", this);
+    toolBar->addAction(actionUndo);
+    QObject::connect(actionUndo, SIGNAL(triggered()), this, SLOT(doActionUndo()));
+
     QActionGroup* actionGroup = new QActionGroup(this);
     actionGroup->addAction(actionSelect);
     actionGroup->addAction(actionNewLineItem);
@@ -183,6 +209,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     actionGroup->addAction(actionNewTextItem);
     actionGroup->addAction(actionNewCircleItem);
     actionGroup->addAction(actionNewEllipseItem);
+    actionGroup->addAction(actionNewBezierItem);
     actionSelect->setChecked(true);
 
 #if 0
@@ -223,7 +250,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     QObject::connect(newCircleItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
     newEllipseItemInteractor = new NewItemInteractor(EllipseItem::create, EllipseItem::BottomRightHandle);
     QObject::connect(newEllipseItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
-
+    newBezierItemInteractor = new NewItemInteractor(BezierItem::create, BezierItem::P2Handle);
+    QObject::connect(newBezierItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
 
     graphicsSheet->setInteractor(selectInteractor);
     graphicsSheet->setSnapper(new EdgeSnapper(new GridSnapper()));
@@ -347,6 +375,17 @@ void MainWindow::doActionNewEllipseItem(){
     graphicsSheet->setInteractor(newEllipseItemInteractor);
 }
 
+void MainWindow::doActionNewBezierItem(){
+    graphicsSheet->setInteractor(newBezierItemInteractor);
+}
+
+void MainWindow::doActionRedo(){
+    qDebug() << "REDO";
+}
+
+void MainWindow::doActionUndo(){
+    qDebug() << "UNDO";
+}
 
 MainWindow::~MainWindow() {
 }

@@ -24,6 +24,10 @@ class MainWindow : public QMainWindow {
     QAction *actionNewTextItem;
     QAction *actionNewCircleItem;
     QAction *actionNewEllipseItem;
+    QAction *actionNewBezierItem;
+    QAction *actionDeleteItem;
+    QAction *actionRedo;
+    QAction *actionUndo;
 
     GraphicsSheet* graphicsSheet;
     QMenuBar *menubar;
@@ -37,6 +41,7 @@ class MainWindow : public QMainWindow {
     Interactor* newTextItemInteractor;
     Interactor* newCircleItemInteractor;
     Interactor* newEllipseItemInteractor;
+    Interactor* newBezierItemInteractor;
 
 public:
     MainWindow(QWidget* parent);
@@ -60,4 +65,7 @@ public slots:
     void doActionNewTextItem();
     void doActionNewCircleItem();
     void doActionNewEllipseItem();
+    void doActionNewBezierItem();
+    void doActionRedo();
+    void doActionUndo();
 };

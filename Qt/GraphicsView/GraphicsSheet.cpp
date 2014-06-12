@@ -29,6 +29,7 @@
 #include "EllipseItem.h"
 #include "CircleItem.h"
 #include "TextItem.h"
+#include "BezierItem.h"
 
 #define RULERHEIGHT 23
 #define RULERWIDTH 23
@@ -63,6 +64,7 @@ GraphicsScene::GraphicsScene() : QGraphicsScene()  {
     itemFactory->registerItemClass("EllipseItem", EllipseItem::create);
     itemFactory->registerItemClass("CircleItem", CircleItem::create);
     itemFactory->registerItemClass("TextItem", TextItem::create);
+    itemFactory->registerItemClass("BezierItem", BezierItem::create);
 }
 
 
@@ -592,5 +594,15 @@ void GraphicsSheet::paste() {
 
     if (interactor) {
         interactor->paste();
+    }
+}
+
+
+void GraphicsSheet::deleteSelectedItems() {
+    QList<QGraphicsItem*> selectedItems = scene()->selectedItems();
+    QGraphicsItem* item;
+    foreach(item, selectedItems) {
+        scene()->removeItem(item);
+        delete item;
     }
 }

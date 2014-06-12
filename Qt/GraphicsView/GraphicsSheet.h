@@ -145,6 +145,8 @@ public slots:
 private slots:
     void areaMoved();
 
+    void deleteSelectedItems();
+
 protected:
     // @Override
     virtual void drawBackground(QPainter * painter, const QRectF & rect);

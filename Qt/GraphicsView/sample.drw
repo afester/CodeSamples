@@ -1,28 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <QGraphicsScene width="420" height="296" bgColor="#000000">
     <RectItem xpos="182" ypos="146" width="120" height="26" rotation="0" background-color="#00ffff" border-color="#ff0000" border-style="1" border-width="0"/>
-    <RectItem xpos="0" ypos="0" width="5" height="5" rotation="0" background-color="#c0c0c0" border-color="#0000ff" border-style="1" border-width="0"/>
-    <RectItem xpos="225" ypos="295" width="5" height="5" rotation="0" background-color="#c0c0c0" border-color="#00ff00" border-style="1" border-width="0"/>
     <RectItem xpos="52" ypos="158" width="92" height="22" rotation="360" background-color="#c0c0c0" border-color="#ff00ff" border-style="1" border-width="0"/>
     <LineItem x1="74" y1="146" x2="52" y2="158" color="#000000" style="1" width="1"/>
-    <TextItem xpos="36" ypos="64" width="320" height="16" rotation="0" background-color="#fffff0" border-color="#800000" border-style="1" border-width="2">
+    <TextItem xpos="40" ypos="56" width="320" height="16" rotation="0" background-color="#fffff0" border-color="#800000" border-style="1" border-width="2">
         <Text font="Arial,12,-1,5,0,0,0,0,0,0" align="4" textColor="#ff0000">Sample Drawing
 for testing purposes</Text>
     </TextItem>
     <LineItem x1="28" y1="200" x2="376" y2="200" color="#ff0000" style="1" width="0"/>
-    <LineItem x1="182" y1="100" x2="224" y2="100" color="#ff0000" style="1" width="0"/>
     <CircleItem xpos="68" ypos="190" radius="10.198" background-color="#ffff00" border-color="#0000ff" border-style="1" border-width="0"/>
-    <EllipseItem xpos="196" ypos="124" xradius="10" yradius="20" rotation="0"/>
+    <EllipseItem xpos="204" ypos="124" xradius="10" yradius="20" rotation="0"/>
     <CircleItem xpos="130" ypos="190" radius="9.92866" background-color="#000000" border-color="#000000" border-style="1" border-width="1"/>
     <LineItem x1="74" y1="146" x2="158" y2="146" color="#000000" style="1" width="1"/>
     <LineItem x1="158" y1="146" x2="144" y2="158" color="#000000" style="1" width="1"/>
     <LineItem x1="158" y1="168" x2="158" y2="146" color="#000000" style="1" width="1"/>
     <LineItem x1="144" y1="180" x2="158" y2="168" color="#000000" style="1" width="1"/>
-    <LineItem x1="250" y1="145.746" x2="224" y2="100" color="#000000" style="1" width="1"/>
     <CircleItem xpos="210" ypos="174" radius="25.6125" background-color="#000000" border-color="#000000" border-style="1" border-width="1"/>
     <CircleItem xpos="282" ypos="186" radius="14.1421" background-color="#000000" border-color="#000000" border-style="1" border-width="1"/>
-    <LineItem x1="182.562" y1="100.012" x2="182" y2="146" color="#000000" style="1" width="1"/>
     <LineItem x1="284" y1="146" x2="284" y2="116" color="#000000" style="1" width="1"/>
     <LineItem x1="276" y1="116" x2="276" y2="146" color="#000000" style="1" width="1"/>
     <LineItem x1="276" y1="116" x2="284" y2="116" color="#000000" style="1" width="1"/>
+    <BezierItem x1="182" y1="146" x2="250.496" y2="146.225" c1x="184.496" c1y="70.4792" c2x="234.496" c2y="100.479" color="#000000" style="1" width="1"/>
 </QGraphicsScene>

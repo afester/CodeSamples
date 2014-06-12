@@ -29,7 +29,6 @@ void NewItemInteractor::mousePressEvent ( QMouseEvent * event ) {
     theView->scene()->addItem(newItem);
     theItem->setItemSelected(true);
     // theFrame->setZValue(theScene->zOrder++);
-	// editHandle = CircleItem::RadHandle;
 	offset = QPointF(0,0);
 }
 

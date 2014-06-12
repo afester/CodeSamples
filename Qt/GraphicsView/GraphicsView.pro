@@ -9,13 +9,13 @@ QT = gui core widgets
 CONFIG += qt warn_on debug console
 
 HEADERS = ScrollAreaLayout.h ScaleWidget.h ScaleEdgeWidget.h GraphicsSheet.h \
-          LineItem.h RectItem.h CircleItem.h EllipseItem.h TextItem.h \
-          Interactor.h EditFrameInteractor.h NewItemInteractor.h \
+          LineItem.h RectItem.h CircleItem.h EllipseItem.h TextItem.h BezierItem.h \
+          Interactor.h EditItemInteractor.h NewItemInteractor.h \
           Snapper.h LabelledComboBox.h Log.h MainWindow.h
 
 SOURCES = ScrollAreaLayout.cpp ScaleWidget.cpp ScaleEdgeWidget.cpp GraphicsSheet.cpp \
-          LineItem.cpp RectItem.cpp CircleItem.cpp EllipseItem.cpp TextItem.cpp \
-          Interactor.cpp EditFrameInteractor.cpp NewItemInteractor.cpp \
+          LineItem.cpp RectItem.cpp CircleItem.cpp EllipseItem.cpp TextItem.cpp BezierItem.cpp \
+          Interactor.cpp EditItemInteractor.cpp NewItemInteractor.cpp \
           Snapper.cpp LabelledComboBox.cpp Log.cpp main.cpp
 
 RESOURCES += GraphicsView.qrc
