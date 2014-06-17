@@ -8,6 +8,8 @@ QT = gui core widgets
 
 CONFIG += qt warn_on debug console
 
+DESTDIR = ../bin
+
 HEADERS = ScrollAreaLayout.h ScaleWidget.h ScaleEdgeWidget.h GraphicsSheet.h \
           Interactor.h EditItemInteractor.h NewItemInteractor.h \
           Snapper.h

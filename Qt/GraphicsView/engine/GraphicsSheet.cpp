@@ -54,7 +54,7 @@ QGraphicsItem* GraphicsItemFactory::createItem(const QString& className) {
 GraphicsScene::GraphicsScene() : QGraphicsScene()  {
     itemFactory = new GraphicsItemFactory();
 
-    QLibrary itemLibrary("items/debug/items");
+    QLibrary itemLibrary("bin/items");
     itemLibrary.load();
 
     typedef void (*ItemMain)(GraphicsItemFactory*);
