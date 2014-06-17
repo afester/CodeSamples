@@ -3,6 +3,17 @@
 # http://creativecommons.org/licenses/by/3.0/ or send a letter to Creative
 # Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
 
-TEMPLATE = subdirs
-SUBDIRS = engine sample \
-          items frames
+TEMPLATE = lib
+QT = gui core widgets
+
+CONFIG += qt warn_on debug console
+
+DESTDIR = ../bin
+TARGET = libframeItems
+
+INCLUDEPATH = ../engine
+LIBS += -L../bin -lengine
+
+HEADERS = DefaultFrame.h
+
+SOURCES = Frames.cpp DefaultFrame.cpp

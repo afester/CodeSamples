@@ -5,11 +5,33 @@
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
 
+#include <QDebug>
+#include <QDir>
+#include <QLibrary>
 
 #include "GraphicsSheet.h"
 #include "GraphicsItemFactory.h"
 
+typedef void (*ItemMain)(GraphicsItemFactory*);
+
 GraphicsItemFactory::GraphicsItemFactory() {
+
+    // search all shared libraries below the bin directory where the
+    // base name ends with "items":
+    QDir itemsDir("bin");
+    QStringList names;
+    names << "*items.dll" << "*items.so";  // TODO: better approach?
+    QStringList itemLibs = itemsDir.entryList(names);
+    foreach(QString libName, itemLibs) {
+        QString libPath = itemsDir.path() + QDir::separator() + libName;
+        qDebug() << "Loading: " << libPath;
+
+        QLibrary itemLibrary(libPath);
+        itemLibrary.load();
+
+        ItemMain itemMain = (ItemMain) itemLibrary.resolve("ItemsMain");
+        itemMain(this);
+    }
 }
 
 

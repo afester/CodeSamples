@@ -11,8 +11,6 @@
 extern "C" {
 
 void ItemsMain(GraphicsItemFactory* itemFactory) {
-   qDebug() << "In ItemsMain()";
-
    itemFactory->registerItemClass("RectItem", RectItem::create);
    itemFactory->registerItemClass("LineItem", LineItem::create);
    itemFactory->registerItemClass("EllipseItem", EllipseItem::create);

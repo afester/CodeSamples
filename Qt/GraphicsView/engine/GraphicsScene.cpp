@@ -7,12 +7,11 @@
 
 
 #include <QDebug>
-#include <QLibrary>
 #include <QGraphicsScene>
 #include <QGraphicsItem>
 #include <QFile>
 #include <QXmlStreamWriter>
-#include <QXmlStreamReader  >
+#include <QXmlStreamReader>
 
 #include "InteractableItem.h"
 #include "GraphicsScene.h"
@@ -21,14 +20,6 @@
 
 GraphicsScene::GraphicsScene() : QGraphicsScene()  {
     itemFactory = new GraphicsItemFactory();
-
-    QLibrary itemLibrary("bin/items");
-    itemLibrary.load();
-
-    typedef void (*ItemMain)(GraphicsItemFactory*);
-
-    ItemMain itemMain = (ItemMain) itemLibrary.resolve("ItemsMain");
-    itemMain(itemFactory);
 }
 
 
