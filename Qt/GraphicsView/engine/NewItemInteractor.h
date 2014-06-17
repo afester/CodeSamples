@@ -2,7 +2,7 @@
 #define NEWITEMINTERACTOR_H
 
 #include "EditItemInteractor.h"
-#include "GraphicsSheet.h"  // FACTORY_FUNCTION
+#include "GraphicsItemFactory.h"
 
 class NewItemInteractor : public EditItemInteractor {
 	Q_OBJECT;

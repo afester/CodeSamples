@@ -1,9 +1,9 @@
 
-#include <QApplication>
+//#include <QApplication>
 #include <QXmlStreamReader>
 #include <QClipboard>
 #include <QMouseEvent>
-#include <QGraphicsView>
+//#include <QGraphicsView>
 #include <QGraphicsItem>
 #include <QUndoCommand>
 #include <QMimeData>
@@ -13,6 +13,7 @@
 //#include "Commands.h"
 #include "EditItemInteractor.h"
 #include "GraphicsSheet.h"
+#include "GraphicsScene.h"
 
 EditItemInteractor::EditItemInteractor() : theItem(0), originalAngle(0), enabledHandles(0xffff), editHandle(0)  {
 }

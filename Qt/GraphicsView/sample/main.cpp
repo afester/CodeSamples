@@ -17,15 +17,8 @@
 #include <QDebug>
 
 #include "GraphicsSheet.h"
+#include "GraphicsScene.h"
 #include "ScrollAreaLayout.h"
-
-// #include "LineItem.h"
-// #include "RectItem.h"
-// #include "CircleItem.h"
-// #include "EllipseItem.h"
-// #include "TextItem.h"
-// #include "BezierItem.h"
-
 #include "EditItemInteractor.h"
 #include "NewItemInteractor.h"
 

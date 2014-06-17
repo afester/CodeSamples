@@ -1,6 +1,6 @@
 #include <QDebug>
 
-#include "GraphicsSheet.h"
+#include "GraphicsItemFactory.h"
 #include "RectItem.h"
 #include "LineItem.h"
 #include "EllipseItem.h"

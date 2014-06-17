@@ -10,10 +10,10 @@ CONFIG += qt warn_on debug console
 
 DESTDIR = ../bin
 
-HEADERS = ScrollAreaLayout.h ScaleWidget.h ScaleEdgeWidget.h GraphicsSheet.h \
+HEADERS = ScrollAreaLayout.h ScaleWidget.h ScaleEdgeWidget.h GraphicsSheet.h GraphicsScene.h GraphicsItemFactory.h \
           Interactor.h EditItemInteractor.h NewItemInteractor.h \
           Snapper.h
 
-SOURCES = ScrollAreaLayout.cpp ScaleWidget.cpp ScaleEdgeWidget.cpp GraphicsSheet.cpp \
+SOURCES = ScrollAreaLayout.cpp ScaleWidget.cpp ScaleEdgeWidget.cpp GraphicsSheet.cpp GraphicsScene.cpp GraphicsItemFactory.cpp \
           Interactor.cpp EditItemInteractor.cpp NewItemInteractor.cpp \
           Snapper.cpp
