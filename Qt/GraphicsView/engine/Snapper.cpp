@@ -4,7 +4,6 @@
 #include <math.h>
 
 #include "Snapper.h"
-#include "Log.h"
 #include "GraphicsSheet.h"
 #include "InteractableItem.h"
 

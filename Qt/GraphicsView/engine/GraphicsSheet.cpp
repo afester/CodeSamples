@@ -7,8 +7,9 @@
 
 
 #include <QDebug>
+#include <QLibrary>
 #include <QApplication>
-#include <QLabel>
+#include <QGraphicsItem>
 #include <QScreen>
 #include <QtCore/qmath.h>
 #include <QScrollBar>
@@ -21,15 +22,8 @@
 #include "ScaleWidget.h"
 #include "ScaleEdgeWidget.h"
 #include "Interactor.h"
+#include "InteractableItem.h"
 #include "Snapper.h"
-#include "Log.h"
-
-#include "RectItem.h"
-#include "LineItem.h"
-#include "EllipseItem.h"
-#include "CircleItem.h"
-#include "TextItem.h"
-#include "BezierItem.h"
 
 #define RULERHEIGHT 23
 #define RULERWIDTH 23
@@ -59,12 +53,14 @@ QGraphicsItem* GraphicsItemFactory::createItem(const QString& className) {
 
 GraphicsScene::GraphicsScene() : QGraphicsScene()  {
     itemFactory = new GraphicsItemFactory();
-    itemFactory->registerItemClass("RectItem", RectItem::create);
-    itemFactory->registerItemClass("LineItem", LineItem::create);
-    itemFactory->registerItemClass("EllipseItem", EllipseItem::create);
-    itemFactory->registerItemClass("CircleItem", CircleItem::create);
-    itemFactory->registerItemClass("TextItem", TextItem::create);
-    itemFactory->registerItemClass("BezierItem", BezierItem::create);
+
+    QLibrary itemLibrary("items/debug/items");
+    itemLibrary.load();
+
+    typedef void (*ItemMain)(GraphicsItemFactory*);
+
+    ItemMain itemMain = (ItemMain) itemLibrary.resolve("ItemsMain");
+    itemMain(itemFactory);
 }
 
 
@@ -277,7 +273,7 @@ void GraphicsSheet::drawForeground(QPainter * painter, const QRectF & rect) {
             edItem->paintSelectedBorder(this, painter);
 
             // paint the edit handles
-            edItem->paintHandles(this, painter, RectItem::AllHandlesMask);
+            edItem->paintHandles(this, painter, 0xffff); // RectItem::AllHandlesMask);
             painter->restore();
 
 #if 0

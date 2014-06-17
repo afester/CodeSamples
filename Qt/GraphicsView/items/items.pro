@@ -3,16 +3,14 @@
 # http://creativecommons.org/licenses/by/3.0/ or send a letter to Creative
 # Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
 
-TEMPLATE = app
+TEMPLATE = lib
 QT = gui core widgets
 
 CONFIG += qt warn_on debug console
 
-HEADERS = LabelledComboBox.h Log.h MainWindow.h
+INCLUDEPATH = ../engine
+LIBS += -L../engine/debug -lengine
 
-SOURCES = LabelledComboBox.cpp Log.cpp main.cpp
+HEADERS = LineItem.h RectItem.h CircleItem.h EllipseItem.h TextItem.h BezierItem.h
 
-INCLUDEPATH=engine
-LIBS += -Lengine/debug -lengine
-
-RESOURCES += GraphicsView.qrc
+SOURCES = StandardItems.cpp LineItem.cpp RectItem.cpp CircleItem.cpp EllipseItem.cpp TextItem.cpp BezierItem.cpp

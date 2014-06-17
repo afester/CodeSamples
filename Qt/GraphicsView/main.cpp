@@ -19,12 +19,12 @@
 #include "GraphicsSheet.h"
 #include "ScrollAreaLayout.h"
 
-#include "LineItem.h"
-#include "RectItem.h"
-#include "CircleItem.h"
-#include "EllipseItem.h"
-#include "TextItem.h"
-#include "BezierItem.h"
+// #include "LineItem.h"
+// #include "RectItem.h"
+// #include "CircleItem.h"
+// #include "EllipseItem.h"
+// #include "TextItem.h"
+// #include "BezierItem.h"
 
 #include "EditItemInteractor.h"
 #include "NewItemInteractor.h"
@@ -240,18 +240,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     scene->loadFromFile("sample.drw");
 
     selectInteractor = new EditItemInteractor();
-    newLineItemInteractor = new NewItemInteractor(LineItem::create, LineItem::P2Handle);
+// TODO: get all registered items from the factory!
+#if 0
+    newLineItemInteractor = new NewItemInteractor(LineItem::create, 1); // LineItem::P2Handle);
     QObject::connect(newLineItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
-    newRectItemInteractor = new NewItemInteractor(RectItem::create, RectItem::BottomRightHandle);
+    newRectItemInteractor = new NewItemInteractor(RectItem::create, 1); // RectItem::BottomRightHandle);
     QObject::connect(newRectItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
-    newTextItemInteractor = new NewItemInteractor(TextItem::create, TextItem::BottomRightHandle);
+    newTextItemInteractor = new NewItemInteractor(TextItem::create, 1); // TextItem::BottomRightHandle);
     QObject::connect(newTextItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
-    newCircleItemInteractor = new NewItemInteractor(CircleItem::create, CircleItem::RadHandle);
+    newCircleItemInteractor = new NewItemInteractor(CircleItem::create, 1); // CircleItem::RadHandle);
     QObject::connect(newCircleItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
-    newEllipseItemInteractor = new NewItemInteractor(EllipseItem::create, EllipseItem::BottomRightHandle);
+    newEllipseItemInteractor = new NewItemInteractor(EllipseItem::create, 1); // EllipseItem::BottomRightHandle);
     QObject::connect(newEllipseItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
-    newBezierItemInteractor = new NewItemInteractor(BezierItem::create, BezierItem::P2Handle);
+    newBezierItemInteractor = new NewItemInteractor(BezierItem::create, 1); // BezierItem::P2Handle);
     QObject::connect(newBezierItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
+#endif
 
     graphicsSheet->setInteractor(selectInteractor);
     graphicsSheet->setSnapper(new EdgeSnapper(new GridSnapper()));

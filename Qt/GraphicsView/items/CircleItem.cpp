@@ -121,7 +121,7 @@ void CircleItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) {
         // draw the shape of the circle
         painter->drawEllipse(rect());
 
-        // draw a radius line
+        // draw a radius line (TODO: Move to paintHandles?)
         painter->drawLine(QPointF(0, 0), radHandle);
 
         // draw a center cross

@@ -12,7 +12,6 @@
 
 //#include "Commands.h"
 #include "EditItemInteractor.h"
-#include "Log.h"
 #include "GraphicsSheet.h"
 
 EditItemInteractor::EditItemInteractor() : theItem(0), originalAngle(0), enabledHandles(0xffff), editHandle(0)  {
@@ -125,8 +124,6 @@ void EditItemInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 void EditItemInteractor::mouseReleaseEvent ( QMouseEvent * event ) {
     Q_UNUSED(event);
 
-	// Log::log(Log::DEBUG, "EditFrameInteractor") << "mouseReleaseEvent";
-
 	if (theItem) {
         if (editHandle == 11) {  // TODO: enum/constant!!!
             event->ignore();
@@ -161,7 +158,6 @@ void EditItemInteractor::paste() {
     if (mimeData->hasText()) {
         QString clipboardText = mimeData->text();
 
-		Log::log(Log::DEBUG, "KollageGraphicsScene") << "Paste new item into scene: " << clipboardText;
 
         KollageGraphicsScene* theScene = dynamic_cast<KollageGraphicsScene*>(theView->scene());
 

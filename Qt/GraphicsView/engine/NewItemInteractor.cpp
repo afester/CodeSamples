@@ -1,9 +1,8 @@
 #include <QMouseEvent>
+#include <QGraphicsItem>
 
 #include "GraphicsSheet.h"
-#include "CircleItem.h"
 #include "NewItemInteractor.h"
-#include "Log.h"
 
 NewItemInteractor::NewItemInteractor(FACTORY_FUNCTION factory, AbstractEditHandle handle) :
 itemFactory(factory) {
@@ -22,7 +21,7 @@ void NewItemInteractor::mousePressEvent ( QMouseEvent * event ) {
 
 	QPointF scenePos = theView->mapToScene(event->pos());
 
-	QGraphicsItem* newItem = itemFactory(); // new CircleItem(scenePos);
+	QGraphicsItem* newItem = itemFactory();
 	newItem->setPos(scenePos);
     theView->scene()->clearSelection();
     theItem = dynamic_cast<InteractableItem*>(newItem);
@@ -34,7 +33,6 @@ void NewItemInteractor::mousePressEvent ( QMouseEvent * event ) {
 
 
 void NewItemInteractor::mouseReleaseEvent ( QMouseEvent* ) {
-	// Log::log(Log::DEBUG, "EditFrameInteractor") << "mouseReleaseEvent";
 
 	if (theItem) {
 #if 0
