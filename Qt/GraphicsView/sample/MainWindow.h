@@ -10,6 +10,7 @@
 class GraphicsSheet;
 class QGraphicsRectItem;
 class Interactor;
+class ObjectController;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT;
@@ -34,6 +35,7 @@ class MainWindow : public QMainWindow {
     QStatusBar *statusbar;
     QToolBar *toolBar;
     QGraphicsRectItem* item1;
+    ObjectController* propertyEditor;
 
     Interactor* selectInteractor;
     Interactor* newLineItemInteractor;
@@ -68,4 +70,5 @@ public slots:
     void doActionNewBezierItem();
     void doActionRedo();
     void doActionUndo();
+    void selectionChanged();
 };

@@ -10,11 +10,12 @@ CONFIG += qt warn_on debug console
 
 DESTDIR = ../bin
 
-HEADERS = LabelledComboBox.h Log.h MainWindow.h
+HEADERS = LabelledComboBox.h Log.h MainWindow.h objectcontroller.h
 
-SOURCES = LabelledComboBox.cpp Log.cpp main.cpp
+SOURCES = LabelledComboBox.cpp Log.cpp main.cpp objectcontroller.cpp
 
-INCLUDEPATH=../engine
-LIBS += -L../bin -lengine
+INCLUDEPATH += ../engine
+INCLUDEPATH += ../../../../qt-solutions/qtpropertybrowser/src
+LIBS += -L../bin -lengine -L../../../../qt-solutions/qtpropertybrowser/lib -lQtSolutions_PropertyBrowser-head
 
 RESOURCES += GraphicsView.qrc

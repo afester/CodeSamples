@@ -11,6 +11,10 @@ static const int EditableTextItemType = QGraphicsItem::UserType + 2;
 static const int InternalTextItemType = QGraphicsItem::UserType + 10000;
 
 class TextItem : public RectItem {
+    Q_OBJECT;
+
+    Q_PROPERTY(QString text READ text WRITE setText);
+
 public:
     enum EditHandle {NoHandle, MoveHandle,              // TODO: Move in common "super" enum
                      TopLeftHandle, TopHandle, TopRightHandle,
@@ -64,6 +68,8 @@ public:
     virtual void readExternal(QXmlStreamReader& reader);
 
     virtual void setText(const QString& text);
+
+    virtual QString text();
 
 #if 0
 ///// Font

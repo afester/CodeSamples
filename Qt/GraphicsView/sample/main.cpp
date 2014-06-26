@@ -12,9 +12,11 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QApplication>
+#include <QGraphicsItem>
 #include <QGraphicsDropShadowEffect>
 #include <QVector2D>
 #include <QDebug>
+#include "objectcontroller.h"
 
 #include "GraphicsSheet.h"
 #include "GraphicsScene.h"
@@ -230,6 +232,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 /*****************************************************************************/
 
     GraphicsScene* scene = dynamic_cast<GraphicsScene*>(graphicsSheet->scene());
+    QObject::connect(scene, SIGNAL(selectionChanged()), this, SLOT(selectionChanged()));
     scene->loadFromFile("sample.drw");
 
     selectInteractor = new EditItemInteractor();
@@ -251,6 +254,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 
     graphicsSheet->setInteractor(selectInteractor);
     graphicsSheet->setSnapper(new EdgeSnapper(new GridSnapper()));
+
+    propertyEditor = new ObjectController();
+    propertyEditor->show();
 }
 
 
@@ -382,6 +388,12 @@ void MainWindow::doActionRedo(){
 void MainWindow::doActionUndo(){
     qDebug() << "UNDO";
 }
+
+void MainWindow::selectionChanged(){
+    InteractableItem* item = dynamic_cast<InteractableItem*>(graphicsSheet->scene()->selectedItems().at(0));
+    propertyEditor->setObject(item);
+}
+
 
 MainWindow::~MainWindow() {
 }

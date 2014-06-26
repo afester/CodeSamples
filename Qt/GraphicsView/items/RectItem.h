@@ -4,6 +4,9 @@
 #include <QGraphicsRectItem>
 #include <QPointF>
 #include <QUndoCommand>
+#include <QBrush>
+#include <QPen>
+
 #include "InteractableItem.h"
 
 #if 0
@@ -26,7 +29,17 @@ public:
 
 class GraphicsSheet;
 
-class RectItem : public QGraphicsRectItem, public InteractableItem {
+// http://qt-project.org/doc/qt-4.8/moc.html
+// Multiple Inheritance Requires QObject to Be First
+// If you are using multiple inheritance, moc assumes
+// that the first inherited class is a subclass of QObject.
+// Also, be sure that only the first inherited class is a QObject.
+class RectItem : public InteractableItem, public QGraphicsRectItem {
+    Q_OBJECT;
+
+    Q_PROPERTY(QPointF pos READ pos WRITE setPos);
+    Q_PROPERTY(QPen    pen READ pen WRITE setPen);
+    Q_PROPERTY(QBrush  brush READ brush WRITE setBrush);
 
 public:
 	enum EditHandle {NoHandle, MoveHandle,              // TODO: Move in common "super" enum

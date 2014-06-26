@@ -1,15 +1,21 @@
 #ifndef INTERACTABLEITEM_H
 #define INTERACTABLEITEM_H
 
+#include <QObject>
+
+
 class QPointF;
 class GraphicsSheet;
 class QXmlStreamWriter;
 class QXmlStreamReader;
+class QPainter;
 
 typedef unsigned int AbstractEditHandle;
 
 
-class InteractableItem {
+class InteractableItem : public QObject {
+    Q_OBJECT;
+
 public:
 
     virtual ~InteractableItem() {};

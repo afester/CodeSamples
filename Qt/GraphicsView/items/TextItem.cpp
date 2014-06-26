@@ -146,10 +146,16 @@ void TextItem::setInternalFont(const QFont& font) {
     centerTextItem();
 }
 
+
 void TextItem::setText(const QString& text) {
     textItem->setPlainText(text);
     centerTextItem();
     setInternalAlignment(alignment);
+}
+
+
+QString TextItem::text() {
+    return textItem->toPlainText();
 }
 
 
