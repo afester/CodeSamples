@@ -42,11 +42,11 @@
 #define OBJECTCONTROLLER_H
 
 #include <QWidget>
+#include "qtvariantproperty.h"
 
 class ObjectControllerPrivate;
 
-class ObjectController : public QWidget
-{
+class ObjectController : public QWidget {
     Q_OBJECT
 public:
     ObjectController(QWidget *parent = 0);
@@ -60,6 +60,7 @@ private:
     Q_DECLARE_PRIVATE(ObjectController)
     Q_DISABLE_COPY(ObjectController)
     Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QVariant &))
+    Q_PRIVATE_SLOT(d_func(), void slotUpdateProperties())
 };
 
 #endif

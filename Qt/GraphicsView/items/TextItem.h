@@ -3,6 +3,7 @@
 
 #include "RectItem.h"
 #include <QGraphicsItem>
+#include <QFont>
 
 class InternalTextItem;
 
@@ -13,7 +14,9 @@ static const int InternalTextItemType = QGraphicsItem::UserType + 10000;
 class TextItem : public RectItem {
     Q_OBJECT;
 
-    Q_PROPERTY(QString text READ text WRITE setText);
+    Q_PROPERTY(QString Text      READ text         WRITE setText);
+    Q_PROPERTY(QFont   Font      READ font         WRITE setFont);
+    Q_PROPERTY(QColor  Textcolor READ getTextColor WRITE setTextColor);
 
 public:
     enum EditHandle {NoHandle, MoveHandle,              // TODO: Move in common "super" enum
@@ -71,12 +74,9 @@ public:
 
     virtual QString text();
 
-#if 0
-///// Font
     virtual QFont font() const;
 
     virtual void setFont(const QFont& font);
-#endif
 
     virtual void setInternalFont(const QFont& font);
 
@@ -89,7 +89,7 @@ public:
     virtual Qt::Alignment getAlignment();
 
 ///// Text color
-//    virtual void setTextColor(const QColor& col);
+    virtual void setTextColor(const QColor& col);
 
     virtual void setInternalDefaultTextColor(const QColor& col);
 

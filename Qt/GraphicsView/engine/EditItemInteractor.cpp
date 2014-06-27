@@ -143,6 +143,8 @@ void EditItemInteractor::mouseReleaseEvent ( QMouseEvent * event ) {
                 theScene->getUndoStack()->push(undo);
             }
 #endif
+
+            emit theItem->propertyChanged();
             theView->setPositionIndicators(QPointF(-1, -1));;
         }
 

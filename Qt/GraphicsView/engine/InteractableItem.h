@@ -39,6 +39,10 @@ public:
 // Interface: Serializable
     virtual void writeExternal(QXmlStreamWriter& writer) = 0;
     virtual void readExternal(QXmlStreamReader& reader) = 0;
+
+signals:
+    void propertyChanged();
+
 };
 
 #endif

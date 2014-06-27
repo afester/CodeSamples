@@ -126,20 +126,22 @@ int EditableTextItem::type () const {
     return EditableTextItemType;
 }
 
+#endif
 
-QFont EditableTextItem::font() const {
+QFont TextItem::font() const {
     return textItem->font();
 }
 
-// TODO: Maybe it is better to create the SetFontCommand outside of this class -
-// same for the text color command ...
-void EditableTextItem::setFont(const QFont& font) {
+void TextItem::setFont(const QFont& font) {
+#if 0
+    // TODO: Maybe it is better to create the SetFontCommand outside of this class -
+    // same for the text color command ...
     KollageGraphicsScene* theScene = dynamic_cast<KollageGraphicsScene*>(scene());
     QUndoCommand* undo = new SetFontCommand(this, font);
     theScene->getUndoStack()->push(undo);
-}
-
 #endif
+    setInternalFont(font);
+}
 
 void TextItem::setInternalFont(const QFont& font) {
     textItem->setFont(font);
@@ -223,13 +225,16 @@ Qt::Alignment TextItem::getAlignment() {
     return alignment;
 }
 
-#if 0
+
 void TextItem::setTextColor(const QColor& col) {
+    textItem->setDefaultTextColor(col);
+/*
     KollageGraphicsScene* theScene = dynamic_cast<KollageGraphicsScene*>(scene());
     QUndoCommand* undo = new TextColorCommand(this, col);
     theScene->getUndoStack()->push(undo);
+    */
 }
-#endif
+
 
 void TextItem::setInternalDefaultTextColor(const QColor& col) {
     textItem->setDefaultTextColor(col);

@@ -7,6 +7,7 @@
 
 #include <QAction>
 #include <QMenuBar>
+#include <QDockWidget>
 #include <QStatusBar>
 #include <QToolBar>
 #include <QComboBox>
@@ -256,7 +257,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     graphicsSheet->setSnapper(new EdgeSnapper(new GridSnapper()));
 
     propertyEditor = new ObjectController();
-    propertyEditor->show();
+    QDockWidget* propertiesDock = new QDockWidget(this);
+    propertiesDock->setObjectName(QStringLiteral("propertiesDock"));
+    propertiesDock->setFeatures(QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable);
+    propertiesDock->setWindowTitle("Item properties");
+    propertiesDock->setWidget(propertyEditor);
+    addDockWidget(static_cast<Qt::DockWidgetArea>(2), propertiesDock);
 }
 
 

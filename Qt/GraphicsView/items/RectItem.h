@@ -37,8 +37,8 @@ class GraphicsSheet;
 class RectItem : public InteractableItem, public QGraphicsRectItem {
     Q_OBJECT;
 
-    Q_PROPERTY(QPointF pos READ pos WRITE setPos);
-    Q_PROPERTY(QPen    pen READ pen WRITE setPen);
+    Q_PROPERTY(QPointF pos   READ pos   WRITE setPos);
+    Q_PROPERTY(QPen    pen   READ pen   WRITE setPen);
     Q_PROPERTY(QBrush  brush READ brush WRITE setBrush);
 
 public:
