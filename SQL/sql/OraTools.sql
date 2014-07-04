@@ -44,3 +44,8 @@ FROM   all_tab_cols
 WHERE  table_name = 'MY_TABLE'
 ORDER BY column_name;
 
+-- Select view definition for a given view
+SELECT TEXT
+FROM DBA_VIEWS
+WHERE VIEW_NAME='MY_VIEW';
+

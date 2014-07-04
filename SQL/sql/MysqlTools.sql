@@ -23,6 +23,9 @@ SHOW PRIVILEGES;
 -- grant (all) privileges to a user
 GRANT ALL ON database.* TO user;
 
+-- Clear the privilege cache in order to make the grants effective
+FLUSH PRIVILEGES;
+
 -- Show privileges granted to a user
 SHOW GRANTS FOR 'user'@'host';
 
