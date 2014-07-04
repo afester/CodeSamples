@@ -228,12 +228,13 @@ void ObjectControllerPrivate::addClassProperties(const QMetaObject *metaObject)
 
     QtProperty *classProperty = m_classToProperty.value(metaObject);
     if (!classProperty) {
+        // add the class name as a "separator" / "group" property
         QString className = QLatin1String(metaObject->className());
         classProperty = m_manager->addProperty(QtVariantPropertyManager::groupTypeId(), className);
-
         m_classToProperty[metaObject] = classProperty;
         m_propertyToClass[classProperty] = metaObject;
 
+        // add all properties of this class as QtVariantProperty
         for (int idx = metaObject->propertyOffset(); idx < metaObject->propertyCount(); idx++) {
             QMetaProperty metaProperty = metaObject->property(idx);
             int type = metaProperty.userType();
@@ -270,6 +271,7 @@ void ObjectControllerPrivate::addClassProperties(const QMetaObject *metaObject)
                             enumNames.append(QLatin1String(metaEnum.key(i)));
                         }
                     }
+
                     subProperty->setAttribute(QLatin1String("enumNames"), enumNames);
                     subProperty->setValue(enumToInt(metaEnum, metaProperty.read(m_object).toInt()));
                 }
