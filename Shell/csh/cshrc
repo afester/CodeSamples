@@ -1,0 +1,32 @@
+# Despite CshTop10.txt, sometimes you *need* to work with csh -
+# then, at least setup a reasonable environment ...
+
+# set a reasonable command line prompt
+set prompt="\
+%n@%m:%~\
+%# "
+
+set promptchars="%#"
+set autolist
+set autoexpand
+
+# Set sort order for e.g. ls - directories first
+setenv LC_COLLATE C
+
+# Expand search path with local directories
+setenv PATH ${HOME}/scripts:${HOME}/local/bin:${PATH}
+
+# Colorized grep
+setenv GREP_OPTIONS "--color=auto"
+setenv GREP_COLOR '00;38;5;11;48;5;4'
+
+# Colorized man pages
+setenv C1 `printf "\033[0;32m"`
+setenv C2 `printf "\033[1;34m"`
+setenv C3 `printf "\033[31m"`
+setenv C4 `printf "\033[33;44m"`
+alias man 'env LESS_TERMCAP_ue="$C1" LESS_TERMCAP_me="$C1" LESS_TERMCAP_se="$C1" LESS_TERMCAP_md="$C2" LESS_TERMCAP_us="$C3" LESS_TERMCAP_so="$C4" man'
+
+# enable unlimited core dumps
+limit coredumpsize unlimited
+
