@@ -30,6 +30,8 @@ public class WebstartSample extends JFrame implements Runnable {
    public void run() {
       setVisible(true);
       textArea.setText("Webstart detected: " + System.getProperty("javawebstart.version", "None"));
+      SecurityManager sm = System.getSecurityManager();
+      textArea.append("\nSecurity Manager detected: " + (sm == null ? "None" : sm));
    }
 
 
