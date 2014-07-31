@@ -15,7 +15,7 @@
     </resources>
 
     <application-desc
-         name="Dynamic Tree Demo Application"
+         name="Webstart sample application"
          main-class="com.example.WebstartSample"
          width="300"
          height="300">
