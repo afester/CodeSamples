@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <sstream>
+#include <cmath>
 
 using namespace std;
 
@@ -14,7 +15,9 @@ void hexprint(const void* array, size_t size) {
 }
 
 
-
+/**
+ * Simple class to analyze and dump a floating point value.
+ */
 class PureFloat {
 
    static const unsigned int BIT24 = 0x00800000;
@@ -49,9 +52,23 @@ public:
 
     static PureFloat normalized(unsigned int resultMant, int newExp);
 
+    /**
+     * Prints out information about the current float value, such as 
+     * the exponent and the mantissa
+     */
     void dumpInfo() const;
     
+    /**
+     * Prints out the current floating point number in scientific
+     * notation, using two lines
+     */
     void dumpScientific() const;
+
+    /**
+     * Prints out the current floating point number in a binary
+     * format, showing the IEEE754 format bit by bit
+     */
+    void dumpBinary() const;
 
     /**
      * @return A string representaion of this floating point number.
@@ -119,6 +136,26 @@ void PureFloat::dumpInfo() const {
 void PureFloat::dumpScientific() const {
     printf("                       %d-127\n", val.b.e);
     printf("  %c%f * 2\n",  val.b.s ? '-' : ' ', 1.0+val.b.m * 0.00000011920928955078125);
+}
+
+
+void PureFloat::dumpBinary() const {
+    printf("s=%d e=%d m=%d\n", val.b.s, val.b.e, val.b.m);
+    printf("+-+--------+-----------------------+\n");
+    printf("|%d|", val.b.s);
+
+    unsigned int mask = 0x0080; 
+    for (int b = 0;  b < 8;  b++, mask >>= 1) {
+        printf("%d", (val.b.e & mask) != 0);
+    }
+    printf("|");
+
+    mask = 0x400000; 
+    for (int b = 0;  b < 23;  b++, mask >>= 1) {
+        printf("%d", (val.b.m & mask) != 0);
+    }
+
+    printf("|\n+-+--------+-----------------------+\n\n");
 }
 
 
@@ -282,7 +319,7 @@ ostream& operator<<(ostream& o, const PureFloat& pf) {
 }
 
 
-int main() {
+int main1() {
     PureFloat f1(42.987654321);
     PureFloat f2(1.0);
     PureFloat f3(2.21);
@@ -318,4 +355,24 @@ int main() {
     res = f2 / f7;
     std::cerr << f2 << " / " << f7 << " = " << res << std::endl;
     f3.dumpInfo();
+}
+
+
+int main() {
+    PureFloat f1(0.0);
+    f1.dumpBinary();
+
+    PureFloat f2(1.0);
+    f2.dumpBinary();
+
+    PureFloat f3(0.1);
+    f3.dumpBinary();
+
+    PureFloat f4(-0.1);
+    f4.dumpBinary();
+    printf("%d\n", f4.value() == f4.value());
+
+    PureFloat f5(NAN);
+    f5.dumpBinary();
+    printf("%d\n", f5.value() == f5.value());
 }
