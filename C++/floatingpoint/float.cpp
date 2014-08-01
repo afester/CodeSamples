@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -129,12 +130,15 @@ PureFloat PureFloat::normalized(unsigned int resultMant, int newExp) {
     return PureFloat(newExp, resultMant & 0x007FFFFF);
 }
 
+/* itoa is non-standard and non-portable! */
+static string pitoa(int number) {
+   return static_cast<ostringstream*>( &(ostringstream() << number) )->str();
+}
 
 // http://www.ragestorm.net/blogs/?p=57
 // Base algorithm to convert an IEEE754 floating point number into a string.
 // very small numbers and very large numbers are not supported yet.
 string PureFloat::toString() const {
-    char buffer[(sizeof(int)*8+1)];
     string result = "";
 
     // 1. Get sign, exponent and (normalized) mantissa
@@ -152,7 +156,7 @@ string PureFloat::toString() const {
 
     // 3. Convert the integer part
     number = man >> (23 - exp);
-    result.append(itoa(number, buffer, 10));
+    result.append(pitoa(number));
 
     // 4. Convert the fractional part
     unsigned int frac = man & ((1 << (23-exp)) - 1);
@@ -164,7 +168,7 @@ string PureFloat::toString() const {
         while (frac != 0 && c++ < 6) {
             frac *= 10;
             number = frac / base;
-            result.append(itoa(number, buffer, base));
+            result.append(pitoa(number));
             frac %= base;
         }
     }
