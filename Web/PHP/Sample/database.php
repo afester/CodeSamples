@@ -16,6 +16,19 @@ if ($mysqli->connect_errno) {
 <font color="red">
 <?php
 echo "Connected to " . $mysqli->host_info . "<br/>";
+
+$mysqli->real_query("SHOW CREATE DATABASE `" . $dbparams['dbname'] . "`");
+$res = $mysqli->use_result();
+
+// process all rows
+while ($row = $res->fetch_assoc()) {
+
+	// process all columns
+	$arr = array_values($row);
+	foreach($arr as $key => $val)
+		echo $val . "<br/>";
+}
+
 ?>
 </font>
 
@@ -53,6 +66,14 @@ while ($row = $res->fetch_assoc()) {
 }
 
 ?>
+
+<h2>Insert new data:</h2>
+
+<form action="demo_form.asp">
+  <textarea rows="10" cols="40"></textarea>
+  <input type="submit" value="Submit">
+</form>
+
   </body>
 
 </html>

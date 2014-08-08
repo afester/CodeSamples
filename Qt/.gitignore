@@ -5,6 +5,7 @@ Makefile*
 ui_*.h
 moc_*.cpp
 qrc_*.cpp
+*.o
 
 release
 debug
