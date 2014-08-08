@@ -9,20 +9,13 @@ import com.example.expressionparser.ExpressionParser.MulDivContext;
 import com.example.expressionparser.ExpressionParser.NumberContext;
 import com.example.expressionparser.ExpressionParser.ParContext;
 import com.example.expressionparser.ExpressionParser.PowerContext;
-
-import com.example.symboltable.Constant;
-import com.example.symboltable.CosFunction;
-import com.example.symboltable.Function;
-import com.example.symboltable.LogFunction;
 import com.example.symboltable.NoFunctionException;
-import com.example.symboltable.SinFunction;
-import com.example.symboltable.SqrtFunction;
 import com.example.symboltable.Symbol;
-import com.example.symboltable.SymbolTable;
-import com.example.symboltable.TanFunction;
 import com.example.symboltable.UndefinedSymbolException;
 import com.example.symboltable.Variable;
 
+import com.example.symboltable.java8.Function;
+import com.example.symboltable.java8.SymbolTable;
 
 
 public class ExpressionInterpreter extends ExpressionBaseVisitor<Double> {
@@ -30,14 +23,14 @@ public class ExpressionInterpreter extends ExpressionBaseVisitor<Double> {
    private SymbolTable symbolTable = new SymbolTable();
 
    public ExpressionInterpreter() {
-      symbolTable.putSymbol(new Constant("PI", Math.PI));
-      symbolTable.putSymbol(new Constant("e", Math.E));
+      symbolTable.putSymbol("PI", Math.PI);
+      symbolTable.putSymbol("e",  Math.E);
 
-      symbolTable.putSymbol(new SinFunction());
-      symbolTable.putSymbol(new CosFunction());
-      symbolTable.putSymbol(new TanFunction());
-      symbolTable.putSymbol(new LogFunction());
-      symbolTable.putSymbol(new SqrtFunction());
+      symbolTable.putSymbol("sin",  x -> Math.sin(x));
+      symbolTable.putSymbol("cos",  x -> Math.cos(x));
+      symbolTable.putSymbol("tan",  x -> Math.tan(x));
+      symbolTable.putSymbol("log",  x -> Math.log(x));
+      symbolTable.putSymbol("sqrt", x -> Math.sqrt(x));
 
       // symbolTable.dump();
    }

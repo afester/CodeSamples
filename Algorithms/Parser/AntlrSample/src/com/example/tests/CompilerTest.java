@@ -90,7 +90,8 @@ public class CompilerTest {
    public void functionTests() {
       TestData[] testData = {
             new TestData("sin(1)", 0.8414709848078965),
-            new TestData("3 * cos(PI)", -3.0)
+            new TestData("3 * cos(PI)", -3.0),
+            new TestData("sqrt(4)", 2.0)
       };
 
       for (TestData td : testData) {

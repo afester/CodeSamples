@@ -1,6 +1,27 @@
+# Set sort order for e.g. ls - directories first
 export LC_COLLATE=C
 
+# Expand search path by local directories
+export PATH=${HOME}/scripts:${HOME}/local/bin:${PATH}
+
+# GIT specific setup (includes prompt!)
 export GIT_PS1_SHOWDIRTYSTATE=1
 export PS1='\n\[\033[01;32m\]\u@\h\[\033[01;34m\] \w\[\033[01;33m\]$(__git_ps1)\[\033[01;34m\]\n\$\[\033[00m\] '
-
 alias gitfiles="git ls-files"
+
+# Colorized grep
+export GREP_OPTIONS="--color=auto"
+export GREP_COLOR='00;38;5;11;48;5;4'
+
+# Colorized man pages
+man() {
+    env \
+    LESS_TERMCAP_ue=$'\E[0;32m' \
+    LESS_TERMCAP_me=$'\E[0;32m' \
+    LESS_TERMCAP_se=$'\E[0;32m' \
+    LESS_TERMCAP_md=$'\E[1;34m' \
+    LESS_TERMCAP_us=$'\E[31m' \
+    LESS_TERMCAP_so=$'\E[33;44m' \
+        man "$@"
+}
+

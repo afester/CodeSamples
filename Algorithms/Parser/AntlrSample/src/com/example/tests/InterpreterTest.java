@@ -92,8 +92,17 @@ public class InterpreterTest {
       result = evaluate("3 * cos(PI)");
       assertEquals(-3, result, EPSILON);
       
+      result = evaluate("sqrt(4)");
+      assertEquals(2.0, result, EPSILON);
+      
+      result = evaluate("tan(PI/4)");
+      assertEquals(1.0, result, EPSILON);
+      
+      result = evaluate("log(2.0)");
+      assertEquals(0.6931471805599453, result, EPSILON);
    }
-   
+
+
    @Test
    public void constantTests() {
       Double result = evaluate("PI");

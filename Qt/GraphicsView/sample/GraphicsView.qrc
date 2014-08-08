@@ -1,0 +1,17 @@
+<RCC>
+  <qresource prefix="Icons">
+    <file>file-load.png</file>
+    <file>file-save.png</file>
+    <file>file-save-as.png</file>
+    <file>object-select.png</file>
+    <file>object-newline.png</file>
+    <file>object-newrect.png</file>
+    <file>object-newtext.png</file>
+    <file>object-newcircle.png</file>
+    <file>object-newellipse.png</file>
+    <file>object-newbezier.png</file>
+    <file>object-delete.png</file>
+    <file>edit-redo.png</file>
+    <file>edit-undo.png</file>
+  </qresource>
+</RCC>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+"
+      codebase="http://localhost:8080/Webstart" 
+      href="app.jnlp">
+
+    <information>
+        <title>Webstart sample project</title>
+        <vendor>Example Com</vendor>
+    </information>
+
+    <resources>
+        <!-- Application Resources -->
+        <j2se version="1.7+" href="http://java.sun.com/products/autodl/j2se"/>
+        <jar href="WebstartSample.jar" main="true" />
+    </resources>
+
+    <application-desc
+         name="Webstart sample application"
+         main-class="com.example.WebstartSample"
+         width="300"
+         height="300">
+     </application-desc>
+
+     <update check="background"/>
+</jnlp>

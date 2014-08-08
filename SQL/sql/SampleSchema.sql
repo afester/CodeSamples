@@ -109,3 +109,23 @@ END;
 /
 
 BEGIN CreateSampleData(4000); END;
+
+CREATE TABLE LargeData (
+    data VARCHAR2(1024)
+);
+
+CREATE OR REPLACE PROCEDURE CreateLargeData(recordCount IN NUMBER) IS
+BEGIN
+    FOR cCount IN 1..recordCount LOOP
+        INSERT INTO LargeData SELECT DBMS_RANDOM.STRING('l', 1024) FROM Dual; 
+    END LOOP;
+END;
+/
+
+-- Create 1 MiB of data
+BEGIN CreateLargeData(1024); END;
+/
+
+-- Create 1 GiB of data
+BEGIN CreateLargeData(1024*1024); END;
+/

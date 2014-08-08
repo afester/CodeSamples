@@ -3,11 +3,6 @@
 # http://creativecommons.org/licenses/by/3.0/ or send a letter to Creative
 # Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
 
-TEMPLATE = app
-QT = gui core widgets
-
-CONFIG += qt warn_on debug console
-
-FORMS = GraphicsView.ui
-HEADERS = GraphicsView.h LabelledComboBox.h
-SOURCES = GraphicsView.cpp LabelledComboBox.cpp main.cpp
+TEMPLATE = subdirs
+SUBDIRS = engine sample \
+          items frames

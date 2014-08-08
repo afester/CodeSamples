@@ -26,10 +26,10 @@ void Canvas::paintEvent(QPaintEvent * event) {
 
 void Canvas::drawLine(int x1, int y1, int x2, int y2) {
     thePainter->drawLine(x1, y1, x2, y2);
-    repaint();
+    update();
 }
 
 void Canvas::drawEllipse(int x, int y, int w, int h) {
     thePainter->drawEllipse(x, y, w, h);
-    repaint();
+    update();
 }

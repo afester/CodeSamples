@@ -4,7 +4,7 @@
 # Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
 
 TEMPLATE = app
-QT = gui core
+QT = gui core widgets
 
 CONFIG += qt warn_on
 FORMS = Canvas.ui

@@ -3,6 +3,7 @@
 	<name>JCE</name>
 	<comment></comment>
 	<projects>
+		<project>hexdump</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
