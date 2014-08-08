@@ -4,11 +4,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.Key;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+
+import com.example.hexdump.HexDump;
 
 public class RSASample {
 
@@ -34,16 +38,25 @@ public class RSASample {
     public void run() {
       try {
          byte[] encryptedData = readFile("data/encrypted.rsa");
-         byte[] rsaKey = readFile("data/rsakey.prv");
 
-         System.out.println(encryptedData.length);
-         System.out.println(rsaKey.length);
+         System.err.println("Encrypted data (" + encryptedData.length + " bytes):");
+         HexDump hd = new HexDump(encryptedData);
+         hd.setPrefix("   ");
+         hd.dumpAll(System.err);
+
+         byte[] rsaKey = readFile("data/rsakey.prv");
+         System.err.println("\nRSA key (" + rsaKey.length + " bytes):");
+         hd = new HexDump(rsaKey);
+         hd.setPrefix("   ");
+         hd.dumpAll(System.err);
 
          // Create key and cipher
          
-         PublicKey publicKey = 
-               KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(rsaKey));
+        // PublicKey publicKey = 
+          //     KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(rsaKey));
 //         Key key = new SecretKeySpec(rsaKey, "RSA");
+         Key publicKey = new SecretKeySpec(rsaKey, "RSA");
+
          Cipher cipher = Cipher.getInstance("RSA");
 /*
          // encrypt the text

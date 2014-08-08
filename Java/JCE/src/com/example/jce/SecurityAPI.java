@@ -8,6 +8,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
@@ -15,13 +16,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Provider.Service;
 import java.security.SecureRandom;
+
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -70,10 +73,10 @@ public class SecurityAPI implements ActionListener {
 		
 		Provider[] providers = java.security.Security.getProviders();
 		for (Provider p : providers) {
-			System.out.println("    " + p.getName());
+			System.out.println("    " + p.getName() + "/" + p.getClass());
 			Set<Service> services = p.getServices();
 			for (Service s : services) {
-				System.out.println("        " + s.getAlgorithm()+ " (" + s.getType() + ")");
+				System.out.println("        " + s.getAlgorithm()+ " (" + s.getType() + ")" + " " + s.getClassName());
 			}
 		}
 	}
@@ -84,6 +87,7 @@ public class SecurityAPI implements ActionListener {
 	public static void main(String[] args) {
 		SecurityAPI api = new SecurityAPI();
 		api.getProvidersByType();
+		api.allProviders();
 		api.run();
 	}
 
