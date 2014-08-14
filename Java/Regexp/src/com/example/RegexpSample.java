@@ -1,6 +1,5 @@
 package com.example;
 
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,8 +10,15 @@ public class RegexpSample {
       new RegexpSample().run();
    }
    
-
+   
    public void run() {
+      // basicSamples();
+      // captureGroups();
+      captureGroups1();
+      captureGroups2();
+   }
+
+   public void basicSamples() {
 
       String str = "Hello World @12:00";
 
@@ -43,6 +49,60 @@ public class RegexpSample {
       printMatch("=(.*)", "name=value", 1);
    }
 
+   
+   public void captureGroups() {
+      String str = "Hello1234Garbage";
+
+      Pattern pattern = Pattern.compile("(\\p{Alpha}*)(\\p{Digit}*)");
+      Matcher matcher = pattern.matcher(str);
+
+      System.out.println(matcher.find());
+      System.out.println(matcher.group(1));
+      System.out.println(matcher.group(2));
+      System.out.println();
+
+      // Same, but using named capturing groups
+      Pattern pattern2 = Pattern.compile("(?<text>\\p{Alpha}*)(?<number>\\p{Digit}*)");
+      Matcher matcher2 = pattern2.matcher(str);
+
+      System.out.println(matcher2.find());
+      System.out.println(matcher2.group("text"));
+      System.out.println(matcher2.group("number"));
+      System.out.println();
+
+      // Using slightly different pattern to simply capture non-digits and digits  
+      str = "Hello";
+      matcher = pattern.matcher(str);
+      System.out.println("Found pattern: " + matcher.find());
+      System.out.println("Group 1      : " + matcher.group(1));
+      System.out.println("Group 2      : " + matcher.group(2));
+   }
+
+   
+   public void captureGroups1() {
+      String input = "Hello World12345Garbage";
+      String regexp = "(\\D*)(\\d*)";
+      
+      Pattern pattern = Pattern.compile(regexp);
+      Matcher matcher = pattern.matcher(input);
+      matcher.find();
+      System.out.println("Text  : " + matcher.group(1));
+      System.out.println("Number: " + matcher.group(2));
+   }
+
+
+   public void captureGroups2() {
+      String input = "Hello World12345Garbage";
+      
+      String regexp = "(?<text>\\D*)(?<number>\\d*)";
+      
+      Pattern pattern = Pattern.compile(regexp);
+      Matcher matcher = pattern.matcher(input);
+      matcher.find();
+      System.out.println("Text  : " + matcher.group("text"));
+      System.out.println("Number: " + matcher.group("number"));
+   }
+
 
    public void printMatch(String regexp, String str, int group) {
       System.out.println("\nMatching \"" + regexp + "\"\n against \"" + str + "\"");
@@ -51,7 +111,7 @@ public class RegexpSample {
       System.out.println( String.format("   find(): %b", matcher.find() ));
       System.out.println( String.format("   Result: %d/%d \"%s\"" , matcher.start(), matcher.end(), matcher.group(group)) );
    }
-   
+
    public void printMatch(String regexp, String str) {
       printMatch(regexp, str, 0);
    }
