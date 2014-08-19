@@ -1,5 +1,7 @@
 <?php
+
 require_once "Session.php";
+require_once "Page.php";
 
 /*
  $dbgStr = "<div style=\"background-color:#f0f0f0\" ><pre>" . "Session id:" . session_id() ."\n";
@@ -45,18 +47,18 @@ function Main() {
 				$dbgStr = $dbgStr . "User name: " . $session->getUserName();
 				$dbgStr = $dbgStr . "Session ID: " . session_id();
 	
-				$page->addFile("Sample.html");
+				$page->addFile("content/Sample.html");
 			} else {
-				$page->addFile("Login.html");
+				$page->addFile("content/Login.html");
 				$markers = array('###ERROR###' => 'Login failed');
 				$page->replaceMarkers($markers);
 			}
-	
+
 		} else {
-			$page->addFile("Login.html");
+			$page->addFile("content/Login.html");
 			$markers = array('###ERROR###' => '');
 		}
-	
+
 	} else  {
 	
 		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -65,22 +67,48 @@ function Main() {
 	
 				// $page->addFile("Logout.html");
 	
-				$page->addFile("Login.html");
+				$page->addFile("content/Login.html");
 				$markers = array('###ERROR###' => '');
 			}
 	
 		} else {
+
+			// Normal page request from authenticated user.
+
 			$pageId = $_GET['pageId'];
 			if ($pageId == null) {
-				$pageId = "Sample.html";
+				$pageId = "content/Sample.html";
 			} else {
 				$pageId = $pageId . '.html';
 			}
 			$page->addFile($pageId);
 		}
 	}
-	
+
+	$markers['###USERNAME###'] = $session->getUserName();
 	$page->replaceMarkers($markers);
+	$page->sendResponse();
+}
+
+
+function MainAnonymous() {
+	$session = Session::getSession();
+	$page = new Page();
+	$markers = array();
+
+	$pageId = $_GET['pageId'];
+	if ($pageId == null) {
+		$pageId = "content/Layout.html";
+	} else {
+		$pageId = "content/" . $pageId . '.html';
+	}
+	$page->addFile($pageId);
+	$page->addCSS("content/Layout.css");
+
+	$markers['###USERNAME###'] = $session->getUserName();
+	$page->resolveFragments();
+	$page->replaceMarkers($markers);
+
 	$page->sendResponse();
 }
 

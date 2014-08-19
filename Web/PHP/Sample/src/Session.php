@@ -3,7 +3,7 @@
 class Session {
 
 	private $authenticated = false;
-	private $userName = null;
+	private $userName = "anonymous";
 
 	/**
 	 * @return A session object corresponding to the current session.
@@ -70,43 +70,6 @@ class Session {
 	 */
 	public function toString() {
 		return "Session[authenticated:" . $this->authenticated . ", userName:" . $this->userName . "]";
-	}
-}
-
-
-
-class Page {
-
-	private $header= "";
-	private $body = "";
-
-	public function __construct() {
-		$this->header ="<!DOCTYPE html>\n" .
-				"<html>\n" .
-				"\n" .
-				"<head>\n" .
-				"<meta charset=\"UTF-8\">\n" .
-				"<title>Login</title>\n" .
-				"</head>\n" .
-				"\n" .
-				"<body>\n";
-	}
-
-
-	public function addFile($htmlFile) {
-		$this->body = $this->body . file_get_contents($htmlFile);
-	}
-
-
-	public function replaceMarkers($markers) {
-		foreach($markers as $key => $val) {
-			$this->body = str_replace($key, $val, $this->body);
-		}
-	}
-
-
-	public function sendResponse() {
-		echo $this->header . $this->body . "</body></html>";
 	}
 }
 
