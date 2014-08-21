@@ -31,12 +31,17 @@ class Session {
 	}
 
 
+	/**
+	 * @return The username which is associated with the current session.
+	 */
 	public function getUserName() {
 		return $this->userName;
 	}
 
 
 	public function login($username, $password) {
+		
+		// TODO: read username and password from database; use encrypted password!
 		if ($username == "andreas" && $password == "helloWorld") {
 			session_regenerate_id(true);
 			$this->authenticated = true;
