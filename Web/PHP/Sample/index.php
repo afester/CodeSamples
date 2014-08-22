@@ -1,4 +1,6 @@
 <?php
 require_once "src/Main.php";
-MainAnonymous();
+$entry = new Entry();
+$entry->service();
+// MainAnonymous();
 ?>

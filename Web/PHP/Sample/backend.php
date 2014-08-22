@@ -1,4 +1,6 @@
 <?php
 require_once "src/Main.php";
-Main();
+$entry = new Entry();
+$entry->service();
+// Main();
 ?>
