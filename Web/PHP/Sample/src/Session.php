@@ -51,6 +51,11 @@ class Session {
 	public function getRequestMap() {
 	  return $this->requestMap;
 	}
+	
+	public function setRequestMap($map) {
+	  $this->requestMap = $map;
+	  
+	}
 
 	
 	/**

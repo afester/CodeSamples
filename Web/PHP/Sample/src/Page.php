@@ -97,6 +97,12 @@ class Page {
 
     if ($accessors[0] === 'session') {
       $map = Session::current()->getSessionMap();
+
+      $result = $map[ $accessors[1] ];
+    } else if ($accessors[0] === 'data') {
+      $map = Session::current()->getRequestMap();
+      $map = $map['data'];
+
       $result = $map[ $accessors[1] ];
     }
 
@@ -104,9 +110,20 @@ class Page {
   }
 
 
-  public function resolveExpressions() {
+  private function resolveExpressions() {
+    // call a page specific PHP script, if it exists, to fill additional 
+    // data into the request map 
+    $pageDir  = implode('/', $this->pagePath);
+    $scriptFile = $pageDir . "/page.php";
+    if (file_exists($scriptFile)) {
+      include $scriptFile;
+      getRenderValues();
+    }
+    
+    // get all expressions in the html page
     $expressions = $this->getExpressions();
 
+    // replace all expressions with their corresponding values
     foreach ($expressions as $expression) {
       // Evaluate the expression.
       $value = $this->evaluateExpression($expression);
