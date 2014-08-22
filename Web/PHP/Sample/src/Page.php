@@ -16,8 +16,6 @@ class MyRecursiveFilterIterator extends RecursiveFilterIterator {
 }
 
 
-
-
 class Page {
   private $pageId = 0;
   private $url = "";
@@ -80,6 +78,43 @@ class Page {
       }
     } while ( $count != null && $count > 0 );
   }
+  
+
+  /**
+   * Find all expressions located in the current page.
+   *
+   * @return An array with all expressions from the current page. 
+   */
+  private function getExpressions() {
+    $matches = array ();
+    $count = preg_match_all ( "/#{(.*)}/", $this->body, $matches );
+    return $matches[1];
+  }
+
+
+  private function evaluateExpression($expression) {
+    $accessors = explode('.', $expression);
+
+    if ($accessors[0] === 'session') {
+      $map = Session::current()->getSessionMap();
+      $result = $map[ $accessors[1] ];
+    }
+
+    return $result;
+  }
+
+
+  public function resolveExpressions() {
+    $expressions = $this->getExpressions();
+
+    foreach ($expressions as $expression) {
+      // Evaluate the expression.
+      $value = $this->evaluateExpression($expression);
+
+      // replace the evaluated value in the page.
+      $this->body = str_replace("#{" . $expression . "}", $value, $this->body);
+    }
+  }
 
 
   public function sendResponse() {
@@ -98,10 +133,13 @@ class Page {
     $this->body = file_get_contents ( $this->layoutFile);
     $this->resolveFragments ();
     $this->replaceMarkers ( $markers );
+
+    $this->resolveExpressions();
+    
     $this->resolveLocalization ();
     $this->sendResponse ();
   }
-  
+
   // method called from constructor - set up the path to the
   // page, given its page id
   private function setupPage() {
@@ -126,7 +164,7 @@ class Page {
     }
 
     // look up the layout file
-    $this->layoutFile = $this->findFile("Layout.htmlf");
+    $this->layoutFile = $this->findFile("Layout.html");
 
     // collect all CSS files up to the top level
     // files lower in the level override files with the same name from upper levels
@@ -140,7 +178,9 @@ class Page {
     // create combined css file for this page
     $pageDir  = implode('/', $this->pagePath);
     $cacheDir = "cache/" . $pageDir;
-    mkdir($cacheDir, 0755, true);
+
+    // create the cache directory for this page - ignore if dir already exists
+    @mkdir($cacheDir, 0755, true);
 
     $combinedCSS = $cacheDir .  "/" . "page.css";
     file_put_contents($combinedCSS, "");

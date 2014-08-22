@@ -2,8 +2,15 @@
 
 class Session {
 
-	private $authenticated = false;
-	private $userName = "anonymous";
+	private $sessionMap = array();
+	private $requestMap = array();
+
+
+	public function __construct() {
+	  $this->sessionMap['authenticated'] = false;
+	  $this->sessionMap['userName'] = 'anonymous';
+	}
+
 
 	/**
 	 * @return A session object corresponding to the current session.
@@ -18,24 +25,39 @@ class Session {
 			$session = new Session();
 			$_SESSION['session'] = $session;
 		}
-
+		
 		return $session;
 	}
 
 
+	public static function current() {
+	  return $_SESSION['session'];
+	}
+
+
+	// TODO: Should probably move all the differently scoped maps into a 
+	// "Context" class or similar ... The session object itself should
+	// really only be an entry in the "Session" map ...
+	public function getApplicationMap() {
+	  return $this->applicationMap;
+	}
+
+
+	public function getSessionMap() {
+	  return $this->sessionMap;
+	}
+
+
+	public function getRequestMap() {
+	  return $this->requestMap;
+	}
+
+	
 	/**
 	 * @return <code>true</code> if this session is authenticated, <code>false</code> otherwise.
 	 */
 	public function isAuthenticated() {
-		return $this->authenticated;
-	}
-
-
-	/**
-	 * @return The username which is associated with the current session.
-	 */
-	public function getUserName() {
-		return $this->userName;
+		return $this->sessionMap['authenticated'];
 	}
 
 
@@ -44,8 +66,9 @@ class Session {
 		// TODO: read username and password from database; use encrypted password!
 		if ($username == "andreas" && $password == "helloWorld") {
 			session_regenerate_id(true);
-			$this->authenticated = true;
-			$this->userName = $username;
+
+			$this->sessionMap['authenticated'] = true;
+			$this->sessionMap['userName'] = $username;
 		}
 	}
 
@@ -55,8 +78,8 @@ class Session {
 	 * After this method has been called, the session is again in "not authenticated" state.
 	 */
 	public function logout() {
-		$authenticated = false;
-		$userName = null;
+		$this->sessionMap['authenticated'] = false;
+		$this->sessionMap['userName'] = "anonymous";
 
 		$_SESSION = array();
 
@@ -74,7 +97,7 @@ class Session {
 	 * @return A readable string of this session object, including the session object attributes.
 	 */
 	public function toString() {
-		return "Session[authenticated:" . $this->authenticated . ", userName:" . $this->userName . "]";
+		return "Session[" . print_r($this->sessionMap, true) . "]";
 	}
 }
 
