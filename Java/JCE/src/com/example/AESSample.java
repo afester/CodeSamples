@@ -2,32 +2,27 @@ package com.example;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 
 import com.example.hexdump.HexDump;
 
-public class RSASample {
+public class AESSample {
 
     public void run() {
       try {
          String text = "Sample String which we want to encrypt";
+         String key = "Bar12345Bar12345";                 // 128 bit key
 
          // Get the cipher (a cipher is a cryptographic algorithm)
-         Cipher cipher = Cipher.getInstance("RSA");
+         Cipher cipher = Cipher.getInstance("AES");
 
-         // Create key pair - in a real application, we need to store the
-         // key somewhere so that they can later be used to decrypt the message!
-         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-         KeyPair keyPair = kpg.generateKeyPair();
-         Key prv = keyPair.getPrivate();
-         Key pub = keyPair.getPublic();
+         // Create Key 
+         Key aesKey = new SecretKeySpec(key.getBytes(StandardCharsets.ISO_8859_1), "AES");
 
-         // print a hexdump of the keys
-         HexDump.dumpHex("Public Key:", pub.getEncoded());
-         HexDump.dumpHex("\nPrivate Key:", prv.getEncoded());
+         // print a hexdump of the key
+         HexDump.dumpHex("Key:", aesKey.getEncoded());
 
 /** Encryption and decryption - essentially same code as in AESSample! ********/
          // cryptographic algorithms work on binary data (byte arrays).
@@ -36,15 +31,15 @@ public class RSASample {
          byte[] plaintext = text.getBytes(StandardCharsets.ISO_8859_1);
          HexDump.dumpHex("\nPlaintext:", plaintext);
 
-         // encrypt the text - we use the public key for encryption
-         cipher.init(Cipher.ENCRYPT_MODE, pub);
+         // encrypt the text
+         cipher.init(Cipher.ENCRYPT_MODE, aesKey);
          byte[] ciphertext = cipher.doFinal(plaintext);
 
          // print a hexdump of the ciphertext
          HexDump.dumpHex("\nCiphertext:", ciphertext);
 
-         // decrypt the text - we use the private key for decryption
-         cipher.init(Cipher.DECRYPT_MODE, prv);
+         // decrypt the text
+         cipher.init(Cipher.DECRYPT_MODE, aesKey);
          byte[] decrypted = cipher.doFinal(ciphertext);
 
          // print a hexdump of the decrypted data
@@ -59,7 +54,7 @@ public class RSASample {
     }
 
     public static void main(String[] args) {
-       RSASample app = new RSASample();
+       AESSample app = new AESSample();
        app.run();
     }
 }
