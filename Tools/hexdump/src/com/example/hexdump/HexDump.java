@@ -55,13 +55,20 @@ public class HexDump {
 
         // ascii dump
         result.append("  ");
-        for (int idx = offset; idx < offset + bytesPerLine && idx < data.length; idx++) {
+        //result.append(" |");
+        int idx = 0;
+        for (idx = offset; idx < offset + bytesPerLine && idx < data.length; idx++) {
             int c = (int) data[idx] & 0xFF;
             if (c < 32) { // c == '\n' || c == '\t') {
                 c = '.';
             }
             result.append(String.format("%c", c));
         }
+        // spacer
+        //for (; idx < offset + bytesPerLine; idx++) {
+        //    result.append(" ");
+        //}
+        //result.append("|");
 
         offset += bytesPerLine;
         return result.toString();
@@ -75,6 +82,21 @@ public class HexDump {
     }
 
 
+    /**
+     * Helper method to print a byte array as a hex dump.
+     * 
+     * @param title The title of the hex dump
+     * @param data  The byte array to dump.
+     */
+    public static void dumpHex(String title, final byte[] data) {
+        System.err.println(title);
+        HexDump hd = new HexDump(data);
+        hd.setPrefix("   ");
+        hd.dumpAll(System.err);
+    }
+
+    
+    
     // test method
     public static void main(String[] args) {
         HexDump hd1 = new HexDump(new byte[] { 1, 2, 3 });
