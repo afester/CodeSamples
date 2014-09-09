@@ -69,7 +69,7 @@ while ($row = $res->fetch_assoc()) {
 
 <h2>Insert new data:</h2>
 
-<form action="demo_form.asp">
+<form action="insert.php" method="post">
   <textarea rows="10" cols="40"></textarea>
   <input type="submit" value="Submit">
 </form>

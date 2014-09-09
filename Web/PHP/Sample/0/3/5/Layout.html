@@ -1,0 +1,19 @@
+<h1>Very simple layout</h1>
+<div>
+<pre>
+Username: #{session.userName}
+Authenticated: #{session.authenticated}
+</pre>
+
+<form action="insert.php" method="post">
+  <textarea rows="10" cols="40">#{data.created}</textarea>
+  <input type="submit" value="Submit">
+</form>
+
+<h2>Available tables:</h2>
+#{data.tables}
+
+<h2>All data from the mydata table:</h2>
+#{data.mydata}
+
+</div>
