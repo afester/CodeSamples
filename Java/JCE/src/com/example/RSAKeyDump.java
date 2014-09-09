@@ -29,7 +29,7 @@ import codec.asn1.ASN1Sequence;
 
 import com.example.hexdump.HexDump;
 
-public class RSASample {
+public class RSAKeyDump {
 
    
     private byte[] readFile(String fileName) {
@@ -215,6 +215,9 @@ public class RSASample {
             Key prv = kp.getPrivate();
             Key pub = kp.getPublic();
 
+            byte[] prvData = prv.getEncoded();
+            byte[] pubData = pub.getEncoded();
+
 //            System.err.println("Private key:"+ prv.getFormat());
 //            HexDump hd = new HexDump(prv.getEncoded());
 //            hd.setPrefix("   ");
@@ -262,7 +265,7 @@ public class RSASample {
     }
 
     public static void main(String[] args) {
-       RSASample app = new RSASample();
+       RSAKeyDump app = new RSAKeyDump();
        app.generateKey();
        // app.run();
     }
