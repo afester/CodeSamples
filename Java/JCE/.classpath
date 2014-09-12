@@ -3,5 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hexdump"/>
+	<classpathentry kind="lib" path="C:/Users/afester/Projects/CodeSamples/nodistrib/CoDec-build21-jdk13.jar"/>
+	<classpathentry kind="lib" path="C:/Users/afester/Projects/CodeSamples/nodistrib/bcprov-jdk15on-151.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

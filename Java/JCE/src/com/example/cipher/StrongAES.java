@@ -1,4 +1,4 @@
-package com.example;
+package com.example.cipher;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
