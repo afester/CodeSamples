@@ -5,4 +5,4 @@ glassfish31eclipsedefaultdomain
 RemoteSystemsTempFiles
 nodistrib
 Debug
-
+*.depend
