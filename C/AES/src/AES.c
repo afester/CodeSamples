@@ -1,7 +1,7 @@
 /*
  ============================================================================
  Name        : AES.c
- Author      : 
+ Author      :
  Version     :
  Copyright   : Your copyright notice
  Description : Hello World in C, Ansi-style
@@ -53,12 +53,6 @@ uint8_t rcon[256] = {
 
 
 void copyBlock(uint8_t* dest, const uint8_t* src, int bytesPerLine, int maxBytes) {
-
-	/* clean block to prepare padding */
-	int idx = 0;
-	for (idx = 0;  idx < 16;  idx++) {
-		dest[idx] = 0x00;
-	}
 
 	int sidx = 0;
 	int col = 0;
@@ -352,6 +346,23 @@ void encryptBlock(uint8_t* block, const uint8_t* plaintext) {
 }
 
 
+void padBlock(uint8_t* block, size_t remaining) {
+    /* Padding - PENDING: Improve and add another block if plaintext is multiple of 16 */
+    int padding = 16 - remaining;
+    if ( padding > 0) {
+        size_t row = remaining % 4;
+        size_t col = remaining / 4;
+
+        for (  ;  col < 4 ; col++) {
+            for (  ; row < 4;  row++) {
+                block[4 * row + col] = padding;
+            }
+            row = 0;
+        }
+    }
+}
+
+
 int main(void) {
 	const uint8_t* key = (uint8_t*) "Bar12345Bar12345";
 	size_t extendedKeySize = 0;
@@ -382,8 +393,10 @@ int main(void) {
 	uint8_t* block = calloc(16, 1);
 	int offset = 0;
 	while(offset < plaintextLen) {
+        size_t remaining = plaintextLen - offset;
+		copyBlock(block, plaintext + offset, 4, remaining > 16 ? 16 : remaining);
+        padBlock(block, remaining);
 
-		copyBlock(block, plaintext + offset, 4, plaintextLen - offset > 16 ? 16 : plaintextLen - offset);
 		printf("  NEXT BLOCK:\n");
 		HexDump_reset(hd3, block, 16);
 		HexDump_dumpAll(hd3);

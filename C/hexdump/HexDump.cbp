@@ -34,7 +34,8 @@
 				</Linker>
 			</Target>
 		</Build>
-		<Unit filename="main.c">
+		<Unit filename="src/HexDump.h" />
+		<Unit filename="src/hexdump_c.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Extensions>

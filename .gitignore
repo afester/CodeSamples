@@ -6,3 +6,4 @@ RemoteSystemsTempFiles
 nodistrib
 Debug
 *.depend
+*.layout
