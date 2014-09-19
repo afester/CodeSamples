@@ -645,6 +645,43 @@ sed do eiusmod tempor incididunt ut labore et dolore magna ..."""
             print("Hello 3")
             self.out.writeln("  i={}".format(i))
 
+    @Sample("RegExp", True)
+    def regExpSample(self):
+        self.out.writelnColor(Qt.lightGray, 'Regular Expressions sample 1:')
+
+        sampleInput = 'Hello World12345Garbage'
+        sampleRegexp = '(\D*)(\d*)'
+        self.out.writelnColor(Qt.yellow, '  Input : "' + sampleInput + '"')
+        self.out.writelnColor(Qt.yellow, '  Regexp: "' + sampleRegexp + '"')
+        m = re.match(sampleRegexp, sampleInput)
+        self.out.writeln('  Text  : "' + m.group(1) + '"')
+        self.out.writeln('  Number: "' + m.group(2) + '"')
+
+        self.out.writelnColor(Qt.lightGray, '\nRegular Expressions sample 2:')
+        sampleInput = '  33.   /home/andreas/sample/Sample.dat    '
+        sampleRegexp = '\s*(\d*)\.\s*(.*)'
+        self.out.writelnColor(Qt.yellow, '  Input : "' + sampleInput + '"')
+        self.out.writelnColor(Qt.yellow, '  Regexp: "' + sampleRegexp + '"')
+        m = re.match(sampleRegexp, sampleInput)
+        self.out.writeln('  Number         : "' + m.group(1) + '"')
+        self.out.writeln('  Path           : "' + m.group(2) + '"')
+        self.out.writeln('  Path (stripped): "' + m.group(2).strip() + '"')
+
+        self.out.writelnColor(Qt.lightGray, '\nRegular Expressions sample 3:')
+        # sampleInput = 'Non matching pattern'
+        sampleInput = '  33.'
+        sampleRegexp = '\s*(\d*)\.\s*(.*)'
+        self.out.writelnColor(Qt.yellow, '  Input : "' + sampleInput + '"')
+        self.out.writelnColor(Qt.yellow, '  Regexp: "' + sampleRegexp + '"')
+        m = re.match(sampleRegexp, sampleInput)
+        if (m == None):
+            self.out.writeln("NO MATCH")    
+        else:
+            self.out.writeln(str(m.lastindex) + " Matches.")    
+            self.out.writeln('  Number         : "' + m.group(1) + '"')
+            self.out.writeln('  Path           : "' + m.group(2) + '"')
+
+
     @Sample("File", True)
     def fileSample(self):
         self.out.writelnColor(Qt.lightGray, 'Read tuple of two Lists from two files:')
