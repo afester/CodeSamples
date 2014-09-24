@@ -1,0 +1,28 @@
+#!/bin/csh -f
+
+# Despite CshTop10.txt, sometimes you *need* to work with csh -
+# then, at least know some basic control structures ...
+
+# for loop
+foreach x (`seq 1 1 3`)
+   echo $x
+end
+
+# for loop and switch statement
+@ idx = 0
+foreach x (`seq 1 1 3`)
+   switch ( $idx )
+     case 0 : 
+         echo "Null"
+         breaksw
+
+     case '1' :
+         echo "One"
+         breaksw
+
+     case 2 :
+         echo "Two"
+         breaksw
+   endsw
+   @ idx++
+end
