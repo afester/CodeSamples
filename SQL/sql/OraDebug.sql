@@ -1,3 +1,19 @@
+-- Usage:
+-- 
+--   Start nc from the command line like
+--   $ nc -lk 1234
+-- 
+--   Start sqlplus and start logging
+--   $ sqlplus user/pass@sid
+--   SQL> begin Debug.Open(1234); end;
+--     2  /
+--   SQL> begin Debug.WriteLine('Sample output');  end;
+--     2  /
+--
+--   All output will be printed by nc.
+--
+
+
 DROP PACKAGE Debug;
 
 CREATE PACKAGE Debug AUTHID CURRENT_USER AS
@@ -10,6 +26,7 @@ CREATE PACKAGE Debug AUTHID CURRENT_USER AS
 
 END Debug;
 /
+
 
 CREATE PACKAGE BODY Debug AS
    c  utl_tcp.connection;  -- TCP/IP connection to the Debug console
@@ -48,6 +65,8 @@ END Debug;
 -- Grant permission to specific user to use the Debug package.
 -- User needs EXECUTE permission on the Debug package and an
 -- ACL entry for the 'connect' privilege on the specified port.
+-- This needs to be run as a privileged user (sysdba)
+--
 -- TODO: How to move this anonymous PL/SQL block into a package?
 DECLARE
   userName VARCHAR2(20) := 'USER';

@@ -92,6 +92,17 @@ SELECT TEXT
 FROM DBA_VIEWS
 WHERE VIEW_NAME='MY_VIEW';
 
+-- Select table definition for a given table
+SELECT TABLE_NAME, TABLESPACE_NAME, STATUS, TEMPORARY
+FROM DBA_TABLES
+WHERE TABLE_NAME LIKE 'xyz%';
+
+-- Select all temporary tables
+SELECT TABLE_NAME, TABLESPACE_NAME, STATUS
+FROM DBA_TABLES
+WHERE TEMPORARY='Y'
+ORDER BY TABLE_NAME;
+
 -- Select all current USER (not BACKGROUND) sessions
 -- "process" is the process ID of the client
 SELECT sid, serial#, username, status, process, machine, sql_id
