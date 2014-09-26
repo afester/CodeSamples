@@ -1,30 +1,51 @@
 #!/bin/bash
 
 usage() {
-    echo "usage: $0 date"
-    echo
-    echo "  Lists all files together with their size"
-    echo "  below the current directory tree which"
-    echo "  have been modified after the given date."
-    echo
-    echo "  date has the format YYYY-MM-DD [HH:MM:SS]"
+  echo "usage: $0 date [-ls]"
+  echo
+  echo "  Lists all files together with their size"
+  echo "  below the current directory tree which"
+  echo "  have been modified after the given date."
+  echo "  Optionally, the -ls option uses ls -la to"
+  echo "  list each file."
+  echo
+  echo "  date has the format YYYY-MM-DD [HH:MM:SS]"
 }
 
-if [ $# -ne 1 ] ; then
-    usage
-    exit 1
+if [ $# -lt 1 ] ; then
+  usage
+  exit 1
+fi
+
+USELS=0
+if [ $# -eq 2 -a "$2" = "-ls" ] ; then
+  USELS=1
 fi
 
 REFDATE=$1
 COUNT=0
 TOTALSIZE=0
 
+# Only more recent versions of find support the "-newermt" predicate
+findVersion=`find  --version | grep -oE "[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+"`
+findVersion=`echo $findVersion | grep -oE "[[:digit:]]+\.[[:digit:]]+"`
+if [ "${findVersion}" = "4.4" ] ; then
+ FINDCMD="find . -type f -newermt ${REFDATE}"
+else
+  touch -d "${REFDATE}" /tmp/refdate
+  FINDCMD="find . -type f -newer /tmp/refdate"
+fi
+
 while read f
 do
   FILENAME=`echo $f | sed -e "s,^./,,g"`
-  SIZE=`stat --format="%s" "${FILENAME}"`
-  (( COUNT++ ))
-  TOTALSIZE=$((TOTALSIZE + SIZE))
-  echo "$FILENAME $SIZE"
-done < <( find . -type f -newermt ${REFDATE}  )
+  if [ ${USELS} -eq 1 ] ; then
+    ls -la ${FILENAME}
+  else
+    SIZE=`stat --format="%s" "${FILENAME}"`
+    (( COUNT++ ))
+    TOTALSIZE=$((TOTALSIZE + SIZE))
+    echo "$FILENAME $SIZE"
+  fi
+done < <( ${FINDCMD} )
 echo "${COUNT} files with total size of ${TOTALSIZE}"
