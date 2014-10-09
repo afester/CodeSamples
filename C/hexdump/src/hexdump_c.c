@@ -91,7 +91,7 @@ char* HexDump_headerLine(HexDump* this) {
 
     if (this->blockMode == BLOCKMODE_LINEAR) {
         result = calloc(200, 1);
-        strcpy(result, "00 01 02 03 04");
+        /* strcpy(result, "00 01 02 03 04"); */
     } else {
         result = calloc(200, 1);
         strcpy(result, this->prefix);

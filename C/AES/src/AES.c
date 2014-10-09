@@ -7,13 +7,10 @@
  Description : Hello World in C, Ansi-style
  ============================================================================
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "HexDump.h"
-
-
+#include "dump.h"
 
 uint8_t sbox[256] = {
 0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
@@ -52,7 +49,7 @@ uint8_t rcon[256] = {
 0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d};
 
 
-typedef struct _extendedKey_t { uint8_t data[11][4][4]; } extendedKey_t;
+
 
 void shiftColumn(extendedKey_t* keyArea, int block) {
 	uint8_t temp = keyArea->data[block][0][0];
@@ -83,7 +80,6 @@ void xorColumn(extendedKey_t* keyArea, int block, int col) {
 	keyArea->data[block][3][col] = keyArea->data[block][3][col - 1] ^ keyArea->data[block - 1][3][col];
 }
 
-typedef struct _block16_t { uint8_t data[4][4]; } block16_t;
 
 void copyBlock(block16_t* dest, const uint8_t* src, int maxBytes) {
 
@@ -189,8 +185,6 @@ void MixColumns(block16_t* block) {
 }
 
 
-static HexDump* hd2 = NULL;
-static HexDump* hd3 = NULL;
 static extendedKey_t*  extendedKey = NULL;
 
 void createExtendedKey(extendedKey_t* extendedKey, const uint8_t* key, size_t extendedKeySize) {
@@ -201,67 +195,43 @@ void createExtendedKey(extendedKey_t* extendedKey, const uint8_t* key, size_t ex
     for (idx = 0;  idx < 16;  idx++) {
         extendedKey->data[0][idx % 4][idx / 4] = key[idx];
     }
-
-	hd3 = new_HexDump((uint8_t*) extendedKey, extendedKeySize);
-	HexDump_dumpAscii(hd3, 0);
-	HexDump_setBytesPerLine(hd3, 44);
-	HexDump_setBlockSize(hd3, 4);
-	HexDump_setBlockMode(hd3, BLOCKMODE_GROUPED);
-	HexDump_dumpAll(hd3);
-	printf("\n");
+    dumpExtendedKey("Initial state", extendedKey, extendedKeySize);
 
 /* Round key generation ***********************************************/
 	for (round = 1;  round <= 10;  round++) {
-		//int col = 4 * round;
-
 		printf("========================================================================\n" \
 		       "Generate round key: %d\n", round);
 
-		printf("  COPY:\n");
+        /* Step 1: Copy Column */
 		int row = 0;
 		for (row = 0;  row < 4;  row++) {
             extendedKey->data[round][row][0] = extendedKey->data[round-1][row][3];
 		}
-		// copyColumn(extendedKey, col);
-		HexDump_reset(hd3, (uint8_t*) extendedKey, extendedKeySize);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        dumpExtendedKey("Copy", extendedKey, extendedKeySize);
 
-		printf("  SHIFT:\n");
+        /* Step 2: Shift Column */
 		shiftColumn(extendedKey, round);
-		HexDump_reset(hd3, (uint8_t*) extendedKey, extendedKeySize);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        dumpExtendedKey("Shift", extendedKey, extendedKeySize);
 
-		printf("  SUBSTITUTE:\n");
+        /* Step 3: Substitute */
 		substituteColumn(extendedKey, round);
-		HexDump_reset(hd3, (uint8_t*) extendedKey, extendedKeySize);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        dumpExtendedKey("Substitute", extendedKey, extendedKeySize);
 
-		printf("  XOR 1 (incl. Rcon):\n");
+        /* Step 4: XOR column 0, including rcon */
 		xorRcon(extendedKey, round);
-		HexDump_reset(hd3, (uint8_t*) extendedKey, extendedKeySize);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        dumpExtendedKey("XOR 1 (incl. Rcon)", extendedKey, extendedKeySize);
 
-		printf("  XOR 2:\n");
+        /* Step 5: XOR column 1 */
 		xorColumn(extendedKey, round, 1);
-		HexDump_reset(hd3, (uint8_t*) extendedKey, extendedKeySize);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        dumpExtendedKey("XOR 2", extendedKey, extendedKeySize);
 
-		printf("  XOR 3:\n");
+        /* Step 6: XOR column 2 */
 		xorColumn(extendedKey, round, 2);
-		HexDump_reset(hd3, (uint8_t*) extendedKey, extendedKeySize);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        dumpExtendedKey("XOR 3", extendedKey, extendedKeySize);
 
-		printf("  XOR 4:\n");
+        /* Step 7: XOR column 3 */
 		xorColumn(extendedKey, round, 3);
-		HexDump_reset(hd3, (uint8_t*) extendedKey, extendedKeySize);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        dumpExtendedKey("XOR 4", extendedKey, extendedKeySize);
 	}
 }
 
@@ -269,63 +239,48 @@ void createExtendedKey(extendedKey_t* extendedKey, const uint8_t* key, size_t ex
 void encryptBlock(block16_t* block) {
 	int round = 0;
 
-	printf("  Plaintext:\n");
-	HexDump_dumpAscii(hd3, 0);
-	HexDump_setBytesPerLine(hd3, 4);
-	HexDump_reset(hd3, (uint8_t*) block, 16);
-	HexDump_dumpAll(hd3);
-	printf("\n");
+//    HexDump_dumpAscii(blockDump, 1);
+    dumpBlock("Plaintext", block);
+//    HexDump_dumpAscii(blockDump, 0);
 
 	printf("Pre Round:\n");
 	AddRoundKey(block, extendedKey, 0);
-	HexDump_reset(hd3, (uint8_t*) block, 16);
-	HexDump_dumpAll(hd3);
-	printf("\n");
+    dumpBlock("AddRoundKey", block);
 
-/*******************/
 	for (round = 1;  round <= 9;  round++) {
 		printf("Round %d:\n", round);
 
-		printf("  SubBytes:\n");
+        /* Step 1: SubBytes */
 		SubBytes(block);
-		HexDump_reset(hd3, (uint8_t*) block, 16);
-		HexDump_dumpAll(hd3);
+        dumpBlock("SubBytes", block);
 
-		printf("  ShiftRows:\n");
+        /* Step 2: ShiftRows */
 		ShiftRows(block);
-		HexDump_reset(hd3, (uint8_t*) block, 16);
-		HexDump_dumpAll(hd3);
+        dumpBlock("ShiftRows", block);
 
-		printf("  MixColumns:\n");
+        /* Step 3: MixColumns */
 		MixColumns(block);
-		HexDump_reset(hd3, (uint8_t*) block, 16);
-		HexDump_dumpAll(hd3);
+        dumpBlock("MixColumns", block);
 
-		printf("  AddRoundKey:\n");
+        /* Step 4: AddRoundKey*/
 		AddRoundKey(block, extendedKey, round);
-		HexDump_reset(hd3, (uint8_t*) block, 16);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        dumpBlock("AddRoundKey", block);
 	}
-/*******************/
 
 	printf("Final Round:\n");
-	printf("  SubBytes:\n");
+
 	SubBytes(block);
-	HexDump_reset(hd3, (uint8_t*) block, 16);
-	HexDump_dumpAll(hd3);
+    dumpBlock("SubBytes", block);
 
-	printf("  ShiftRows:\n");
 	ShiftRows(block);
-	HexDump_reset(hd3, (uint8_t*) block, 16);
-	HexDump_dumpAll(hd3);
+    dumpBlock("ShiftRows", block);
 
-	printf("  AddRoundKey:\n");
 	AddRoundKey(block, extendedKey, 10);
+    dumpBlock("AddRoundKey", block);
 }
 
 
-void padBlock(uint8_t* block, size_t remaining) {
+void padBlock2(uint8_t* block, size_t remaining) {
     /* Padding - PENDING: Improve and add another block if plaintext is multiple of 16 */
     int padding = 16 - remaining;
     if ( padding > 0) {
@@ -341,28 +296,40 @@ void padBlock(uint8_t* block, size_t remaining) {
     }
 }
 
+
+void padBlock(block16_t* block, size_t remaining) {
+   int padding = 16 - remaining;
+   if ( padding > 0) {
+        size_t row = remaining % 4;
+        size_t col = remaining / 4;
+
+        for (  ;  col < 4 ; col++) {
+            for (  ; row < 4;  row++) {
+                block->data[row][col] = padding;
+            }
+            row = 0;
+        }
+    }
+}
+
+
 int main(void) {
+    dumpInit();
+
+/** Key generation ******************************************************/
+
 	const uint8_t* key = (uint8_t*) "Bar12345Bar12345";
-    hd2 = new_HexDump((uint8_t*) key, 16);
-	HexDump_dumpAll(hd2);
-	printf("\n");
+    dumpData("Key", key, 16);
 
 	size_t extendedKeySize = sizeof(extendedKey_t);
     extendedKey = calloc(extendedKeySize, 1);
-
 	createExtendedKey(extendedKey, key, extendedKeySize);
 
-	/* Encryption ***********************************************/
+/** Encryption **********************************************************/
+
 	const uint8_t* plaintext = (uint8_t*)"Sample String which we want to encrypt";
 	const size_t plaintextLen = strlen((char*) plaintext);
-
-	HexDump_reset(hd2, plaintext, plaintextLen);
-	HexDump_dumpAll(hd2);
-	printf("\n");
-
-	HexDump_setBytesPerLine(hd3, 4);
-	HexDump_setBlockMode(hd3, BLOCKMODE_LINEAR);
-
+    dumpData("Plaintext", plaintext, plaintextLen);
 
 	/**
 	 * The simplest of the encryption modes is the electronic codebook (ECB) mode.
@@ -372,21 +339,22 @@ int main(void) {
 	int offset = 0;
 	while(offset < plaintextLen) {
         size_t remaining = plaintextLen - offset;
-		copyBlock(block, plaintext + offset, remaining > 16 ? 16 : remaining);
-        padBlock((uint8_t*) block, remaining);
 
-		printf("  NEXT BLOCK:\n");
-		HexDump_reset(hd3, (uint8_t*) block, 16);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+		copyBlock(block, plaintext + offset, remaining > 16 ? 16 : remaining);
+
+        padBlock(block, remaining);
 
 		encryptBlock(block);
-		HexDump_reset(hd3, (uint8_t*) block, 16);
-		HexDump_dumpAll(hd3);
-		printf("\n");
 
 		offset += 16;
 	}
+	if (offset == plaintextLen) {
+        padBlock(block, 16);
+		encryptBlock(block);
+	}
+
+    free(block);
+    free(extendedKey);
 
 	return EXIT_SUCCESS;
 }
