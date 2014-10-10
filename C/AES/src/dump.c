@@ -30,8 +30,9 @@ void dumpExtendedKey(const char* title, const extendedKey_t* extendedKey, size_t
 }
 
 
-void dumpBlock(const char* title, const block16_t* block) {
+void dumpBlock(const char* title, const block16_t* block, bool dumpAscii) {
     printf("  %s:\n", title);
+    HexDump_dumpAscii(blockDump, dumpAscii);
     HexDump_reset(blockDump, (uint8_t*) block, 16);
     HexDump_dumpAll(blockDump);
     printf("\n");

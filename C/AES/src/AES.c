@@ -81,13 +81,14 @@ void xorColumn(extendedKey_t* keyArea, int block, int col) {
 }
 
 
-void copyBlock(block16_t* dest, const uint8_t* src, int maxBytes) {
+void copyBlock(block16_t* dest, const uint8_t* src, size_t maxBytes) {
 
     size_t idx;
     for (idx = 0;  idx < 16 && idx < maxBytes;  idx++) {
         dest->data[idx % 4][idx / 4] = src[idx];
     }
 }
+
 
 void AddRoundKey(block16_t* block, const extendedKey_t* extendedKey, int keyRound) {
 	int row = 0;
@@ -100,6 +101,7 @@ void AddRoundKey(block16_t* block, const extendedKey_t* extendedKey, int keyRoun
 	}
 }
 
+
 void SubBytes(block16_t* block) {
    	int row = 0;
 	for (row = 0;  row < 4;  row++) {
@@ -110,6 +112,7 @@ void SubBytes(block16_t* block) {
 		}
 	}
 }
+
 
 void ShiftRows(block16_t* block) {
 	int row = 0;
@@ -185,8 +188,6 @@ void MixColumns(block16_t* block) {
 }
 
 
-static extendedKey_t*  extendedKey = NULL;
-
 void createExtendedKey(extendedKey_t* extendedKey, const uint8_t* key, size_t extendedKeySize) {
 	int round = 0;
 
@@ -236,47 +237,45 @@ void createExtendedKey(extendedKey_t* extendedKey, const uint8_t* key, size_t ex
 }
 
 
-void encryptBlock(block16_t* block) {
+void encryptBlock(block16_t* block, extendedKey_t* extendedKey) {
 	int round = 0;
 
-//    HexDump_dumpAscii(blockDump, 1);
-    dumpBlock("Plaintext", block);
-//    HexDump_dumpAscii(blockDump, 0);
+    dumpBlock("Plaintext", block, true);
 
 	printf("Pre Round:\n");
-	AddRoundKey(block, extendedKey, 0);
-    dumpBlock("AddRoundKey", block);
+	AddRoundKey(block, extendedKey, false);
+    dumpBlock("AddRoundKey", block, 0);
 
 	for (round = 1;  round <= 9;  round++) {
-		printf("Round %d:\n", round);
+		printf("Round %d:\n", round, false);
 
         /* Step 1: SubBytes */
 		SubBytes(block);
-        dumpBlock("SubBytes", block);
+        dumpBlock("SubBytes", block, false);
 
         /* Step 2: ShiftRows */
 		ShiftRows(block);
-        dumpBlock("ShiftRows", block);
+        dumpBlock("ShiftRows", block, false);
 
         /* Step 3: MixColumns */
 		MixColumns(block);
-        dumpBlock("MixColumns", block);
+        dumpBlock("MixColumns", block, false);
 
         /* Step 4: AddRoundKey*/
 		AddRoundKey(block, extendedKey, round);
-        dumpBlock("AddRoundKey", block);
+        dumpBlock("AddRoundKey", block, false);
 	}
 
 	printf("Final Round:\n");
 
 	SubBytes(block);
-    dumpBlock("SubBytes", block);
+    dumpBlock("SubBytes", block, false);
 
 	ShiftRows(block);
-    dumpBlock("ShiftRows", block);
+    dumpBlock("ShiftRows", block, false);
 
 	AddRoundKey(block, extendedKey, 10);
-    dumpBlock("AddRoundKey", block);
+    dumpBlock("AddRoundKey", block, false);
 }
 
 
@@ -322,7 +321,7 @@ int main(void) {
     dumpData("Key", key, 16);
 
 	size_t extendedKeySize = sizeof(extendedKey_t);
-    extendedKey = calloc(extendedKeySize, 1);
+	extendedKey_t* extendedKey = calloc(extendedKeySize, 1);
 	createExtendedKey(extendedKey, key, extendedKeySize);
 
 /** Encryption **********************************************************/
@@ -336,7 +335,7 @@ int main(void) {
      * The message is divided into blocks, and each block is encrypted separately.
      */
 	block16_t* block = calloc(sizeof(block16_t), 1);
-	int offset = 0;
+	size_t offset = 0;
 	while(offset < plaintextLen) {
         size_t remaining = plaintextLen - offset;
 
@@ -344,13 +343,13 @@ int main(void) {
 
         padBlock(block, remaining);
 
-		encryptBlock(block);
+		encryptBlock(block, extendedKey);
 
 		offset += 16;
 	}
 	if (offset == plaintextLen) {
         padBlock(block, 16);
-		encryptBlock(block);
+		encryptBlock(block, extendedKey);
 	}
 
     free(block);
