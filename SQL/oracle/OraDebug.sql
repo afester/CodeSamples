@@ -13,10 +13,9 @@
 --   All output will be printed by nc.
 --
 
+-- DROP PACKAGE Debug;
 
-DROP PACKAGE Debug;
-
-CREATE PACKAGE Debug AUTHID CURRENT_USER AS
+CREATE OR REPLACE PACKAGE Debug AUTHID CURRENT_USER AS
 
    PROCEDURE Open(portNumber PLS_INTEGER);
 
@@ -28,7 +27,7 @@ END Debug;
 /
 
 
-CREATE PACKAGE BODY Debug AS
+CREATE OR REPLACE PACKAGE BODY Debug AS
    c  utl_tcp.connection;  -- TCP/IP connection to the Debug console
    ret_val pls_integer; 
 
@@ -62,6 +61,10 @@ END Debug;
 /
 
 
+-- If using a separate runtime user, then grant execute rights to the package
+GRANT EXECUTE ON Debug TO runtimeUser;
+
+
 -- Grant permission to specific user to use the Debug package.
 -- User needs EXECUTE permission on the Debug package and an
 -- ACL entry for the 'connect' privilege on the specified port.
@@ -73,8 +76,6 @@ DECLARE
   portNumber PLS_INTEGER := 1234;
 
 BEGIN
-  EXECUTE IMMEDIATE 'GRANT EXECUTE ON Debug TO ' || userName;
-
   -- Remove existing ACL, ignore if the ACL did not exist
   BEGIN
     DBMS_NETWORK_ACL_ADMIN.DROP_ACL('debug-console-permission.xml');

@@ -58,6 +58,8 @@ GRANT create table TO userName;
 GRANT create sequence TO userName;
 GRANT create view TO userName;
 GRANT create procedure to userName;
+GRANT EXECUTE ON a.procedure TO userName;
+GRANT DELETE, INSERT, SELECT, UPDATE ON table TO userName;
 
 -- show grants for user
 -- System privileges
