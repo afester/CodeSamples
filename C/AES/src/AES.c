@@ -279,23 +279,6 @@ void encryptBlock(block16_t* block, extendedKey_t* extendedKey) {
 }
 
 
-void padBlock2(uint8_t* block, size_t remaining) {
-    /* Padding - PENDING: Improve and add another block if plaintext is multiple of 16 */
-    int padding = 16 - remaining;
-    if ( padding > 0) {
-        size_t row = remaining % 4;
-        size_t col = remaining / 4;
-
-        for (  ;  col < 4 ; col++) {
-            for (  ; row < 4;  row++) {
-                block[4 * row + col] = padding;
-            }
-            row = 0;
-        }
-    }
-}
-
-
 void padBlock(block16_t* block, size_t remaining) {
    int padding = 16 - remaining;
    if ( padding > 0) {

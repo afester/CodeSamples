@@ -32,15 +32,27 @@
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-S" />
+					<Add option="-O" />
+					<Add option="-std=c99" />
+					<Add option="-Winline -S" />
 				</Compiler>
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-pedantic" />
 			<Add option="-Wall" />
+			<Add option="-std=c99" />
 		</Compiler>
+		<Unit filename="inline.c">
+			<Option compilerVar="CC" />
+			<Option target="Assembly" />
+		</Unit>
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="universalidentifier.c">
+			<Option compilerVar="CC" />
+			<Option target="Assembly" />
 		</Unit>
 		<Extensions>
 			<code_completion />

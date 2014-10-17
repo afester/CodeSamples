@@ -12,6 +12,10 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-pedantic" />
+					<Add option="-std=c99" />
+					<Add option="-Wextra" />
+					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add directory="../hexdump/src" />
 				</Compiler>
@@ -38,6 +42,11 @@
 		<Unit filename="src/AES.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="src/dump.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/dump.h" />
+		<Unit filename="src/types.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

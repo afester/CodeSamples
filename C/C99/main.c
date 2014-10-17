@@ -18,6 +18,18 @@ complexType add(complexType a, complexType b) {
     return result;
 }
 
+int vlaSample(int n) {
+    int values[n]; //  = {0}; // VLAs can not be initialized through an initializer! http://stackoverflow.com/questions/17332360/initializing-variable-length-array
+    for (int i = 0;  i < n;  i++) {
+        values[i] = i;
+    }
+
+    int result = 0;
+    for (int i = 0;  i < n;  i++) {
+        result += values[i];
+    }
+    return result;
+}
 
 int main() {
 
@@ -67,6 +79,9 @@ int main() {
 
 // improved support for IEEE floating point
 
+// Variable length arrays
+    int result = vlaSample(5);
+    printf("RESULT: %d\n", result);
 
     return 0;
 }
