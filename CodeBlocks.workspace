@@ -4,5 +4,7 @@
 		<Project filename="C/hexdump/HexDump.cbp" />
 		<Project filename="C/hexdump/HexDumpTest/HexDumpTest.cbp" />
 		<Project filename="C/AES/AES.cbp" />
+		<Project filename="C/C99/C99.cbp" />
+		<Project filename="C++/Snippets/Snippets.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

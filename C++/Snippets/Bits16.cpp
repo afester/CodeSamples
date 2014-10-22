@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "Samples.h"
 
 typedef unsigned short Bits16;
 enum Exception {NO_EXCEPTION, NUMBER_FORMAT_EXCEPTION};
@@ -161,7 +162,10 @@ void shiftLeftSample() {
 }
 
 
-void bitsSample() {
+BitsSample::BitsSample() : Sample("Bits sample") {
+}
+
+void BitsSample::run() {
     Exception ex = NO_EXCEPTION;
     Bits16 inputValue = Bits16_fromString("1001000110100", &ex);
     printf("Input : 0x%04X\n", inputValue);

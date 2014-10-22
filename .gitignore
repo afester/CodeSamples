@@ -7,3 +7,4 @@ nodistrib
 Debug
 *.depend
 *.layout
+.objs

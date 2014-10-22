@@ -1,6 +1,11 @@
 #include <iostream>
+#include "Samples.h"
 
-void sizeofSample()  {
+
+SizeofSample::SizeofSample() : Sample("Sizeof sample") {
+}
+
+void SizeofSample::run() {
 	const char* p = "Hello";
 
 	std::cerr << "sizeof(int): " << sizeof(int) << std::endl;

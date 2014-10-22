@@ -1,8 +1,8 @@
 
-
 #include <iostream>
 
 #include "initializer.h"
+#include "Samples.h"
 
 using namespace std;
 
@@ -63,4 +63,13 @@ void initializerSample() {
 
 	TestInitialize y(3);		// CORRECT!!
 	cerr << "Value: " << y.getValue() << endl;
+}
+
+
+
+InitializerSample::InitializerSample() : Sample("Initializer sample") {
+}
+
+void InitializerSample::run() {
+    initializerSample();
 }

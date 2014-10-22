@@ -1,3 +1,6 @@
+#include "Samples.h"
+
+
 class A {
 public:
   enum class AA
@@ -14,6 +17,10 @@ public:
 };
 
 
-void enumSample() {
+EnumSample::EnumSample() : Sample("Enum sample") {
+}
+
+void EnumSample::run() {
 	A::AB x = A::enumVal1;
 }
+

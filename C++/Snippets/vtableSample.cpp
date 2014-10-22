@@ -1,11 +1,12 @@
 #include <iostream>
+#include "Samples.h"
 
 
-class Sample {
+class VSample {
 public:
 	int x;
 
-	virtual ~Sample() {
+	virtual ~VSample() {
 		std::cerr << "~Sample" << std::endl;
 	}
 
@@ -15,7 +16,7 @@ public:
 };
 
 void vtableSample()  {
-	Sample* s = new Sample();
+	VSample* s = new VSample();
 	s->x = 0xabcdef12;
 
 	std::cerr << "s=" << std::hex << s << std::endl;
@@ -41,4 +42,12 @@ void vtableSample()  {
 
 	// call s->setX() through the vtable - also pass the object as "this"
 	( (void (*)(void*)) vptr[2] )(s);	// setX
+}
+
+
+VTableSample::VTableSample() : Sample("VTable sample") {
+}
+
+void VTableSample::run() {
+    vtableSample();
 }

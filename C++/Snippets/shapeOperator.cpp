@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include "Samples.h"
 
 using namespace std;
 
@@ -36,7 +37,11 @@ shape shape::operator+(const shape& b) {
 }
 
 
-void shapeOperatorSample() {
+
+ShapeOperatorSample::ShapeOperatorSample() : Sample("Shape Operator sample") {
+}
+
+void ShapeOperatorSample::run() {
   shape shap1, shap2, shap3;
 
   shap1.setlength(10.0);
@@ -45,6 +50,6 @@ void shapeOperatorSample() {
   shap2.setbreadth(10.0);
   shap3 = shap1 + shap2;
 
-  cout << "\n The length of the third object is : " << shap3.returnlen();
-  cout << "\n The breadth of the third object is : " << shap3.returnbre();
+  cout << "The length of the third object is : " << shap3.returnlen() << endl;
+  cout << "The breadth of the third object is : " << shap3.returnbre() << endl;
 }

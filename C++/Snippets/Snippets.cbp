@@ -32,7 +32,23 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="Bits16.cpp" />
+		<Unit filename="Bits16.h" />
+		<Unit filename="array.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="calc.cpp" />
+		<Unit filename="enumSample.cpp" />
+		<Unit filename="foreach.cpp" />
+		<Unit filename="initializer.cpp" />
+		<Unit filename="initializer.h" />
+		<Unit filename="less.cpp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="mapSample.cpp" />
+		<Unit filename="outputSample.cpp" />
+		<Unit filename="shapeOperator.cpp" />
+		<Unit filename="sizeofSample.cpp" />
+		<Unit filename="vtableSample.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

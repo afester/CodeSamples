@@ -4,6 +4,8 @@
 #include <vector>
 #include <inttypes.h>
 
+#include "Samples.h"
+
 void simpleSample() {
     std::cerr << std::endl
               << "std::map<K, V> sample:" << std::endl
@@ -95,7 +97,10 @@ void userDefinedSample() {
 }
 
 
-void mapSample() {
+MapSample::MapSample() : Sample("Map sample") {
+}
+
+void MapSample::run() {
     simpleSample();
     userDefinedSample();
 }
