@@ -3,18 +3,38 @@
 #include <map>
 
 #include "Samples.h"
+#include "colorManip.h"
 
 using namespace std;
 
 string readInput(const string& prompt) {
-    cout << prompt;
+    cout << col(12) << prompt;
 
     string line;
     getline(cin, line);
     return line;
 }
 
+
 int main() {
+#if 0
+    // simple rectangle
+    cout << col(2) <<                 "+---------------------------------------------------+" << endl
+         << col(2) << '|' << col(3) << " Lorem ipsum dolor sit amet, consetetur sadipscing " << col(2) << '|' << endl
+         << col(2) << '|' << col(3) << " elitr, sed diam nonumy eirmod " << col(5) << "tempor" << col(3) << " invidunt ut  " << col(2) << '|' << endl
+         << col(2) << '|' << col(3) << " labore et dolore magna aliquyam erat, sed diam    " << col(2) << '|' << endl
+         << col(2) << '|' << col(3) << " voluptua. At vero eos et accusam et justo duo     " << col(2) << '|' << endl
+         << col(2) << '|' << col(3) << " dolores et ea rebum. Stet clita kasd gubergren,   " << col(2) << '|' << endl
+         << col(2) <<                 "+---------------------------------------------------+" << endl;
+    return 0;
+
+    // you can loop k higher to see more color choices
+    for(int k = 1; k < 256; k++) {
+        cout << col(k) << k << " I want to be nice today!" << endl;
+    }
+    return 0;
+#endif
+
     map<string, SamplePtr> samples = {
         {"1", SamplePtr(new BitsSample())},
         {"2", SamplePtr(new ForEachSample())},
@@ -27,6 +47,7 @@ int main() {
         {"9", SamplePtr(new MapSample())}
     };
 
+    cout << col(33) << cls;
     while(1) {
         cout << "Please choose a sample:" << endl;
         for (map<string, SamplePtr>::const_iterator it = samples.begin();
@@ -44,6 +65,7 @@ int main() {
              << " q. Quit" << endl
              << "=======================" << endl;
         string choice = readInput("Which sample to run (enter number and press <RETURN>)? ");
+        cout << cls;
 
         if (choice == "q") {
             return 0;

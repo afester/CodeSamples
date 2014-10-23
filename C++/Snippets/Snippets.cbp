@@ -12,6 +12,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-std=c++0x" />
 					<Add option="-g" />
 				</Compiler>
 			</Target>
@@ -34,10 +35,13 @@
 		</Compiler>
 		<Unit filename="Bits16.cpp" />
 		<Unit filename="Bits16.h" />
+		<Unit filename="Samples.cpp" />
 		<Unit filename="array.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="calc.cpp" />
+		<Unit filename="colorManip.cpp" />
+		<Unit filename="colorManip.h" />
 		<Unit filename="enumSample.cpp" />
 		<Unit filename="foreach.cpp" />
 		<Unit filename="initializer.cpp" />
