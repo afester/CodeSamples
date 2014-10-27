@@ -1,6 +1,8 @@
         PROCESSOR 16f74
         INCLUDE   p16f74.inc
+
         __CONFIG  _CP_OFF & _WDT_OFF & _HS_OSC
+
 
 ; ********************************************************
 ; Reset Vector
