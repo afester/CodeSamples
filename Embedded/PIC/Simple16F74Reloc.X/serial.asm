@@ -4,7 +4,7 @@
 
             code
 
-            extern  Reg1
+            extern  Reg1, Reg2
 
 
 ; Initializes the serial UART interface.
@@ -91,6 +91,31 @@ SerialSendHex:
             call    SerialSendChar
 
             return
+
+
+; Sends a 8 character binary string to the serial interface.
+;
+; @param Reg1   The value to send as binary string
+;
+; Uses Reg2 which will be 0 when the procedure returns.
+;
+            global  SerialSendBin
+SerialSendBin:
+            movlw   0x08
+            movwf   Reg2
+
+LoopSendBin:
+            movlw   '0'
+            rlf     Reg1, F
+            btfsc   STATUS, C
+            movlw   '1'
+            call    SerialSendChar
+
+            decfsz  Reg2, F
+            goto    LoopSendBin
+
+            return
+
 
 hexChars:
             de      '0'

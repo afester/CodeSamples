@@ -1,44 +1,39 @@
             PROCESSOR   16f74
             INCLUDE     p16f74.inc
+
             INCLUDE     table.inc
+            INCLUDE     instructions.inc
+            INCLUDE     serial.inc
 
             udata_shr                   ; NOTE: This should be udata - verify the map file!
             global   Reg1, Reg2
 Reg1        res 1
 Reg2        res 1
+Reg3        res 1
 
 
             code
             global  Main
-            extern  SerialInit, SerialSendChar, SerialSendConstString, SerialSendHex, hexToDigits
+            extern  hexToDigits
 Main:
-            clrf    PORTA
-
-            clrf    Reg1
-
-            banksel ADCON1               ; bank 1 - ADCON1 and TRISA registers
-            movlw   0x06                 ; all PORTA pins are
-            movwf   ADCON1               ; digital
-            movlw   B'00111100'          ; RA0, RA1 are outputs
-            movwf   TRISA
-
-            banksel PORTA               ; bank 0 - PORTA register
-
             call    SerialInit
 
             TBLINIT startMsg
             call    SerialSendConstString
 
-            clrf    Reg1
+            clrf    Reg3
 
 CountLoop:
-            call    SerialSendHex           ; send value in Reg1 as hex digits
+            MOVFF   Reg3, Reg1
+            call    SerialSendBin       ; send value in Reg1 as binary digits
+;            call    SerialSendHex       ; send value in Reg1 as hex digits
+
             movlw   '\n'
             call    SerialSendChar
 
-            incf    Reg1, F
+            incf    Reg3, F
             movlw   0x0f
-            xorwf   Reg1, W
+            xorwf   Reg3, W
             bnz     CountLoop
 
             TBLINIT doneMsg

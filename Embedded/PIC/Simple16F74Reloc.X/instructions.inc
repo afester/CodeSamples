@@ -1,6 +1,7 @@
 ;
 ;
 
+            extern  mWsav
 
 ; 18Fxx2 instruction: MOVFF fs, fd
 ;
