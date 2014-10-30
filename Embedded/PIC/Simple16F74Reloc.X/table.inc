@@ -1,6 +1,8 @@
 ;
 ;
 
+#ifndef __TABLE_INC__
+#define __TABLE_INC__
 
 
 ; Define a read only table. Together with the "td" macros below, this can be used
@@ -110,3 +112,5 @@ TBLIDXW     macro
             INCF    PMADRH, F
 NoOvl:
             endm
+
+#endif

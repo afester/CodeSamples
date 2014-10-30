@@ -1,15 +1,52 @@
-        PROCESSOR 16f74
-        INCLUDE   p16f74.inc
+            PROCESSOR 16f74
+            INCLUDE p16f74.inc
+            INCLUDE mcp23x17.inc
+            INCLUDE instructions.inc
+            INCLUDE table.inc
 
-        extern  Reg2
-        code
-        global  hexToDigits
+#define __SEVENDIGITS_ASM__
+            INCLUDE sevendigits.inc
+
+            extern  Reg1, Reg2
+            code
+
+;
+;
+            global  ssegSetValue
+ssegSetValue:
+; Set low digit
+            TBLINIT ssegGetDigitTable   ; initialize table pointer
+
+            movf    Reg2, W             ; load value from parameter
+            andlw   0x0f                ; low nibble
+            TBLIDXW                                             ; add offset to table pointer
+
+            TBLRD                                               ; read value from table
+
+            movwf   Reg1
+            WriteMCP23S17   MCP23x17b0_OLATA    ; write value into PORT A latch
+
+; set high digit
+            TBLINIT ssegGetDigitTable   ; initialize table pointer
+
+            swapf   Reg2, W             ; load high nibble from Parameter
+            andlw   0x0f
+            TBLIDXW                                             ; add offset to table pointer
+
+            TBLRD                                               ; read value from table
+
+            movwf   Reg1
+            WriteMCP23S17   MCP23x17b0_OLATB    ; write value into PORT B latch
+
+            return
+
 
 ; Convert a 4 bit binary value into the corresponding bitmask for a seven
 ; segment display
 ;
 ; @param    Reg1    The value to convert (only the lower 4 bits are used)
 ; @return   W       The converted value.
+        global  hexToDigits
 hexToDigits:
         banksel PMADRH          ; bank2
         MOVLW   HIGH ssegGetDigitTable

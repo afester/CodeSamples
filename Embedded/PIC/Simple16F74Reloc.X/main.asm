@@ -3,7 +3,12 @@
 
             INCLUDE     table.inc
             INCLUDE     instructions.inc
+
+            INCLUDE     timer.inc
+            INCLUDE     spi.inc
+            INCLUDE     mcp23x17.inc
             INCLUDE     serial.inc
+            INCLUDE     sevendigits.inc
 
             udata_shr                   ; NOTE: This should be udata - verify the map file!
             global   Reg1, Reg2
@@ -16,7 +21,14 @@ Reg3        res 1
             global  Main
             extern  hexToDigits
 Main:
+            call    TimerInit
+            call    SPIInit
+            call    MCP23x17Init
             call    SerialInit
+
+            movlw   0xAF
+            movwf   Reg2
+            call    ssegSetValue
 
             TBLINIT startMsg
             call    SerialSendConstString
