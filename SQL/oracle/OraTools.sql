@@ -118,3 +118,25 @@ FROM v$sql
 JOIN v$session ON v$session.sql_id=v$sql.sql_id
 JOIN v$sql_bind_capture ON v$session.sql_id=v$sql_bind_capture.sql_id
 WHERE username='userName';
+
+-- Selects the current session id (references AUDSID in v$session) 
+SELECT SYS_CONTEXT('userenv','sessionid') AUDSID 
+FROM dual;
+
+-- Selects the current session id (references SID in v$session)
+SELECT SYS_CONTEXT('userenv','SID') SID 
+FROM dual;
+
+SELECT osuser, program, user, sid, audsid
+FROM v$session 
+WHERE sid=SYS_CONTEXT('USERENV', 'SID');
+
+SELECT 'osuser="' || osuser || '", program="' || program || '", dbuser="' || user || 
+       '", sid="' || sid || '", audsid="' || audsid || '"' sessionInfo
+FROM v$session 
+WHERE sid=SYS_CONTEXT('USERENV', 'SID');
+
+
+SELECT sid, serial# 
+FROM SYS.V_$SESSION
+WHERE SID = (SELECT DISTINCT SID FROM SYS.V_$MYSTAT);

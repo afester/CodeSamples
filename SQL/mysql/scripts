@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Export MySQL database
+# Beware: Default charset for mysqldump is utf8, regardless of server default charset
+
+mysqldump -u ${DBUSER} -p --lock-all-tables --routines ${DBNAME} > ${DATABASE_SQL}
+
+# Recreate MySQL database
+mysql -u ${DBUSER} -p ${DBNAME} < ${DATABASE_SQL}

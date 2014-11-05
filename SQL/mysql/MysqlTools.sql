@@ -49,10 +49,11 @@ CREATE TABLE mydata (
     cvalue varchar(100)
 );
 
-INSERT INTO mydata (cvalue) VALUES("Hello");
-INSERT INTO mydata (cvalue) VALUES("World");
-INSERT INTO mydata (cvalue) VALUES("Sun");
-INSERT INTO mydata (cvalue) VALUES("äöü€");
+INSERT INTO mydata (cvalue) VALUES("Hello"),
+								  ("World"),
+								  ("Sun"),
+								  ("äöü€");
+
 
 -- Show default character set for database
 SHOW CREATE DATABASE `dbname`;
@@ -70,15 +71,30 @@ WHERE CCSA.collation_name = T.table_collation
   AND T.table_schema = "schema"
   AND T.table_name = "tablename";
 
--- Show default character set for column
+-- Show character set for column
 SELECT character_set_name 
 FROM information_schema.`COLUMNS` C
 WHERE table_schema = "schemaname"
   AND table_name = "tablename"
   AND column_name = "columnname";
 
--- Show default character set for all columns of a table
+-- Show character set for all columns of a table
 SELECT column_name, character_set_name 
 FROM information_schema.`COLUMNS` C
 WHERE table_schema = "schemaname"
   AND table_name = "tablename";
+  
+-- Show all supported character sets
+SHOW CHARACTER SET;
+
+SELECT *
+FROM information_schema.character_sets 
+ORDER BY CHARACTER_SET_NAME;
+
+CREATE TABLE Latin1Data (
+	cid    int not null auto_increment,
+	primary key (cid),
+    cvalue  VARCHAR(100)
+) CHARACTER SET latin1;
+
+INSERT INTO latin1Data VALUES(0, "€");

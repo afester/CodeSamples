@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Export MySQL database
-
-# Recreate MySQL database
-
 # Export Oracle Schema
 # Original export is desupported for general use as of Oracle Database 11g!
 # To use Export and Import, you must run the script catexp.sql or catalog.sql
