@@ -2,7 +2,7 @@ package com.example;
 
 import javafx.scene.paint.Color;
 
-class Graph {
+public class Graph {
 
    private FunctionDefinition fn;
    private Expression expr;
@@ -31,7 +31,7 @@ class Graph {
    }
 
 
-   Double evaluate(double value) {
+   public Double evaluate(double value) {
       return expr.evaluate(value);
    }
    
