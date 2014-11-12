@@ -49,7 +49,7 @@ public class LegendTable extends GridPane  {
     * Adds a new row to the legend grid.
     * @param graph
     */
-   public void addLegendEntry(Graph graph) {
+   public void addLegendEntry(FunctionGraph graph) {
       final int row = graph.getIndex();
 
       Button b1 = new Button();

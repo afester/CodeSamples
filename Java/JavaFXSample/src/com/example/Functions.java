@@ -25,7 +25,7 @@ import javafx.util.Duration;
 
 public class Functions extends Application {
 
-   private List<Graph> graphs = new ArrayList<Graph>();
+   private List<FunctionGraph> graphs = new ArrayList<FunctionGraph>();
    
    private double startX = 0;
    private double stopX = 0;
@@ -481,7 +481,7 @@ public class Functions extends Application {
       drawAxis();
 
       // draw the graphs
-      for (Graph graph : graphs) {
+      for (FunctionGraph graph : graphs) {
          drawGraph(graph);
       }
 
@@ -518,7 +518,7 @@ public class Functions extends Application {
    }
 
    
-   private void drawGraph(Graph theGraph) {
+   private void drawGraph(FunctionGraph theGraph) {
       // do not draw the graph if it is in an error state
       if (theGraph.isError()) {
          return;
@@ -560,7 +560,7 @@ public class Functions extends Application {
 
    
    private void addGraph(String func, Color col) {
-      Graph graph = new Graph(func, col);
+      FunctionGraph graph = new FunctionGraph(func, col);
       graphs.add(graph);
       graph.setIndex(graphs.size());
       legendTable.addLegendEntry(graph);
@@ -568,7 +568,7 @@ public class Functions extends Application {
 
 
    public void setGraph(int i, String newFormula, Color newColor) {
-      Graph graph = graphs.get(i);
+      FunctionGraph graph = graphs.get(i);
       graph.setFormula(newFormula);
       graph.setColor(newColor);
       graph.setIsError(false);

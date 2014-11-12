@@ -1,8 +1,11 @@
 package com.example;
 
+import com.example.graph.Graph;
+import com.example.graph.Point2DOperationIterator;
+
 import javafx.scene.paint.Color;
 
-public class Graph {
+public class FunctionGraph implements Graph {
 
    private FunctionDefinition fn;
    private Expression expr;
@@ -11,7 +14,7 @@ public class Graph {
    private Color color;
    private boolean isError;
 
-   public Graph(String formula, Color color) {
+   public FunctionGraph(String formula, Color color) {
       fn = new FunctionDefinition(formula);
       expr = fn.compiled();
 
@@ -34,7 +37,11 @@ public class Graph {
    public Double evaluate(double value) {
       return expr.evaluate(value);
    }
-   
+
+   @Override
+   public Point2DOperationIterator operationIterator(double from, double to, double delta) {
+       return new FunctionGraphIterator(this, from, to, delta);
+   }
    
    void setIndex(int idx) {
       this.index = idx;
@@ -73,4 +80,5 @@ public class Graph {
    public boolean isError() {
       return this.isError;
    }
+
 }

@@ -16,8 +16,8 @@ public class GraphParametersTest {
         assertEquals(128, gp.getX0());
         assertEquals(360, gp.getY0());
         assertEquals(2.56, gp.getScale(), 0.01);
-        assertEquals(gp.getX0(), gp.toViewX(0));
-        assertEquals(gp.getY0(), gp.toViewY(0));
+        assertEquals(gp.getX0(), gp.mapToViewX(0));
+        assertEquals(gp.getY0(), gp.mapToViewY(0));
         assertEquals(51, gp.getTickPixels());
         assertEquals(20.0, gp.getUnit(), 0.01);
     }

@@ -1,5 +1,7 @@
 package com.example.graph;
 
+import javafx.geometry.Point2D;
+
 /**
  * A general set of parameters for drawing any kind of graphs
  * (limited to linear scaling currently)
@@ -106,15 +108,21 @@ public class GraphParameters {
         return minBottomMargin;
     }
     
-    public double toViewX(double xval) {
+    public double mapToViewX(double xval) {
         return (int) (x0 + xval * scale);
     }
     
 
-    public double toViewY(double yval) {
+    public double mapToViewY(double yval) {
         return (y0 - yval * scale); 
     }
 
+    public Point2D mapToView(Point2D point) {
+        return new Point2D(mapToViewX(point.getX()), mapToViewY(point.getY()));
+    }
+
+    
+    
     public int getCanvasWidth() {
         return canvasWidth;
     }
@@ -170,4 +178,6 @@ public class GraphParameters {
     public double getUnit() {
         return unit;
     }
+
+
 }
