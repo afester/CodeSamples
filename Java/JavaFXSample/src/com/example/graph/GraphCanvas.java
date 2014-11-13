@@ -1,18 +1,24 @@
 package com.example.graph;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.TextAlignment;
 
 public class GraphCanvas extends Canvas {
 
     private GraphParameters gp;
     private GraphicsContext context;
     private List<Graph> graphs = new ArrayList<>();
+    private Map<Graph, Paint> graphPainter = new HashMap<>();
+    private Paint axisColor = Color.BLACK;
 
     public GraphCanvas(GraphParameters gp) {
         super(gp.canvasWidth, gp.canvasHeight);
@@ -27,7 +33,7 @@ public class GraphCanvas extends Canvas {
         }
 
         context.beginPath();
-        context.setStroke(theGraph.getColor());
+        context.setStroke(graphPainter.get(theGraph));
         context.setLineWidth(1);
         // FGV.context.setLineDash([]);
 
@@ -93,14 +99,14 @@ public class GraphCanvas extends Canvas {
      */
     private void drawYTick(double y) {
         double ypos = gp.mapToViewY(y);
+        context.setTextAlign(TextAlignment.RIGHT);
 
         if (ypos > 20) { // do not draw a tick nearby the end of the axis!
             context.moveTo(gp.getX0() - 5, ypos + 0.5);
             context.lineTo(gp.getX0() + 5, ypos + 0.5);
 
-            String value = "" + Math.round(y); // * 10) / 10.0;
-            double textWidth = 15; // / context.measureText(value).width;
-            context.fillText(value, gp.getX0() - textWidth - 7, ypos + 3);
+            String value = "" + Math.round(y);
+            context.fillText(value, gp.getX0() - 10, ypos + 5);
         }
     }
 
@@ -110,13 +116,13 @@ public class GraphCanvas extends Canvas {
      */
     private void drawXTick(double x) {
         double xpos = gp.mapToViewX(x);
+        context.setTextAlign(TextAlignment.CENTER);
 
         context.moveTo(xpos + 0.5, gp.getY0() - 5);
         context.lineTo(xpos + 0.5, gp.getY0() + 5);
 
-        String value = "" + Math.round(x); // * 10) / 10.0;
-        double textWidth = 15; // / FGV.context.measureText(value).width;
-        context.fillText(value, xpos - textWidth / 2, gp.getY0() + 15);
+        String value = "" + Math.round(x);
+        context.fillText(value, xpos, gp.getY0() + 17);
     }
 
     /**
@@ -125,7 +131,8 @@ public class GraphCanvas extends Canvas {
     private void drawAxis() {
         // set the axis visual properties
         context.beginPath();
-        context.setStroke(Color.BLACK);
+        context.setStroke(axisColor);   // line color
+        context.setFill(axisColor);     // text color
         context.setLineWidth(1);
         // FGV.context.setLineDash([]);
 
@@ -160,8 +167,40 @@ public class GraphCanvas extends Canvas {
         context.stroke();
     }
 
-    public void addGraph(Graph graph) {
+    public void addGraph(Graph graph, Paint painter) {
         this.graphs.add(graph);
+        this.graphPainter.put(graph,  painter);
     }
 
+    public void removeGraph(int index) {
+        this.graphPainter.remove(this.graphs.get(index));
+        this.graphs.remove(index);
+    }
+
+    public void clear() {
+        this.graphs.clear();
+        this.graphPainter.clear();
+    }
+
+    public void setRange(double startX, double stopX) {
+        gp.setRange(startX, stopX);
+    }
+
+    public void setAxisColor(Color color) {
+        this.axisColor = color;
+    }
+
+    public void setT(double t) {
+        for (Graph g : graphs) {
+            ((FunctionGraph) g).setT(t);    // TODO: Only supported on Function graphs!
+        }
+    }
+
+    public Graph getGraph(int i) {
+        return graphs.get(i);
+    }
+
+    public void setGraphColor(int i, Color newColor) {
+        graphPainter.put(graphs.get(i), newColor);
+    }
 }

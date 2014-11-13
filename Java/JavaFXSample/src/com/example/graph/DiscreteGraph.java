@@ -1,21 +1,16 @@
 package com.example.graph;
 
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 
 public class DiscreteGraph implements Graph {
 
-    private double[] values = null;
-    private double delta;
+    protected double[] values = null;
+    protected double start;
+    protected double delta;
 
-    public DiscreteGraph(double delta, double[] is) {
+    public DiscreteGraph(double start, double delta, double[] is) {
         values = is;
         this.delta = delta;
-    }
-
-    @Override
-    public Paint getColor() {
-        return Color.RED;
+        this.start = start;
     }
 
     @Override
@@ -30,6 +25,6 @@ public class DiscreteGraph implements Graph {
     @Override
     public Point2DOperationIterator operationIterator(double from, double to,
                                                       double ignored) {
-        return new DiscreteGraphIterator(values, from, to, this.delta);
+        return new DiscreteGraphIterator(this, from, to);
     }
 }

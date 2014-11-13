@@ -1,9 +1,7 @@
-package com.example;
+package com.example.graph;
 
-import com.example.graph.Graph;
-import com.example.graph.Point2DOperationIterator;
-
-import javafx.scene.paint.Color;
+import com.example.Expression;
+import com.example.FunctionDefinition;
 
 public class FunctionGraph implements Graph {
 
@@ -11,15 +9,13 @@ public class FunctionGraph implements Graph {
    private Expression expr;
 
    private int index;
-   private Color color;
    private boolean isError;
 
-   public FunctionGraph(String formula, Color color) {
+   public FunctionGraph(String formula) {
       fn = new FunctionDefinition(formula);
-      expr = fn.compiled();
-
-      //this.formula = formula;
-      this.color = color;
+      if (!formula.isEmpty()) {
+          expr = fn.compiled();
+      }
       this.isError = false;
    }
 
@@ -55,22 +51,13 @@ public class FunctionGraph implements Graph {
       return fn.getExpression();
    }
 
-   public Color getColor() {
-      return color;
-   }
-
    public String toString() {
-      return "Graph[" + this.index + ", \"" + fn.getExpression() + "\", " + this.color
-            + ", " + this.isError + "]";
+      return "Graph[" + this.index + ", \"" + fn.getExpression() + "\", " + this.isError + "]";
    }
 
    public void setFormula(String newFormula) {
       fn = new FunctionDefinition(newFormula);
       expr = fn.compiled();
-   }
-
-   public void setColor(Color newColor) {
-      this.color = newColor;
    }
 
    public void setIsError(boolean b) {

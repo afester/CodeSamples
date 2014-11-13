@@ -2,8 +2,8 @@ package com.example;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import com.example.graph.FunctionGraph;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -44,13 +44,17 @@ public class LegendTable extends GridPane  {
       this.plotter = plotter;
    }
 
+   
+   public int getSize() {
+       return formulas.size();
+   }
 
    /**
     * Adds a new row to the legend grid.
     * @param graph
     */
    public void addLegendEntry(FunctionGraph graph) {
-      final int row = graph.getIndex();
+      final int row = formulas.size();
 
       Button b1 = new Button();
       b1.setGraphic(new ImageView(pencilImage));
@@ -71,14 +75,14 @@ public class LegendTable extends GridPane  {
 
          @Override
          public void handle(ActionEvent arg0) {
-            //System.err.println("commit row " + row );
-            String newFormula = formulas.get(row - 1).getText();
+            System.err.println("commit row " + row );
+            String newFormula = formulas.get(row).getText();
             //System.err.println("  formula: " + newFormula);
             Color newColor = Color.BLUEVIOLET;  // TODO: read from drop down
 
             // set new values
-            formulaTexts.get(row-1).setText(String.format("f%d(x) = %s", row, newFormula));
-            plotter.setGraph(row - 1, newFormula, newColor);
+            formulaTexts.get(row).setText(String.format("f%d(x) = %s", row, newFormula));
+            plotter.setGraph(row, newFormula, newColor);
 
             setRowNoEdit(row);
          }
@@ -92,7 +96,10 @@ public class LegendTable extends GridPane  {
          @Override
          public void handle(ActionEvent arg0) {
             System.err.println("Deleting row " + row);
+            removeLegendEntry(row);
+            plotter.removeGraph(row);
          }
+
       });
       deleteButtons.add(b3);
 
@@ -112,7 +119,7 @@ public class LegendTable extends GridPane  {
       TextField formula = new TextField(graph.getFormula());
       formula.setVisible(false);
       formulas.add(formula);
-      Label formulaText = new Label(String.format("f%d(x) = %s", graph.getIndex(), graph.getFormula()));
+      Label formulaText = new Label(String.format("f%d(x) = %s", row, graph.getFormula()));
       formulaTexts.add(formulaText);
 
       Label errorLabel = new Label();
@@ -130,6 +137,16 @@ public class LegendTable extends GridPane  {
       // setGridLinesVisible(true);
    }
 
+   private void removeLegendEntry(int row) {
+       getChildren().remove(editButtons.get(row));
+       getChildren().remove(checkButtons.get(row));
+       getChildren().remove(deleteButtons.get(row));
+       getChildren().remove(cancelButtons.get(row));
+       getChildren().remove(formulaTexts.get(row));
+       getChildren().remove(formulas.get(row));
+       getChildren().remove(errorLabels.get(row));
+   }
+
    public void removeLegend() {
       getChildren().clear();
       editButtons.clear();
@@ -143,8 +160,7 @@ public class LegendTable extends GridPane  {
 
 
    public void setRowNoEdit(int i) {
-      i--;
-      //System.err.println("NoEditing row " + i);
+      System.err.println("NoEditing row " + i);
 
       editButtons.get(i).setVisible(true);
       checkButtons.get(i).setVisible(false);
@@ -158,8 +174,7 @@ public class LegendTable extends GridPane  {
    }
 
    public void setRowEdit(int i) {
-      i--;
-      //System.err.println("Editing row " + i);
+      System.err.println("Editing row " + i);
 
       editButtons.get(i).setVisible(false);
       checkButtons.get(i).setVisible(true);
@@ -168,8 +183,6 @@ public class LegendTable extends GridPane  {
       formulaTexts.get(i).setVisible(false);
       formulas.get(i).setVisible(true);
    }
-
-   private Pattern pattern = Pattern.compile("^.*:(.*) \\(.*");
 
    public void setError(int index, String s) {
       index--;

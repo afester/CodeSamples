@@ -1,7 +1,8 @@
 package com.example;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.example.graph.FunctionGraph;
+import com.example.graph.GraphCanvas;
+import com.example.graph.GraphParameters;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -10,12 +11,9 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -24,18 +22,6 @@ import javafx.util.Duration;
 
 
 public class Functions extends Application {
-
-   private List<FunctionGraph> graphs = new ArrayList<FunctionGraph>();
-   
-   private double startX = 0;
-   private double stopX = 0;
-   private double paddingLeft = 0;
-   private double startY = 0;
-   private double stopY = 0;
-   private double scalePerPixel = 0;
-   private double x0pos = 0;
-   private double y0pos = 0;
-   private double tick = 0;
 
    double mouseXpos = -1;
    double mouseYpos = -1;
@@ -49,8 +35,7 @@ public class Functions extends Application {
    private Timeline stepTimeline = null;
 
    // UI components
-   private Canvas canvas;
-   private GraphicsContext context;
+   private GraphCanvas canvas;
    private TextField fromX;
    private TextField toX;
    private Label fromY;
@@ -84,10 +69,13 @@ public class Functions extends Application {
          (getClass().getResource("functions.css").toExternalForm());
      
       /* Setup the scene */
-      canvas = new Canvas(640, 480);
-      context = canvas.getGraphicsContext2D();
-      context.setFill(Color.BLUE);
-      context.fillRect(75, 75, 100, 100);
+      GraphParameters gp = new GraphParameters(640, 480, 20, 20, 20, 20,
+                                               -1, 1, 0.5, 40);
+      canvas = new GraphCanvas(gp);
+      canvas.setAxisColor(Color.BLUE);
+      grid.add(canvas, 0, 0);
+
+/*
       canvas.setOnMouseMoved(new EventHandler<MouseEvent>() {
 
          @Override
@@ -112,8 +100,9 @@ public class Functions extends Application {
       });
 
       grid.add(canvas, 0, 0);
+*/
 
-/********************************/
+/* Range *******************************/
       final GridPane axisControlGrid = new GridPane();
 
       Label lbl = new Label("X axis:");
@@ -132,7 +121,7 @@ public class Functions extends Application {
          @Override
          public void handle(ActionEvent arg0) {
             updateValues();
-            renderScene();
+            canvas.renderScene();
          }
          
       });
@@ -152,7 +141,7 @@ public class Functions extends Application {
 
       grid.add(axisControlGrid, 0, 1);
 
-/********************************/
+/* Parameter ******************************/
       
       final GridPane parameterControlGrid = new GridPane();
       Label lbl5 = new Label("t =");
@@ -164,8 +153,8 @@ public class Functions extends Application {
 
          @Override
          public void handle(ActionEvent arg0) {
-            Functions.this.t = Double.parseDouble(curT.getText());
-            renderScene();
+            canvas.setT(Double.parseDouble(curT.getText()));
+            canvas.renderScene();
          }
       });
 
@@ -173,7 +162,7 @@ public class Functions extends Application {
 
       grid.add(parameterControlGrid, 0, 2);
 
-/************************/
+/* Animation ***********************/
 
       final GridPane animationControlGrid = new GridPane();
 
@@ -214,7 +203,7 @@ public class Functions extends Application {
             // Update UI
             String txt = String.valueOf(Math.round(Functions.this.t * 100) / 100.0);
             Functions.this.curT.setText(txt);
-            renderScene();
+            canvas.renderScene();
 
             // schedule next steps
             // Duration (and KeyFrame) are immutable, and Timeline does not contain
@@ -279,7 +268,7 @@ public class Functions extends Application {
 
       grid.add(animationControlGrid, 0, 3);
 
-/************************/
+/* Legend ***********************/
 
       GridPane newDeleteButtons = new GridPane();
       Button addButton = new Button("Add");
@@ -290,19 +279,19 @@ public class Functions extends Application {
             addGraph("", Color.AQUA);
 
             // set row into edit mode
-            legendTable.setRowEdit(graphs.size());
+            legendTable.setRowEdit(legendTable.getSize() - 1);
          }
       });
-
       newDeleteButtons.add(addButton, 0, 0);
+
       Button clearAllButton = new Button("Clear all");
       clearAllButton.setOnAction(new EventHandler<ActionEvent>() {
 
          @Override
          public void handle(ActionEvent arg0) {
             legendTable.removeLegend();
-            graphs.clear();
-            renderScene();
+            canvas.clear();
+            canvas.renderScene();
          }
       });
       newDeleteButtons.add(clearAllButton, 1, 0);
@@ -313,6 +302,7 @@ public class Functions extends Application {
 
       grid.add(editGrid, 1, 0);
 
+/* ****************************************/
       /* Add some sample functions */
       //addGraph("2*sin(x+2*t)", Color.RED);
       //addGraph("log(x)+t", Color.BLUE);
@@ -320,11 +310,11 @@ public class Functions extends Application {
       //addGraph("x + 3*(x-t)^2 + x^3 - 1", Color.MAROON);
       //addGraph("tan(x)", Color.BLUEVIOLET);
       //addGraph("sqrt(x)", Color.YELLOWGREEN);
-      //addGraph("1/x", Color.AQUA);
+      addGraph("1/x", Color.AQUA);
       addGraph("sin(x) + t", Color.RED);
 
       updateValues();
-      renderScene();
+      canvas.renderScene();
 
       SceneGraphTree tree = new SceneGraphTree();
       tree.setSceneTree(scene);
@@ -335,8 +325,13 @@ public class Functions extends Application {
 
    private void updateValues() {
       // get the x axis range as entered by the user
-      startX = Double.parseDouble(fromX.getText());
-      stopX = Double.parseDouble(toX.getText());
+      double startX = Double.parseDouble(fromX.getText());
+      double stopX = Double.parseDouble(toX.getText());
+      canvas.setRange(startX, stopX);
+   }
+
+/*      
+      
       double xRange = stopX - startX;
 
       // calculate graph parameters with the assumption that there is enough
@@ -390,90 +385,8 @@ public class Functions extends Application {
    }
 
    /**
-    * Draws the axes including the ticks.
-    */
-   private void drawAxis() {
-
-      // set the axis visual properties
-      context.beginPath();
-      context.setStroke(Color.BLACK);
-      context.setLineWidth(1);
-      // FGV.context.setLineDash([]);
-
-      // draw the axis lines
-
-      // Y axis
-      context.moveTo(x0pos + 0.5, canvas.getHeight() + 0.5);
-      context.lineTo(x0pos + 0.5, 0.5);
-
-      // X axis
-      context.moveTo(paddingLeft + 0.5, y0pos + 0.5);
-      context.lineTo(canvas.getWidth() + 0.5, y0pos + 0.5);
-
-      // draw the y scale
-      for (double y = -tick; y > startY; y -= tick) { // negative axis
-         drawYTick(y);
-      }
-      for (double y = tick; y < stopY; y += tick) { // positive axis
-         drawYTick(y);
-      }
-
-      // draw the x scale
-      for (double x = -tick; x > startX; x -= tick) { // negative axis
-         drawXTick(x);
-      }
-      for (double x = tick; x < stopX; x += tick) { // positive axis
-         drawXTick(x);
-      }
-
-      context.stroke();
-
-      /*
-       * // Y axis arrow FGV.context.moveTo(FGV.x0pos, 0);
-       * FGV.context.lineTo(FGV.x0pos - 5, 10); FGV.context.lineTo(FGV.x0pos +
-       * 5, 10); FGV.context.lineTo(FGV.x0pos, 0); FGV.context.strokeText("Y",
-       * FGV.x0pos + FGV.paddingLeft - 15, 10);
-       * 
-       * // X axis arrow FGV.context.moveTo(FGV.canvas.width, FGV.y0pos);
-       * FGV.context.lineTo(FGV.canvas.width - 10, FGV.y0pos - 5);
-       * FGV.context.lineTo(FGV.canvas.width - 10, FGV.y0pos + 5);
-       * FGV.context.lineTo(FGV.canvas.width, FGV.y0pos);
-       * FGV.context.strokeText("X", FGV.canvas.width - 10, FGV.y0pos + 20);
-       * 
-       * FGV.context.fill();
-       */
-   }
-
-   
-   private void drawYTick(double y) {
-      long /*double*/ ypos = Math.round(y0pos - y / scalePerPixel);
-
-      if (ypos > 20) { // do not draw a tick nearby the end of the axis!
-         context.moveTo(x0pos - 5, ypos + 0.5);
-         context.lineTo(x0pos + 5, ypos + 0.5);
-
-         String value = "" + Math.round(y * 10) / 10.0;
-         double textWidth = 20; // / context.measureText(value).width;
-         context.fillText(value, x0pos - textWidth - 7, ypos + 3);
-      }
-   }
-
-   
-   private void drawXTick(double x) {
-      long /*double*/ xpos = Math.round(x0pos + x / scalePerPixel);
-
-      context.moveTo(xpos + 0.5, y0pos - 5);
-      context.lineTo(xpos + 0.5, y0pos + 5);
-
-      String value = "" + Math.round(x * 10) / 10.0;
-      double textWidth = 20; // / FGV.context.measureText(value).width;
-      context.fillText(value, xpos - textWidth / 2, y0pos + 15);
-   }
-
-   
-   /**
     * Redraws the complete canvas.
-    */
+    *
    private void renderScene() {
       context.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
@@ -516,63 +429,22 @@ public class Functions extends Application {
           // FGV.curYposNode.value = "n/a";
        }
    }
+   */
 
-   
-   private void drawGraph(FunctionGraph theGraph) {
-      // do not draw the graph if it is in an error state
-      if (theGraph.isError()) {
-         return;
-      }
-
-      context.beginPath();
-      context.setStroke(theGraph.getColor());
-      context.setLineWidth(1);
-      // FGV.context.setLineDash([]);
-
-      boolean move = true;
-      theGraph.setT(this.t);
-      for (double x = startX; x < stopX; x += scalePerPixel) {
-         try {
-            Double y = theGraph.evaluate(x);
-
-            double xpos = x0pos + x / scalePerPixel;
-            double ypos = y0pos - y / scalePerPixel;
-
-            if (!Double.isNaN(y)) {
-               if (move) {
-                  move = false;
-                  context.moveTo(xpos, ypos);
-               } else {
-                  context.lineTo(xpos, ypos);
-               }
-            } else {
-               move = true;  // next non-NaN needs to MOVE first
-            }
-         } catch (Exception e) {
-            legendTable.setError(theGraph.getIndex(), e.getLocalizedMessage());
-            theGraph.setIsError(true);
-            return;
-         }
-      }
-
-      context.stroke();
-   }
-
-   
    private void addGraph(String func, Color col) {
-      FunctionGraph graph = new FunctionGraph(func, col);
-      graphs.add(graph);
-      graph.setIndex(graphs.size());
+      FunctionGraph graph = new FunctionGraph(func);
+      canvas.addGraph(graph, col);
       legendTable.addLegendEntry(graph);
    }
 
 
    public void setGraph(int i, String newFormula, Color newColor) {
-      FunctionGraph graph = graphs.get(i);
+      FunctionGraph graph = (FunctionGraph) canvas.getGraph(i);
       graph.setFormula(newFormula);
-      graph.setColor(newColor);
       graph.setIsError(false);
-      renderScene();
+      canvas.setGraphColor(i, newColor);
+
+      canvas.renderScene();
    }
 
 
@@ -597,7 +469,9 @@ public class Functions extends Application {
       // Update UI
       String txt = String.valueOf(Math.round(this.t * 100) / 100.0);
       this.curT.setText(txt);
-      renderScene();
+      
+      canvas.setT(this.t);
+      canvas.renderScene();
    }
 
 
@@ -621,6 +495,14 @@ public class Functions extends Application {
       // Update UI
       String txt = String.valueOf(Math.round(this.t * 100) / 100.0);
       this.curT.setText(txt);
-      renderScene();
+
+      canvas.setT(this.t);
+      canvas.renderScene();
    }
+
+    public void removeGraph(int row) {
+        canvas.removeGraph(row);
+        canvas.renderScene();
+    }
+
 }

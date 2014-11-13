@@ -1,7 +1,5 @@
 package com.example.graph;
 
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 
 public class PointGraph implements Graph {
 
@@ -9,11 +7,6 @@ public class PointGraph implements Graph {
 
     public PointGraph(double[][] values) {
         this.values = values;
-    }
-
-    @Override
-    public Paint getColor() {
-        return Color.RED;
     }
 
     @Override

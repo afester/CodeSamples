@@ -1,7 +1,5 @@
-package com.example;
+package com.example.graph;
 
-import com.example.graph.Point2DOperation;
-import com.example.graph.Point2DOperationIterator;
 
 class FunctionGraphIterator implements Point2DOperationIterator {
 

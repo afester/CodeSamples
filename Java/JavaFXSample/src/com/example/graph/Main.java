@@ -7,8 +7,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import com.example.FunctionGraph;
-
 
 public class Main extends Application {
     private GraphCanvas canvas;
@@ -38,11 +36,11 @@ public class Main extends Application {
       canvas = new GraphCanvas(gp);
       grid.add(canvas, 0, 0);
 
-      canvas.addGraph(new FunctionGraph("x^2", Color.GREEN));
-      canvas.addGraph(new FunctionGraph("log(x)", Color.RED));
-      canvas.addGraph(new FunctionGraph("x * log(x)", Color.BLACK));
-      canvas.addGraph(new FunctionGraph("sqrt(x)", Color.BLUE));
-      canvas.addGraph(new DiscreteGraph(0.5,
+      canvas.addGraph(new FunctionGraph("x^2"), Color.GREEN);
+      canvas.addGraph(new FunctionGraph("log(x)"), Color.RED);
+      canvas.addGraph(new FunctionGraph("x * log(x)"), Color.BLACK);
+      canvas.addGraph(new FunctionGraph("sqrt(x)"), Color.BLUE);
+      canvas.addGraph(new DiscreteGraph(0.0, 0.5,
                   new double[] {1.0, 2.0, 3.0, 4.5,   5,   5,   5,   5,
                                 4.5, 3.5, 2.0, 1.5, 0.5, 0.5, 0.5, 0.5,
                                 1.0, 2.0, 3.0, 4.5,   5,   5,   5,   5,
@@ -52,10 +50,11 @@ public class Main extends Application {
                                 1.0, 2.0, 3.0, 4.5,   5,   5,   5,   5,
                                 4.5, 3.5, 2.0, 1.5, 0.5, 0.5, 0.5, 0.5,
                                 1.0, 2.0, 3.0, 4.5,   5,   5,   5,   5,
-                                4.5, 3.5, 2.0, 1.5, 0.5, 0.5, 0.5, 0.5}));
+                                4.5, 3.5, 2.0, 1.5, 0.5, 0.5, 0.5, 0.5}),
+                                Color.AQUAMARINE);
       canvas.addGraph(new PointGraph(new double[][] {{-3.0, 2.0}, 
                                                      {2.0, 4.5},
-                                                     {1.3, 4.5} }));
+                                                     {1.3, 4.5} }), Color.DEEPSKYBLUE);
 
       canvas.renderScene();
 

@@ -5,23 +5,20 @@ class DiscreteGraphIterator implements Point2DOperationIterator {
 
     private boolean first = true;
     private int index = 0;
-    private double[] values;
+    private DiscreteGraph graph;
     private double x;
-    private double delta;
     private double to;
 
-    public DiscreteGraphIterator(double[] values, double from, double to,
-            double delta) {
+    public DiscreteGraphIterator(DiscreteGraph graph, double from, double to) {
         this.index = 0;
-        this.values = values;
+        this.graph = graph;
         this.to = to;
-        this.delta = delta;
-        this.x = from;
+        this.x = graph.start;
     }
 
     @Override
     public boolean hasNext() {
-        return (index < values.length && x < to);
+        return (index < graph.values.length && x < to);
     }
 
     @Override
@@ -35,8 +32,8 @@ class DiscreteGraphIterator implements Point2DOperationIterator {
             first = false;
         }
 
-        Point2DOperation result = new Point2DOperation(x, values[index], retOper);
-        x += delta;
+        Point2DOperation result = new Point2DOperation(x, graph.values[index], retOper);
+        x += graph.delta;
         index++;
         return result;
     }

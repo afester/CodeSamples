@@ -180,4 +180,11 @@ public class GraphParameters {
     }
 
 
+    public void setRange(double startX, double stopX) {
+        fromX = startX;
+        toX = stopX;
+        recalculate();
+    }
+
+
 }
