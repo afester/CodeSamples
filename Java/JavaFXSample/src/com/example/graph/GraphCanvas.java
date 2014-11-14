@@ -167,14 +167,20 @@ public class GraphCanvas extends Canvas {
         context.stroke();
     }
 
+    /**
+     * Adds a new graph to this canvas.
+     *
+     * @param graph The graph to add.
+     * @param painter The painter to use for painting the graph.
+     */
     public void addGraph(Graph graph, Paint painter) {
         this.graphs.add(graph);
         this.graphPainter.put(graph,  painter);
     }
 
-    public void removeGraph(int index) {
-        this.graphPainter.remove(this.graphs.get(index));
-        this.graphs.remove(index);
+    public void removeGraph(Graph graph) {
+        this.graphPainter.remove(graph); // this.graphs.get(index));
+        this.graphs.remove(graph);  // TODO: ArrayList not suitable
     }
 
     public void clear() {
@@ -200,7 +206,7 @@ public class GraphCanvas extends Canvas {
         return graphs.get(i);
     }
 
-    public void setGraphColor(int i, Color newColor) {
-        graphPainter.put(graphs.get(i), newColor);
+    public void setGraphColor(Graph graph, Color newColor) {
+        graphPainter.put(graph, newColor); // graphs.get(i), newColor);
     }
 }

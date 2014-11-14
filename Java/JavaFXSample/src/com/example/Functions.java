@@ -1,6 +1,7 @@
 package com.example;
 
 import com.example.graph.FunctionGraph;
+import com.example.graph.Graph;
 import com.example.graph.GraphCanvas;
 import com.example.graph.GraphParameters;
 
@@ -276,10 +277,10 @@ public class Functions extends Application {
 
          @Override
          public void handle(ActionEvent arg0) {
-            addGraph("", Color.AQUA);
+            Graph newGraph = addGraph("", Color.AQUA);
 
             // set row into edit mode
-            legendTable.setRowEdit(legendTable.getSize() - 1);
+            legendTable.setRowEdit(newGraph);
          }
       });
       newDeleteButtons.add(addButton, 0, 0);
@@ -431,18 +432,18 @@ public class Functions extends Application {
    }
    */
 
-   private void addGraph(String func, Color col) {
+   private Graph addGraph(String func, Color col) {
       FunctionGraph graph = new FunctionGraph(func);
       canvas.addGraph(graph, col);
       legendTable.addLegendEntry(graph);
+      return graph;
    }
 
 
-   public void setGraph(int i, String newFormula, Color newColor) {
-      FunctionGraph graph = (FunctionGraph) canvas.getGraph(i);
+   public void setGraph(FunctionGraph graph, String newFormula, Color newColor) {
       graph.setFormula(newFormula);
       graph.setIsError(false);
-      canvas.setGraphColor(i, newColor);
+      canvas.setGraphColor(graph, newColor);
 
       canvas.renderScene();
    }
@@ -500,8 +501,8 @@ public class Functions extends Application {
       canvas.renderScene();
    }
 
-    public void removeGraph(int row) {
-        canvas.removeGraph(row);
+    public void removeGraph(Graph graph) {
+        canvas.removeGraph(graph);
         canvas.renderScene();
     }
 
