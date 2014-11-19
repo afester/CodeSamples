@@ -1,4 +1,4 @@
-package com.example;
+package com.example.javafx.components;
 
 import java.util.List;
 
@@ -109,7 +109,7 @@ public class SceneGraphTree {
          @Override
          public void changed(ObservableValue<? extends TreeItem<String>> arg0,
                              TreeItem<String> oldValue, TreeItem<String> newValue) {
-            SceneGraphItem oldItem = (SceneGraphItem) oldValue; // ?????
+           // SceneGraphItem oldItem = (SceneGraphItem) oldValue; // ?????
             SceneGraphItem newItem = (SceneGraphItem) newValue; // ?????
 
             Node node = newItem.getNode();

@@ -1,9 +1,10 @@
-package com.example;
+package com.example.functions;
 
 import com.example.graph.FunctionGraph;
 import com.example.graph.Graph;
 import com.example.graph.GraphCanvas;
 import com.example.graph.GraphParameters;
+import com.example.javafx.components.SceneGraphTree;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;

@@ -1,4 +1,4 @@
-package com.example;
+package com.example.javafx.components;
 
 import java.io.File;
 import javafx.application.Application;
