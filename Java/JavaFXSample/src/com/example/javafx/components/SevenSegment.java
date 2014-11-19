@@ -1,5 +1,8 @@
 package com.example.javafx.components;
 
-public class SevenSegment {
+import javafx.scene.control.Control;
 
+public class SevenSegment extends Control {
+
+    
 }
