@@ -5,6 +5,9 @@ COLUMN Label FORMAT A30
 COLUMN Node FORMAT A30
 COLUMN Path FORMAT A50
 
+-- Alternative (Better?) tree schema which uses NULL as the parent key for
+-- root nodes and which adds a foreign key constraint 
+
 -- Remove existing schema objects
 BEGIN DROP_TABLE_IF_EXISTS('TreeNode'); END;
 BEGIN DROP_SEQUENCE_IF_EXISTS('TreeNodePk'); END;
@@ -17,11 +20,11 @@ CACHE 100;
 
 -- Create the table which holds the tree nodes
 CREATE TABLE TreeNode (
-    Id NUMBER(10),
+    Id NUMBER(10) PRIMARY KEY,					-- Creates implicit index on Id
     Parent NUMBER(10),
-    Label VARCHAR2(100)
+    Label VARCHAR2(100),
+    FOREIGN KEY(Parent) REFERENCES TreeNode(Id)	-- does **not** create an index on Parent!
 );
-CREATE UNIQUE INDEX TreePK ON TreeNode(Id);
 CREATE INDEX TreeParentFK ON TreeNode(Parent);
 
 
@@ -42,25 +45,25 @@ DECLARE
     newId NUMBER;
 
 BEGIN 
-    INSERT INTO TreeNode VALUES(0, 0, 'Root Node') RETURNING Id INTO rootId;
+    INSERT INTO TreeNode VALUES(null, null, 'Root Node') RETURNING Id INTO rootId;
 
-    INSERT INTO TreeNode VALUES(0, rootId, 'Node 1') RETURNING Id INTO newId;
-    INSERT INTO TreeNode VALUES(0, newId, 'Node 1.1');
-    INSERT INTO TreeNode VALUES(0, newId, 'Node 1.2') RETURNING Id INTO newId;
+    INSERT INTO TreeNode VALUES(null, rootId, 'Node 1') RETURNING Id INTO newId;
+    INSERT INTO TreeNode VALUES(null, newId, 'Node 1.1');
+    INSERT INTO TreeNode VALUES(null, newId, 'Node 1.2') RETURNING Id INTO newId;
 
-    INSERT INTO TreeNode VALUES(0, newId, 'Node 1.2.1') RETURNING Id INTO newId;
-    INSERT INTO TreeNode VALUES(0, newId, 'Node 1.2.1.1');
+    INSERT INTO TreeNode VALUES(null, newId, 'Node 1.2.1') RETURNING Id INTO newId;
+    INSERT INTO TreeNode VALUES(null, newId, 'Node 1.2.1.1');
 
-    INSERT INTO TreeNode VALUES(0, rootId, 'Node 2') RETURNING Id INTO newId;
-    INSERT INTO TreeNode VALUES(0, newId, 'Node 2.1');
+    INSERT INTO TreeNode VALUES(null, rootId, 'Node 2') RETURNING Id INTO newId;
+    INSERT INTO TreeNode VALUES(null, newId, 'Node 2.1');
 --    INSERT INTO TreeNode VALUES(0, newId, 'Node 2.2');
-    INSERT INTO TreeNode VALUES(0, newId, 'Node 2.3');
-    INSERT INTO TreeNode VALUES(0, newId, 'Node 2.4');
+    INSERT INTO TreeNode VALUES(null, newId, 'Node 2.3');
+    INSERT INTO TreeNode VALUES(null, newId, 'Node 2.4');
 
-    INSERT INTO TreeNode VALUES(0, rootId, 'Node 3') RETURNING Id INTO newId;
+    INSERT INTO TreeNode VALUES(null, rootId, 'Node 3') RETURNING Id INTO newId;
 
-    INSERT INTO TreeNode VALUES(0, rootId, 'Node 4') RETURNING Id INTO newId;
-    INSERT INTO TreeNode VALUES(0, newId, 'Node 4.1');
+    INSERT INTO TreeNode VALUES(null, rootId, 'Node 4') RETURNING Id INTO newId;
+    INSERT INTO TreeNode VALUES(null, newId, 'Node 4.1');
 
     COMMIT;
 END;
@@ -109,13 +112,13 @@ SELECT * FROM TreeNode;
 -- Pseudo column: LEVEL
 SELECT LEVEL, Id, LPAD (' ', 3 * (LEVEL - 1)) || Label Node
 FROM TreeNode
-START WITH Parent = 0
+START WITH Parent IS NULL
 CONNECT BY PRIOR Id = Parent;
 
 -- Pseudo column: CONNECT_BY_ISLEAF
 SELECT LEVEL, CONNECT_BY_ISLEAF Leaf, Id, LPAD (' ', 3 * (LEVEL - 1)) || Label Node
 FROM TreeNode
-START WITH Parent = 0
+START WITH Parent IS NULL
 CONNECT BY PRIOR Id = Parent;
 
      LEVEL       LEAF         ID NODE
@@ -167,7 +170,7 @@ CONNECT BY PRIOR Id = Parent;
 
 
 SELECT LEVEL, SYS_CONNECT_BY_PATH(Id, '/') Path, 
-	   PRIOR Id, Id,    LPAD (' ', 3 * (LEVEL - 1)) || Label Node
+	   PRIOR Id, Id, LPAD (' ', 3 * (LEVEL - 1)) || Label Node
 FROM TreeNode
 START WITH  Id=1
 CONNECT BY PRIOR Id = Parent;
@@ -215,7 +218,7 @@ END;
 
 SELECT LEVEL, Id, LPAD (' ', 3 * (LEVEL - 1)) || Label Node
 FROM TreeNode
-START WITH Parent = 0
+START WITH Parent IS NULL
 CONNECT BY PRIOR Id = Parent
 ORDER BY Label;
 
@@ -243,9 +246,9 @@ ORDER BY Label;
 -- See how the Root Node and "ANode 1.2.1" (which we have renamed from Node 1.2.1 before)
 -- are located at the wrong positions! 
 
-SELECT Parent, ROWNUM, LEVEL, Id, LPAD (' ', 3 * (LEVEL - 1)) || Label Node
+SELECT Parent, ROWNUM, LEVEL, Id, substr( LPAD (' ', 3 * (LEVEL - 1)) || Label, 0, 30) Node
 FROM TreeNode
-START WITH Parent = 0
+START WITH Parent IS NULL
 CONNECT BY PRIOR Id = Parent
 ORDER SIBLINGS BY Label;
 
@@ -273,29 +276,121 @@ ORDER SIBLINGS BY Label;
        
 
 -- Path query - start with leaf and get all rows up to the root node
-SELECT LEVEL, Id,  LPAD (' ', 3 * (LEVEL - 1)) || Label Node
+SELECT LEVEL, Id,  substr( LPAD (' ', 3 * (LEVEL - 1)) || Label, 0, 30) Node
 FROM TreeNode
 START WITH  Id=6
 CONNECT BY Id = PRIOR Parent;
 
-SELECT LEVEL, SYS_CONNECT_BY_PATH(Label, '/') Path, 
-	   Id,    LPAD (' ', 3 * (LEVEL - 1)) || Label Node
+SELECT LEVEL, substr( SYS_CONNECT_BY_PATH(Label, '/'), 0, 60), 
+	   Id,    substr( LPAD (' ', 3 * (LEVEL - 1)) || Label, 0, 30) Node
 FROM TreeNode
 START WITH  Id=6
 CONNECT BY Id = PRIOR Parent;
 
 
--- Recursive With Clause
-WITH Node (Id, label, parent, hierlevel, path) AS
-( SELECT Id, Label, Parent, 1, label
-  FROM   TreeNode
-  WHERE  Parent = 0
+
+-- Subquery Factoring Clause
+
+-- General Syntax:
+-- WITH query_name ([c_alias [, c_alias]...]) AS (subquery) [search__clause] [cycle_clause]
+--   [, query_name ([c_alias [, c_alias]...]) AS (subquery) [search_clause] [cycle_clause]]
+-- SELECT ... 
+
+-- Simple example - not recursive! (and not really useful - need to look for a better sample)
+--  Query Name Column Aliases
+--   vvvvvvvv  vvvvvvv
+WITH AllNodes (a, b, c) AS
+(SELECT * FROM TreeNode)
+ SELECT * FROM AllNodes a, AllNodes b;
+
+-- If a subquery_factoring_clause refers to its own query_name in the subquery 
+-- that defines it, then the subquery_factoring_clause is said to be recursive.
+
+-- Incomplete example
+WITH AllNodes (a, b, c) AS
+(SELECT * FROM AllNodes) -- Refers to its own query name!
+ SELECT * FROM AllNodes;
+
+-- A recursive subquery_factoring_clause must contain two query blocks:
+--    * The first is the anchor member 
+--    * The second is the recursive member
+-- The anchor member must appear before the recursive member, and it cannot reference query_name. 
+-- The recursive member must follow the anchor member and must reference query_name exactly once. 
+-- You must combine the recursive member with the anchor member using the UNION ALL set operator.
+
+-- Simple query which traverses all nodes (bread first - all nodes on the same 
+-- level are returned before continuing on the next level)
+WITH Node (Id, Parent, Label) AS
+(   -- Anchor Member - start node
+    SELECT *
+    FROM TreeNode
+    WHERE Parent IS NULL
   UNION ALL
-  SELECT e.Id, e.Label, e.Parent, m.hierlevel + 1, m.path||'/'||e.label
-  FROM TreeNode e
-  JOIN Node m ON (m.Id = e.Parent)
+    -- Recursive Member - join between parent and child
+    SELECT ChildNode.Id, ChildNode.Parent, ChildNode.Label
+    FROM TreeNode ChildNode
+    JOIN Node ParentNode ON (ParentNode.Id = ChildNode.Parent)
 )
-SELECT hierlevel, LPAD (' ', 4 * (hierlevel- 1)) || Label "Node", 
-				  path "Path"
+SELECT * 
+FROM Node;
+
+-- Add a level indicator (do not use "Level" as column name since "Level" is a reserved identifier)
+WITH Node (Id, Parent, HLevel, Label) AS
+(   -- Anchor Member - start node
+    SELECT TreeNode.Id, TreeNode.Parent, 1, TreeNode.Label
+    FROM TreeNode
+    WHERE Parent IS NULL
+  UNION ALL
+    -- Recursive Member - join between parent and child
+    SELECT ChildNode.Id, ChildNode.Parent, ParentNode.HLevel+1, ChildNode.Label
+    FROM TreeNode ChildNode
+    JOIN Node ParentNode ON (ParentNode.Id = ChildNode.Parent)
+)
+SELECT * 
+FROM Node;
+
+-- Add a Node order sort criteria.  
+-- SEARCH mode    BY siblingsOrder        SET orderColumn
+--        ^^^^       ^^^^^^^^^^^^^            ^^^^^^^^^^^
+--  BREADTH FIRST    Clause to specify        Column name to add
+-- or DEPTH FIRST    Ordering of siblings     for the final node sequence
+--
+-- Default is BREADTH FIRST, so the following query returns the same result as
+-- the one above (but adds the NodeSequence column):
+WITH Node (Id, Parent, HLevel, Label) AS
+(   -- Anchor Member - start node
+    SELECT TreeNode.Id, TreeNode.Parent, 1, TreeNode.Label
+    FROM TreeNode
+    WHERE Parent IS NULL
+  UNION ALL
+    -- Recursive Member - join between parent and child
+    SELECT ChildNode.Id, ChildNode.Parent, ParentNode.HLevel+1, ChildNode.Label
+    FROM TreeNode ChildNode
+    JOIN Node ParentNode ON (ParentNode.Id = ChildNode.Parent)
+)
+SEARCH BREADTH FIRST BY Label SET NodeSequence
+SELECT * 
 FROM Node
-ORDER BY path;
+ORDER BY NodeSequence;
+
+
+-- Use DEPTH FIRST search to return a tree structure, and add indentation 
+-- of the label according to the level
+WITH Node (Id, Parent, HLevel, Label) AS
+(   -- Anchor Member - start node
+    SELECT TreeNode.Id, TreeNode.Parent, 1, TreeNode.Label
+    FROM TreeNode
+    WHERE Parent IS NULL
+  UNION ALL
+    -- Recursive Member - join between parent and child
+    SELECT ChildNode.Id, ChildNode.Parent, ParentNode.HLevel+1, ChildNode.Label
+    FROM TreeNode ChildNode
+    JOIN Node ParentNode ON (ParentNode.Id = ChildNode.Parent)
+)
+SEARCH DEPTH FIRST BY Label SET NodeSequence
+SELECT Id, Parent, HLevel, LPAD (' ', 2 * (HLevel - 1)) || Label AS Label, NodeSequence
+FROM Node
+ORDER BY NodeSequence;
+
+
+-- Cycle clause 
