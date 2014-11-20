@@ -1,0 +1,5 @@
+@CHARSET "ISO-8859-1";
+
+.seven-segment {
+	-fx-skin: "com.example.javafx.components.SevenSegmentSkin";
+}

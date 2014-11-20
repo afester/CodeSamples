@@ -34,6 +34,7 @@ public class Main extends Application {
 
     private int rowCount = 0;
     private GridPane grid = new GridPane();
+    private int number = 0;
 
     public static void main(String[] args) {
         launch(args);
@@ -121,6 +122,34 @@ public class Main extends Application {
 
         addRow(new Text("Shapes:"), r1, e1, a1);
 
+
+        SevenSegment s7 = new SevenSegment();
+        s7.setScaleX(0.25);
+        s7.setScaleY(0.25);
+        s7.setDigit(number);
+        Button pb = new Button("+");
+        pb.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent arg0) {
+                number++;
+                if (number > 9) {
+                    number = 0;
+                }
+                s7.setDigit(number);
+            }
+        });
+        Button mb = new Button("-");
+        mb.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent arg0) {
+                number--;
+                if (number < 0) {
+                    number = 9;
+                }
+                s7.setDigit(number);
+            }
+        });
+        addRow(new Text("Seven segment display:"), s7, pb, mb);
 
         /********** Simple animation sample */
 
