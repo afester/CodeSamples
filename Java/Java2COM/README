@@ -1,0 +1,53 @@
+ Automation: http://msdn.microsoft.com/en-us/library/windows/desktop/ms221375(v=vs.85).aspx
+ The IDispatch interface, which derives from the IUnknown interface, consists of functions
+ that allow access to the methods and properties of ActiveX objects.
+
+ int main() {
+ // initialize the COM library
+ CoInitialize(NULL);
+
+ // get the class id for the required object
+ CLSID CLSID_OPCServer;
+ HRESULT hr = CLSIDFromString(OPC_SERVER_NAME, &CLSID_OPCServer);
+
+ // Create an instance of the requested class, and query the required interfaces
+ CComQIPtr <IDispatch> pServer;
+ hr = pServer.CoCreateInstance(CLSID_OPCServer);
+ if (SUCCEEDED (hr)){
+
+ // Use the interface.
+ printf("Created the instance");
+ }
+
+ // Release the pointer to the instance
+ pServer.Release();
+
+ // uninitialize the COM library
+ CoUninitialize();
+ }
+
+ * COM:
+ * OLE32.DLL:
+ *  -CLSIDFromProgID        Looks up a CLSID in the registry, given a ProgID.
+ *                          HRESULT hr = CLSIDFromProgID("Excel.Application", &clsid);
+ *
+ *  -CoCreateInstanceEx     Creates an instance of a specific class on a specific computer.
+ *                          Also queries the required interfaces like IDispatch.
+ *
+ *  -CoInitializeEx         CoInitializeEx must be called at least once, and is usually
+ *                          called only once, for each thread that uses the COM library.
+ *  -CoUninitialize         Closes the COM library on the current thread, unloads all DLLs
+ *                          loaded by the thread, frees any other resources that the thread
+ *                          maintains, and forces all RPC connections on the thread to close.
+ *                          Needs to be balanced with the CoInitializeEx calls.
+ *
+ * OLEAUT32.DLL:
+ *  - SysAllocString
+ *  - SysFreeString
+ *
+ *  - VariantInit
+ *  - VariantClear
+ *
+ *  - SystemTimeToVariantTime
+ *  - VariantTimeToSystemTime
+ */
