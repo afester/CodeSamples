@@ -3,7 +3,7 @@ TARGET   = Native.dll
 TARGET_DIR= ../jlib
 
 # Definitions for the javah-tool
-JAVA_HOME = /c/Program\ Files/Java/jdk1.8.0_11
+JAVA_HOME = "/c/Program Files/Java/jdk1.8.0_11"
 NATIVE_CLASS = com.example.java2com.IDispatch
 JH_CLASSPATH = ../bin
 JAVAH    =  $(JAVA_HOME)/bin/javah.exe
@@ -30,3 +30,8 @@ stub:
 
 clean:
 	rm $(OBJECTS) $(TARGET_DIR)/$(TARGET)
+
+versions:
+	$(CXX) --version
+	$(JAVAH) -version
+	$(LINK) -version

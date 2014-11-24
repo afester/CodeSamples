@@ -3,7 +3,7 @@
 
 #include "COMProxy.h"
 
-COMProxy::COMProxy(JavaVM *jvm) {
+COMProxy::COMProxy(JavaVM *jvm) : debugEnabled(false) {
 	// initialize the COM library
 	fprintf(stderr, "*** Initializing COM API ...\n");
 	::CoInitialize( NULL);
@@ -37,26 +37,33 @@ COMProxy::~COMProxy() {
 
 
 void COMProxy::create(JNIEnv* env, jobject dispatchObj, jstring className) {
-	fprintf(stderr, "*** Create() ...\n");
+	if (debugEnabled)
+		fprintf(stderr, "*** Create() ...\n");
 
 	// Get the class name from the String parameter
 	OLECHAR * szClassname = (OLECHAR*) env->GetStringChars(className, NULL);
 
 	// get the class id for the required object
-	fprintf(stderr, "  Retrieving Class ID for \"%ls\" ...\n", szClassname);
+	if (debugEnabled)
+		fprintf(stderr, "  Retrieving Class ID for \"%ls\" ...\n", szClassname);
 	CLSID CLSID_Class;
 	HRESULT hr = ::CLSIDFromProgID(szClassname, &CLSID_Class);
-	fprintf(stderr, "    Status: 0x%lx\n", hr);
-	fprintf(stderr, "    Result: 0x%08lX-%04hX-%04hX-%08lX\n",
-			CLSID_Class.Data1, CLSID_Class.Data2, CLSID_Class.Data3,
-			(long) CLSID_Class.Data4);
+	if (debugEnabled) {
+		fprintf(stderr, "    Status: 0x%lx\n", hr);
+		fprintf(stderr, "    Result: 0x%08lX-%04hX-%04hX-%08lX\n",
+				CLSID_Class.Data1, CLSID_Class.Data2, CLSID_Class.Data3,
+				(long) CLSID_Class.Data4);
+	}
+
 	// Create an instance of the requested class, and query the required interfaces
 	fprintf(stderr, "  Retrieving IDispatch interface ...\n");
 	IDispatch* pServer = 0;
 	hr = ::CoCreateInstance(CLSID_Class, NULL, CLSCTX_LOCAL_SERVER, IID_IDispatch,
 							reinterpret_cast<void**> (&pServer));
-	fprintf(stderr, "    Status: 0x%lx\n", hr);
-	fprintf(stderr, "    Result: 0x%p\n", pServer);
+	if (debugEnabled) {
+		fprintf(stderr, "    Status: 0x%lx\n", hr);
+		fprintf(stderr, "    Result: 0x%p\n", pServer);
+	}
 
 	// store the pointer into the dispatchObj
 	// set the dispatchHandle member - NOTE: architecture specific! (32 bit <=> 64 bit)
@@ -69,7 +76,9 @@ void COMProxy::create(JNIEnv* env, jobject dispatchObj, jstring className) {
 
 jobject COMProxy::invoke(JNIEnv *env, jobject dispatchObj, jstring memberName,
 						 jint wFlags, jobjectArray parameters) {
-	fprintf(stderr, "*** Invoke() ...\n");
+	if (debugEnabled) {
+		fprintf(stderr, "*** Invoke() ...\n");
+	}
 
 	// Get the member name from the String parameter
 	OLECHAR * szMember = (OLECHAR*) env->GetStringChars(memberName, NULL);
@@ -79,7 +88,10 @@ jobject COMProxy::invoke(JNIEnv *env, jobject dispatchObj, jstring memberName,
 
 	// Retrieve the dispatch ID for the member
 	DISPID dispId = 0;
-	fprintf(stderr, "  Retrieving dispatch id for \"%ls\" ...\n", szMember);
+	if (debugEnabled) {
+		fprintf(stderr, "  Retrieving dispatch id for \"%ls\" ...\n", szMember);
+	}
+
 	HRESULT hr = pServer->GetIDsOfNames(IID_NULL, &szMember, 1, LOCALE_USER_DEFAULT, &dispId);
     switch(hr) {
 		case DISP_E_UNKNOWNNAME :
@@ -87,18 +99,24 @@ jobject COMProxy::invoke(JNIEnv *env, jobject dispatchObj, jstring memberName,
 			break;
 
 		default :
-			fprintf(stderr, "    Error code: 0x%lx\n", hr);
+			if (debugEnabled) {
+				fprintf(stderr, "    Error code: 0x%lx\n", hr);
+			}
 			break;
 	}
-	fprintf(stderr, "    Result: 0x%lx\n", dispId);	// NOTE: 0x0 is the default method!
+	if (debugEnabled) {
+		fprintf(stderr, "    Result: 0x%lx\n", dispId);	// NOTE: 0x0 is the default method!
 													// (e.g. "Item" for collections)
+	}
 
 	// Convert the Parameters object into a COM DISPPARAMS structure
 	DISPPARAMS params;
 	createParams(env, &params, wFlags, parameters);
 
 	// Invoke the member (property GET, property SET or Invoke)
-	fprintf(stderr, "  Invoking member ... (%d)\n", (int) wFlags);
+	if (debugEnabled) {
+		fprintf(stderr, "  Invoking member ... (%d)\n", (int) wFlags);
+	}
 	VARIANT result;
 	hr = pServer->Invoke(dispId, IID_NULL, 0, wFlags, &params, &result, NULL, NULL);
 	switch(hr) {
@@ -115,7 +133,9 @@ jobject COMProxy::invoke(JNIEnv *env, jobject dispatchObj, jstring memberName,
 			break;
 
 		default :
-			fprintf(stderr, "    Error code: 0x%lx\n", hr);
+			if (debugEnabled) {
+				fprintf(stderr, "    Error code: 0x%lx\n", hr);
+			}
 			break;
 	}
 
@@ -131,23 +151,36 @@ jobject COMProxy::invoke(JNIEnv *env, jobject dispatchObj, jstring memberName,
 
 
 void COMProxy::release(JNIEnv* env, jobject dispatchObj) {
-	fprintf(stderr, "*** Release()...\n");
+	if (debugEnabled) {
+		fprintf(stderr, "*** Release()...\n");
+	}
 
 	// get the IDispatch pointer from the dispatchObj
 	IDispatch* pServer = (IDispatch*) env->GetIntField(dispatchObj, dispatchHandleFID);
 
 	// Release the pointer to the instance
 	int newCount = pServer->Release();
-	fprintf(stderr, "    New refcount: %d\n", newCount); // (should be 0)
+	if (debugEnabled) {
+		fprintf(stderr, "    New refcount: %d\n", newCount); // (should be 0)
+	}
+}
+
+
+void COMProxy::setDebugEnabled(JNIEnv* env, jboolean flag) {
+	debugEnabled = flag;
 }
 
 
 jobject COMProxy::convertToVariant(JNIEnv *env, const VARIANT* value) {
 
 	// Create a new instance of com.example.java2com.Variant
-	fprintf(stderr, "  FindClass(com/example/java2com/Variant)\n");
+	if (debugEnabled) {
+		fprintf(stderr, "  FindClass(com/example/java2com/Variant)\n");
+	}
 	jclass variantClass = env->FindClass("com/example/java2com/Variant");
-	fprintf(stderr, "  newObject()\n");
+	if (debugEnabled) {
+		fprintf(stderr, "  newObject()\n");
+	}
 	jobject resultVariant = env->NewObject(variantClass, variantConstructorMID);
 
 	// Set the vt field of the Variant instance
@@ -158,7 +191,9 @@ jobject COMProxy::convertToVariant(JNIEnv *env, const VARIANT* value) {
 	switch (value->vt) {
 		case VT_BSTR:
 			{
-				fprintf(stderr, "  Result: \"%ls\"", value->bstrVal);
+				if (debugEnabled) {
+					fprintf(stderr, "  Result: \"%ls\"", value->bstrVal);
+				}
 
 				// Convert the BSTRING into an UTF8 string
 
@@ -166,7 +201,9 @@ jobject COMProxy::convertToVariant(JNIEnv *env, const VARIANT* value) {
 				// TODO: too much magic here - are all assumptions correct??
 				// See also http://stackoverflow.com/questions/606075/how-to-convert-char-to-bstr
 				int stringLength = *((int*) (value->bstrVal) - 1) / 2;
-				fprintf(stderr, " (length: %d)\n", stringLength);
+				if (debugEnabled) {
+					fprintf(stderr, " (length: %d)\n", stringLength);
+				}
 
 				jstring resString = env->NewString((jchar*) value->bstrVal,
 												   stringLength);
@@ -176,12 +213,18 @@ jobject COMProxy::convertToVariant(JNIEnv *env, const VARIANT* value) {
 
 		case VT_DISPATCH:
 			{
-				fprintf(stderr, "  Result: 0x%p\n", value->pdispVal);
+				if (debugEnabled) {
+					fprintf(stderr, "  Result: 0x%p\n", value->pdispVal);
+				}
 
 				// Create a new instance of com.example.java2com.IDispatch
-				fprintf(stderr, "  FindClass(com/example/java2com/IDispatch)\n");
+				if (debugEnabled) {
+					fprintf(stderr, "  FindClass(com/example/java2com/IDispatch)\n");
+				}
 				jclass idispatchClass = env->FindClass("com/example/java2com/IDispatch");
-				fprintf(stderr, "  newObject()\n");
+				if (debugEnabled) {
+					fprintf(stderr, "  newObject()\n");
+				}
 				jobject idispatchObject = env->NewObject(idispatchClass, idispatchConstructorMID);
 
 				// set the dispatchHandle member - NOTE: architecture specific! (32 bit <=> 64 bit)
@@ -194,14 +237,18 @@ jobject COMProxy::convertToVariant(JNIEnv *env, const VARIANT* value) {
 
 		case VT_I4:
 			{
-				fprintf(stderr, "  Result: %d\n", value->iVal);
+				if (debugEnabled) {
+					fprintf(stderr, "  Result: %d\n", value->iVal);
+				}
 				env->SetIntField(resultVariant, intValueFID, value->iVal);
 			}
 			break;
 
 		case VT_BOOL:
 			{
-				fprintf(stderr, "  Result: %d\n", value->boolVal);
+				if (debugEnabled) {
+					fprintf(stderr, "  Result: %d\n", value->boolVal);
+				}
 				env->SetBooleanField(resultVariant, booleanValueFID, value->boolVal ? true : false);
 			}
 			break;
@@ -220,7 +267,9 @@ static DISPID mydispid = DISPID_PROPERTYPUT;
 
 void COMProxy::createParams(JNIEnv* env, DISPPARAMS* params, int wFlags,
 							jobjectArray parameters) {
-	fprintf(stderr, "  Converting Variant[] to DISPPARAMS ...\n");
+	if (debugEnabled) {
+		fprintf(stderr, "  Converting Variant[] to DISPPARAMS ...\n");
+	}
 
 	// initialize DISPPARAMS structure
 	params->rgvarg = NULL;
@@ -230,13 +279,19 @@ void COMProxy::createParams(JNIEnv* env, DISPPARAMS* params, int wFlags,
 
 	// convert Variant array into VARIANT structure
 	if (parameters != 0) {
-		fprintf(stderr, "    Retrieving length of Variant[] array ...\n");
+		if (debugEnabled) {
+			fprintf(stderr, "    Retrieving length of Variant[] array ...\n");
+		}
 
 		int size = env->GetArrayLength(parameters);
-		fprintf(stderr, "    Number of parameters: %d\n", size);
+		if (debugEnabled) {
+			fprintf(stderr, "    Number of parameters: %d\n", size);
+		}
 		if (size > 0) {
 			params->rgvarg = (VARIANTARG*) calloc(size, sizeof(VARIANTARG));
-			fprintf(stderr, "      Allocated memory at: 0x%p\n", params->rgvarg);
+			if (debugEnabled) {
+				fprintf(stderr, "      Allocated memory at: 0x%p\n", params->rgvarg);
+			}
 
 			for (int idx = 0; idx < size; idx++) {
 				params->rgvarg[idx].vt = VT_EMPTY;
@@ -247,7 +302,9 @@ void COMProxy::createParams(JNIEnv* env, DISPPARAMS* params, int wFlags,
 				switch (vt) {
 					case VT_BSTR:
 						{
-							fprintf(stderr, "Converting java string to BSTR ...");
+							if (debugEnabled) {
+								fprintf(stderr, "Converting java string to BSTR ...");
+							}
 
 							jstring valStr = (jstring) env->GetObjectField(variantElement, strValueFID);
 							const jchar* val = env->GetStringChars(valStr, NULL);
@@ -256,9 +313,11 @@ void COMProxy::createParams(JNIEnv* env, DISPPARAMS* params, int wFlags,
 							// TODO: Need to deallocate string in freeParams()
 							BSTR bstr = SysAllocStringLen((OLECHAR*) val, valLen);
 
-							char *x = (char*) bstr;
-							fprintf(stderr, " %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X \n", x[-4], x[-3], x[-2], x[-1],
+							if (debugEnabled) {
+								char *x = (char*) bstr;
+								fprintf(stderr, " %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X \n", x[-4], x[-3], x[-2], x[-1],
 												  x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7]);
+							}
 
 							params->rgvarg[idx].vt = VT_BSTR;
 							params->rgvarg[idx].bstrVal = bstr;
@@ -298,7 +357,9 @@ void COMProxy::createParams(JNIEnv* env, DISPPARAMS* params, int wFlags,
 
 void COMProxy::freeParams(DISPPARAMS* params) {
 	if (params->cArgs > 0) {
-		fprintf(stderr, "      Freeing memory at: 0x%p\n", params->rgvarg);
+		if (debugEnabled) {
+			fprintf(stderr, "      Freeing memory at: 0x%p\n", params->rgvarg);
+		}
 
 		free(params->rgvarg);
 		params->rgvarg = 0;

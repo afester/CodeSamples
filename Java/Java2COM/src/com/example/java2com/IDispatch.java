@@ -35,6 +35,14 @@ public class IDispatch {
      */
     private native void Destroy();
 
+    /**
+     * Enables or disabled debug output from the native library.
+     *
+     * @param flag <code>true</code> to enable debug output, <code>false</code> 
+     *             to disable debug output
+     */
+    private static native void SetDebugEnabled(boolean flag);
+
     private final static int DISPATCH_METHOD = 1;
     private final static int DISPATCH_PROPERTYGET = 2;
     private final static int DISPATCH_PROPERTYPUT = 4;
@@ -59,6 +67,11 @@ public class IDispatch {
         Create(className);
     }
     
+    
+    public static void setDebugEnabled(boolean flag) {
+        SetDebugEnabled(flag);
+    }
+
 
     public Variant invoke(String member) {
         return Invoke(member, DISPATCH_METHOD, null);

@@ -53,3 +53,10 @@ JNIEXPORT void JNICALL Java_com_example_java2com_IDispatch_Destroy
 		comProxy->release(env, dispatchObj);
 	}
 }
+
+JNIEXPORT void JNICALL Java_com_example_java2com_IDispatch_SetDebugEnabled
+  (JNIEnv *env, jclass clazz, jboolean flag) {
+	if (comProxy) {
+		comProxy->setDebugEnabled(env, flag);
+	}
+}

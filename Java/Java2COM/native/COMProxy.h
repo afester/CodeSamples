@@ -14,6 +14,8 @@ public:
 
 	void release(JNIEnv* env, jobject dispatchObj);
 
+	void setDebugEnabled(JNIEnv* env, jboolean flag);
+
 private:
 	jobject convertToVariant(JNIEnv *env, const VARIANT* value);
 
@@ -22,6 +24,7 @@ private:
 
 	void freeParams(DISPPARAMS* params);
 
+	jboolean debugEnabled;
 
 	// Field- and Method IDs from IDispatch
 	jmethodID idispatchConstructorMID;
