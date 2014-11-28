@@ -31,11 +31,21 @@ public abstract class COMCollection<T> extends COMInterface implements Iterable<
 
             @Override
             public T next() {
-                Variant result = ci.getProperty("Item", new Variant(idx));
-                idx++;
-                return newInstance(result.dispatch);
+                return getItem(idx++);
             }
 
         };
+    }
+    
+
+    public T getItem(String id) {
+        Variant result = ci.getProperty("Item", new Variant(id));
+        return newInstance(result.dispatch);
+    }
+
+    
+    public T getItem(int idx) {
+        Variant result = ci.getProperty("Item", new Variant(idx));
+        return newInstance(result.dispatch);
     }
 }

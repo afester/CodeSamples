@@ -18,6 +18,14 @@ public class IDispatch {
     private native void Create(String className);
 
     /**
+     * Gets an IDispatch interface for an existing object.
+     * 
+     * @param className The name of the class for which to get an IDispatch 
+     *                  interface. Example: "Word.Application"
+     */
+    private native void Get(String className);
+
+    /**
      * Invokes a member of this IDispatch interface.
      * 
      * @param member    The name of the member to invoke, like "Visible". Can be 
@@ -66,8 +74,17 @@ public class IDispatch {
     public IDispatch(String className) {
         Create(className);
     }
-    
-    
+
+    /**
+     * @param className
+     * @return An IDispatch object for an existing automation server.
+     */
+    public static IDispatch get(String className) {
+        IDispatch result = new IDispatch();
+        result.Get(className);
+        return result;
+    }
+
     public static void setDebugEnabled(boolean flag) {
         SetDebugEnabled(flag);
     }
@@ -111,5 +128,9 @@ public class IDispatch {
     
     public void release() {
         Destroy();
+    }
+    
+    public String toString() {
+        return String.format("%08x", dispatchHandle);
     }
 }

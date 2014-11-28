@@ -34,6 +34,12 @@ JNIEXPORT void JNICALL Java_com_example_java2com_IDispatch_Create
 	}
 }
 
+JNIEXPORT void JNICALL Java_com_example_java2com_IDispatch_Get
+  (JNIEnv *env, jobject dispatchObj, jstring className) {
+	if (comProxy) {
+		comProxy->get(env, dispatchObj, className);
+	}
+}
 
 JNIEXPORT jobject JNICALL Java_com_example_java2com_IDispatch_Invoke(
 		JNIEnv *env, jobject dispatchObj, jstring memberName, jint wFlags,

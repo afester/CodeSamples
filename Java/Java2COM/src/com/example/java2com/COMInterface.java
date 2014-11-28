@@ -8,7 +8,13 @@ public abstract class COMInterface {
     }
     
     
-    public void release() {
+    public final void release() {
         ci.release();
+    }
+    
+
+    public String toString() {
+        return String.format("%s[dispatchHandle=0x%s]", 
+                             getClass().getSimpleName(), ci.toString());
     }
 }

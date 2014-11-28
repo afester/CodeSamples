@@ -20,6 +20,17 @@ public class Variant {
         this.intValue = i;
     }
 
+    public Variant(float f) {
+        this.vt = VT_R4;
+        this.floatValue = f;
+    }
+
+    public Variant(double d) {
+        this.vt = VT_R8;
+        this.doubleValue = d;
+    }
+
+
     public String stringValue() {
         String result = "";
         switch(vt) {
@@ -31,8 +42,17 @@ public class Variant {
                 }
                 break;
 
+            case VT_I2 :
             case VT_I4 :
                 result = String.valueOf(intValue);
+                break;
+
+            case VT_R4 :
+                result = String.valueOf(floatValue);
+                break;
+
+            case VT_R8 :
+                result = String.valueOf(doubleValue);
                 break;
 
             case VT_BSTR :
@@ -42,6 +62,10 @@ public class Variant {
             case VT_DISPATCH :
                 result = dispatch.toString();
                 break;
+
+            default :
+                result = "N/A";
+                break;
         }
         
         return result;
@@ -49,7 +73,7 @@ public class Variant {
 
 
     public String toString() {
-        return "Variant[type=" + vt + ", value=" + stringValue(); 
+        return String.format("Variant[type=%d, value=%s]", vt, stringValue());
     }
 
     // See http://msdn.microsoft.com/en-us/library/ms221170(v=vs.85).aspx
@@ -97,6 +121,7 @@ public class Variant {
     public static final short VT_CF                 = 71;
     public static final short VT_CLSID              = 72;
     public static final short VT_VERSIONED_STREAM   = 73;
+
     public static final short VT_BSTR_BLOB          = 0xfff;
     public static final short VT_VECTOR             = 0x1000;
     public static final short VT_ARRAY              = 0x2000;
@@ -109,5 +134,7 @@ public class Variant {
     public String strValue;
     public IDispatch dispatch;
     public int intValue;
+    public float floatValue;
+    public double doubleValue;
     public boolean booleanValue;
 }

@@ -1,6 +1,7 @@
 LIBRARY    Native.dll
 EXPORTS
     _Java_com_example_java2com_IDispatch_Create@12 = Java_com_example_java2com_IDispatch_Create@12
+    _Java_com_example_java2com_IDispatch_Get@12 = Java_com_example_java2com_IDispatch_Get@12
     _Java_com_example_java2com_IDispatch_Destroy@8 = Java_com_example_java2com_IDispatch_Destroy@8
     _Java_com_example_java2com_IDispatch_Invoke@20 = Java_com_example_java2com_IDispatch_Invoke@20
     _Java_com_example_java2com_IDispatch_SetDebugEnabled@12 = Java_com_example_java2com_IDispatch_SetDebugEnabled@12
