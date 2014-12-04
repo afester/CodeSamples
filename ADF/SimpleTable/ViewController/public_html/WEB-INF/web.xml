@@ -23,6 +23,10 @@
     <servlet-name>MapProxyServlet</servlet-name>
     <servlet-class>oracle.adf.view.faces.bi.webapp.MapProxyServlet</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>adflibResources</servlet-name>
+    <servlet-class>oracle.adf.library.webapp.ResourceServlet</servlet-class>
+  </servlet>
   <servlet-mapping>
     <servlet-name>Faces Servlet</servlet-name>
     <url-pattern>/faces/*</url-pattern>
@@ -51,13 +55,21 @@
     <servlet-name>resources</servlet-name>
     <url-pattern>/bi/*</url-pattern>
   </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>adflibResources</servlet-name>
+    <url-pattern>/adflib/*</url-pattern>
+  </servlet-mapping>
   <filter>
     <filter-name>trinidad</filter-name>
     <filter-class>org.apache.myfaces.trinidad.webapp.TrinidadFilter</filter-class>
   </filter>
   <filter>
-    <filter-name>ServletADFFilter</filter-name>
-    <filter-class>oracle.adf.share.http.ServletADFFilter</filter-class>
+    <filter-name>ADFLibraryFilter</filter-name>
+    <filter-class>oracle.adf.library.webapp.LibraryFilter</filter-class>
+  </filter>
+  <filter>
+    <filter-name>adfBindings</filter-name>
+    <filter-class>oracle.adf.model.servlet.ADFBindingFilter</filter-class>
   </filter>
   <filter-mapping>
     <filter-name>trinidad</filter-name>
@@ -67,7 +79,13 @@
     <dispatcher>ERROR</dispatcher>
   </filter-mapping>
   <filter-mapping>
-    <filter-name>ServletADFFilter</filter-name>
+    <filter-name>ADFLibraryFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>FORWARD</dispatcher>
+    <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>adfBindings</filter-name>
     <servlet-name>Faces Servlet</servlet-name>
     <dispatcher>FORWARD</dispatcher>
     <dispatcher>REQUEST</dispatcher>
@@ -133,4 +151,13 @@
   <listener>
     <listener-class>oracle.adf.mbean.share.connection.ADFConnectionLifeCycleCallBack</listener-class>
   </listener>
+  <listener>
+    <listener-class>oracle.bc4j.mbean.BC4JConfigLifeCycleCallBack</listener-class>
+  </listener>
+  <jsp-config>
+    <jsp-property-group>
+      <url-pattern>*.jsff</url-pattern>
+      <is-xml>true</is-xml>
+    </jsp-property-group>
+  </jsp-config>
 </web-app>
