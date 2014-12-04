@@ -1,0 +1,14 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<BC4JConfig version="11.1" xmlns="http://xmlns.oracle.com/bc4j/configuration">
+   <AppModuleConfigBag ApplicationName="com.example.adf.model.SimpleTableAM">
+      <AppModuleConfig name="SimpleTableAMLocal" ApplicationName="com.example.adf.model.SimpleTableAM" jbo.project="com.example.adf.model.Model" DeployPlatform="LOCAL">
+         <Database jbo.TypeMapEntries="OracleApps"/>
+         <Security AppModuleJndiName="com.example.adf.model.SimpleTableAM"/>
+      </AppModuleConfig>
+      <AppModuleConfig name="SimpleTableAMShared" ApplicationName="com.example.adf.model.SimpleTableAM" jbo.project="com.example.adf.model.Model" DeployPlatform="LOCAL">
+         <AM-Pooling jbo.ampool.isuseexclusive="false" jbo.ampool.maxpoolsize="1"/>
+         <Database jbo.TypeMapEntries="OracleApps"/>
+         <Security AppModuleJndiName="com.example.adf.model.SimpleTableAM"/>
+      </AppModuleConfig>
+   </AppModuleConfigBag>
+</BC4JConfig>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <adf-config xmlns="http://xmlns.oracle.com/adf/config" xmlns:config="http://xmlns.oracle.com/bc4j/configuration"
-            xmlns:adf="http://xmlns.oracle.com/adf/config/properties">
+            xmlns:adf="http://xmlns.oracle.com/adf/config/properties"
+            xmlns:sec="http://xmlns.oracle.com/adf/security/config">
   <adf-adfm-config xmlns="http://xmlns.oracle.com/adfm/config">
     <defaults changeEventPolicy="ppr" useBindVarsForViewCriteriaLiterals="true" useBindValuesInFindByKey="true"
               mapNegativeScaleToIntegerTypes="true" executeEmptyOnException="true"/>
@@ -13,4 +14,8 @@
   <adf:adf-properties-child xmlns="http://xmlns.oracle.com/adf/config/properties">
     <adf-property name="adfAppUID" value="SimpleTable.com.example.adf"/>
   </adf:adf-properties-child>
+  <sec:adf-security-child xmlns="http://xmlns.oracle.com/adf/security/config">
+    <CredentialStoreContext credentialStoreClass="oracle.adf.share.security.providers.jps.CSFCredentialStore"
+                            credentialStoreLocation="../../src/META-INF/jps-config.xml"/>
+  </sec:adf-security-child>
 </adf-config>
