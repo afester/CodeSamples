@@ -1,80 +1,96 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.1" xmlns:af="http://xmlns.oracle.com/adf/faces/rich"
           xmlns:f="http://java.sun.com/jsf/core">
-  <af:table value="#{bindings.AddressVO.collectionModel}" var="row" rows="#{bindings.AddressVO.rangeSize}"
-            emptyText="#{bindings.AddressVO.viewable ? 'No data to display.' : 'Access Denied.'}" rowBandingInterval="0"
-            fetchSize="#{bindings.AddressVO.rangeSize}" id="t1">
-    <af:column headerText="#{bindings.AddressVO.hints.Firstname.label}" id="c1">
-      <af:inputText value="#{row.bindings.Firstname.inputValue}" label="#{bindings.AddressVO.hints.Firstname.label}"
-                    required="#{bindings.AddressVO.hints.Firstname.mandatory}"
-                    columns="#{bindings.AddressVO.hints.Firstname.displayWidth}"
-                    maximumLength="#{bindings.AddressVO.hints.Firstname.precision}"
-                    shortDesc="#{bindings.AddressVO.hints.Firstname.tooltip}" id="it1">
-        <f:validator binding="#{row.bindings.Firstname.validator}"/>
-      </af:inputText>
-    </af:column>
-    <af:column headerText="#{bindings.AddressVO.hints.Lastname.label}" id="c2">
-      <af:inputText value="#{row.bindings.Lastname.inputValue}" label="#{bindings.AddressVO.hints.Lastname.label}"
-                    required="#{bindings.AddressVO.hints.Lastname.mandatory}"
-                    columns="#{bindings.AddressVO.hints.Lastname.displayWidth}"
-                    maximumLength="#{bindings.AddressVO.hints.Lastname.precision}"
-                    shortDesc="#{bindings.AddressVO.hints.Lastname.tooltip}" id="it2">
-        <f:validator binding="#{row.bindings.Lastname.validator}"/>
-      </af:inputText>
-    </af:column>
-    <af:column headerText="#{bindings.AddressVO.hints.Email.label}" id="c3">
-      <af:inputText value="#{row.bindings.Email.inputValue}" label="#{bindings.AddressVO.hints.Email.label}"
-                    required="#{bindings.AddressVO.hints.Email.mandatory}"
-                    columns="#{bindings.AddressVO.hints.Email.displayWidth}"
-                    maximumLength="#{bindings.AddressVO.hints.Email.precision}"
-                    shortDesc="#{bindings.AddressVO.hints.Email.tooltip}" id="it3">
-        <f:validator binding="#{row.bindings.Email.validator}"/>
-      </af:inputText>
-    </af:column>
-    <af:column headerText="#{bindings.AddressVO.hints.City.label}" id="c4">
-      <af:inputText value="#{row.bindings.City.inputValue}" label="#{bindings.AddressVO.hints.City.label}"
-                    required="#{bindings.AddressVO.hints.City.mandatory}"
-                    columns="#{bindings.AddressVO.hints.City.displayWidth}"
-                    maximumLength="#{bindings.AddressVO.hints.City.precision}"
-                    shortDesc="#{bindings.AddressVO.hints.City.tooltip}" id="it4">
-        <f:validator binding="#{row.bindings.City.validator}"/>
-      </af:inputText>
-    </af:column>
-    <af:column headerText="#{bindings.AddressVO.hints.Street.label}" id="c5">
-      <af:inputText value="#{row.bindings.Street.inputValue}" label="#{bindings.AddressVO.hints.Street.label}"
-                    required="#{bindings.AddressVO.hints.Street.mandatory}"
-                    columns="#{bindings.AddressVO.hints.Street.displayWidth}"
-                    maximumLength="#{bindings.AddressVO.hints.Street.precision}"
-                    shortDesc="#{bindings.AddressVO.hints.Street.tooltip}" id="it5">
-        <f:validator binding="#{row.bindings.Street.validator}"/>
-      </af:inputText>
-    </af:column>
-    <af:column headerText="#{bindings.AddressVO.hints.Streetno.label}" id="c6">
-      <af:inputText value="#{row.bindings.Streetno.inputValue}" label="#{bindings.AddressVO.hints.Streetno.label}"
-                    required="#{bindings.AddressVO.hints.Streetno.mandatory}"
-                    columns="#{bindings.AddressVO.hints.Streetno.displayWidth}"
-                    maximumLength="#{bindings.AddressVO.hints.Streetno.precision}"
-                    shortDesc="#{bindings.AddressVO.hints.Streetno.tooltip}" id="it6">
-        <f:validator binding="#{row.bindings.Streetno.validator}"/>
-      </af:inputText>
-    </af:column>
-    <af:column headerText="#{bindings.AddressVO.hints.Zipcode.label}" id="c7">
-      <af:inputText value="#{row.bindings.Zipcode.inputValue}" label="#{bindings.AddressVO.hints.Zipcode.label}"
-                    required="#{bindings.AddressVO.hints.Zipcode.mandatory}"
-                    columns="#{bindings.AddressVO.hints.Zipcode.displayWidth}"
-                    maximumLength="#{bindings.AddressVO.hints.Zipcode.precision}"
-                    shortDesc="#{bindings.AddressVO.hints.Zipcode.tooltip}" id="it7">
-        <f:validator binding="#{row.bindings.Zipcode.validator}"/>
-      </af:inputText>
-    </af:column>
-    <af:column headerText="#{bindings.AddressVO.hints.Phone.label}" id="c8">
-      <af:inputText value="#{row.bindings.Phone.inputValue}" label="#{bindings.AddressVO.hints.Phone.label}"
-                    required="#{bindings.AddressVO.hints.Phone.mandatory}"
-                    columns="#{bindings.AddressVO.hints.Phone.displayWidth}"
-                    maximumLength="#{bindings.AddressVO.hints.Phone.precision}"
-                    shortDesc="#{bindings.AddressVO.hints.Phone.tooltip}" id="it8">
-        <f:validator binding="#{row.bindings.Phone.validator}"/>
-      </af:inputText>
-    </af:column>
-  </af:table>
+  <af:panelCollection id="pc1">
+    <f:facet name="menus"/>
+    <f:facet name="toolbar">
+      <af:toolbar id="t2">
+        <af:selectOneChoice label="Show table" id="soc1"
+                            valueChangeListener="#{viewScope.AddressTableBean.tableFormatChanged}" autoSubmit="true">
+          <af:selectItem label="Table" value="table" id="si1"/>
+          <af:selectItem label="Form" value="form" id="si2"/>
+        </af:selectOneChoice>
+      </af:toolbar>
+    </f:facet>
+    <f:facet name="statusbar"/>
+
+    <af:table value="#{bindings.AddressVO.collectionModel}" var="row" rows="#{bindings.AddressVO.rangeSize}"
+              emptyText="#{bindings.AddressVO.viewable ? 'No data to display.' : 'Access Denied.'}" rowBandingInterval="0"
+              fetchSize="#{bindings.AddressVO.rangeSize}" id="t1">
+        <af:column headerText="#{bindings.AddressVO.hints.Firstname.label}" id="c1">
+          <af:inputText value="#{row.bindings.Firstname.inputValue}" label="#{bindings.AddressVO.hints.Firstname.label}"
+                        required="#{bindings.AddressVO.hints.Firstname.mandatory}"
+                        columns="#{bindings.AddressVO.hints.Firstname.displayWidth}"
+                        maximumLength="#{bindings.AddressVO.hints.Firstname.precision}"
+                        shortDesc="#{bindings.AddressVO.hints.Firstname.tooltip}" id="it1">
+            <f:validator binding="#{row.bindings.Firstname.validator}"/>
+          </af:inputText>
+        </af:column>
+        <af:column headerText="#{bindings.AddressVO.hints.Lastname.label}" id="c2">
+          <af:inputText value="#{row.bindings.Lastname.inputValue}" label="#{bindings.AddressVO.hints.Lastname.label}"
+                        required="#{bindings.AddressVO.hints.Lastname.mandatory}"
+                        columns="#{bindings.AddressVO.hints.Lastname.displayWidth}"
+                        maximumLength="#{bindings.AddressVO.hints.Lastname.precision}"
+                        shortDesc="#{bindings.AddressVO.hints.Lastname.tooltip}" id="it2">
+            <f:validator binding="#{row.bindings.Lastname.validator}"/>
+          </af:inputText>
+        </af:column>
+        <af:column headerText="#{bindings.AddressVO.hints.Email.label}" id="c3">
+          <af:inputText value="#{row.bindings.Email.inputValue}" label="#{bindings.AddressVO.hints.Email.label}"
+                        required="#{bindings.AddressVO.hints.Email.mandatory}"
+                        columns="#{bindings.AddressVO.hints.Email.displayWidth}"
+                        maximumLength="#{bindings.AddressVO.hints.Email.precision}"
+                        shortDesc="#{bindings.AddressVO.hints.Email.tooltip}" id="it3">
+            <f:validator binding="#{row.bindings.Email.validator}"/>
+          </af:inputText>
+        </af:column>
+        <af:column headerText="#{bindings.AddressVO.hints.City.label}" id="c4">
+          <af:inputText value="#{row.bindings.City.inputValue}" label="#{bindings.AddressVO.hints.City.label}"
+                        required="#{bindings.AddressVO.hints.City.mandatory}"
+                        columns="#{bindings.AddressVO.hints.City.displayWidth}"
+                        maximumLength="#{bindings.AddressVO.hints.City.precision}"
+                        shortDesc="#{bindings.AddressVO.hints.City.tooltip}" id="it4">
+            <f:validator binding="#{row.bindings.City.validator}"/>
+          </af:inputText>
+        </af:column>
+        <af:column headerText="#{bindings.AddressVO.hints.Street.label}" id="c5">
+          <af:inputText value="#{row.bindings.Street.inputValue}" label="#{bindings.AddressVO.hints.Street.label}"
+                        required="#{bindings.AddressVO.hints.Street.mandatory}"
+                        columns="#{bindings.AddressVO.hints.Street.displayWidth}"
+                        maximumLength="#{bindings.AddressVO.hints.Street.precision}"
+                        shortDesc="#{bindings.AddressVO.hints.Street.tooltip}" id="it5">
+            <f:validator binding="#{row.bindings.Street.validator}"/>
+          </af:inputText>
+        </af:column>
+        <af:column headerText="#{bindings.AddressVO.hints.Streetno.label}" id="c6">
+          <af:inputText value="#{row.bindings.Streetno.inputValue}" label="#{bindings.AddressVO.hints.Streetno.label}"
+                        required="#{bindings.AddressVO.hints.Streetno.mandatory}"
+                        columns="#{bindings.AddressVO.hints.Streetno.displayWidth}"
+                        maximumLength="#{bindings.AddressVO.hints.Streetno.precision}"
+                        shortDesc="#{bindings.AddressVO.hints.Streetno.tooltip}" id="it6">
+            <f:validator binding="#{row.bindings.Streetno.validator}"/>
+          </af:inputText>
+        </af:column>
+        <af:column headerText="#{bindings.AddressVO.hints.Zipcode.label}" id="c7">
+          <af:inputText value="#{row.bindings.Zipcode.inputValue}" label="#{bindings.AddressVO.hints.Zipcode.label}"
+                        required="#{bindings.AddressVO.hints.Zipcode.mandatory}"
+                        columns="#{bindings.AddressVO.hints.Zipcode.displayWidth}"
+                        maximumLength="#{bindings.AddressVO.hints.Zipcode.precision}"
+                        shortDesc="#{bindings.AddressVO.hints.Zipcode.tooltip}" id="it7">
+            <f:validator binding="#{row.bindings.Zipcode.validator}"/>
+          </af:inputText>
+        </af:column>
+        <af:column headerText="#{bindings.AddressVO.hints.Phone.label}" id="c8">
+          <af:inputText value="#{row.bindings.Phone.inputValue}" label="#{bindings.AddressVO.hints.Phone.label}"
+                        required="#{bindings.AddressVO.hints.Phone.mandatory}"
+                        columns="#{bindings.AddressVO.hints.Phone.displayWidth}"
+                        maximumLength="#{bindings.AddressVO.hints.Phone.precision}"
+                        shortDesc="#{bindings.AddressVO.hints.Phone.tooltip}" id="it8">
+            <f:validator binding="#{row.bindings.Phone.validator}"/>
+          </af:inputText>
+        </af:column>
+
+    </af:table>
+
+  </af:panelCollection>
 </jsp:root>

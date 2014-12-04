@@ -1,7 +1,10 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <SDM>
    <OverallProperties
-      id="OverallProperties1"/>
+      id="OverallProperties1">
+      <property
+         name="linkStyle">Direct</property>
+   </OverallProperties>
    <View
       id="View2">
       <property
@@ -15,10 +18,56 @@
       <property
          name="exceptionHandler">false</property>
       <property
-         name="y">312.53125</property>
+         name="y">280.5625</property>
+      <property
+         name="x">177.64062</property>
+      <property
+         name="pageFragment">true</property>
+   </View>
+   <View
+      id="View3">
+      <property
+         name="activityId">AddressForm</property>
+      <property
+         name="page">/AddressForm.jsff</property>
+      <property
+         name="description">&lt;html>&lt;p>&lt;b>AddressForm&lt;/b>&lt;/p>&lt;p>Activity Type:  View&lt;/p></property>
+      <property
+         name="exceptionHandler">false</property>
+      <property
+         name="y">276.59375</property>
       <property
          name="pageFragment">true</property>
       <property
-         name="x">272.64062</property>
+         name="x">471.56543</property>
    </View>
+   <WildcardControlFlowRule
+      id="WildcardControlFlowRule4">
+      <property
+         name="activityId">*</property>
+      <property
+         name="y">112.0625</property>
+      <property
+         name="x">346.0</property>
+   </WildcardControlFlowRule>
+   <ControlFlowCase
+      islink="true"
+      id="ControlFlowCase5"
+      from="WildcardControlFlowRule4"
+      to="View2">
+      <property
+         name="fromOutcome">table</property>
+      <property
+         name="sdm:polyPoints">L50,310.0,112.578125,177.64062,226.54688,T50</property>
+   </ControlFlowCase>
+   <ControlFlowCase
+      islink="true"
+      id="ControlFlowCase6"
+      from="WildcardControlFlowRule4"
+      to="View3">
+      <property
+         name="fromOutcome">form</property>
+      <property
+         name="sdm:polyPoints">R50,382.0,112.578125,471.56543,222.57812,T50</property>
+   </ControlFlowCase>
 </SDM>
