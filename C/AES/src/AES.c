@@ -7,13 +7,10 @@
  Description : Hello World in C, Ansi-style
  ============================================================================
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "HexDump.h"
-
-
+#include "dump.h"
 
 uint8_t sbox[256] = {
 0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
@@ -52,119 +49,96 @@ uint8_t rcon[256] = {
 0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d};
 
 
-void copyBlock(uint8_t* dest, const uint8_t* src, int bytesPerLine, int maxBytes) {
 
-	int sidx = 0;
-	int col = 0;
-	int row = 0;
 
-	for (col = 0;  col < 4 && sidx < maxBytes;  col++) {
-		int didx = col;
-		for (row = 0;  row < 4 && sidx < maxBytes;  row++, didx += bytesPerLine) {
-			dest[didx] = src[sidx];
-			sidx++;
-		}
-	}
+void shiftColumn(extendedKey_t* keyArea, int block) {
+	uint8_t temp = keyArea->data[block][0][0];
+	keyArea->data[block][0][0] = keyArea->data[block][1][0];
+	keyArea->data[block][1][0] = keyArea->data[block][2][0];
+	keyArea->data[block][2][0] = keyArea->data[block][3][0];
+    keyArea->data[block][3][0] = temp;
+}
+
+void substituteColumn(extendedKey_t* keyArea, int block) {
+	keyArea->data[block][0][0] = sbox[ keyArea->data[block][0][0] ];
+	keyArea->data[block][1][0] = sbox[ keyArea->data[block][1][0] ];
+	keyArea->data[block][2][0] = sbox[ keyArea->data[block][2][0] ];
+	keyArea->data[block][3][0] = sbox[ keyArea->data[block][3][0] ];
+}
+
+void xorRcon(extendedKey_t* keyArea, int block) {
+	keyArea->data[block][0][0] = keyArea->data[block][0][0] ^ keyArea->data[block - 1][0][0] ^ rcon[block];
+	keyArea->data[block][1][0] = keyArea->data[block][1][0] ^ keyArea->data[block - 1][1][0];
+	keyArea->data[block][2][0] = keyArea->data[block][2][0] ^ keyArea->data[block - 1][2][0];
+	keyArea->data[block][3][0] = keyArea->data[block][3][0] ^ keyArea->data[block - 1][3][0];
+}
+
+void xorColumn(extendedKey_t* keyArea, int block, int col) {
+	keyArea->data[block][0][col] = keyArea->data[block][0][col - 1] ^ keyArea->data[block - 1][0][col];
+	keyArea->data[block][1][col] = keyArea->data[block][1][col - 1] ^ keyArea->data[block - 1][1][col];
+	keyArea->data[block][2][col] = keyArea->data[block][2][col - 1] ^ keyArea->data[block - 1][2][col];
+	keyArea->data[block][3][col] = keyArea->data[block][3][col - 1] ^ keyArea->data[block - 1][3][col];
 }
 
 
-void copyColumn(uint8_t* keyArea, int to) {
-	int sidx = to - 1;
-	int didx = to;
-	int row = 0;
+void copyBlock(block16_t* dest, const uint8_t* src, size_t maxBytes) {
 
-	for (row = 0;  row < 4;  row++, didx += 44, sidx += 44) {
-		keyArea[didx] = keyArea[sidx];
-	}
+    size_t idx;
+    for (idx = 0;  idx < 16 && idx < maxBytes;  idx++) {
+        dest->data[idx % 4][idx / 4] = src[idx];
+    }
 }
 
 
-void shiftColumn(uint8_t* keyArea, int col) {
-	uint8_t temp = keyArea[col];
-	keyArea[col + 0*44] = keyArea[col + 1*44];
-	keyArea[col + 1*44] = keyArea[col + 2*44];
-	keyArea[col + 2*44] = keyArea[col + 3*44];
-	keyArea[col + 3*44] = temp;
-}
-
-
-void substituteColumn(uint8_t* keyArea, int col) {
-	keyArea[col + 0*44] = sbox[keyArea[col + 0*44]];
-	keyArea[col + 1*44] = sbox[keyArea[col + 1*44]];
-	keyArea[col + 2*44] = sbox[keyArea[col + 2*44]];
-	keyArea[col + 3*44] = sbox[keyArea[col + 3*44]];
-}
-
-
-void xorRcon(uint8_t* keyArea, int col, int round) {
-	keyArea[col + 0*44] = keyArea[col + 0*44] ^ keyArea[(col-4) + 0*44] ^ rcon[round];
-	keyArea[col + 1*44] = keyArea[col + 1*44] ^ keyArea[(col-4) + 1*44];
-	keyArea[col + 2*44] = keyArea[col + 2*44] ^ keyArea[(col-4) + 2*44];
-	keyArea[col + 3*44] = keyArea[col + 3*44] ^ keyArea[(col-4) + 3*44];
-}
-
-
-void xorColumn(uint8_t* keyArea, int col) {
-	keyArea[col + 0*44] = keyArea[(col-1) + 0*44] ^ keyArea[(col-4) + 0*44];
-	keyArea[col + 1*44] = keyArea[(col-1) + 1*44] ^ keyArea[(col-4) + 1*44];
-	keyArea[col + 2*44] = keyArea[(col-1) + 2*44] ^ keyArea[(col-4) + 2*44];
-	keyArea[col + 3*44] = keyArea[(col-1) + 3*44] ^ keyArea[(col-4) + 3*44];
-}
-
-
-void AddRoundKey(uint8_t* block, const uint8_t* extendedKey, int keyRound) {
-	int didx = 0;	/* destination index */
-
+void AddRoundKey(block16_t* block, const extendedKey_t* extendedKey, int keyRound) {
 	int row = 0;
 	for (row = 0;  row < 4;  row++) {
-		int col = 0;
-		int sidx = (44 * row) + (4 * keyRound); /* source index of first key byte */
 
-		/* calculate one row */
+		int col = 0;
 		for (col = 0;  col < 4;  col++) {
-			block[didx] = block[didx] ^ extendedKey[sidx];
-			didx++;
-			sidx++;
+            block->data[row][col] = block->data[row][col] ^ extendedKey->data[keyRound][row][col];
 		}
 	}
 }
 
 
-void SubBytes(uint8_t* block) {
-	int idx = 0;
-	for (idx = 0;  idx < 16;  idx++) {
-		block[idx] = sbox[block[idx]];
+void SubBytes(block16_t* block) {
+   	int row = 0;
+	for (row = 0;  row < 4;  row++) {
+
+		int col = 0;
+		for (col = 0;  col < 4;  col++) {
+            block->data[row][col] = sbox[ block->data[row][col] ];
+		}
 	}
 }
 
 
-void ShiftRows(uint8_t* block) {
+void ShiftRows(block16_t* block) {
 	int row = 0;
 	for (row = 1;  row < 4;  row++) {
-		int idx = 4 * row;
-		uint8_t temp = block[idx];
-		block[idx] = block[idx+1];
-		block[idx+1] = block[idx+2];
-		block[idx+2] = block[idx+3];
-		block[idx+3] = temp;
+		uint8_t temp = block->data[row][0];
+		block->data[row][0] = block->data[row][1];
+		block->data[row][1] = block->data[row][2];
+		block->data[row][2] = block->data[row][3];
+		block->data[row][3] = temp;
 	}
 	for (row = 2;  row < 4;  row++) {
-		int idx = 4 * row;
-		uint8_t temp = block[idx];
-		block[idx] = block[idx+1];
-		block[idx+1] = block[idx+2];
-		block[idx+2] = block[idx+3];
-		block[idx+3] = temp;
+		uint8_t temp = block->data[row][0];
+		block->data[row][0] = block->data[row][1];
+		block->data[row][1] = block->data[row][2];
+		block->data[row][2] = block->data[row][3];
+		block->data[row][3] = temp;
 	}
 	for (row = 3;  row < 4;  row++) {
-		int idx = 4 * row;
-		uint8_t temp = block[idx];
-		block[idx] = block[idx+1];
-		block[idx+1] = block[idx+2];
-		block[idx+2] = block[idx+3];
-		block[idx+3] = temp;
+		uint8_t temp = block->data[row][0];
+		block->data[row][0] = block->data[row][1];
+		block->data[row][1] = block->data[row][2];
+		block->data[row][2] = block->data[row][3];
+		block->data[row][3] = temp;
 	}
 }
+
 
 /**
  * Note: The multiplication is not an arithmetic multiplication, but a
@@ -198,164 +172,122 @@ uint8_t gmul(uint8_t a, uint8_t b) {
 }
 
 
-void MixColumns(uint8_t* block) {
+void MixColumns(block16_t* block) {
 	int col = 0;
 	for (col = 0;  col < 4;  col++) {
-		uint8_t b0 = gmul(block[col], 2) ^ gmul(block[col + 1*4], 3) ^ gmul(block[col + 2*4], 1) ^ gmul(block[col + 3*4], 1);
-		uint8_t b1 = gmul(block[col], 1) ^ gmul(block[col + 1*4], 2) ^ gmul(block[col + 2*4], 3) ^ gmul(block[col + 3*4], 1);
-		uint8_t b2 = gmul(block[col], 1) ^ gmul(block[col + 1*4], 1) ^ gmul(block[col + 2*4], 2) ^ gmul(block[col + 3*4], 3);
-		uint8_t b3 = gmul(block[col], 3) ^ gmul(block[col + 1*4], 1) ^ gmul(block[col + 2*4], 1) ^ gmul(block[col + 3*4], 2);
+		uint8_t b0 = gmul( block->data[0][col], 2) ^ gmul( block->data[1][col], 3) ^ gmul( block->data[2][col], 1) ^ gmul( block->data[3][col], 1);
+		uint8_t b1 = gmul( block->data[0][col], 1) ^ gmul( block->data[1][col], 2) ^ gmul( block->data[2][col], 3) ^ gmul( block->data[3][col], 1);
+		uint8_t b2 = gmul( block->data[0][col], 1) ^ gmul( block->data[1][col], 1) ^ gmul( block->data[2][col], 2) ^ gmul( block->data[3][col], 3);
+		uint8_t b3 = gmul( block->data[0][col], 3) ^ gmul( block->data[1][col], 1) ^ gmul( block->data[2][col], 1) ^ gmul( block->data[3][col], 2);
 
-		block[col + 0*4] = b0;
-		block[col + 1*4] = b1;
-		block[col + 2*4] = b2;
-		block[col + 3*4] = b3;
+        block->data[0][col] = b0;
+        block->data[1][col] = b1;
+        block->data[2][col] = b2;
+        block->data[3][col] = b3;
 	}
 }
 
 
-static HexDump* hd2 = NULL;
-static HexDump* hd3 = NULL;
-uint8_t* extendedKey = NULL;
-
-
-void createExtendedKey(uint8_t* extendedKey, const uint8_t* key, size_t extendedKeySize) {
+void createExtendedKey(extendedKey_t* extendedKey, const uint8_t* key, size_t extendedKeySize) {
 	int round = 0;
 
-	copyBlock(extendedKey, key, 44, 16);
-
-	hd3 = new_HexDump(extendedKey, extendedKeySize);
-	HexDump_dumpAscii(hd3, 0);
-	HexDump_setBytesPerLine(hd3, 44);
-	HexDump_setBlockSize(hd3, 4);
-
-	HexDump_dumpAll(hd3);
-	printf("\n");
+    /* Copy first block */
+    size_t idx;
+    for (idx = 0;  idx < 16;  idx++) {
+        extendedKey->data[0][idx % 4][idx / 4] = key[idx];
+    }
+    dumpExtendedKey("Initial state", extendedKey, extendedKeySize);
 
 /* Round key generation ***********************************************/
 	for (round = 1;  round <= 10;  round++) {
-		int col = 4 * round;
-
 		printf("========================================================================\n" \
 		       "Generate round key: %d\n", round);
 
-		printf("  COPY:\n");
-		copyColumn(extendedKey, col);
-		HexDump_reset(hd3, extendedKey, extendedKeySize);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        /* Step 1: Copy Column */
+		int row = 0;
+		for (row = 0;  row < 4;  row++) {
+            extendedKey->data[round][row][0] = extendedKey->data[round-1][row][3];
+		}
+        dumpExtendedKey("Copy", extendedKey, extendedKeySize);
 
-		printf("  SHIFT:\n");
-		shiftColumn(extendedKey, col);
-		HexDump_reset(hd3, extendedKey, extendedKeySize);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        /* Step 2: Shift Column */
+		shiftColumn(extendedKey, round);
+        dumpExtendedKey("Shift", extendedKey, extendedKeySize);
 
-		printf("  SUBSTITUTE:\n");
-		substituteColumn(extendedKey, col);
-		HexDump_reset(hd3, extendedKey, extendedKeySize);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        /* Step 3: Substitute */
+		substituteColumn(extendedKey, round);
+        dumpExtendedKey("Substitute", extendedKey, extendedKeySize);
 
-		printf("  XOR 1 (incl. Rcon):\n");
-		xorRcon(extendedKey, col, round);
-		HexDump_reset(hd3, extendedKey, extendedKeySize);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        /* Step 4: XOR column 0, including rcon */
+		xorRcon(extendedKey, round);
+        dumpExtendedKey("XOR 1 (incl. Rcon)", extendedKey, extendedKeySize);
 
-		printf("  XOR 2:\n");
-		xorColumn(extendedKey, col+1);
-		HexDump_reset(hd3, extendedKey, extendedKeySize);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        /* Step 5: XOR column 1 */
+		xorColumn(extendedKey, round, 1);
+        dumpExtendedKey("XOR 2", extendedKey, extendedKeySize);
 
-		printf("  XOR 3:\n");
-		xorColumn(extendedKey, col+2);
-		HexDump_reset(hd3, extendedKey, extendedKeySize);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        /* Step 6: XOR column 2 */
+		xorColumn(extendedKey, round, 2);
+        dumpExtendedKey("XOR 3", extendedKey, extendedKeySize);
 
-		printf("  XOR 4:\n");
-		xorColumn(extendedKey, col+3);
-		HexDump_reset(hd3, extendedKey, extendedKeySize);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        /* Step 7: XOR column 3 */
+		xorColumn(extendedKey, round, 3);
+        dumpExtendedKey("XOR 4", extendedKey, extendedKeySize);
 	}
-/************************************************/
 }
 
 
-void encryptBlock(uint8_t* block, const uint8_t* plaintext) {
+void encryptBlock(block16_t* block, extendedKey_t* extendedKey) {
 	int round = 0;
 
-
-	printf("  Plaintext:\n");
-	HexDump_dumpAscii(hd3, 0);
-	HexDump_setBytesPerLine(hd3, 4);
-	HexDump_reset(hd3, block, 16);
-	HexDump_dumpAll(hd3);
-	printf("\n");
+    dumpBlock("Plaintext", block, true);
 
 	printf("Pre Round:\n");
-	AddRoundKey(block, extendedKey, 0);
-	HexDump_reset(hd3, block, 16);
-	HexDump_dumpAll(hd3);
-	printf("\n");
+	AddRoundKey(block, extendedKey, false);
+    dumpBlock("AddRoundKey", block, 0);
 
-/*******************/
 	for (round = 1;  round <= 9;  round++) {
-		printf("Round %d:\n", round);
+		printf("Round %d:\n", round, false);
 
-		printf("  SubBytes:\n");
+        /* Step 1: SubBytes */
 		SubBytes(block);
-		HexDump_reset(hd3, block, 16);
-		HexDump_dumpAll(hd3);
+        dumpBlock("SubBytes", block, false);
 
-		printf("  ShiftRows:\n");
+        /* Step 2: ShiftRows */
 		ShiftRows(block);
-		HexDump_reset(hd3, block, 16);
-		HexDump_dumpAll(hd3);
+        dumpBlock("ShiftRows", block, false);
 
-		printf("  MixColumns:\n");
+        /* Step 3: MixColumns */
 		MixColumns(block);
-		HexDump_reset(hd3, block, 16);
-		HexDump_dumpAll(hd3);
+        dumpBlock("MixColumns", block, false);
 
-		printf("  AddRoundKey:\n");
+        /* Step 4: AddRoundKey*/
 		AddRoundKey(block, extendedKey, round);
-		HexDump_reset(hd3, block, 16);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+        dumpBlock("AddRoundKey", block, false);
 	}
-/*******************/
 
 	printf("Final Round:\n");
-	printf("  SubBytes:\n");
+
 	SubBytes(block);
-	HexDump_reset(hd3, block, 16);
-	HexDump_dumpAll(hd3);
+    dumpBlock("SubBytes", block, false);
 
-	printf("  ShiftRows:\n");
 	ShiftRows(block);
-	HexDump_reset(hd3, block, 16);
-	HexDump_dumpAll(hd3);
+    dumpBlock("ShiftRows", block, false);
 
-	printf("  AddRoundKey:\n");
 	AddRoundKey(block, extendedKey, 10);
-
+    dumpBlock("AddRoundKey", block, false);
 }
 
 
-void padBlock(uint8_t* block, size_t remaining) {
-    /* Padding - PENDING: Improve and add another block if plaintext is multiple of 16 */
-    int padding = 16 - remaining;
-    if ( padding > 0) {
+void padBlock(block16_t* block, size_t remaining) {
+   int padding = 16 - remaining;
+   if ( padding > 0) {
         size_t row = remaining % 4;
         size_t col = remaining / 4;
 
         for (  ;  col < 4 ; col++) {
             for (  ; row < 4;  row++) {
-                block[4 * row + col] = padding;
+                block->data[row][col] = padding;
             }
             row = 0;
         }
@@ -364,51 +296,47 @@ void padBlock(uint8_t* block, size_t remaining) {
 
 
 int main(void) {
+    dumpInit();
+
+/** Key generation ******************************************************/
+
 	const uint8_t* key = (uint8_t*) "Bar12345Bar12345";
-	size_t extendedKeySize = 0;
+    dumpData("Key", key, 16);
 
-	hd2 = new_HexDump((uint8_t*) key, 16);
-	HexDump_dumpAll(hd2);
-	printf("\n");
-
-	extendedKeySize = 11 * 4 * 4;
-	extendedKey = calloc(extendedKeySize, 1);
-
+	size_t extendedKeySize = sizeof(extendedKey_t);
+	extendedKey_t* extendedKey = calloc(extendedKeySize, 1);
 	createExtendedKey(extendedKey, key, extendedKeySize);
 
+/** Encryption **********************************************************/
 
-	/* Encryption (one block only!) ***********************************************/
 	const uint8_t* plaintext = (uint8_t*)"Sample String which we want to encrypt";
 	const size_t plaintextLen = strlen((char*) plaintext);
-
-	HexDump_reset(hd2, plaintext, plaintextLen);
-	HexDump_dumpAll(hd2);
-	printf("\n");
-
+    dumpData("Plaintext", plaintext, plaintextLen);
 
 	/**
 	 * The simplest of the encryption modes is the electronic codebook (ECB) mode.
      * The message is divided into blocks, and each block is encrypted separately.
      */
-	uint8_t* block = calloc(16, 1);
-	int offset = 0;
+	block16_t* block = calloc(sizeof(block16_t), 1);
+	size_t offset = 0;
 	while(offset < plaintextLen) {
         size_t remaining = plaintextLen - offset;
-		copyBlock(block, plaintext + offset, 4, remaining > 16 ? 16 : remaining);
+
+		copyBlock(block, plaintext + offset, remaining > 16 ? 16 : remaining);
+
         padBlock(block, remaining);
 
-		printf("  NEXT BLOCK:\n");
-		HexDump_reset(hd3, block, 16);
-		HexDump_dumpAll(hd3);
-		printf("\n");
+		encryptBlock(block, extendedKey);
 
-		encryptBlock(block, plaintext + offset);
-		HexDump_reset(hd3, block, 16);
-		HexDump_dumpAll(hd3);
-		printf("\n");
 		offset += 16;
 	}
+	if (offset == plaintextLen) {
+        padBlock(block, 16);
+		encryptBlock(block, extendedKey);
+	}
 
+    free(block);
+    free(extendedKey);
 
 	return EXIT_SUCCESS;
 }

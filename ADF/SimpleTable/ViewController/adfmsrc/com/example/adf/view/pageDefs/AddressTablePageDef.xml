@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<pageDefinition xmlns="http://xmlns.oracle.com/adfm/uimodel" version="12.1.3.10.8" id="AddressTablePageDef"
+                Package="com.example.adf.view.pageDefs">
+  <parameters/>
+  <executables>
+    <variableIterator id="variables"/>
+    <iterator Binds="AddressVO" RangeSize="25" DataControl="SimpleTableAMDataControl" id="AddressVOIterator"/>
+  </executables>
+  <bindings>
+    <tree IterBinding="AddressVOIterator" id="AddressVO">
+      <nodeDefinition DefName="com.example.adf.view.AddressVO" Name="AddressVO0">
+        <AttrNames>
+          <Item Value="Firstname"/>
+          <Item Value="Lastname"/>
+          <Item Value="Email"/>
+          <Item Value="City"/>
+          <Item Value="Street"/>
+          <Item Value="Streetno"/>
+          <Item Value="Zipcode"/>
+          <Item Value="Phone"/>
+        </AttrNames>
+      </nodeDefinition>
+    </tree>
+  </bindings>
+</pageDefinition>

@@ -1,0 +1,4 @@
+*.dll
+*.o
+com_example_java2com_Native.h
+com_example_java2com_IDispatch.h

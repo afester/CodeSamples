@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Snippets" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="Debug/Snippets" prefix_auto="1" extension_auto="1" />
+				<Option object_output="Debug/obj/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-std=c++0x" />
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="Release/Snippets" prefix_auto="1" extension_auto="1" />
+				<Option object_output="Release/obj/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="Bits16.cpp" />
+		<Unit filename="Bits16.h" />
+		<Unit filename="Samples.cpp" />
+		<Unit filename="array.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="calc.cpp" />
+		<Unit filename="colorManip.cpp" />
+		<Unit filename="colorManip.h" />
+		<Unit filename="enumSample.cpp" />
+		<Unit filename="foreach.cpp" />
+		<Unit filename="initializer.cpp" />
+		<Unit filename="initializer.h" />
+		<Unit filename="less.cpp" />
+		<Unit filename="main.cpp" />
+		<Unit filename="mapSample.cpp" />
+		<Unit filename="outputSample.cpp" />
+		<Unit filename="shapeOperator.cpp" />
+		<Unit filename="sizeofSample.cpp" />
+		<Unit filename="vtableSample.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

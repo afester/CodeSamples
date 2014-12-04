@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Export Oracle Schema
+# Original export is desupported for general use as of Oracle Database 11g!
+# To use Export and Import, you must run the script catexp.sql or catalog.sql
+
+exp user/password FILE=file1.dmp, file2.dmp FILESIZE=100MB
+imp user/password FILE=file.dmp FEEDBACK=1000 FROMUSER=username TOUSER=username
+
+# Import Oracle Schema
+ 
