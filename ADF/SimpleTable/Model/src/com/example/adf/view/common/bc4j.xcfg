@@ -1,15 +1,13 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <BC4JConfig version="11.1" xmlns="http://xmlns.oracle.com/bc4j/configuration">
    <AppModuleConfigBag ApplicationName="com.example.adf.view.SimpleTableAM">
-      <AppModuleConfig name="SimpleTableAMLocal" DeployPlatform="LOCAL" java.naming.factory.initial="oracle.jbo.common.JboInitialContextFactory" ApplicationName="com.example.adf.view.SimpleTableAM"
-                       jbo.project="com.example.adf.model.Model">
-         <Database jbo.locking.mode="optimistic" jbo.TypeMapEntries="OracleApps"/>
+      <AppModuleConfig DeployPlatform="LOCAL" JDBCName="ApplicationDB" name="SimpleTableAMLocal" ApplicationName="com.example.adf.view.SimpleTableAM" jbo.project="com.example.adf.model.Model">
+         <Database jbo.TypeMapEntries="OracleApps"/>
          <Security AppModuleJndiName="com.example.adf.view.SimpleTableAM"/>
       </AppModuleConfig>
-      <AppModuleConfig name="SimpleTableAMShared" DeployPlatform="LOCAL" java.naming.factory.initial="oracle.jbo.common.JboInitialContextFactory" ApplicationName="com.example.adf.view.SimpleTableAM"
-                       jbo.project="com.example.adf.model.Model">
-         <AM-Pooling jbo.ampool.isuseexclusive="false" jbo.ampool.maxpoolsize="1"/>
-         <Database jbo.locking.mode="optimistic" jbo.TypeMapEntries="OracleApps"/>
+      <AppModuleConfig DeployPlatform="LOCAL" JDBCName="ApplicationDB" name="SimpleTableAMShared" ApplicationName="com.example.adf.view.SimpleTableAM" jbo.project="com.example.adf.model.Model">
+         <AM-Pooling jbo.ampool.isuseexclusive="false" jbo.ampool.resetnontransactionalstate="false" jbo.ampool.dynamicjdbccredentials="false" jbo.ampool.maxpoolsize="1"/>
+         <Database jbo.TypeMapEntries="OracleApps"/>
          <Security AppModuleJndiName="com.example.adf.view.SimpleTableAM"/>
       </AppModuleConfig>
    </AppModuleConfigBag>
