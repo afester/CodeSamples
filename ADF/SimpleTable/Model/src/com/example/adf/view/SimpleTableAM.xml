@@ -10,11 +10,14 @@
   <Properties>
     <SchemaBasedProperties>
       <LABEL
-        ResId="com.example.adf.model.SimpleTableAM_LABEL"/>
+        ResId="com.example.adf.view.SimpleTableAM_LABEL"/>
     </SchemaBasedProperties>
   </Properties>
+  <ViewUsage
+    Name="AddressVO"
+    ViewObjectName="com.example.adf.view.AddressVO"/>
   <ResourceBundle>
     <PropertiesBundle
-      PropertiesFile="com.example.adf.model.ModelBundle"/>
+      PropertiesFile="com.example.adf.view.ModelBundle"/>
   </ResourceBundle>
 </AppModule>
