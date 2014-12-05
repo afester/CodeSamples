@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE JboProject SYSTEM "jbo_03_01.dtd">
+<!---->
+<JboProject
+  xmlns="http://xmlns.oracle.com/bc4j"
+  Name="Model"
+  Version="12.1.3.10.8"
+  SeparateXMLFiles="true"
+    PackageName="com.example.adf.model">
+    <DesignTime>
+        <Attr Name="_jprName" Value="../../../../../Model.jpr"/>
+        <Attr Name="_jbo.TypeMapEntries" Value="OracleApps"/>
+        <Attr Name="_OfflineConnection" Value="SIMPLETABLE"/>
+        <Attr Name="_appModuleNames0" Value="com.example.adf.view.SimpleTableAM"/>
+        <Attr Name="_NamedConnection" Value="ApplicationDB"/>
+    </DesignTime>
+    <Containee
+      Name="entity"
+      PackageName="com.example.adf.entity"
+      ObjectType="JboPackage">
+        <DesignTime>
+            <Attr Name="_EO" Value="true"/>
+        </DesignTime>
+    </Containee>
+    <Containee
+      Name="view"
+      PackageName="com.example.adf.view"
+      ObjectType="JboPackage">
+        <DesignTime>
+            <Attr Name="_VO" Value="true"/>
+            <Attr Name="_AM" Value="true"/>
+        </DesignTime>
+    </Containee>
+</JboProject>

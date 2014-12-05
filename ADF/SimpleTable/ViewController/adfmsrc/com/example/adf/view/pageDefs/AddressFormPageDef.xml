@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<pageDefinition xmlns="http://xmlns.oracle.com/adfm/uimodel" version="12.1.3.10.8" id="AddressFormPageDef"
+                Package="com.example.adf.view.pageDefs">
+  <parameters/>
+  <executables>
+    <variableIterator id="variables"/>
+    <iterator Binds="AddressVO" RangeSize="25" DataControl="SimpleTableAMDataControl" id="AddressVOIterator"/>
+  </executables>
+  <bindings>
+    <attributeValues IterBinding="AddressVOIterator" id="Firstname">
+      <AttrNames>
+        <Item Value="Firstname"/>
+      </AttrNames>
+    </attributeValues>
+    <attributeValues IterBinding="AddressVOIterator" id="Lastname">
+      <AttrNames>
+        <Item Value="Lastname"/>
+      </AttrNames>
+    </attributeValues>
+    <attributeValues IterBinding="AddressVOIterator" id="Email">
+      <AttrNames>
+        <Item Value="Email"/>
+      </AttrNames>
+    </attributeValues>
+    <attributeValues IterBinding="AddressVOIterator" id="City">
+      <AttrNames>
+        <Item Value="City"/>
+      </AttrNames>
+    </attributeValues>
+    <attributeValues IterBinding="AddressVOIterator" id="Street">
+      <AttrNames>
+        <Item Value="Street"/>
+      </AttrNames>
+    </attributeValues>
+    <attributeValues IterBinding="AddressVOIterator" id="Streetno">
+      <AttrNames>
+        <Item Value="Streetno"/>
+      </AttrNames>
+    </attributeValues>
+    <attributeValues IterBinding="AddressVOIterator" id="Zipcode">
+      <AttrNames>
+        <Item Value="Zipcode"/>
+      </AttrNames>
+    </attributeValues>
+    <attributeValues IterBinding="AddressVOIterator" id="Phone">
+      <AttrNames>
+        <Item Value="Phone"/>
+      </AttrNames>
+    </attributeValues>
+    <action IterBinding="AddressVOIterator" id="First" RequiresUpdateModel="true" Action="first"/>
+    <action IterBinding="AddressVOIterator" id="Previous" RequiresUpdateModel="true" Action="previous"/>
+    <action IterBinding="AddressVOIterator" id="Next" RequiresUpdateModel="true" Action="next"/>
+    <action IterBinding="AddressVOIterator" id="Last" RequiresUpdateModel="true" Action="last"/>
+  </bindings>
+</pageDefinition>
