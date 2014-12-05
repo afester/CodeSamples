@@ -1,9 +1,9 @@
 package com.example.java2com.visio;
 
-import com.example.java2com.COMInterface;
+import com.example.java2com.COMObject;
 import com.example.java2com.IDispatch;
 
-public class VisioApplication extends COMInterface {
+public class VisioApplication extends COMObject {
 
     public VisioApplication() {
         super(new IDispatch("Visio.Application"));        

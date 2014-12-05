@@ -124,8 +124,8 @@ public class Main extends Application {
 
 
         SevenSegment s7 = new SevenSegment();
-        s7.setScaleX(0.25);
-        s7.setScaleY(0.25);
+//        s7.setScaleX(0.25);
+//        s7.setScaleY(0.25);
         s7.setDigit(number);
         Button pb = new Button("+");
         pb.setOnAction(new EventHandler<ActionEvent>() {

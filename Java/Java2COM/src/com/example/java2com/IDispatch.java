@@ -90,19 +90,7 @@ public class IDispatch {
     }
 
 
-    public Variant invoke(String member) {
-        return Invoke(member, DISPATCH_METHOD, null);
-    }
-    
-
-    public Variant invoke(String member, Variant param) {
-        Variant[] parameters = new Variant[1];
-        parameters[0] = param;
-        return Invoke(member, DISPATCH_METHOD, parameters);
-    }
-
-
-    public Variant invoke(String member, Variant[] params) {
+    public Variant invoke(String member, Variant ... params) {
         return Invoke(member, DISPATCH_METHOD, params);
     }
 
@@ -113,19 +101,10 @@ public class IDispatch {
         Invoke(propertyName, DISPATCH_PROPERTYPUT, parameters);
     }
 
-    // indexed properties
-    public Variant getProperty(String propertyName, Variant index) {
-        Variant[] parameters = new Variant[1];
-        parameters[0] = index;
+    public Variant getProperty(String propertyName, Variant ... parameters) {
         return Invoke(propertyName, DISPATCH_PROPERTYGET, parameters);
     }
 
-
-    public Variant getProperty(String propertyName) {
-        return Invoke(propertyName, DISPATCH_PROPERTYGET, null);
-    }
-
-    
     public void release() {
         Destroy();
     }

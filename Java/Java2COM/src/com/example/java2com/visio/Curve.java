@@ -2,12 +2,12 @@ package com.example.java2com.visio;
 
 import javafx.geometry.Point2D;
 
-import com.example.java2com.COMInterface;
+import com.example.java2com.COMObject;
 import com.example.java2com.IDispatch;
 import com.example.java2com.Variant;
 import com.example.java2com.VariantOut;
 
-public class Curve extends COMInterface {
+public class Curve extends COMObject {
 
     protected Curve(IDispatch dispatch) {
         super(dispatch);
@@ -27,5 +27,9 @@ public class Curve extends COMInterface {
         Variant[] params = new Variant[] { new Variant(t), x, y };
         ci.invoke("Point", params);
         return new Point2D(x.doubleValue, y.doubleValue);
+    }
+
+    public int getObjectType() {
+        return ci.getProperty("ObjectType").intValue;
     }
 }
