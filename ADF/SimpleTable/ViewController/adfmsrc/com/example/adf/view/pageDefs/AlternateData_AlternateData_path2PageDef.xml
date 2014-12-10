@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<pageDefinition xmlns="http://xmlns.oracle.com/adfm/uimodel" version="12.1.3.10.8"
+                id="AlternateData_AlternateData_path2PageDef" Package="com.example.adf.view.pageDefs"
+                SkipValidation="true">
+  <parameters/>
+  <executables>
+    <variableIterator id="variables"/>
+  </executables>
+  <bindings/>
+</pageDefinition>

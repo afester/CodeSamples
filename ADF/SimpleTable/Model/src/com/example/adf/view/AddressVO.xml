@@ -12,7 +12,11 @@
   BindingStyle="OracleName"
   CustomQuery="false"
   SelectAllAttributes="false"
-  PageIterMode="Full">
+  PageIterMode="Full"
+  ComponentClass="com.example.adf.view.AddressVOImpl">
+  <DesignTime>
+    <Attr Name="_codeGenFlag2" Value="Coll|VarAccess"/>
+  </DesignTime>
   <EntityUsage
     Name="AddressEO"
     Entity="com.example.adf.entity.AddressEO"/>

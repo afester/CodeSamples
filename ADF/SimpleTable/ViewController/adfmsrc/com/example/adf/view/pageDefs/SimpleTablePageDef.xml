@@ -6,6 +6,8 @@
     <variableIterator id="variables"/>
     <taskFlow id="AddressTableTF1" taskFlowId="/WEB-INF/flows/AddressTableTF.xml#AddressTableTF" activation="deferred"
               xmlns="http://xmlns.oracle.com/adf/controller/binding"/>
+    <taskFlow id="dynamicRegion1" taskFlowId="${viewScope.DynamicRegionManager.dynamicTaskFlowId}" activation="deferred"
+              xmlns="http://xmlns.oracle.com/adf/controller/binding"/>
   </executables>
   <bindings/>
 </pageDefinition>

@@ -7,7 +7,7 @@
             <af:form id="f1">
                 <af:pageTemplate viewId="/oracle/templates/threeColumnTemplate.jspx" id="pt1">
                     <f:facet name="center">
-                        <af:region value="#{bindings.AddressTableTF1.regionModel}" id="r1"/>
+                        <af:region value="#{bindings.dynamicRegion1.regionModel}" id="r1"/>
                     </f:facet>
                     <f:facet name="header"/>
                     <f:facet name="end"/>
