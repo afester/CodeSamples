@@ -17,4 +17,14 @@ public class DynamicRegionManager implements Serializable {
     public void setDynamicTaskFlowId(String taskFlowId) {
         this.taskFlowId = taskFlowId;
     }
+
+    public String inputFocusTF() {
+        setDynamicTaskFlowId("/WEB-INF/flows/InputFocusTF.xml#InputFocusTF");
+        return null;
+    }
+
+    public String addressTableTF() {
+        setDynamicTaskFlowId("/WEB-INF/flows/AddressTableTF.xml#AddressTableTF");
+        return null;
+    }
 }

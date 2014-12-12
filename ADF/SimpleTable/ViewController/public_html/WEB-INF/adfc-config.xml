@@ -5,4 +5,9 @@
     <managed-bean-class>com.example.adf.view.DynamicRegionManager</managed-bean-class>
     <managed-bean-scope>view</managed-bean-scope>
   </managed-bean>
+  <managed-bean id="__2">
+    <managed-bean-name>ButtonBean</managed-bean-name>
+    <managed-bean-class>com.example.adf.view.ButtonBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
 </adfc-config>

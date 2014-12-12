@@ -179,7 +179,7 @@
          <hash n="Default">
             <value n="custom" v="false"/>
             <value n="name" v="Default"/>
-            <url n="targetURL" path="public_html/SimpleTable.jspx"/>
+            <url n="targetURL" path="public_html/Start.jspx"/>
          </hash>
       </hash>
    </hash>
