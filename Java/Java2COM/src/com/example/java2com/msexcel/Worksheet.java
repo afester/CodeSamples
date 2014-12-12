@@ -1,10 +1,10 @@
 package com.example.java2com.msexcel;
 
-import com.example.java2com.COMInterface;
+import com.example.java2com.COMObject;
 import com.example.java2com.IDispatch;
 import com.example.java2com.Variant;
 
-public class Worksheet extends COMInterface {
+public class Worksheet extends COMObject {
 
     protected Worksheet(IDispatch ci) {
         super(ci);

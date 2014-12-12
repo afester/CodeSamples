@@ -1,9 +1,9 @@
 package com.example.java2com;
 
-public abstract class COMInterface {
+public abstract class COMObject {
     protected IDispatch ci;
 
-    protected COMInterface(IDispatch ci) {
+    protected COMObject(IDispatch ci) {
         this.ci = ci;
     }
     
@@ -12,6 +12,10 @@ public abstract class COMInterface {
         ci.release();
     }
     
+
+    public final IDispatch getDispatch() {
+        return ci;
+    }
 
     public String toString() {
         return String.format("%s[dispatchHandle=0x%s]", 

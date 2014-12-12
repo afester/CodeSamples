@@ -1,24 +1,23 @@
 package com.example.java2com.visio;
 
-import com.example.java2com.COMInterface;
+import com.example.java2com.COMObject;
 import com.example.java2com.IDispatch;
-import com.example.java2com.Variant;
 
-
-public class Page extends COMInterface {
+public class Page extends COMObject {
 
     protected Page(IDispatch ci) {
         super(ci);
     }
 
     public String getName() {
-        Variant result = ci.getProperty("Name");
-        return result.strValue;
+        return ci.getProperty("Name").strValue;
     }
 
     public Shapes getShapes() {
-        Variant result = ci.getProperty("Shapes");
-        return new Shapes(result.dispatch);
+        return new Shapes(ci.getProperty("Shapes").dispatch);
     }
 
+    public Shape getPageSheet() {
+        return new Shape(ci.getProperty("PageSheet").dispatch);
+    }
 }

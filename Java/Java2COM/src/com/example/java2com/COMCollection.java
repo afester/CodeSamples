@@ -3,7 +3,7 @@ package com.example.java2com;
 import java.util.Iterator;
 
 
-public abstract class COMCollection<T> extends COMInterface implements Iterable<T> {
+public abstract class COMCollection<T> extends COMObject implements Iterable<T> {
 
     protected COMCollection(IDispatch ci) {
         super(ci);
