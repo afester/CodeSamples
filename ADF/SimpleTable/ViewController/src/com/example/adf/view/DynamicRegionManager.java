@@ -27,4 +27,9 @@ public class DynamicRegionManager implements Serializable {
         setDynamicTaskFlowId("/WEB-INF/flows/AddressTableTF.xml#AddressTableTF");
         return null;
     }
+
+    public String dynamicDataTF() {
+        setDynamicTaskFlowId("/WEB-INF/flows/DynamicDataTF.xml#DynamicDataTF");
+        return null;
+    }
 }

@@ -75,4 +75,10 @@
     EntityAttrName="Phone"
     EntityUsage="AddressEO"
     AliasName="PHONE"/>
+  <ViewAttribute
+    Name="TheData"
+    PrecisionRule="true"
+    EntityAttrName="TheData"
+    EntityUsage="AddressEO"
+    AliasName="THE_DATA"/>
 </ViewObject>

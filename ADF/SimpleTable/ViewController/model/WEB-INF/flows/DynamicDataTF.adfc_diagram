@@ -1,0 +1,29 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<SDM>
+   <OverallProperties
+      id="OverallProperties1">
+      <property
+         name="y">91.515625</property>
+      <property
+         name="x">93.90918</property>
+   </OverallProperties>
+   <View
+      id="View2">
+      <property
+         name="activityId">DynamicData</property>
+      <property
+         name="page">/DynamicData.jsff</property>
+      <property
+         name="start">false</property>
+      <property
+         name="description">&lt;html>&lt;p>&lt;b>DynamicData&lt;/b>&lt;/p>&lt;p>Activity Type:  View&lt;/p></property>
+      <property
+         name="exceptionHandler">false</property>
+      <property
+         name="y">266.5</property>
+      <property
+         name="x">279.31836</property>
+      <property
+         name="pageFragment">true</property>
+   </View>
+</SDM>

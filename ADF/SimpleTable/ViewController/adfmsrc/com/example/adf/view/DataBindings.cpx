@@ -10,11 +10,13 @@
     <page path="/AddressTable.jsff" usageId="com_example_adf_view_AddressTablePageDef"/>
     <page path="/Start.jspx" usageId="com_example_adf_view_SimpleTablePageDef"/>
     <page path="/AddressForm.jsff" usageId="com_example_adf_view_AddressFormPageDef"/>
+    <page path="/DynamicData.jsff" usageId="com_example_adf_view_DynamicDataPageDef"/>
   </pageMap>
   <pageDefinitionUsages>
     <page id="com_example_adf_view_AddressTablePageDef" path="com.example.adf.view.pageDefs.AddressTablePageDef"/>
     <page id="com_example_adf_view_SimpleTablePageDef" path="com.example.adf.view.pageDefs.SimpleTablePageDef"/>
     <page id="com_example_adf_view_AddressFormPageDef" path="com.example.adf.view.pageDefs.AddressFormPageDef"/>
+    <page id="com_example_adf_view_DynamicDataPageDef" path="com.example.adf.view.pageDefs.DynamicDataPageDef"/>
   </pageDefinitionUsages>
   <dataControlUsages>
     <BC4JDataControl id="SimpleTableAMDataControl" Package="com.example.adf.view"

@@ -7,7 +7,8 @@
             <af:form id="f1">
                 <af:pageTemplate viewId="/oracle/templates/threeColumnTemplate.jspx" id="pt1">
                     <f:facet name="center">
-                        <af:region value="#{bindings.dynamicRegion1.regionModel}" id="r1" partialTriggers="::l3 ::l1"/>
+                        <af:region value="#{bindings.dynamicRegion1.regionModel}" id="r1"
+                                   partialTriggers="::l3 ::l1 ::l2"/>
                     </f:facet>
                     <f:facet name="header"/>
                     <f:facet name="end"/>
@@ -19,6 +20,8 @@
                                          action="#{viewScope.DynamicRegionManager.addressTableTF}"/>
                                 <af:link id="l3" text="Input Focus"
                                          action="#{viewScope.DynamicRegionManager.inputFocusTF}"/>
+                                <af:link text="Dynamic Data" action="#{viewScope.DynamicRegionManager.dynamicDataTF}"
+                                         id="l2"/>
                             </af:panelGroupLayout>
                         </af:panelGroupLayout>
                     </f:facet>

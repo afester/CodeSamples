@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<adfc-config xmlns="http://xmlns.oracle.com/adf/controller" version="1.2">
+  <task-flow-definition id="DynamicDataTF">
+    <data-control-scope>
+      <shared/>
+    </data-control-scope>
+    <managed-bean id="__2">
+      <managed-bean-name>DataUpdater</managed-bean-name>
+      <managed-bean-class>com.example.adf.view.DataUpdater</managed-bean-class>
+      <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+    <view id="DynamicData">
+      <page>/DynamicData.jsff</page>
+    </view>
+    <use-page-fragments/>
+  </task-flow-definition>
+</adfc-config>
