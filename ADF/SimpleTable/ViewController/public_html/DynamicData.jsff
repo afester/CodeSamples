@@ -7,8 +7,8 @@
       <af:toolbar id="t2">
         <af:selectOneChoice label="Update data with" id="soc1"
                             valueChangeListener="#{DataUpdater.updateData}" autoSubmit="true">
-          <af:selectItem label="Data 1" value="Data_1" id="si1"/>
-          <af:selectItem label="Data 2" value="Data_2" id="si2"/>
+          <af:selectItem label="Left" value="Left" id="si1"/>
+          <af:selectItem label="Right" value="Right" id="si2"/>
         </af:selectOneChoice>
       </af:toolbar>
     </f:facet>

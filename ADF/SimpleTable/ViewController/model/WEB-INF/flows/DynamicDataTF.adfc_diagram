@@ -14,16 +14,93 @@
       <property
          name="page">/DynamicData.jsff</property>
       <property
-         name="start">false</property>
+         name="start">true</property>
       <property
-         name="description">&lt;html>&lt;p>&lt;b>DynamicData&lt;/b>&lt;/p>&lt;p>Activity Type:  View&lt;/p></property>
+         name="description">&lt;html>&lt;p>&lt;b>DynamicData&lt;/b> (Default Activity)&lt;/p>&lt;p>Activity Type:  View&lt;/p></property>
       <property
          name="exceptionHandler">false</property>
       <property
-         name="y">266.5</property>
+         name="y">356.59375</property>
       <property
-         name="x">279.31836</property>
+         name="x">325.31836</property>
       <property
          name="pageFragment">true</property>
    </View>
+   <MethodCall
+      id="MethodCall4">
+      <property
+         name="activityId">updateData</property>
+      <property
+         name="start">false</property>
+      <property
+         name="description">&lt;html>&lt;p>&lt;b>updateData&lt;/b>&lt;/p>&lt;p>Activity Type:  Method Call&lt;/p></property>
+      <property
+         name="exceptionHandler">false</property>
+      <property
+         name="y">111.0625</property>
+      <property
+         name="x">217.0</property>
+   </MethodCall>
+   <ControlFlowCase
+      islink="true"
+      id="ControlFlowCase6"
+      from="MethodCall4"
+      to="View2">
+      <property
+         name="fromOutcome">showResult</property>
+      <property
+         name="sdm:polyPoints">B50,217.0,165.07812,321.81836,302.60938,T44</property>
+   </ControlFlowCase>
+   <MethodCall
+      id="MethodCall8">
+      <property
+         name="activityId">updateData1</property>
+      <property
+         name="description">&lt;html>&lt;p>&lt;b>updateData1&lt;/b>&lt;/p>&lt;p>Activity Type:  Method Call&lt;/p></property>
+      <property
+         name="exceptionHandler">false</property>
+      <property
+         name="y">115.546875</property>
+      <property
+         name="x">403.28418</property>
+   </MethodCall>
+   <ControlFlowCase
+      islink="true"
+      id="ControlFlowCase10"
+      from="MethodCall8"
+      to="View2">
+      <property
+         name="fromOutcome">showResult</property>
+      <property
+         name="sdm:polyPoints">B50,403.28418,169.5625,328.81836,302.60938,T56</property>
+   </ControlFlowCase>
+   <WildcardControlFlowRule
+      id="WildcardControlFlowRule11">
+      <property
+         name="activityId">*</property>
+      <property
+         name="y">-45.96875</property>
+      <property
+         name="x">319.0</property>
+   </WildcardControlFlowRule>
+   <ControlFlowCase
+      islink="true"
+      id="ControlFlowCase12"
+      from="WildcardControlFlowRule11"
+      to="MethodCall4">
+      <property
+         name="fromOutcome">Left</property>
+      <property
+         name="sdm:polyPoints">B43,315.5,-2.953125,217.0,57.078125,T50</property>
+   </ControlFlowCase>
+   <ControlFlowCase
+      islink="true"
+      id="ControlFlowCase13"
+      from="WildcardControlFlowRule11"
+      to="MethodCall8">
+      <property
+         name="fromOutcome">Right</property>
+      <property
+         name="sdm:polyPoints">B57,322.5,-2.953125,403.28418,61.5625,T50</property>
+   </ControlFlowCase>
 </SDM>

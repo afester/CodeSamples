@@ -19,7 +19,7 @@ public class DataUpdater implements Serializable  {
 
         FacesContext context = FacesContext.getCurrentInstance();
         NavigationHandler handler = context.getApplication().getNavigationHandler();
-        handler.handleNavigation(context, null, "default");
+        handler.handleNavigation(context, null, dest);
         context.renderResponse();
 
         // The following line might or not be needed depending where the code is called and the context
