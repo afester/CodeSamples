@@ -14,15 +14,35 @@
                     <f:facet name="end"/>
                     <f:facet name="start">
                         <af:panelGroupLayout id="pgl1">
+
                             <af:outputText value="Samples" id="ot1" inlineStyle="font-weight:bold;"/>
                             <af:panelGroupLayout id="pgl2" layout="vertical" inlineStyle="margin-left:10px;">
                                 <af:link id="l1" text="Address Table"
                                          action="#{viewScope.DynamicRegionManager.addressTableTF}"/>
                                 <af:link id="l3" text="Input Focus"
                                          action="#{viewScope.DynamicRegionManager.inputFocusTF}"/>
-                                <af:link text="Dynamic Data" action="#{viewScope.DynamicRegionManager.dynamicDataTF}"
-                                         id="l2"/>
+                                <af:link id="l2" text="Dynamic Data" 
+                                         action="#{viewScope.DynamicRegionManager.dynamicDataTF}"/>
                             </af:panelGroupLayout>
+
+                            <af:spacer width="0" height="20" id="s1"/>
+                            <af:outputText value="Samples - by button" id="ot2" inlineStyle="font-weight:bold;"/>
+                            <af:panelGroupLayout id="pgl4" layout="vertical" inlineStyle="margin-left:10px;">
+                                <af:button text="Address Table" id="b1"
+                                           action="#{viewScope.DynamicRegionManager.addressTableTF}"/>
+                                <af:button text="Input Focus" id="b3"
+                                           action="#{viewScope.DynamicRegionManager.inputFocusTF}"/>
+                                <af:button text="Dynamic Data" id="b2"
+                                           action="#{viewScope.DynamicRegionManager.dynamicDataTF}"/>
+                            </af:panelGroupLayout>
+
+                            <af:spacer width="0" height="20" id="s2"/>
+                            <af:outputText value="Samples - by drop down" id="ot3" inlineStyle="font-weight:bold;"/>
+                            <af:selectOneChoice id="soc1">
+                                <af:selectItem label="Address Table" id="si1"/>
+                                <af:selectItem label="Input Focus" id="si2"/>
+                                <af:selectItem label="Dynamic Data" id="si3"/>
+                            </af:selectOneChoice>
                         </af:panelGroupLayout>
                     </f:facet>
                     <f:facet name="branding"/>
