@@ -25,18 +25,24 @@
         <fixed-outcome>showResult</fixed-outcome>
       </outcome>
     </method-call>
+    <method-call id="Execute">
+      <method>#{bindings.Execute.execute}</method>
+      <outcome>
+        <fixed-outcome>Execute</fixed-outcome>
+      </outcome>
+    </method-call>
     <control-flow-rule id="__4">
       <from-activity-id>updateData</from-activity-id>
       <control-flow-case id="__5">
         <from-outcome>showResult</from-outcome>
-        <to-activity-id>DynamicData</to-activity-id>
+        <to-activity-id>Execute</to-activity-id>
       </control-flow-case>
     </control-flow-rule>
     <control-flow-rule id="__8">
       <from-activity-id>updateData1</from-activity-id>
       <control-flow-case id="__9">
         <from-outcome>showResult</from-outcome>
-        <to-activity-id>DynamicData</to-activity-id>
+        <to-activity-id>Execute</to-activity-id>
       </control-flow-case>
     </control-flow-rule>
     <control-flow-rule id="__10">
@@ -48,6 +54,13 @@
       <control-flow-case id="__12">
         <from-outcome>Right</from-outcome>
         <to-activity-id>updateData1</to-activity-id>
+      </control-flow-case>
+    </control-flow-rule>
+    <control-flow-rule id="__1">
+      <from-activity-id>Execute</from-activity-id>
+      <control-flow-case id="__3">
+        <from-outcome>Execute</from-outcome>
+        <to-activity-id>DynamicData</to-activity-id>
       </control-flow-case>
     </control-flow-rule>
     <use-page-fragments/>

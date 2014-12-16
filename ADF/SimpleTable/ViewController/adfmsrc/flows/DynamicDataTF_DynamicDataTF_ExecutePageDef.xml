@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<pageDefinition xmlns="http://xmlns.oracle.com/adfm/uimodel" version="12.1.3.10.8"
+                id="DynamicDataTF_DynamicDataTF_ExecutePageDef" Package="flows" SkipValidation="true">
+  <parameters/>
+  <executables>
+    <iterator Binds="AddressVO" RangeSize="25" DataControl="SimpleTableAMDataControl" id="AddressVOIterator"
+              Refresh="never"/>
+  </executables>
+  <bindings>
+    <action IterBinding="AddressVOIterator" id="Execute" RequiresUpdateModel="true" Action="iteratorExecute"/>
+  </bindings>
+</pageDefinition>
