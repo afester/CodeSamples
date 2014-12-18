@@ -1,0 +1,17 @@
+# Sample ~/.gitconfig file
+
+[user]
+	email = Firstname.Lastname@email.com
+	name = Firstname Lastname
+
+[push]
+	default = matching
+
+[color]
+        ui = true
+
+[alias]
+        ignore = !git update-index --assume-unchanged 
+        unignore = !git update-index --no-assume-unchanged
+        ignored = !git ls-files -v | grep ^[a-z]
+        statusall = status --untracked-files=all
