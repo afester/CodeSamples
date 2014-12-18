@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.1" xmlns:f="http://java.sun.com/jsf/core"
+          xmlns:af="http://xmlns.oracle.com/adf/faces/rich">
+    <jsp:directive.page contentType="text/html;charset=UTF-8"/>
+    <f:view>
+        <af:document title="SimpleTable" id="d1">
+            <af:form id="f1">
+                <af:pageTemplate viewId="/oracle/templates/threeColumnTemplate.jspx" id="pt1">
+                    <f:facet name="center">
+                        <af:region value="#{bindings.dynamicRegion1.regionModel}" id="r1"/>
+                    </f:facet>
+                    <f:facet name="header"/>
+                    <f:facet name="end"/>
+                    <f:facet name="start">
+                        <af:panelGroupLayout id="pgl1">
+
+                            <af:outputText value="Samples" id="ot1" inlineStyle="font-weight:bold;"/>
+                            <af:panelGroupLayout id="pgl2" layout="vertical" inlineStyle="margin-left:10px;">
+                                <af:link id="l1" text="Address Table"
+                                         action="#{viewScope.DynamicRegionManager.addressTableTF}"/>
+                                <af:link id="l3" text="Input Focus"
+                                         action="#{viewScope.DynamicRegionManager.inputFocusTF}"/>
+                                <af:link id="l2" text="Dynamic Data" 
+                                         action="#{viewScope.DynamicRegionManager.dynamicDataTF}"/>
+                                <af:link id="l4" text="Custom model"
+                                         action="#{viewScope.DynamicRegionManager.customModelTF}"/>
+                            </af:panelGroupLayout>
+
+                            <af:spacer width="0" height="20" id="s1"/>
+                            <af:outputText value="Samples - by button" id="ot2" inlineStyle="font-weight:bold;"/>
+                            <af:panelGroupLayout id="pgl4" layout="vertical" inlineStyle="margin-left:10px;">
+                                <af:button text="Address Table" id="b1"
+                                           action="#{viewScope.DynamicRegionManager.addressTableTF}"/>
+                                <af:button text="Input Focus" id="b3"
+                                           action="#{viewScope.DynamicRegionManager.inputFocusTF}"/>
+                                <af:button text="Dynamic Data" id="b2"
+                                           action="#{viewScope.DynamicRegionManager.dynamicDataTF}"/>
+                            </af:panelGroupLayout>
+
+                            <af:spacer width="0" height="20" id="s2"/>
+                            <af:outputText value="Samples - by drop down" id="ot3" inlineStyle="font-weight:bold;"/>
+                            <af:selectOneChoice id="soc1">
+                                <af:selectItem label="Address Table" id="si1"/>
+                                <af:selectItem label="Input Focus" id="si2"/>
+                                <af:selectItem label="Dynamic Data" id="si3"/>
+                            </af:selectOneChoice>
+                        </af:panelGroupLayout>
+                    </f:facet>
+                    <f:facet name="branding"/>
+                    <f:facet name="copyright"/>
+                    <f:facet name="status"/>
+                </af:pageTemplate>
+            </af:form>
+        </af:document>
+    </f:view>
+</jsp:root>

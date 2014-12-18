@@ -365,8 +365,8 @@ int main() {
     PureFloat f2(1.0);
     f2.dumpBinary();
 
-    PureFloat f3(0.1);
-    f3.dumpBinary();
+    PureFloat f3(40.0);
+    f3.dumpInfo();
 
     PureFloat f4(-0.1);
     f4.dumpBinary();
@@ -375,4 +375,8 @@ int main() {
     PureFloat f5(NAN);
     f5.dumpBinary();
     printf("%d\n", f5.value() == f5.value());
+
+    double d = 4.0;
+    printf("len: %d\n", sizeof(d));
+    hexprint((void*) &d, sizeof(d));
 }

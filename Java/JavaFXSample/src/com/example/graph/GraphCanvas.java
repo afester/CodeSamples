@@ -91,6 +91,11 @@ public class GraphCanvas extends Canvas {
         for (Graph graph : graphs) {
             drawGraph(graph);
         }
+        
+        
+        
+        
+        
     }
 
     /**

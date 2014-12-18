@@ -6,7 +6,12 @@
   Name="SimpleTableAM"
   Version="12.1.3.10.8"
   InheritPersonalization="merge"
-  ClearCacheOnRollback="true">
+  ClearCacheOnRollback="true"
+  ComponentClass="com.example.adf.view.SimpleTableAMImpl"
+  ComponentInterface="com.example.adf.view.common.SimpleTableAM">
+  <DesignTime>
+    <Attr Name="_isCodegen" Value="true"/>
+  </DesignTime>
   <Properties>
     <SchemaBasedProperties>
       <LABEL
@@ -16,6 +21,19 @@
   <ViewUsage
     Name="AddressVO"
     ViewObjectName="com.example.adf.view.AddressVO"/>
+  <ClientInterface
+    Name="__clientInterface">
+    <Method
+      Name="updateData"
+      MethodName="updateData">
+      <Return
+        Name="_return_type_"
+        Type="void"/>
+      <Parameter
+        Name="theData"
+        Type="java.lang.String"/>
+    </Method>
+  </ClientInterface>
   <ResourceBundle>
     <PropertiesBundle
       PropertiesFile="com.example.adf.view.ModelBundle"/>

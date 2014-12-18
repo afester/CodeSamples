@@ -97,7 +97,7 @@ void COMProxy::get(JNIEnv* theEnv, jobject dispatchObj, jstring className) {
 
 	// Get the class name from the String parameter
 	OLECHAR * szClassname = (OLECHAR*) env->GetStringChars(className, NULL);
-
+#if 0
 	// get the class id for the required object
 	log("  Retrieving Class ID for \"%ls\" ...\n", szClassname);
 	CLSID CLSID_Class;
@@ -122,8 +122,10 @@ void COMProxy::get(JNIEnv* theEnv, jobject dispatchObj, jstring className) {
 	}
 
 	log("    Result: 0x%p\n", pServer);
+#endif
 
-#if 0
+	IDispatch* pServer = 0;
+
 	log("\n::CoGetObject(\"%ls\", NULL, IID_IDispatch, &pServer)\n", szClassname);
 	HRESULT hr = ::CoGetObject(szClassname, NULL, IID_IDispatch, reinterpret_cast<void**> (&pServer));
 
@@ -168,7 +170,15 @@ log("    Result3: 0x%p\n", hr);
 log("    cFuncs: %d\n"
     "    cVars: %d\n"
 	"    cImplTypes: %d\n", typeAttr->cFuncs,typeAttr->cVars,typeAttr->cImplTypes);
-#endif
+
+
+BSTR name;
+BSTR docStr;
+BSTR helpFile;
+info->GetDocumentation(MEMBERID_NIL, &name, &docStr, NULL, &helpFile);
+log("    name=%ls\n", name);
+log("    docStr=%ls\n", docStr);
+log("    helpFile=%ls\n", helpFile);
 
 	// store the pointer into the dispatchObj
 	// set the dispatchHandle member - NOTE: architecture specific! (32 bit <=> 64 bit)
@@ -289,7 +299,7 @@ jobject COMProxy::invoke(JNIEnv *theEnv, jobject dispatchObj, jstring memberName
 	dumpParams(&params);
 
 	// Invoke the member (property GET, property SET or Invoke)
-	log("  Invoking member ... (%d)\n", (int) wFlags);
+	log("  0x%08X->Invoke(0x%08x, IID_NULL, 0, %d, &p)\n", pServer, dispId, wFlags, &params);
 
 	VARIANT result;
 	UINT uArgErr;

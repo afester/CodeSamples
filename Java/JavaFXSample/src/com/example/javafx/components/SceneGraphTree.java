@@ -95,7 +95,8 @@ public class SceneGraphTree {
     *
     * @param theScene The scene to visualize.
     */
-   public void setSceneTree(Scene theScene) {
+   @SuppressWarnings("unchecked")
+public void setSceneTree(Scene theScene) {
       // create a TreeItem structure with the scene graph
       Parent parentNode = theScene.getRoot();
       SceneGraphItem rootItem = new SceneGraphItem(parentNode);

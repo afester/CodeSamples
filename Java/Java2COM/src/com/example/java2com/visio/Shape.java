@@ -1,10 +1,10 @@
 package com.example.java2com.visio;
 
-import com.example.java2com.COMInterface;
+import com.example.java2com.COMObject;
 import com.example.java2com.IDispatch;
 import com.example.java2com.Variant;
 
-public class Shape extends COMInterface {
+public class Shape extends COMObject {
 
     public final static int visTypeInval=0;
     public final static int visTypePage=1;
@@ -27,28 +27,23 @@ public class Shape extends COMInterface {
     }
 
     public int getGeometryCount() {
-        Variant result = ci.getProperty("GeometryCount");
-        return result.intValue;
+        return ci.getProperty("GeometryCount").intValue;
     }
 
     public int getType() {
-        Variant result = ci.getProperty("Type");
-        return result.intValue;
+        return ci.getProperty("Type").intValue;
     }
 
     public Connects getConnects() {
-        Variant result = ci.getProperty("Connects");
-        return new Connects(result.dispatch);
+        return new Connects(ci.getProperty("Connects").dispatch);
     }
 
     public String getUniqueID() {
-        Variant result = ci.getProperty("UniqueID", new Variant(1));
-        return result.strValue;
+        return ci.getProperty("UniqueID", new Variant(1)).strValue;
     }
 
     public long getID() {
-        Variant result = ci.getProperty("ID");
-        return result.intValue;
+        return ci.getProperty("ID").intValue;
     }
 
     public String getName() {
@@ -59,12 +54,25 @@ public class Shape extends COMInterface {
         return new Paths(ci.getProperty("Paths").dispatch);
     }
 
-/*    public String getBoundingBox() {
-        Variant[] params = new Variant[5];
-        params[0] = new Variant(0);
-        ci.invoke("BoundingBox", params);
+    public int getRowCount(int i) {
+        return ci.getProperty("RowCount", new Variant(i)).intValue;
+    }
 
-        return "";
-    }*/
-    
+    public Cell getCellsSRC(int i, int j, int k) {
+        return new Cell(ci.getProperty("CellsSRC", new Variant(i), new Variant(j), new Variant(k)).dispatch);
+    }
+
+    public Cell getCells(String s) {
+        return new Cell(ci.getProperty("Cells", new Variant(s)).dispatch);
+    }
+
+    public String getLineStyle() {
+        return ci.getProperty("LineStyle").strValue;
+    }
+
+    public String toString() {
+        return String.format("%s[dispatchHandle=0x%s, name=%s, type=%d]", 
+                             getClass().getSimpleName(), ci.toString(),
+                             getName(), getType());
+    }
 }

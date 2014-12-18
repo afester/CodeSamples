@@ -1,35 +1,31 @@
 package com.example.java2com.visio;
 
-import com.example.java2com.COMInterface;
+import com.example.java2com.COMObject;
 import com.example.java2com.IDispatch;
-import com.example.java2com.Variant;
 
-public class Document extends COMInterface {
+public class Document extends COMObject {
 
     protected Document(IDispatch dispatch) {
         super(dispatch);
     }
 
-    public String getName() {
-        Variant result = ci.getProperty("Name");
-        return result.strValue;
+    public static Document get(String objectName) {
+        return new Document(IDispatch.get(objectName));
     }
 
+    public String getName() {
+        return ci.getProperty("Name").strValue;
+    }
 
     public Pages getPages() {
-        Variant result = ci.getProperty("Pages");
-        return new Pages(result.dispatch);
+        return new Pages(ci.getProperty("Pages").dispatch);
     }
 
     public String getCompany() {
-        Variant result = ci.getProperty("Company");
-        return result.strValue;
+        return ci.getProperty("Company").strValue;
     }
 
-    
     public String getCreator() {
-        Variant result = ci.getProperty("Creator");
-        return result.strValue;
+        return ci.getProperty("Creator").strValue;
     }
-
 }

@@ -8,3 +8,4 @@ Debug
 *.depend
 *.layout
 .objs
+hs_err_pid*.log

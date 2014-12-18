@@ -1,9 +1,9 @@
 package com.example.java2com.msexcel;
 
-import com.example.java2com.COMInterface;
+import com.example.java2com.COMObject;
 import com.example.java2com.IDispatch;
 
-public class ExcelApplication extends COMInterface {
+public class ExcelApplication extends COMObject {
 
     public ExcelApplication() {
         super(new IDispatch("Excel.Application"));        
