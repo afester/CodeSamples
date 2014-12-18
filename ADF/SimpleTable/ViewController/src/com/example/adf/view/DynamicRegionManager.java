@@ -32,4 +32,9 @@ public class DynamicRegionManager implements Serializable {
         setDynamicTaskFlowId("/WEB-INF/flows/DynamicDataTF.xml#DynamicDataTF");
         return null;
     }
+
+    public String customModelTF() {
+        setDynamicTaskFlowId("/WEB-INF/flows/CustomModelTF.xml#CustomModelTF");
+        return null;
+    }
 }
