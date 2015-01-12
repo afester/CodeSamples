@@ -3,7 +3,12 @@
           xmlns:f="http://java.sun.com/jsf/core">
   <af:panelFormLayout id="pfl1">
     <f:facet name="footer"/>
+
     <af:inputText readOnly="true" label="Value 1" id="it1" value="#{dynamicBean.value1}"/>
     <af:inputText readOnly="true" label="Value 2" id="it2" value="#{dynamicBean.value2}"/>
+    
+    <af:inputText readOnly="true" label="Value 2" id="it3" value="#{customDynamicBean.value1}"/>
+    <af:inputText readOnly="false" label="Value 2" id="it4" value="#{customDynamicBean.value2}"/>
+    <af:button text="Save ..." id="b1"/>
   </af:panelFormLayout>
 </jsp:root>

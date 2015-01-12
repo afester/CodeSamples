@@ -10,6 +10,11 @@
       <managed-bean-class>com.example.adf.view.bean.DynamicBeanSample</managed-bean-class>
       <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
+    <managed-bean id="__2">
+      <managed-bean-name>customDynamicBean</managed-bean-name>
+      <managed-bean-class>com.example.adf.view.bean.GenericDynamicBean</managed-bean-class>
+      <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
     <view id="DynamicBeanSample">
       <page>/DynamicBeanSample.jsff</page>
     </view>

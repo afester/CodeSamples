@@ -2,5 +2,6 @@
 <faces-config version="2.1" xmlns="http://java.sun.com/xml/ns/javaee">
   <application>
     <default-render-kit-id>oracle.adf.rich</default-render-kit-id>
+    <el-resolver>com.example.adf.CustomELResolver</el-resolver>
   </application>
 </faces-config>
