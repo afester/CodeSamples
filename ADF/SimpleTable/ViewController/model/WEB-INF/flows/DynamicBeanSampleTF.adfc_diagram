@@ -1,0 +1,24 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<SDM>
+   <OverallProperties
+      id="OverallProperties1"/>
+   <View
+      id="View2">
+      <property
+         name="activityId">DynamicBeanSample</property>
+      <property
+         name="page">/DynamicBeanSample.jsff</property>
+      <property
+         name="start">true</property>
+      <property
+         name="description">&lt;html>&lt;p>&lt;b>DynamicBeanSample&lt;/b> (Default Activity)&lt;/p>&lt;p>Activity Type:  View&lt;/p></property>
+      <property
+         name="exceptionHandler">false</property>
+      <property
+         name="y">263.53125</property>
+      <property
+         name="pageFragment">true</property>
+      <property
+         name="x">228.24512</property>
+   </View>
+</SDM>

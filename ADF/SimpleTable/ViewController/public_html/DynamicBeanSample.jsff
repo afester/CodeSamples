@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.1" xmlns:af="http://xmlns.oracle.com/adf/faces/rich"
+          xmlns:f="http://java.sun.com/jsf/core">
+  <af:panelFormLayout id="pfl1">
+    <f:facet name="footer"/>
+    <af:inputText readOnly="true" label="Value 1" id="it1" value="#{dynamicBean.value1}"/>
+    <af:inputText readOnly="true" label="Value 2" id="it2" value="#{dynamicBean.value2}"/>
+  </af:panelFormLayout>
+</jsp:root>
