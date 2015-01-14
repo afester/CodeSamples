@@ -46,11 +46,13 @@ public class ExpressionCompiler extends ExpressionBaseVisitor<Void> {
       symbolTable.putSymbol("PI", a -> Math.PI);
       symbolTable.putSymbol("e", a -> Math.E);
 
-      symbolTable.putSymbol("sin", a -> Math.sin((double) a));
-      symbolTable.putSymbol("cos", a -> Math.cos((double) a));
-      symbolTable.putSymbol("tan", a -> Math.tan((double) a));
-      symbolTable.putSymbol("log", a -> Math.log((double) a));
-      symbolTable.putSymbol("sqrt", a -> Math.sqrt((double) a));
+      symbolTable.putSymbol("sin", x -> Math.sin(x));
+      symbolTable.putSymbol("cos", x -> Math.cos(x));
+      symbolTable.putSymbol("tan", x -> Math.tan(x));
+      symbolTable.putSymbol("log", x -> Math.log(x));
+      symbolTable.putSymbol("sqrt", x -> Math.sqrt(x));
+      symbolTable.putSymbol("f1", x -> x*x + 42*x + 19);
+      symbolTable.putSymbol("f2", x -> Math.cos(x*x) + 42*x);
    }
 
 
