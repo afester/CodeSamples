@@ -58,7 +58,48 @@ public class ButtonBean {
         System.err.println("INPUT VALIDATOR: " + uIComponent.getClientId());
     }
 
+    public String dumpHTTPRequest() {
+        ADFContext ctx = ADFContext.getCurrent();
+
+        // get the http servlet request for the current ADF context
+        HttpServletRequest req = (HttpServletRequest) ctx.getEnvironment().getRequest(); 
+
+        // dump the attributes of the http servlet request
+        System.err.println("HTTP Request attributes:");
+        Enumeration names = req.getAttributeNames();
+        List<String> contents = new ArrayList();
+        while(names.hasMoreElements()) {
+            Object name = names.nextElement();
+            String line = String.format("%s=%s", name, req.getAttribute(name.toString()));
+            contents.add(line);
+        }
+        Collections.sort(contents);
+        for (String line : contents) {
+            System.err.println("   " + line);
+        }
+
+        // dump the session attributes of the http servlet request
+        System.err.println("HTTP Session attributes:");
+        HttpSession hs = req.getSession();
+
+        names = hs.getAttributeNames();
+        contents = new ArrayList();
+        while(names.hasMoreElements()) {
+            Object name = names.nextElement();
+            String line = String.format("%s=%s", name, hs.getAttribute(name.toString()));
+            contents.add(line);
+        }
+        Collections.sort(contents);
+        for (String line : contents) {
+            System.err.println("   " + line);
+        }
+
+        return null;
+    }
+
     public String dumpBindings() {
+        dumpHTTPRequest();
+
         ADFContext ctx = ADFContext.getCurrent();
 
 /**************************************/
@@ -73,24 +114,6 @@ public class ButtonBean {
             dumpMapSorted(scope);
         }
 
-        // get the http servlet request for the current ADF context
-        HttpServletRequest req = (HttpServletRequest) ctx.getEnvironment().getRequest(); 
-
-        // dump the session attributes of the http servlet request
-        System.err.println("HTTP Session attributes:");
-        HttpSession hs = req.getSession();
-
-        Enumeration names = hs.getAttributeNames();
-        List<String> contents = new ArrayList();
-        while(names.hasMoreElements()) {
-            Object name = names.nextElement();
-            String line = String.format("%s=%s", name, hs.getAttribute(name.toString()));
-            contents.add(line);
-        }
-        Collections.sort(contents);
-        for (String line : contents) {
-            System.err.println("   " + line);
-        }
 */
 /***************************************************/
 

@@ -1,6 +1,6 @@
 package com.example.adf;
 
-public interface CustomDynamicBean {
+public interface DynamicBean {
     Object getProperty(String name);
 
     void setProperty(String name, Object value);

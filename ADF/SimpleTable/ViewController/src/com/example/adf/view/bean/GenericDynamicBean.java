@@ -1,13 +1,13 @@
 package com.example.adf.view.bean;
 
-import com.example.adf.CustomDynamicBean;
+import com.example.adf.DynamicBean;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class GenericDynamicBean implements CustomDynamicBean {
+public class GenericDynamicBean implements DynamicBean {
     public GenericDynamicBean() {
         super();
     }
