@@ -1,15 +1,37 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.1" xmlns:f="http://java.sun.com/jsf/core"
           xmlns:af="http://xmlns.oracle.com/adf/faces/rich">
-  <af:treeTable value="#{bindings.Task.treeModel}" var="node" selectionListener="#{bindings.Task.treeModel.makeCurrent}"
-                rowSelection="single" id="tt1">
-    <f:facet name="nodeStamp">
-      <af:column id="c1">
-        <af:outputText value="#{node}" id="ot1"/>
+
+  <af:panelCollection id="pc1">
+    <f:facet name="menus"/>
+    <f:facet name="toolbar"/>
+    <f:facet name="statusbar"/>
+
+    <af:treeTable value="#{bindings.Task.treeModel}" var="node"
+                  selectionListener="#{bindings.Task.treeModel.makeCurrent}" rowSelection="single" id="tt1">
+
+      <!-- Tree column, including disclosure icon -->
+      <f:facet name="nodeStamp">
+        <af:column width="200" id="c1">
+          <f:facet name="header">
+            <af:outputText value="#{bindings.Task.hints.Name.label}" id="ot4"/>
+          </f:facet>
+          <af:outputText value="#{node.Name}" id="ot1"/>
+        </af:column>
+      </f:facet>
+
+      <f:facet name="pathStamp">
+        <af:outputText value="#{node}" id="ot2"/>
+      </f:facet>
+
+      <!-- Description column -->
+      <af:column width="500" id="c2">
+        <f:facet name="header">
+          <af:outputText value="#{bindings.Task.hints.Description.label}" id="ot5"/>
+        </f:facet>
+        <af:outputText value="#{node.Description}" id="ot3"/>
       </af:column>
-    </f:facet>
-    <f:facet name="pathStamp">
-      <af:outputText value="#{node}" id="ot2"/>
-    </f:facet>
-  </af:treeTable>
+
+    </af:treeTable>
+  </af:panelCollection>
 </jsp:root>
