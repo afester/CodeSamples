@@ -5,6 +5,16 @@
     <data-control-scope>
       <shared/>
     </data-control-scope>
+    <managed-bean id="__1">
+      <managed-bean-name>TreeTableBB</managed-bean-name>
+      <managed-bean-class>com.example.adf.view.bean.TreeTableBB</managed-bean-class>
+      <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+    <managed-bean id="__2">
+      <managed-bean-name>TreeTableViewBB</managed-bean-name>
+      <managed-bean-class>com.example.adf.view.bean.TreeTableViewBB</managed-bean-class>
+      <managed-bean-scope>view</managed-bean-scope>
+    </managed-bean>
     <view id="TaskTreeTable">
       <page>/TaskTreeTable.jsff</page>
     </view>
