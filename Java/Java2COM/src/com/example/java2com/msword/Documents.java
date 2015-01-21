@@ -1,12 +1,12 @@
 package com.example.java2com.msword;
 
 import com.example.java2com.COMCollection;
-import com.example.java2com.IDispatch;
+import com.example.java2com.COMProxy;
 import com.example.java2com.Variant;
 
 public class Documents extends COMCollection<Document>  {
 
-    protected Documents(IDispatch ci) {
+    protected Documents(COMProxy ci) {
         super(ci);
     }
 
@@ -17,7 +17,7 @@ public class Documents extends COMCollection<Document>  {
     }
 
     @Override
-    protected Document newInstance(IDispatch dispatch) {
+    protected Document newInstance(COMProxy dispatch) {
         return new Document(dispatch);
     }
     

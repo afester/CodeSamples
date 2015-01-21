@@ -5,6 +5,11 @@ public class Variant {
     public Variant() {
     }
 
+    public Variant(IDispatch d) {
+        this.vt = VT_DISPATCH;
+        this.dispatch = d.ci;
+    }
+
     public Variant(boolean b) {
         this.vt = VT_BOOL;
         this.booleanValue = b;
@@ -132,7 +137,7 @@ public class Variant {
 
     // Various data type values
     public String strValue;
-    public IDispatch dispatch;
+    public COMProxy dispatch;
     public int intValue;
     public float floatValue;
     public double doubleValue;

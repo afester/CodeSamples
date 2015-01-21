@@ -16,9 +16,9 @@ COMProxy::COMProxy(JavaVM *jvm) : debugEnabled(false) {
 
 	// NOTE: FindClass returns local reference only! Only method- and Field IDs
 	// are valid forever, class references are NOT!!!!
-	jclass idispatchClass = env->FindClass("com/example/java2com/IDispatch");
-	idispatchConstructorMID = env->GetMethodID(idispatchClass, "<init>", "()V");
-	dispatchHandleFID = env->GetFieldID(idispatchClass, "dispatchHandle", "I");
+	jclass comProxyClass = env->FindClass("com/example/java2com/COMProxy");
+	idispatchConstructorMID = env->GetMethodID(comProxyClass, "<init>", "()V");
+	dispatchHandleFID = env->GetFieldID(comProxyClass, "dispatchHandle", "I");
 
 	jclass variantClass = env->FindClass("com/example/java2com/Variant");
 	variantConstructorMID = env->GetMethodID(variantClass, "<init>", "()V");
@@ -28,7 +28,7 @@ COMProxy::COMProxy(JavaVM *jvm) : debugEnabled(false) {
 	doubleValueFID = env->GetFieldID(variantClass, "doubleValue", "D");
 	booleanValueFID = env->GetFieldID(variantClass, "booleanValue", "Z");
 	strValueFID = env->GetFieldID(variantClass, "strValue", "Ljava/lang/String;");
-	dispatchValueFID = env->GetFieldID(variantClass, "dispatch", "Lcom/example/java2com/IDispatch;");
+	dispatchValueFID = env->GetFieldID(variantClass, "dispatch", "Lcom/example/java2com/COMProxy;");
 }
 
 
@@ -423,18 +423,18 @@ void COMProxy::convertToVariant(const VARIANT* value, jobject resultVariant) {
 			{
 				log("  Result: 0x%p\n", value->pdispVal);
 
-				// Create a new instance of com.example.java2com.IDispatch
-				log("  FindClass(com/example/java2com/IDispatch)\n");
-				jclass idispatchClass = env->FindClass("com/example/java2com/IDispatch");
+				// Create a new instance of com.example.java2com.COMProxy
+				log("  FindClass(com/example/java2com/COMProxy)\n");
+				jclass comProxyClass = env->FindClass("com/example/java2com/COMProxy");
 
 				log("  newObject()\n");
-				jobject idispatchObject = env->NewObject(idispatchClass, idispatchConstructorMID);
+				jobject comProxyObject = env->NewObject(comProxyClass, idispatchConstructorMID);
 
 				// set the dispatchHandle member - NOTE: architecture specific! (32 bit <=> 64 bit)
-				env->SetIntField(idispatchObject, dispatchHandleFID, (int) value->pdispVal);
+				env->SetIntField(comProxyObject, dispatchHandleFID, (int) value->pdispVal);
 
 				// set the dispatch member to the created object
-				env->SetObjectField(resultVariant, dispatchValueFID, idispatchObject);
+				env->SetObjectField(resultVariant, dispatchValueFID, comProxyObject);
 			}
 			break;
 

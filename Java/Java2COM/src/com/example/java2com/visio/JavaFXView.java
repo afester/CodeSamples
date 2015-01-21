@@ -3,6 +3,10 @@ package com.example.java2com.visio;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.example.java2com.IDispatch;
+import com.example.java2com.Variant;
+import com.example.java2com.VariantOut;
+
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -66,18 +70,18 @@ public class JavaFXView extends Application {
         return result;
     }
 
-    private Document document;
+    private IVDocument document;
 
     private void render(String pageName) {
-        Pages pages = document.getPages();
-        Page page = pages.getItem(pageName);
+        IVPages pages = document.getPages();
+        IVPage page = pages.getItem(new Variant(pageName));
 
         // get width and height of the page
-        Shape properties = page.getPageSheet();
+        IVShape properties = page.getPageSheet();
 
         // http://msdn.microsoft.com/en-us/library/bb267452(v=office.12).aspx
-        double w = properties.getCells("PageWidth").getResult("mm");
-        double h = properties.getCells("PageHeight").getResult("mm");
+        double w = properties.getCells("PageWidth").getResult(new Variant("mm"));
+        double h = properties.getCells("PageHeight").getResult(new Variant("mm"));
         canvas.setWidth(w);
         canvas.setHeight(h);
 
@@ -85,28 +89,30 @@ public class JavaFXView extends Application {
         context.setFill(new Color(255F/255F, 255F/255F, 204F/255F, 1.0));
         context.fillRect(0,  0, canvas.getWidth(), canvas.getHeight());
 
-        Shapes shapes = page.getShapes();
+        IVShapes shapes = page.getShapes();
 
-        for (Shape s : shapes) {
+        //for (Shape s : shapes) {
+        for (int i = 1;  i <= shapes.getCount();  i++) {
+            IVShape s = shapes.getItem(new Variant(i));
             System.out.println(s);
 
-            String col = s.getCells("LineColor").getResultStr("");
+            String col = s.getCells("LineColor").getResultStr(new Variant(""));
             Color lineColor = parseRGB(col);
 
-            int linePattern = s.getCells("LinePattern").getResultInt("", 0);
-            int fillPattern = s.getCells("FillPattern").getResultInt("", 0);
+            long linePattern = s.getCells("LinePattern").getResultInt(new Variant(""), 0);
+            long fillPattern = s.getCells("FillPattern").getResultInt(new Variant(""), 0);
 
-            col = s.getCells("FillBkgnd").getResultStr("");
+            col = s.getCells("FillBkgnd").getResultStr(new Variant(""));
             Color fillColor = parseRGB(col);
 
-            col = s.getCells("FillForegnd").getResultStr("");
+            col = s.getCells("FillForegnd").getResultStr(new Variant(""));
 //            Color foreColor = parseRGB(col);
 
             if (s.getName().startsWith("Circle") || s.getName().startsWith("Ellipse")) {
-                double radiusX = (s.getCells("Width").getResult("mm"))/2;
-                double radiusY = (s.getCells("Height").getResult("mm"))/2;
-                double xPos = s.getCells("PinX").getResult("mm");
-                double yPos = h - s.getCells("PinY").getResult("mm");
+                double radiusX = (s.getCells("Width").getResult(new Variant("mm")))/2;
+                double radiusY = (s.getCells("Height").getResult(new Variant("mm")))/2;
+                double xPos = s.getCells("PinX").getResult(new Variant("mm"));
+                double yPos = h - s.getCells("PinY").getResult(new Variant("mm"));
 
                 context.beginPath();
 
@@ -123,9 +129,12 @@ public class JavaFXView extends Application {
                     context.stroke();
                 }
             } else {
-                Paths paths = s.getPaths();
+                IVPaths paths = s.getPaths();
 
-                for (Path path : paths) {
+                //for (Path path : paths) {
+                for (int pi = 1;  pi < paths.getCount();  pi++) {
+                    IVPath path = paths.getItem(pi);
+
                     System.err.println("   " + path);
                     context.beginPath();
 
@@ -134,10 +143,19 @@ public class JavaFXView extends Application {
                     context.setStroke(lineColor);
 
                     boolean first = true;
-                    for (Curve c : path) {
+                    //for (Curve c : path) {
+                    for (int ci = 1;  ci < path.getCount();  ci++) {
+                        IVCurve c = path.getItem(ci);
+
                         if (first) {
                             double start = c.getStart();
-                            Point2D p1 = c.point(start);
+
+                            // Point2D p1 = c.point(start);
+                            VariantOut x = new VariantOut(VariantOut.VT_R8);
+                            VariantOut y = new VariantOut(VariantOut.VT_R8);
+                            c.point(start, x, y);
+                            Point2D p1 = new Point2D(x.doubleValue, y.doubleValue);
+
                             p1 = p1.multiply(25.4);
                             p1 = new Point2D(p1.getX(), h - p1.getY());
                             context.moveTo(p1.getX(), p1.getY());
@@ -145,7 +163,12 @@ public class JavaFXView extends Application {
                         }
                         double end = c.getEnd();
         
-                        Point2D p2 = c.point(end);
+                        // Point2D p2 = c.point(end);
+                        VariantOut x = new VariantOut(VariantOut.VT_R8);
+                        VariantOut y = new VariantOut(VariantOut.VT_R8);
+                        c.point(end, x, y);
+                        Point2D p2 = new Point2D(x.doubleValue, y.doubleValue);
+
                         p2 = p2.multiply(25.4);
                         p2 = new Point2D(p2.getX(), h - p2.getY());
         
@@ -189,8 +212,11 @@ public class JavaFXView extends Application {
         context = canvas.getGraphicsContext2D();
 
         final ChoiceBox<String> pageSelect = new ChoiceBox<>();
-        document = Document.get(sampleFile);
-        for (Page p : document.getPages()) {
+        document = IDispatch.get(sampleFile, IVDocument.class);
+        //for (Page p : document.getPages()) {
+        IVPages pages = document.getPages();
+        for (int ip = 1;  ip <= pages.getCount();  ip++) {
+            IVPage p = pages.getItem(new Variant(ip));
             System.err.println(p.getName());
             pageSelect.getItems().add(p.getName());
         }

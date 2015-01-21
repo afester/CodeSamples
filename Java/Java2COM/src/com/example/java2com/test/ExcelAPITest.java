@@ -7,7 +7,7 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.example.java2com.IDispatch;
+import com.example.java2com.COMProxy;
 import com.example.java2com.msexcel.ExcelApplication;
 import com.example.java2com.msexcel.Sheets;
 import com.example.java2com.msexcel.Workbook;
@@ -23,7 +23,7 @@ public class ExcelAPITest {
     public void setupFilenames() {
         String projDir = System.getProperty("user.dir");
         sampleFile = projDir + File.separator + "Sample.xls";
-        IDispatch.setDebugEnabled(false);
+        COMProxy.setDebugEnabled(false);
     }
 
 

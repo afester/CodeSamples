@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src">
+	<classpathentry excluding="com/example/java2com/visio/FXMLExport.java" kind="src" path="src">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Java2COM/jlib"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="src" path="target/generated-sources/antlr4"/>
+	<classpathentry kind="src" path="target/generated-sources/midl"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre8_32"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/ANTLR41"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/ANTLR44"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

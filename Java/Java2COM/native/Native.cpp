@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include "com_example_java2com_IDispatch.h"
+#include "com_example_java2com_COMProxy.h"
 #include "COMProxy.h"
 
 
@@ -27,21 +27,21 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
  */
 
 
-JNIEXPORT void JNICALL Java_com_example_java2com_IDispatch_Create
+JNIEXPORT void JNICALL Java_com_example_java2com_COMProxy_Create
 (JNIEnv* env, jobject dispatchObj, jstring className) {
 	if (comProxy) {
 		comProxy->create(env, dispatchObj, className);
 	}
 }
 
-JNIEXPORT void JNICALL Java_com_example_java2com_IDispatch_Get
+JNIEXPORT void JNICALL Java_com_example_java2com_COMProxy_Get
   (JNIEnv *env, jobject dispatchObj, jstring className) {
 	if (comProxy) {
 		comProxy->get(env, dispatchObj, className);
 	}
 }
 
-JNIEXPORT jobject JNICALL Java_com_example_java2com_IDispatch_Invoke(
+JNIEXPORT jobject JNICALL Java_com_example_java2com_COMProxy_Invoke(
 		JNIEnv *env, jobject dispatchObj, jstring memberName, jint wFlags,
 		jobjectArray parameters) {
 	if (comProxy) {
@@ -53,14 +53,14 @@ JNIEXPORT jobject JNICALL Java_com_example_java2com_IDispatch_Invoke(
 }
 
 
-JNIEXPORT void JNICALL Java_com_example_java2com_IDispatch_Destroy
+JNIEXPORT void JNICALL Java_com_example_java2com_COMProxy_Destroy
 (JNIEnv* env, jobject dispatchObj) {
 	if (comProxy) {
 		comProxy->release(env, dispatchObj);
 	}
 }
 
-JNIEXPORT void JNICALL Java_com_example_java2com_IDispatch_SetDebugEnabled
+JNIEXPORT void JNICALL Java_com_example_java2com_COMProxy_SetDebugEnabled
   (JNIEnv *env, jclass clazz, jboolean flag) {
 	if (comProxy) {
 		comProxy->setDebugEnabled(env, flag);
