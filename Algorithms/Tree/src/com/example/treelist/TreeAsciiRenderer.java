@@ -1,7 +1,10 @@
 package com.example.treelist;
 
+import java.io.PrintStream;
+import java.util.List;
 
-public class TreeVisualizer {
+
+public class TreeAsciiRenderer {
 
    private final static char   BAR         = '|';
    private final static char   NO_BAR      = ' ';
@@ -9,8 +12,14 @@ public class TreeVisualizer {
    private final static char   NODE        = '+';
    private final static char   LAST_NODE   = '`';
    private final static String NODE_HANDLE = "--";
+   private PrintStream out = null;
+   
+   public TreeAsciiRenderer(PrintStream ps) {
+       out = ps;
+   }
 
-   public void visualizeHierarchical(Tree tree) {
+
+   public void renderHierarchical(List<TreeNode> tree) {
       boolean[] hideBar = new boolean[100];  // default is false!
 
       for (TreeNode tn : tree) {
@@ -41,14 +50,14 @@ public class TreeVisualizer {
          }
          line.append(NODE_HANDLE + tn.getLabel());
 
-         System.out.println(line);
+         out.println(line);
       }
    }
 
 
-   public void visualizeFlat(Tree tree) {
+   public void renderFlat(List<TreeNode> tree) {
       for (TreeNode tn : tree) {
-         System.out.println(tn);
+         out.println(tn);
       }
    }
 }
