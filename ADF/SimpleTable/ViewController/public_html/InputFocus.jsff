@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.1" xmlns:f="http://java.sun.com/jsf/core"
+          xmlns:af="http://xmlns.oracle.com/adf/faces/rich">
+    <af:button text="K" id="b1" action="#{ButtonBean.buttonPressed}"
+                   actionListener="#{ButtonBean.buttonAction}"/>
+    <af:panelFormLayout id="pfl1" maxColumns="2" rows="2">
+        <f:facet name="footer"/>
+        <af:inputText label="A" id="it1" autoSubmit="true" validator="#{ButtonBean.inputValidator}"
+                      valueChangeListener="#{ButtonBean.inputChangeListener}" clientComponent="true"/>
+        <af:inputText label="B" id="it2" autoSubmit="true" validator="#{ButtonBean.inputValidator2}" clientComponent="true"/>
+        <af:inputText label="C" id="it3"/>
+        <af:inputText label="D" id="it4"/>
+    </af:panelFormLayout>
+</jsp:root>

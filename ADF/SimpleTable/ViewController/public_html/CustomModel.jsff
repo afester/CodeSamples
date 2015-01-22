@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.1" xmlns:af="http://xmlns.oracle.com/adf/faces/rich">
+<!-- 
+            value="#{viewScope.TheTableModel.tableModel}">
+-->
+  <af:button text="button 1" id="b1" action="#{ButtonBean.dumpBindings}"/>
+  <af:outputText value="Estimated Row Count: #{bindings.updateData}" id="ot4"/>
+  <af:table var="row" rowBandingInterval="0" id="t1" 
+            value="#{bindings.AddressVO.collectionModel}">
+            
+    <af:column sortable="false" headerText="Firstname" id="c1">
+      <af:outputText value="#{row.Firstname}" id="ot1"/>
+    </af:column>
+    <af:column sortable="false" headerText="Lastname" id="c2">
+      <af:outputText value="#{row[1]}" id="ot2"/>
+    </af:column>
+    <af:column sortable="false" headerText="TheData" id="c3">
+      <af:outputText value="#{row[2]}" id="ot3"/>
+    </af:column>
+  </af:table>
+</jsp:root>

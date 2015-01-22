@@ -1,0 +1,46 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 0.8.4 ] */
+
+/* [wxMaxima: input   start ] */
+f(x) := sin(x);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+wxplot2d(f(x), [x, 0, 2*%pi]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+f2(x) := sin(x - %pi/3);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+f3(x) := sin(x - 2*%pi/3);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+wxplot2d([f(x), f2(x), f3(x)], [x, 0, %pi * 2]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+wxplot2d(f(x), [x,0,%pi/3]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+xlist : makelist(j,j,0,170) * %pi / 510$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+ylist : map(sin, xlist)$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+wxplot2d([f(x), [discrete, xlist, ylist]],[x,0,%pi/3]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+float(ylist);
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

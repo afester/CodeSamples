@@ -1,2 +1,5 @@
+SNIPPET=const
+SNIPPET=popen
+
 all:
-	gcc -Wall -pedantic -o const const.c
+	gcc -std=c99 -Wall -pedantic -o $(SNIPPET) $(SNIPPET).c

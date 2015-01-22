@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE ViewLink SYSTEM "jbo_03_01.dtd">
+<!---->
+<ViewLink
+  xmlns="http://xmlns.oracle.com/bc4j"
+  Name="TaskParentToChildren"
+  Version="12.1.3.10.8"
+  InheritPersonalization="merge"
+  EntityAssociation="com.example.adf.entity.TaskParentToChild">
+  <Properties>
+    <SchemaBasedProperties>
+      <LABEL
+        ResId="com.example.adf.view.TaskParentToChildren_LABEL"/>
+    </SchemaBasedProperties>
+  </Properties>
+  <ViewLinkDefEnd
+    Name="CParentIdTaskVO"
+    Cardinality="1"
+    Source="true"
+    Owner="com.example.adf.view.TaskVO">
+    <DesignTime>
+      <Attr Name="_finderName" Value="CParentIdTaskVO"/>
+      <Attr Name="_isUpdateable" Value="true"/>
+    </DesignTime>
+    <AttrArray Name="Attributes">
+      <Item Value="com.example.adf.view.TaskVO.CId"/>
+    </AttrArray>
+  </ViewLinkDefEnd>
+  <ViewLinkDefEnd
+    Name="Children"
+    Cardinality="-1"
+    Owner="com.example.adf.view.TaskVO">
+    <DesignTime>
+      <Attr Name="_finderName" Value="Children"/>
+      <Attr Name="_isUpdateable" Value="true"/>
+    </DesignTime>
+    <AttrArray Name="Attributes">
+      <Item Value="com.example.adf.view.TaskVO.CParentId"/>
+    </AttrArray>
+  </ViewLinkDefEnd>
+  <ResourceBundle>
+    <PropertiesBundle
+      PropertiesFile="com.example.adf.view.ModelBundle"/>
+  </ResourceBundle>
+</ViewLink>

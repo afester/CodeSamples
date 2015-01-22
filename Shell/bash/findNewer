@@ -19,6 +19,15 @@ REFDATE=$1
 COUNT=0
 TOTALSIZE=0
 
+# Only more recent versions of find support the "-newermt" predicate
+findVersion=`find  --version | grep -oE "[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+"`
+findVersion=`echo $findVersion | grep -oE "[[:digit:]]+\.[[:digit:]]+"`
+if [ "${findVersion}" = "4.4" ] ; then
+   FINDCMD="find . -type f -newermt ${REFDATE}"
+else
+   FINDCMD="echo None"
+fi
+
 while read f
 do
   FILENAME=`echo $f | sed -e "s,^./,,g"`
@@ -26,5 +35,5 @@ do
   (( COUNT++ ))
   TOTALSIZE=$((TOTALSIZE + SIZE))
   echo "$FILENAME $SIZE"
-done < <( find . -type f -newermt ${REFDATE}  )
+done < <( ${FINDCMD} )
 echo "${COUNT} files with total size of ${TOTALSIZE}"

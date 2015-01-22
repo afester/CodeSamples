@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.1" xmlns:af="http://xmlns.oracle.com/adf/faces/rich"
+          xmlns:f="http://java.sun.com/jsf/core">
+  <af:panelCollection id="pc1">
+    <f:facet name="menus"/>
+    <f:facet name="toolbar">
+      <af:toolbar id="t2">
+        <af:selectOneChoice label="Update data with" id="soc1"
+                            valueChangeListener="#{DataUpdater.updateData}" autoSubmit="true">
+          <af:selectItem label="Left" value="Left" id="si1"/>
+          <af:selectItem label="Right" value="Right" id="si2"/>
+        </af:selectOneChoice>
+      </af:toolbar>
+    </f:facet>
+
+      <af:table value="#{bindings.AddressVO.collectionModel}" var="row" rows="#{bindings.AddressVO.rangeSize}"
+                emptyText="#{bindings.AddressVO.viewable ? 'No data to display.' : 'Access Denied.'}" rowBandingInterval="0"
+                fetchSize="#{bindings.AddressVO.rangeSize}" id="t1">
+        <af:column headerText="#{bindings.AddressVO.hints.Firstname.label}" id="c1">
+          <af:inputText value="#{row.bindings.Firstname.inputValue}" label="#{bindings.AddressVO.hints.Firstname.label}"
+                        required="#{bindings.AddressVO.hints.Firstname.mandatory}"
+                        columns="#{bindings.AddressVO.hints.Firstname.displayWidth}"
+                        maximumLength="#{bindings.AddressVO.hints.Firstname.precision}"
+                        shortDesc="#{bindings.AddressVO.hints.Firstname.tooltip}" id="it1">
+            <f:validator binding="#{row.bindings.Firstname.validator}"/>
+          </af:inputText>
+        </af:column>
+        <af:column headerText="#{bindings.AddressVO.hints.Lastname.label}" id="c2">
+          <af:inputText value="#{row.bindings.Lastname.inputValue}" label="#{bindings.AddressVO.hints.Lastname.label}"
+                        required="#{bindings.AddressVO.hints.Lastname.mandatory}"
+                        columns="#{bindings.AddressVO.hints.Lastname.displayWidth}"
+                        maximumLength="#{bindings.AddressVO.hints.Lastname.precision}"
+                        shortDesc="#{bindings.AddressVO.hints.Lastname.tooltip}" id="it2">
+            <f:validator binding="#{row.bindings.Lastname.validator}"/>
+          </af:inputText>
+        </af:column>
+        <af:column headerText="#{bindings.AddressVO.hints.TheData.label}" id="c3">
+          <af:inputText value="#{row.bindings.TheData.inputValue}" label="#{bindings.AddressVO.hints.TheData.label}"
+                        required="#{bindings.AddressVO.hints.TheData.mandatory}"
+                        columns="#{bindings.AddressVO.hints.TheData.displayWidth}"
+                        maximumLength="#{bindings.AddressVO.hints.TheData.precision}"
+                        shortDesc="#{bindings.AddressVO.hints.TheData.tooltip}" id="it3">
+            <f:validator binding="#{row.bindings.TheData.validator}"/>
+          </af:inputText>
+        </af:column>
+      </af:table>
+  </af:panelCollection>
+</jsp:root>

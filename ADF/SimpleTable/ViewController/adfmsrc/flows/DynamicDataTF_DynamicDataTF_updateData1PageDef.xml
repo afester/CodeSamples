@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<pageDefinition xmlns="http://xmlns.oracle.com/adfm/uimodel" version="12.1.3.10.8"
+                id="DynamicDataTF_DynamicDataTF_updateData1PageDef" Package="flows" SkipValidation="true">
+  <parameters/>
+  <executables/>
+  <bindings>
+    <methodAction id="updateData" RequiresUpdateModel="true" Action="invokeMethod" MethodName="updateData"
+                  IsViewObjectMethod="false" DataControl="SimpleTableAMDataControl"
+                  InstanceName="data.SimpleTableAMDataControl.dataProvider"
+                  ReturnName="data.SimpleTableAMDataControl.methodResults.updateData_SimpleTableAMDataControl_dataProvider_updateData_result">
+      <NamedData NDName="theData" NDValue="Right" NDType="java.lang.String"/>
+    </methodAction>
+  </bindings>
+</pageDefinition>

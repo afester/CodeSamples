@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<pageDefinition xmlns="http://xmlns.oracle.com/adfm/uimodel" version="12.1.3.10.8" id="CustomModelPageDef"
+                Package="com.example.adf.view.pageDefs">
+  <parameters/>
+  <executables>
+    <variableIterator id="variables">
+      <variable Name="test" Type="String"/>
+    </variableIterator>
+    <iterator id="AddressVOIterator" Binds="AddressVO" DataControl="SimpleTableAMDataControl" RangeSize="25"/>
+    <shuttleRegion id="DCShuttle">
+      <list id="DCShuttle_baseList" ListOperMode="multiSelect" IterBinding="AddressVOIterator">
+        <AttrNames>
+          <Item Value="Lastname"/>
+        </AttrNames>
+      </list>
+    </shuttleRegion>
+  </executables>
+  <bindings>
+    <table IterBinding="AddressVOIterator" id="AddressVO">
+      <AttrNames>
+        <Item Value="Firstname"/>
+        <Item Value="Lastname"/>
+        <Item Value="TheData"/>
+      </AttrNames>
+    </table>
+    <attributeValues IterBinding="AddressVOIterator" id="Firstname">
+      <AttrNames>
+        <Item Value="Firstname"/>
+      </AttrNames>
+    </attributeValues>
+    <methodAction id="updateData" RequiresUpdateModel="true" Action="invokeMethod" MethodName="updateData"
+                  IsViewObjectMethod="false" DataControl="SimpleTableAMDataControl"
+                  InstanceName="data.SimpleTableAMDataControl.dataProvider"
+                  ReturnName="data.SimpleTableAMDataControl.methodResults.updateData_SimpleTableAMDataControl_dataProvider_updateData_result">
+      <NamedData NDName="theData" NDType="java.lang.String"/>
+    </methodAction>
+    <list ListOperMode="navigation" IterBinding="AddressVOIterator" ListIter="AddressVOIterator" id="Lastname">
+      <AttrNames>
+        <Item Value="Lastname"/>
+      </AttrNames>
+    </list>
+  </bindings>
+</pageDefinition>
