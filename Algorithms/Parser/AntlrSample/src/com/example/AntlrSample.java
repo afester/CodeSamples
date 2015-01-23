@@ -15,7 +15,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import com.example.expressionparser.ExpressionLexer;
 import com.example.expressionparser.ExpressionParser;
-import com.example.helloparser.HelloLexer;
+import com.example.grammars.hello.HelloLexer;
 
 public class AntlrSample {
 
@@ -39,6 +39,7 @@ public class AntlrSample {
    private void helloSample() {
 
       CharStream input = new ANTLRInputStream("hello parrt");
+
       Lexer helloLexer = new HelloLexer(input);
 
       while(true) {

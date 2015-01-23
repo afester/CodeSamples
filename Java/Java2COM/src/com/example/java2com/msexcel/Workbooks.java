@@ -1,13 +1,13 @@
 package com.example.java2com.msexcel;
 
 import com.example.java2com.COMCollection;
-import com.example.java2com.IDispatch;
+import com.example.java2com.COMProxy;
 import com.example.java2com.Variant;
 
 
 public class Workbooks extends  COMCollection<Worksheet> {
 
-    public Workbooks(IDispatch dispatch) {
+    public Workbooks(COMProxy dispatch) {
         super(dispatch);
     }
 
@@ -17,7 +17,7 @@ public class Workbooks extends  COMCollection<Worksheet> {
     }
 
     @Override
-    protected Worksheet newInstance(IDispatch dispatch) {
+    protected Worksheet newInstance(COMProxy dispatch) {
         return new Worksheet(dispatch);
     }
 }

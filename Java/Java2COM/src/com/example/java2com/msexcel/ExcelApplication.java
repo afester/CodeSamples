@@ -1,12 +1,12 @@
 package com.example.java2com.msexcel;
 
-import com.example.java2com.COMObject;
 import com.example.java2com.IDispatch;
+import com.example.java2com.COMProxy;
 
-public class ExcelApplication extends COMObject {
+public class ExcelApplication extends IDispatch {
 
     public ExcelApplication() {
-        super(new IDispatch("Excel.Application"));        
+        super(new COMProxy("Excel.Application"));        
     }
 
     public String getName() {

@@ -3,14 +3,14 @@ package com.example.java2com;
 import java.util.Iterator;
 
 
-public abstract class COMCollection<T> extends COMObject implements Iterable<T> {
+public abstract class COMCollection<T> extends IDispatch implements Iterable<T> {
 
-    protected COMCollection(IDispatch ci) {
+    protected COMCollection(COMProxy ci) {
         super(ci);
     }
 
     
-    protected abstract T newInstance(IDispatch dispatch); 
+    protected abstract T newInstance(COMProxy dispatch); 
 
     public int getCount() {
         Variant result = ci.getProperty("Count");
