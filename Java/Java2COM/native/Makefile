@@ -1,10 +1,10 @@
 OBJECTS  = Native.o COMProxy.o
-TARGET   = Native.dll
+TARGET   = COMProxy.dll
 TARGET_DIR= ../jlib
 
 # Definitions for the javah-tool
 JAVA_HOME = "/c/Program Files/Java/jdk1.8.0_11"
-NATIVE_CLASS = com.example.java2com.IDispatch
+NATIVE_CLASS = com.example.java2com.COMProxy
 JH_CLASSPATH = ../bin
 JAVAH    =  $(JAVA_HOME)/bin/javah.exe
 

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE Association SYSTEM "jbo_03_01.dtd">
+<!---->
+<Association
+  xmlns="http://xmlns.oracle.com/bc4j"
+  Name="TaskParentToChild"
+  Version="12.1.3.10.8"
+  InheritPersonalization="merge">
+  <DesignTime>
+    <Attr Name="_isCodegen" Value="true"/>
+  </DesignTime>
+  <AssociationEnd
+    Name="ParentTask"
+    Cardinality="1"
+    Source="true"
+    Owner="com.example.adf.entity.TaskEO"
+    LockLevel="NONE">
+    <DesignTime>
+      <Attr Name="_aggregation" Value="0"/>
+      <Attr Name="_finderName" Value="ParentTask"/>
+      <Attr Name="_foreignKey" Value="com.example.adf.entity.TaskEO.TaskPk"/>
+      <Attr Name="_isUpdateable" Value="true"/>
+    </DesignTime>
+    <AttrArray Name="Attributes">
+      <Item Value="com.example.adf.entity.TaskEO.CId"/>
+    </AttrArray>
+  </AssociationEnd>
+  <AssociationEnd
+    Name="ChildTask"
+    Cardinality="-1"
+    Owner="com.example.adf.entity.TaskEO">
+    <DesignTime>
+      <Attr Name="_aggregation" Value="0"/>
+      <Attr Name="_finderName" Value="ChildTask"/>
+      <Attr Name="_foreignKey" Value="com.example.adf.entity.TaskEO.fk_TaskEO"/>
+      <Attr Name="_isUpdateable" Value="true"/>
+    </DesignTime>
+    <AttrArray Name="Attributes">
+      <Item Value="com.example.adf.entity.TaskEO.CParentId"/>
+    </AttrArray>
+  </AssociationEnd>
+</Association>

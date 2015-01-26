@@ -14,8 +14,8 @@ public class Function extends Symbol {
    }
 
    @Override
-   public double getValue(double arg) {
-      return theFunc.apply(arg);
+   public double getValue(double x) {
+      return theFunc.apply(x);
    }
    
 

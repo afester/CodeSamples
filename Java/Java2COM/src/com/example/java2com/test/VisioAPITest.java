@@ -10,17 +10,20 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.example.java2com.IDispatch;
-import com.example.java2com.visio.Document;
-import com.example.java2com.visio.Documents;
-import com.example.java2com.visio.Page;
-import com.example.java2com.visio.Pages;
-import com.example.java2com.visio.Path;
-import com.example.java2com.visio.Paths;
-import com.example.java2com.visio.Curve;
-import com.example.java2com.visio.Shape;
-import com.example.java2com.visio.Shapes;
-import com.example.java2com.visio.VisioApplication;
+import com.example.java2com.COMProxy;
+import com.example.java2com.Variant;
+import com.example.java2com.VariantOut;
 
+import com.example.java2com.visio.IVApplication;
+import com.example.java2com.visio.IVCurve;
+import com.example.java2com.visio.IVDocument;
+import com.example.java2com.visio.IVDocuments;
+import com.example.java2com.visio.IVPage;
+import com.example.java2com.visio.IVPages;
+import com.example.java2com.visio.IVPath;
+import com.example.java2com.visio.IVPaths;
+import com.example.java2com.visio.IVShape;
+import com.example.java2com.visio.IVShapes;
 
 public class VisioAPITest {
 
@@ -30,28 +33,28 @@ public class VisioAPITest {
     public void setupFilenames() {
         String projDir = System.getProperty("user.dir");
         sampleFile = projDir + File.separator + "Sample.vsd";
-         IDispatch.setDebugEnabled(false);
+         COMProxy.setDebugEnabled(false);
     }
 
 
     @Test
     public void testVisioAPI() {
-        VisioApplication appl = new VisioApplication();
+        IVApplication appl = IDispatch.create("Visio.Application", IVApplication.class);
         assertEquals("Microsoft Visio", appl.getName());
         assertEquals("12,0", appl.getVersion());
 
-        Documents docs = appl.getDocuments();
+        IVDocuments docs = appl.getDocuments();
         assertEquals(0, docs.getCount());
 
-        Document doc = docs.open(sampleFile);
+        IVDocument doc = docs.open(sampleFile);
         System.err.println(doc.getName());
         System.err.println(doc.getCompany());
         System.err.println(doc.getCreator());
 
-        Pages pages = doc.getPages();
-        assertEquals(2, pages.getCount());
+        IVPages pages = doc.getPages();
+        assertEquals(4, pages.getCount());
 
-        for (Page p : pages) {
+        for (IVPage p : pages) {
             System.err.println("# " + p.getName());
             p.release();
         }
@@ -59,18 +62,18 @@ public class VisioAPITest {
         //Page ap = appl.getActivePage();
         //System.err.println(ap.getName());
 
-        Page p = pages.getItem("MYPAGE");
+        IVPage p = pages.getItem(new Variant("MYPAGE"));
 
-        Shapes shapes = p.getShapes();
+        IVShapes shapes = p.getShapes();
         //assertEquals(2, shapes.getCount());
 
-        for (Shape s : shapes) {
-            System.err.println("# Shape: " + s.getType() +"/"+ s.getID() + "/" + s.getUniqueID()+
+        for (IVShape s : shapes) {
+            System.err.println("# Shape: " + s.getType() +"/"+ s.getID() + "/" + s.getUniqueID(1)+
                     "/"+s.getName());
 
-            Paths paths = s.getPaths();
+            IVPaths paths = s.getPaths();
             System.err.println("   # " + paths.getCount());
-            for (Path p1 : paths) {
+            for (IVPath p1 : paths) {
                 System.err.println("   " + p1);
                 p1.release();
             }
@@ -96,36 +99,43 @@ public class VisioAPITest {
         doc.release();
 
         docs.release();
+
+        appl.quit();
+
         appl.release();
     }
 
     @Test
     public void testPaths() {
-        VisioApplication appl = new VisioApplication();
-        Documents docs = appl.getDocuments();
-        Document doc = docs.open(sampleFile);
-        Pages pages = doc.getPages();
-        Page p = pages.getItem("MYPAGE");
-        Shapes shapes = p.getShapes();
-        Shape s = shapes.getItem(5);
+        IVApplication appl = IDispatch.create("Visio.Application", IVApplication.class);
+        IVDocuments docs = appl.getDocuments();
+        IVDocument doc = docs.open(sampleFile);
+        IVPages pages = doc.getPages();
+        IVPage p = pages.getItem(new Variant("MYPAGE"));
+        IVShapes shapes = p.getShapes();
+        IVShape s = shapes.getItem(new Variant(5));
         assertEquals("Hexagon", s.getName());
 
         // A Shape consists of Paths
-        Paths paths = s.getPaths();
-        Path path = paths.getItem(1);
+        IVPaths paths = s.getPaths();
+        IVPath path = paths.getItem(1);
 
         System.err.println("Path path = new Path();");
 
         // Each Path consists of Curves
         int idx = 0;
         boolean first = true;
-        for (Curve c : path) {
+        for (IVCurve c : path) {
             double start = c.getStart();
             double end = c.getEnd();
 
             if (first) {
                 first = false;
-                Point2D p1 = c.point(start);
+
+                VariantOut x = new VariantOut(VariantOut.VT_R8);
+                VariantOut y = new VariantOut(VariantOut.VT_R8);
+                c.point(start, x, y);
+                Point2D p1 = new Point2D(x.doubleValue, y.doubleValue);
 
                 System.err.printf("MoveTo moveTo = new MoveTo();\n" +
                                    "moveTo.setX(%ff);\n" + 
@@ -133,18 +143,25 @@ public class VisioAPITest {
                                    "path.getElements().add(moveTo);\n\n", p1.getX(), p1.getY());
             }
 
-            Point2D p2 = c.point(end);
+            VariantOut x = new VariantOut(VariantOut.VT_R8);
+            VariantOut y = new VariantOut(VariantOut.VT_R8);
+            c.point(start, x, y);
+            Point2D p2 = new Point2D(x.doubleValue, y.doubleValue);
+
             System.err.printf("LineTo lineTo%d = new LineTo();\n" + 
                                "lineTo%d.setX(%ff);\n" +
                                "lineTo%d.setY(%ff);\n" +
                                "path.getElements().add(lineTo%d);\n\n", idx, idx, p2.getX(), idx, p2.getY(), idx);
+
             idx++;
+            c.release();
         }
 
         appl.quit();
 
         path.release();
         paths.release();
+
         s.release();
         shapes.release();
         p.release();

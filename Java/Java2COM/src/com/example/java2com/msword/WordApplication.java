@@ -1,13 +1,13 @@
 package com.example.java2com.msword;
 
-import com.example.java2com.COMObject;
 import com.example.java2com.IDispatch;
+import com.example.java2com.COMProxy;
 
 
-public class WordApplication extends COMObject {
+public class WordApplication extends IDispatch {
 
     public WordApplication() {
-        super(new IDispatch("Word.Application"));        
+        super(new COMProxy("Word.Application"));        
     }
     
     public String getName() {

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<adfc-config xmlns="http://xmlns.oracle.com/adf/controller" version="1.2">
+  <task-flow-definition id="TreeTableTF">
+    <default-activity>TaskTreeTable</default-activity>
+    <data-control-scope>
+      <shared/>
+    </data-control-scope>
+    <managed-bean id="__1">
+      <managed-bean-name>TreeTableBB</managed-bean-name>
+      <managed-bean-class>com.example.adf.view.bean.TreeTableBB</managed-bean-class>
+      <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+    <managed-bean id="__2">
+      <managed-bean-name>TreeTableViewBB</managed-bean-name>
+      <managed-bean-class>com.example.adf.view.bean.TreeTableViewBB</managed-bean-class>
+      <managed-bean-scope>view</managed-bean-scope>
+    </managed-bean>
+    <view id="TaskTreeTable">
+      <page>/TaskTreeTable.jsff</page>
+    </view>
+    <use-page-fragments/>
+  </task-flow-definition>
+</adfc-config>

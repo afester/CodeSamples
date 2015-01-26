@@ -24,6 +24,10 @@
                                          action="#{viewScope.DynamicRegionManager.dynamicDataTF}"/>
                                 <af:link id="l4" text="Custom model"
                                          action="#{viewScope.DynamicRegionManager.customModelTF}"/>
+                                <af:link id="l5" text="Dynamic Bean Sample"
+                                         action="#{viewScope.DynamicRegionManager.dynamicBeanSampleTF}"/>
+                                <af:link id="l6" text="Tree table sample"
+                                         action="#{viewScope.DynamicRegionManager.treeTableSampleTF}"/>
                             </af:panelGroupLayout>
 
                             <af:spacer width="0" height="20" id="s1"/>

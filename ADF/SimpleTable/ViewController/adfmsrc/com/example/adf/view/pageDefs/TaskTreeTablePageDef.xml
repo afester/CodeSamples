@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<pageDefinition xmlns="http://xmlns.oracle.com/adfm/uimodel" version="12.1.3.10.8" id="TaskTreeTablePageDef"
+                Package="com.example.adf.view.pageDefs">
+  <parameters/>
+  <executables>
+    <variableIterator id="variables"/>
+    <iterator Binds="Task" RangeSize="25" DataControl="SimpleTableAMDataControl" id="TaskIterator"/>
+  </executables>
+  <bindings>
+    <tree IterBinding="TaskIterator" id="Task">
+      <nodeDefinition DefName="com.example.adf.view.TaskVO" Name="Task0">
+        <AttrNames>
+          <Item Value="CId"/>
+          <Item Value="Description"/>
+          <Item Value="Name"/>
+        </AttrNames>
+        <Accessors>
+          <Item Value="Children"/>
+        </Accessors>
+      </nodeDefinition>
+    </tree>
+  </bindings>
+</pageDefinition>

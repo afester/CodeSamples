@@ -7,10 +7,12 @@
 
 grammar Expr;
 
+import Lexical;
+
 prog: stat+ ;
 
 stat : expr NEWLINE
-     | ID '=' NEWLINE
+     | ID '=' expr NEWLINE
      | NEWLINE
      ;
 
@@ -20,8 +22,3 @@ expr : expr ('*'|'/') expr
      | ID
      | '(' expr ')'
      ;
-
-ID 	: [a-zA-Z]+	;
-INT	: [0-9]+    	;
-NEWLINE: '\r'? '\n'  ;
-WS	: [ \t]+ -> skip ;

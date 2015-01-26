@@ -3,6 +3,7 @@ package com.example.tree;
 
 public class TreeSample {
 
+   // The tree is represented as a hierarchical set of TreeNode objects
    private TreeNode<String> tree;
 
 
@@ -40,18 +41,22 @@ public class TreeSample {
    public void run()  {
       // Create a sample tree
       TreeNode<String> tree = createTree(3, 3);
-      
+
+      @SuppressWarnings("rawtypes")
       TreeNode[] path = {new TreeNode<String>("Node.2"), 
                          new TreeNode<String>("Node.2.3"),
                          new TreeNode<String>("Node.2.3.1")};
+
+      @SuppressWarnings("unchecked")
       TreeNode<String> node = tree.findNode(path);
+
       System.err.println(node.getPathString());
       for (int i = 0;  i < 500;  i++) {
          node.addChildren(new TreeNode<String>("Node.2.3.1." + i));
       }
 
       // visualize the tree using plain old ASCII
-      TreeAsciiRenderer tv = new TreeAsciiRenderer();
+      TreeAsciiRenderer tv = new TreeAsciiRenderer(System.err);
       tv.renderHierarchical(tree);
       tv.renderFlat(tree);
    }
