@@ -2,9 +2,10 @@ package com.example.pathlist;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
-public class Path {
+public class Path implements Iterable<String> {
 
     private List<String> elements = new ArrayList<>();
     
@@ -21,7 +22,10 @@ public class Path {
         return this;
     }
 
-    
+    public Iterator<String> iterator() {
+        return elements.iterator();
+    }
+
     @Override
     public String toString() {
         StringBuffer result = new StringBuffer("Path[");
@@ -39,16 +43,7 @@ public class Path {
         
         return result.toString();
     }
-/*
-    public static Path createPath(String... elems) {
-        Path result = new Path();
-        elements.
-        for (String e : elems) {
-            
-        }
-        return null;
-    }
-*/
+
     public String asString(String delimiter) {
         StringBuffer result = new StringBuffer();
 

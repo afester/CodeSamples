@@ -1,5 +1,6 @@
 package com.example.tree;
 
+import java.io.PrintStream;
 import java.util.Iterator;
 
 
@@ -11,8 +12,13 @@ public class TreeAsciiRenderer {
    private final static char   NODE        = '+';
    private final static char   LAST_NODE   = '`';
    private final static String NODE_HANDLE = "--";
+   private PrintStream out;
 
-   
+   public TreeAsciiRenderer(PrintStream ps) {
+       out = ps;
+   }
+
+
    private void processChildren(TreeNode<?> parent, String prefix) {
 
       Iterator<?> childs = parent.getChildren().iterator();
@@ -35,7 +41,7 @@ public class TreeAsciiRenderer {
          line.append(NODE_HANDLE);
          line.append(child.getContent());
 
-         System.out.println(line);
+         out.println(line);
 
          processChildren(child, newPrefix.toString());
       }
@@ -48,14 +54,15 @@ public class TreeAsciiRenderer {
     * @param tree The tree to render.
     */
    public void renderHierarchical(TreeNode<?> tree) {
-      // TreeNode rootNode = tree.getRootNode();
-      System.out.println(LAST_NODE + NODE_HANDLE + tree.getContent());
-      processChildren(tree, "   ");
+      //out.println(LAST_NODE + NODE_HANDLE + tree.getContent());
+      //processChildren(tree, "   ");
+      out.println(tree.getContent());
+      processChildren(tree, "");
    }
 
 
    private void printNode(TreeNode<?> node) {
-      System.out.println(node.getLevel() + " " + node + " (" + node.getPathString() + ")");
+      out.println(node.getLevel() + " " + node + " (" + node.getPathString() + ")");
       for (TreeNode<?> child : node.getChildren()) {
          printNode(child);
       }
