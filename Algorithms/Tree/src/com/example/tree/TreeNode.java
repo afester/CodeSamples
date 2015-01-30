@@ -121,6 +121,16 @@ public class TreeNode <T> {
       return child;
    }
 
+   public TreeNode<T> getChild(T e) {
+       TreeNode<T> n = new TreeNode<>(e);
+       int idx = children.indexOf(n);     // TODO: hash table!
+       if (idx >= 0) {
+           return children.get(idx);
+       }
+
+       return null;
+   }
+
 
    /**
     * @return The path to the root node in a String format.
@@ -201,7 +211,10 @@ public class TreeNode <T> {
          return false;
       if (getClass() != obj.getClass())
          return false;
-      TreeNode other = (TreeNode) obj;
+
+      @SuppressWarnings("unchecked")
+      TreeNode<T> other = (TreeNode<T>) obj;
+
       if (content == null) {
          if (other.content != null)
             return false;
@@ -223,4 +236,6 @@ public class TreeNode <T> {
    public TreeNode<T> getParent() {
       return parent;
    }
+
+
 }
