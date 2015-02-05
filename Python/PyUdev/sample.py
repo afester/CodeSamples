@@ -9,7 +9,19 @@ from sip import SIP_VERSION_STR
 
 import pyudev
 import sys
+import usb1
 
+
+class TwoColumnTable(QTableWidget):
+
+    def __init__(self, parentWidget):
+        QTableWidget.__init__(self, parentWidget)
+
+    def resizeEvent(self, *args, **kwargs):
+        width = args[0].size().width()
+        self.setColumnWidth(0, width/2)
+        self.setColumnWidth(1, width - width/2)
+        return QTableWidget.resizeEvent(self, *args, **kwargs)
 
 
 class SearchWidget(QWidget):
@@ -211,9 +223,17 @@ class UDevTreeWidget(QWidget):
             path = device.device_path[1:].split("/")
             self.addPath(path)
 
+        usbCtx = usb1.USBContext()
+        for device in context.getDeviceList(skip_on_error=True):
+            print('ID') # %04x:%04x' % (device.getVendorID(), device.getProductID()), '->'.join(str(x) for x in ['Bus %03i' % (device.getBusNumber(), )] + device.getPortNumberList()), 'Device', device.getDeviceAddress()
+
         self.treeWidget.addTopLevelItems(self.rootNodes)
         for node in self.rootNodes:
             node.setExpanded(True)
+
+
+        
+
 
 
 
@@ -229,17 +249,19 @@ class UDevBrowserWidget(QWidget):
         self.leftWidget = UDevTreeWidget(self)
         self.leftWidget.itemSelected.connect(self.itemSelected)
 
-        self.rightWidget = QTextEdit(self)
-        self.rightWidget.setReadOnly(True)
-        self.rightWidget.setLineWrapMode(QTextEdit.NoWrap);
-        self.font = self.rightWidget.font()
-        self.font.setFamily("Courier")
-        self.font.setPointSize(10)
-        self.rightWidget.setCurrentFont(self.font)
-        self.rightWidget.setTextColor(Qt.blue)
+        self.rightWidget = TwoColumnTable(self)
+        self.rightWidget.setColumnCount(2)
+        self.rightWidget.setHorizontalHeaderLabels(['Name', 'Value'])
+        self.rightWidget.verticalHeader().hide()
 
         self.splitter.addWidget(self.leftWidget)
-        self.splitter.addWidget(self.rightWidget)
+
+        self.rightLayoutWidget = QHBoxLayout()
+        self.rightLayoutWidget.addWidget(self.rightWidget)
+        self.rightW = QWidget(self.splitter)
+        self.rightW.setLayout(self.rightLayoutWidget)
+        self.splitter.addWidget(self.rightW)
+
         self.setLayout(self.theLayout)
         self.splitter.setSizes([200, 400])
 
@@ -247,10 +269,12 @@ class UDevBrowserWidget(QWidget):
         ctx = pyudev.Context()
         path = self.leftWidget.getCurrentPath()
 
-        self.rightWidget.clear()
         try:
             device = pyudev.Device.from_sys_path(ctx, "/sys" + path)
     
+            self.rightWidget.clearContents()
+            self.rightWidget.setRowCount(0)
+
             self.insertLine("Sys path", device.sys_path)
             self.insertLine("Sys name", device.sys_name)
             self.insertLine("Sys number", device.sys_number)
@@ -270,7 +294,8 @@ class UDevBrowserWidget(QWidget):
             self.insertLine("Device type", device.device_type)
             self.insertLine("Device Node", device.device_node)
             self.insertLine("Device number", device.device_number);
-            self.rightWidget.insertPlainText("\nAll properties:\n")
+            self.insertLine("All properties", "");
+            #self.rightWidget.insertPlainText("\nAll properties:\n")
             for p in device:
                 self.insertLine("  " + p, device[p])
         except pyudev.device.DeviceNotFoundAtPathError:
@@ -278,10 +303,19 @@ class UDevBrowserWidget(QWidget):
 
 
     def insertLine(self, label, value):
-        self.rightWidget.setTextColor(Qt.red)
-        self.rightWidget.insertPlainText(label + ": ")
-        self.rightWidget.setTextColor(Qt.blue)
-        self.rightWidget.insertPlainText(str(value) + "\n")
+        newRow = self.rightWidget.rowCount()
+        self.rightWidget.insertRow(newRow)
+        self.rightWidget.setItem(newRow, 0, QTableWidgetItem(label))
+        self.rightWidget.setItem(newRow, 1, QTableWidgetItem(value))
+        self.rightWidget.setRowHeight(newRow, 20)
+        if (newRow % 2) == 0:
+            color = QColor(255, 255, 0xDE)
+        else:
+            color = QColor(255, 255, 0xBF)
+        self.rightWidget.item( newRow, 0).setBackground( color );
+        self.rightWidget.item( newRow, 0).setForeground( Qt.blue );
+        self.rightWidget.item( newRow, 1).setBackground( color );
+        self.rightWidget.item( newRow, 1).setForeground( Qt.blue );
 
     def refresh(self):
         self.leftWidget.refresh()
