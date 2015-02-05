@@ -15,8 +15,12 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
@@ -124,15 +128,13 @@ public class Main extends Application {
 
 
         SevenSegment s7 = new SevenSegment();
-//        s7.setScaleX(0.25);
-//        s7.setScaleY(0.25);
         s7.setDigit(number);
         Button pb = new Button("+");
         pb.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
                 number++;
-                if (number > 9) {
+                if (number > 15) {
                     number = 0;
                 }
                 s7.setDigit(number);
@@ -144,12 +146,36 @@ public class Main extends Application {
             public void handle(ActionEvent arg0) {
                 number--;
                 if (number < 0) {
-                    number = 9;
+                    number = 15;
                 }
                 s7.setDigit(number);
             }
         });
-        addRow(new Text("Seven segment display:"), s7, pb, mb);
+        
+
+        SevenSegment s7_2 = new SevenSegment();
+        s7_2.setDigit(0);
+        
+        final HBox displayGroup = new HBox();
+        displayGroup.getChildren().addAll(s7, s7_2);
+
+        addRow(new Text("Seven segment display:"), displayGroup, pb, mb);
+
+
+        Meter m = new Meter();
+        m.setUnit("mV");
+        Slider s2 = new Slider(0.0, 1.0, 0.0);
+        s2.valueProperty().addListener(
+            new ChangeListener<Number>() {
+    
+                @Override
+                public void changed(ObservableValue<? extends Number> arg0,
+                        Number oldValue, Number newValue) {
+                    m.setValue(newValue.doubleValue());
+                }
+            });
+
+        addRow(new Text("Meter:"), m, s2);
 
         /********** Simple animation sample */
 
