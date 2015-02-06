@@ -40,8 +40,32 @@ case $1 in
 	rm *.pyc
 	;;
 
-    debpkg)
-	echo "Creating debian package"
+    debianize)
+	# Use stdeb to create an initial debian package configuration
+	# Usually only done once to create the debian directory
+	echo "Debianizing package ..."
+	# python setup.py --command-packages=stdeb.command bdist_deb
+	py2dsc dist/Sample-0.1.tar.gz
+	;;
+
+    debsrc)
+	echo "Creating debian source package"
+	# debuild -S requires an upstream tarball in the parent directory
+	# python setup.py sdist
+	# mv dist/Sample-0.1.tar.gz ../sample_0.1.orig.tar.gz
+        # rm -rf dist
+        cd .. ; tar cvzf sample_0.1.orig.tar.gz python-pkg ; cd python-pkg
+        debuild -S
+	;;
+
+    debbin)
+	echo "Creating debian binary package"
+	echo "--------------------------------------------------------------------------"
+	# dpkg-buildpackage requires an upstream tarball in the parent directory
+        cd .. ; tar cvzf sample_0.1.orig.tar.gz python-pkg ; cd python-pkg
+	dpkg-buildpackage -rfakeroot -uc -us
+	echo "--------------------------------------------------------------------------"
+	dpkg -c ../python-sample_0.1-1_all.deb
 	;;
 esac
 
