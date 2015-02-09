@@ -38,6 +38,11 @@ case $1 in
 	rm -rf dist
 	rm -rf build
 	rm *.pyc
+	rm debian/files \
+	   debian/python-sample.debhelper.log debian/python-sample.postinst.debhelper debian/python-sample.prerm.debhelper debian/python-sample.substvars \
+	   debian/python3-sample.debhelper.log debian/python3-sample.postinst.debhelper debian/python3-sample.prerm.debhelper debian/python3-sample.substvars
+        rm -rf debian/python-sample/
+        rm -rf debian/python3-sample/
 	;;
 
     debianize)
@@ -61,11 +66,14 @@ case $1 in
     debbin)
 	echo "Creating debian binary package"
 	echo "--------------------------------------------------------------------------"
+	rm ../python-sample_0.1-1_all.deb ../python3-sample_0.1-1_all.deb
 	# dpkg-buildpackage requires an upstream tarball in the parent directory
         cd .. ; tar cvzf sample_0.1.orig.tar.gz python-pkg ; cd python-pkg
 	dpkg-buildpackage -rfakeroot -uc -us
-	echo "--------------------------------------------------------------------------"
+	echo "Python2: --------------------------------------------------------------------------"
 	dpkg -c ../python-sample_0.1-1_all.deb
+	echo "Python3: --------------------------------------------------------------------------"
+	dpkg -c ../python3-sample_0.1-1_all.deb
 	;;
 esac
 
