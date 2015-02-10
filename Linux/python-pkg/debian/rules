@@ -20,12 +20,12 @@ override_dh_auto_install:
 	@echo "==> Installing for Python2 ..."
 	# dh_auto_install
 	set -ex; for python in $(shell pyversions -r); do \
-		$$python setup.py install --root=$(CURDIR)/debian/python-sample --install-layout=deb; \
+		$$python setup.py install --root=$(CURDIR)/debian/python-sample --install-layout=deb | awk '{print "    \x1b[1;34m"$$0"\x1b[m"}' ; \
 	done;
 	@echo "==> Installing for Python3 ..."
 	tree
 	set -ex; for python in $(shell py3versions -r); do \
-		$$python setup.py install --root=$(CURDIR)/debian/python3-sample | awk '{print "    \x1b[1;34m"$$0"\x1b[m"}' ; \
+		$$python setup.py install --root=$(CURDIR)/debian/python3-sample --install-layout=deb | awk '{print "    \x1b[1;34m"$$0"\x1b[m"}' ; \
 	done;
 	tree
 	@echo "================================================================="
