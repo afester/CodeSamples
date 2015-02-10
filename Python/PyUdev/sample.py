@@ -181,6 +181,7 @@ class UDevTreeWidget(QWidget):
         self.treeWidget.scrollToItem(node)
 
     def addPath(self, path):
+        print("Adding:" + str(path))
         rootElement = path[0]
         subPath = path[1:]
 
@@ -225,7 +226,9 @@ class UDevTreeWidget(QWidget):
 
         usbCtx = usb1.USBContext()
         for device in usbCtx.getDeviceList(skip_on_error=True):
-            print('%04x:%04x' % (device.getVendorID(), device.getProductID()), '->'.join(str(x) for x in ['Bus %03i' % (device.getBusNumber(), )] + device.getPortNumberList()), 'Device', device.getDeviceAddress())
+            usbEntry ='%04x:%04x' % (device.getVendorID(), device.getProductID()), '->'.join(str(x) for x in ['Bus %03i' % (device.getBusNumber(), )] + device.getPortNumberList()), 'Device', device.getDeviceAddress()
+            path = ['usb', str(usbEntry)]
+            self.addPath(path)
 
         self.treeWidget.addTopLevelItems(self.rootNodes)
         for node in self.rootNodes:
