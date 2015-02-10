@@ -13,6 +13,7 @@ override_dh_auto_build:
 	set -ex; for python in $(shell py3versions -r); do \
 		$$python setup.py build; \
 	done;
+	tree
 	@echo "================================================================="
 
 override_dh_auto_install:
@@ -22,8 +23,9 @@ override_dh_auto_install:
 		$$python setup.py install --root=$(CURDIR)/debian/python-sample --install-layout=deb; \
 	done;
 	@echo "==> Installing for Python3 ..."
+	tree
 	set -ex; for python in $(shell py3versions -r); do \
-		$$python setup.py install --root=$(CURDIR)/debian/python3-sample --install-layout=deb; \
+		$$python setup.py install --root=$(CURDIR)/debian/python3-sample | awk '{print "    \x1b[1;34m"$$0"\x1b[m"}' ; \
 	done;
-	tree debian
+	tree
 	@echo "================================================================="
