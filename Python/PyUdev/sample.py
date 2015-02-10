@@ -224,8 +224,8 @@ class UDevTreeWidget(QWidget):
             self.addPath(path)
 
         usbCtx = usb1.USBContext()
-        for device in context.getDeviceList(skip_on_error=True):
-            print('ID') # %04x:%04x' % (device.getVendorID(), device.getProductID()), '->'.join(str(x) for x in ['Bus %03i' % (device.getBusNumber(), )] + device.getPortNumberList()), 'Device', device.getDeviceAddress()
+        for device in usbCtx.getDeviceList(skip_on_error=True):
+            print('%04x:%04x' % (device.getVendorID(), device.getProductID()), '->'.join(str(x) for x in ['Bus %03i' % (device.getBusNumber(), )] + device.getPortNumberList()), 'Device', device.getDeviceAddress())
 
         self.treeWidget.addTopLevelItems(self.rootNodes)
         for node in self.rootNodes:
