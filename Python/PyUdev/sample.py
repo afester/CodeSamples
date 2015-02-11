@@ -9,7 +9,7 @@ from sip import SIP_VERSION_STR
 
 import pyudev
 import sys
-import usb1
+import usb1, libusb1
 
 
 class TwoColumnTable(QTableWidget):
@@ -61,6 +61,8 @@ class SearchWidget(QWidget):
 class UDevTreeWidget(QWidget):
 
     itemSelected = pyqtSignal()
+    usbDevices = {}
+    usbCtx = usb1.USBContext()
 
     def __init__(self, parentWidget):
         QWidget.__init__(self, parentWidget)
@@ -88,12 +90,12 @@ class UDevTreeWidget(QWidget):
             self.itemSelected.emit()
 
     def getCurrentPath(self):
-        result = self.currentItem.text(0)
+        result = [self.currentItem.text(0)]
         parent = self.currentItem.parent()
         while parent is not None:
-            result = parent.text(0) + "/" + result
+            result.insert(0, parent.text(0))
             parent = parent.parent()
-        return "/" + result 
+        return result 
 
 
     def childNodes(self, parent):
@@ -224,19 +226,28 @@ class UDevTreeWidget(QWidget):
             path = device.device_path[1:].split("/")
             self.addPath(path)
 
-        usbCtx = usb1.USBContext()
-        for device in usbCtx.getDeviceList(skip_on_error=True):
-            usbEntry ='%04x:%04x' % (device.getVendorID(), device.getProductID()), '->'.join(str(x) for x in ['Bus %03i' % (device.getBusNumber(), )] + device.getPortNumberList()), 'Device', device.getDeviceAddress()
-            path = ['usb', str(usbEntry)]
-            self.addPath(path)
+        self.usbDevices = {}
+        usbPaths = []
+        # '->'.join(str(x) for x in ['Bus %03i' % (device.getBusNumber(), )] + device.getPortNumberList()),
+        for device in self.usbCtx.getDeviceList(skip_on_error=True):
+            usbEntry = ['usb',
+                        'Bus %03i' % device.getBusNumber()]
+            usbEntry.extend('Port %d' % x for x in device.getPortNumberList())
+            usbEntry.append('Device %d: %04x:%04x' % (device.getDeviceAddress(), device.getVendorID(), device.getProductID()))
+
+            entryPath = '/' + '/'.join(usbEntry)
+            self.usbDevices[entryPath] = device
+
+            usbPaths.append(usbEntry)
+
+        usbPaths = sorted(usbPaths, key = lambda k : k[1])
+
+        for p in usbPaths:
+            self.addPath(p)
 
         self.treeWidget.addTopLevelItems(self.rootNodes)
         for node in self.rootNodes:
             node.setExpanded(True)
-
-
-        
-
 
 
 
@@ -268,15 +279,45 @@ class UDevBrowserWidget(QWidget):
         self.setLayout(self.theLayout)
         self.splitter.setSizes([200, 400])
 
-    def itemSelected(self):
-        ctx = pyudev.Context()
-        path = self.leftWidget.getCurrentPath()
 
+    def itemSelected(self):
+        self.rightWidget.clearContents()
+        self.rightWidget.setRowCount(0)
+
+        path = self.leftWidget.getCurrentPath()
+        
+        if path[0] == 'usb':
+            self.handleUsb(path)
+        elif path[0] == 'devices':
+            self.handleDevice(path)
+
+
+    def handleUsb(self, path):
+
+        pathStr = '/' + '/'.join(path)
+        usbDevice = self.leftWidget.usbDevices.get(pathStr)
+        if usbDevice is not None:
+            self.insertLine("Device", pathStr)
+
+            self.insertLine("Speed", libusb1.libusb_speed.get(usbDevice.getDeviceSpeed()))
+            self.insertLine("Interfaces", usbDevice.getNumConfigurations())
+            self.insertLine("Vendor ID", '%04x' % usbDevice.getVendorID())
+            self.insertLine("Product ID", '%04x' % usbDevice.getProductID())
+
+            # USBDevice.getProduct() and USBDevice.getManufacturer() read
+            # the data from the devices string descriptor - unfortunately,
+            # libusb opens the device in read/write mode for that, which leads
+            # to an EACCESS error.  
+            # self.insertLine("Product", '%04x' % usbDevice.getProduct())
+            # self.insertLine("Manufacturer", '%04x' % usbDevice.getManufacturer())
+
+
+    def handleDevice(self, path):
+        pathStr = '/'.join(path)
+        sysPath = "/sys/" + pathStr
         try:
-            device = pyudev.Device.from_sys_path(ctx, "/sys" + path)
-    
-            self.rightWidget.clearContents()
-            self.rightWidget.setRowCount(0)
+            ctx = pyudev.Context()
+            device = pyudev.Device.from_sys_path(ctx, sysPath)
 
             self.insertLine("Sys path", device.sys_path)
             self.insertLine("Sys name", device.sys_name)
@@ -309,7 +350,7 @@ class UDevBrowserWidget(QWidget):
         newRow = self.rightWidget.rowCount()
         self.rightWidget.insertRow(newRow)
         self.rightWidget.setItem(newRow, 0, QTableWidgetItem(label))
-        self.rightWidget.setItem(newRow, 1, QTableWidgetItem(value))
+        self.rightWidget.setItem(newRow, 1, QTableWidgetItem(str(value)))
         self.rightWidget.setRowHeight(newRow, 20)
         if (newRow % 2) == 0:
             color = QColor(255, 255, 0xDE)
