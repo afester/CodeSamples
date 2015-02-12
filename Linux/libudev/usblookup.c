@@ -5,6 +5,14 @@
 
 #include "usblookup.h"
 
+static char* StrDup(const char* src) {
+   int memLen = strlen(src) + 1;
+   char* result = malloc(memLen);
+   memcpy(result, src, memLen);
+   return result;
+}
+
+
 void getVendorById(unsigned int vendorId, char** resultVendor) {
    getModelById(vendorId, 0, resultVendor, NULL);
 }
@@ -22,7 +30,7 @@ void getModelById(unsigned int vendorId, unsigned int productId, char** resultVe
        vendorProperty = udev_list_entry_get_by_name(properties, "ID_VENDOR_FROM_DATABASE");
        if (vendorProperty) {
           const char* vendor = udev_list_entry_get_value(vendorProperty);
-          *resultVendor = strdup(vendor);
+          *resultVendor = StrDup(vendor);
        }
 
        if (resultProduct) {
@@ -30,7 +38,7 @@ void getModelById(unsigned int vendorId, unsigned int productId, char** resultVe
           productProperty = udev_list_entry_get_by_name(properties, "ID_MODEL_FROM_DATABASE");
           if (productProperty) {
              const char* product = udev_list_entry_get_value(productProperty);
-             *resultProduct = strdup(product);
+             *resultProduct = StrDup(product);
           }
        }
     }
