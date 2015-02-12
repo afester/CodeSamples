@@ -183,7 +183,6 @@ class UDevTreeWidget(QWidget):
         self.treeWidget.scrollToItem(node)
 
     def addPath(self, path):
-        print("Adding:" + str(path))
         rootElement = path[0]
         subPath = path[1:]
 
@@ -298,11 +297,51 @@ class UDevBrowserWidget(QWidget):
         usbDevice = self.leftWidget.usbDevices.get(pathStr)
         if usbDevice is not None:
             self.insertLine("Device", pathStr)
-
+            self.insertLine("Bus Number", usbDevice.getBusNumber())
+            self.insertLine("Port  Number", usbDevice.getPortNumber())
+            self.insertLine("Device Address", usbDevice.getDeviceAddress())
+            self.insertLine("USB Spec", "0x%02x" % usbDevice.getbcdUSB())
+            self.insertLine("Class ID", usbDevice.getDeviceClass())
+            self.insertLine("Subclass ID", usbDevice.getDeviceSubClass())
+            self.insertLine("Protocol ID", usbDevice.getDeviceProtocol())
+            self.insertLine("EP0 Max packet size", usbDevice.getMaxPacketSize0())
+            self.insertLine("Vendor ID", '0x%04x' % usbDevice.getVendorID())
+            self.insertLine("Product ID", '0x%04x' % usbDevice.getProductID())
+            self.insertLine("Device release", '0x%04x' % usbDevice.getbcdDevice())
             self.insertLine("Speed", libusb1.libusb_speed.get(usbDevice.getDeviceSpeed()))
-            self.insertLine("Interfaces", usbDevice.getNumConfigurations())
-            self.insertLine("Vendor ID", '%04x' % usbDevice.getVendorID())
-            self.insertLine("Product ID", '%04x' % usbDevice.getProductID())
+
+            cfgCount = 0
+            self.insertLine("Number of Configurations", usbDevice.getNumConfigurations())
+            for usbCfg in usbDevice.iterConfigurations():
+                self.insertLine("  Configuration %d" % cfgCount, "")
+                self.insertLine("    Max Power", "%d mA" % usbCfg.getMaxPower())
+                self.insertLine("    Descriptor", usbCfg.getDescriptor())
+                
+                ifCount = 0
+                self.insertLine("    Number of Interfaces", usbCfg.getNumInterfaces())
+                for usbIf in usbCfg:
+                    self.insertLine("      Interface %d" % ifCount, "")
+                    self.insertLine("        Number of Settings", usbIf.getNumSettings())
+
+                    setCount = 0
+                    for usbSetting in usbIf:
+                        self.insertLine("          Setting %d" % setCount, "")
+                        self.insertLine("            Protocol", usbSetting.getProtocol())
+                        self.insertLine("            Number of Endpoints", usbSetting.getNumEndpoints())
+
+                        epCount = 1
+                        for ep in usbSetting:
+                            self.insertLine("              EP %d" % (int(ep.getAddress()) & 0x7F), "")
+                            self.insertLine("                Address", ep.getAddress())
+                            self.insertLine("                Interval", ep.getInterval())
+                            self.insertLine("                Max packet size", ep.getMaxPacketSize())
+                            epCount += 1
+
+                        setCount += 1
+
+                    ifCount += 1
+
+                cfgCount += 1
 
             # USBDevice.getProduct() and USBDevice.getManufacturer() read
             # the data from the devices string descriptor - unfortunately,
