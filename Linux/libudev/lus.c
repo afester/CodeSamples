@@ -1,12 +1,23 @@
+#include <stdlib.h>
 #include <stdio.h>
-#include <libudev.h>
 
+#include "usblookup.h"
 
 int main() {
-    printf("Querying hwdb:\n");
-    struct udev *udevCtx = udev_new ();
-    printf("udev ctx: %p\n", udevCtx);
+    char* vendor = NULL;
+    char* product = NULL;
 
-    struct udev * remaining = udev_unref (udevCtx);
-    printf("udev ctx: %p\n", remaining);
+    getModelById(0x03eb, 0x0902, &vendor, &product);
+    printf("RESULT: %s by %s\n", product, vendor);
+    free(vendor);
+    free(product);
+
+    getModelById(0x03f0, 0x0117, &vendor, &product);
+    printf("RESULT: %s by %s\n", product, vendor);
+    free(vendor);
+    free(product);
+
+    getVendorById(0x03f0, &vendor);
+    printf("RESULT: %s\n", vendor);
+    free(vendor);
 }
