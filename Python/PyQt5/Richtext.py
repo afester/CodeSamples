@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 '''
 Created on Feb 13, 2015
 
@@ -7,7 +9,89 @@ Created on Feb 13, 2015
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-import sys
+import sys, os
+
+
+class BrowserWidget(QTreeWidget):
+
+    itemSelected = pyqtSignal()
+
+    def __init__(self, parentWidget):
+        QTreeWidget.__init__(self, parentWidget)
+        self.setColumnCount(1)
+        self.setHeaderLabel("Sections")
+        self.itemSelectionChanged.connect(self.handleItemSelected)
+
+
+    def handleItemSelected(self):
+        selItems = self.selectedItems()
+        if len(selItems) == 1:
+            self.currentItem = selItems[0]
+            self.itemSelected.emit()
+
+
+    def refresh(self):
+        self.rootNodes = []
+
+        for root, dirs, files in os.walk('SampleWiki'):
+           dirs.sort()
+           for d in dirs:
+               path = os.path.join(root, d)
+               path = path.split("/")
+               path = path[1:]
+               self.addPath(path)
+
+        self.addTopLevelItems(self.rootNodes)
+        
+
+    def addPath(self, path):
+        rootElement = path[0]
+        subPath = path[1:]
+
+        # Lookup the root element
+        rootItem = None
+        for treeWidgetItem in self.rootNodes:
+            label = treeWidgetItem.text(0)
+            if label == rootElement:
+                rootItem = treeWidgetItem
+                break
+
+        # Create the root element
+        if rootItem is None:
+            rootItem = QTreeWidgetItem([rootElement])
+            self.rootNodes.append(rootItem)
+
+        # add the remaining child path
+        currentItem = rootItem
+        for element in subPath:
+
+            # Lookup the current element in the child items of the current node
+            foundItem = None
+            for idx in range(0, currentItem.childCount()):
+                childItem = currentItem.child(idx)
+                label = childItem.text(0)
+                if label == element:
+                    foundItem = childItem
+                    break
+            if foundItem is None:
+                foundItem = QTreeWidgetItem([element])
+                currentItem.addChild(foundItem)
+            currentItem = foundItem
+
+    def getCurrentPath(self):
+        result = [self.currentItem.text(0)]
+        parent = self.currentItem.parent()
+        while parent is not None:
+            result.insert(0, parent.text(0))
+            parent = parent.parent()
+        return result 
+
+
+class EditorWidget(QWidget):
+
+    def __init__(self, parentWidget):
+        QWidget.__init__(self, parentWidget)
+
 
 
 class RichtextSampleWidget(QWidget):
@@ -19,17 +103,12 @@ class RichtextSampleWidget(QWidget):
         self.splitter = QSplitter(self)
         self.theLayout.addWidget(self.splitter)
 
-        self.leftWidget = QTreeWidget(self)
-        self.leftWidget.setColumnCount(1)
-        self.leftWidget.setHeaderLabel("Sections")
-        #self.leftWidget.itemSelected.connect(self.itemSelected)
+        self.leftWidget = BrowserWidget(self)
+        self.leftWidget.itemSelected.connect(self.itemSelected)
 
         self.rightWidget = QTabWidget(self)
-        #self.rightWidget.setColumnCount(2)
-        #self.rightWidget.setHorizontalHeaderLabels(['Name', 'Value'])
-        #self.rightWidget.verticalHeader().hide()
 
-
+        ###########################################
         toolbar = QToolBar(self)
         toolbar.setFloatable(False)
         toolbar.setMovable(False)
@@ -60,6 +139,8 @@ class RichtextSampleWidget(QWidget):
         editWidget.setLayout(hLayout)
         hLayout.addWidget(toolbar)
         hLayout.addWidget(self.editView)
+        ###########################################
+
 
         self.rightWidget.addTab(editWidget, "Edit")
 
@@ -93,7 +174,17 @@ class RichtextSampleWidget(QWidget):
         self.setLayout(self.theLayout)
         self.splitter.setSizes([100, 400])
 
+        self.leftWidget.refresh()
         self.loadLatest()
+
+
+    def itemSelected(self):
+        path = self.leftWidget.getCurrentPath()
+        path = os.path.join('SampleWiki', *path)
+        contentFile = os.path.join(path, 'content.html')
+        with open(contentFile, 'r') as content_file:
+            content = content_file.read()
+            self.editView.setHtml(content)
 
 
     def selectedBlocks(self):
@@ -113,9 +204,9 @@ class RichtextSampleWidget(QWidget):
 
     def textCode(self):
         # Create a plain text representation of the selected blocks
-        result = "Line1\u2028Line2\u2028Line3\u2028"
-        #for block in self.selectedBlocks():
-        #    result = result + block.text() + "\r"
+        result = '' # "Line1\u2028Line2\u2028Line3\u2028"
+        for block in self.selectedBlocks():
+            result = result + block.text() + "\u2028"
         
         #fragment = QTextDocumentFragment.fromPlainText(result)
         
@@ -179,19 +270,14 @@ class RichtextSampleWidget(QWidget):
 
         fragments = textBlock.begin()
         while not fragments.atEnd():
-            self.result = self.result + "|"
             fragment = fragments.fragment()
             text = fragment.text()
-            if len(text) > 4:
-                print(text, len(text))
-                print("!%04x!" %ord(text[5]))
             charFormat = fragment.charFormat()
             if charFormat.fontWeight() == QFont.Bold:
                 self.result = self.result + "<b>" + fragment.text() + "</b>"
             else:
                 self.result = self.result + fragment.text()
             fragments += 1
-            self.result = self.result + "|"
 
         self.result = self.result + "</p>\n"
 
