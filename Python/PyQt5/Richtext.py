@@ -122,7 +122,13 @@ class RichtextSampleWidget(QWidget):
         textBoldAction.triggered.connect(self.textBold)
         toolbar.addAction(textBoldAction)
 
-        toolbar.addAction(QAction(QIcon("icons/format-text-italic.png"), "Italic", toolbar))
+        blockListAction = QAction(QIcon("icons/format-list-unordered.png"), "List", toolbar)
+        blockListAction.triggered.connect(self.blockList)
+        toolbar.addAction(blockListAction)
+
+        toolbar.addAction(QAction(QIcon("icons/format-list-ordered.png"), "Numbered List", toolbar))
+        toolbar.addAction(QAction(QIcon("icons/format-indent-less.png"), "Increase indent", toolbar))
+        toolbar.addAction(QAction(QIcon("icons/format-indent-more.png"), "Decrease indent", toolbar))
 
         textCodeAction = QAction(QIcon("icons/format-text-code.png"), "Code", toolbar)
         textCodeAction.triggered.connect(self.textCode)
@@ -231,6 +237,29 @@ class RichtextSampleWidget(QWidget):
             cursor.select(QTextCursor.WordUnderCursor)
         cursor.mergeCharFormat(fmt);
         self.editView.mergeCurrentCharFormat(fmt);
+
+
+    def blockList(self):
+        print("Formatting as list")
+        cursor = self.textView.textCursor()
+        cursor.beginEditBlock()
+
+        blockFmt = cursor.blockFormat()
+
+        listFmt = QTextListFormat()
+        if cursor.currentList():
+            listFmt = cursor.currentList().format()
+        else:
+            listFmt.setIndent(blockFmt.indent() + 1)
+            blockFmt.setIndent(0)
+            cursor.setBlockFormat(blockFmt)
+
+        listFmt.setStyle(QTextListFormat.ListDisc)
+
+        cursor.createList(listFmt)
+
+        cursor.endEditBlock()
+
 
 
     def loadLatest(self):
