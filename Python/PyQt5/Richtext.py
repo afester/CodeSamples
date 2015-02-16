@@ -10,6 +10,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 import sys, os
+from _tracemalloc import start
 
 
 class BrowserWidget(QTreeWidget):
@@ -38,11 +39,14 @@ class BrowserWidget(QTreeWidget):
            for d in dirs:
                path = os.path.join(root, d)
                path = path.split("/")
-               path = path[1:]
+               # path = path[1:]
                self.addPath(path)
 
         self.addTopLevelItems(self.rootNodes)
-        
+
+        for node in self.rootNodes:
+            node.setExpanded(True)
+
 
     def addPath(self, path):
         rootElement = path[0]
@@ -112,10 +116,17 @@ class RichtextSampleWidget(QWidget):
         toolbar = QToolBar(self)
         toolbar.setFloatable(False)
         toolbar.setMovable(False)
-        toolbar.addAction(QAction(QIcon("icons/file-open.png"), "Open", toolbar))
+
         saveAction = QAction(QIcon("icons/file-save.png"), "Save", toolbar)
+        saveAction.setShortcut(Qt.CTRL + Qt.Key_S);
         saveAction.triggered.connect(self.save)
         toolbar.addAction(saveAction)
+
+        self.nonprintableAction = QAction(QIcon("icons/view-nonprintable.png"), "View nonprintable chars", toolbar)
+        self.nonprintableAction.setCheckable(True);
+        self.nonprintableAction.triggered.connect(self.toggleNonprintable)
+        toolbar.addAction(self.nonprintableAction)
+
         toolbar.addSeparator()
 
         textBoldAction = QAction(QIcon("icons/format-text-bold.png"), "Bold", toolbar)
@@ -127,18 +138,31 @@ class RichtextSampleWidget(QWidget):
         toolbar.addAction(blockListAction)
 
         toolbar.addAction(QAction(QIcon("icons/format-list-ordered.png"), "Numbered List", toolbar))
-        toolbar.addAction(QAction(QIcon("icons/format-indent-less.png"), "Increase indent", toolbar))
-        toolbar.addAction(QAction(QIcon("icons/format-indent-more.png"), "Decrease indent", toolbar))
 
-        textCodeAction = QAction(QIcon("icons/format-text-code.png"), "Code", toolbar)
-        textCodeAction.triggered.connect(self.textCode)
-        toolbar.addAction(textCodeAction)
+        decIndentAction = QAction(QIcon("icons/format-indent-less.png"), "Decrease indent", toolbar)
+        decIndentAction.triggered.connect(self.decrementIndent)
+        toolbar.addAction(decIndentAction)
+
+        incIndentAction = QAction(QIcon("icons/format-indent-more.png"), "Incecrease indent", toolbar)
+        incIndentAction.triggered.connect(self.incrementIndent)
+        toolbar.addAction(incIndentAction)
+
+        self.comboStyle = QComboBox(toolbar)
+        toolbar.addWidget(QLabel("Block format:"))
+        toolbar.addWidget(self.comboStyle)
+        self.comboStyle.addItem("Paragraph")
+        self.comboStyle.addItem("Paragraph centered")
+        self.comboStyle.addItem("Paragraph block")
+        self.comboStyle.addItem("Header 1")
+        self.comboStyle.addItem("Header 2")
+        self.comboStyle.addItem("Header 3")
+        self.comboStyle.addItem("Code (Java)")
+        self.comboStyle.addItem("Code (C++)")
+        self.comboStyle.addItem("Code (SQL)")
+        self.comboStyle.activated.connect(self.blockStyle)
+
 
         self.editView = QTextEdit(self.rightWidget)
-
-        option = QTextOption()
-        option.setFlags(QTextOption.ShowTabsAndSpaces | QTextOption.ShowLineAndParagraphSeparators)
-        self.editView.document().setDefaultTextOption(option)
 
         editWidget = QWidget(self)
         hLayout = QVBoxLayout(editWidget)
@@ -181,16 +205,13 @@ class RichtextSampleWidget(QWidget):
         self.splitter.setSizes([100, 400])
 
         self.leftWidget.refresh()
-        self.loadLatest()
+        self.load(['SampleWiki'])
 
 
     def itemSelected(self):
         path = self.leftWidget.getCurrentPath()
-        path = os.path.join('SampleWiki', *path)
-        contentFile = os.path.join(path, 'content.html')
-        with open(contentFile, 'r') as content_file:
-            content = content_file.read()
-            self.editView.setHtml(content)
+        # path = os.path.join('SampleWiki', *path)
+        self.load(path)
 
 
     def selectedBlocks(self):
@@ -213,7 +234,7 @@ class RichtextSampleWidget(QWidget):
         result = '' # "Line1\u2028Line2\u2028Line3\u2028"
         for block in self.selectedBlocks():
             result = result + block.text() + "\u2028"
-        
+
         #fragment = QTextDocumentFragment.fromPlainText(result)
         
         fragment = QTextDocumentFragment.fromPlainText(result)
@@ -228,6 +249,17 @@ class RichtextSampleWidget(QWidget):
         print(result)
 
 
+    def toggleNonprintable(self):
+        if self.nonprintableAction.isChecked():
+            option = QTextOption()
+            option.setFlags(QTextOption.ShowTabsAndSpaces | QTextOption.ShowLineAndParagraphSeparators)
+            self.editView.document().setDefaultTextOption(option)
+        else:
+            option = QTextOption()
+            # option.setFlags(QTextOption.ShowTabsAndSpaces | QTextOption.ShowLineAndParagraphSeparators)
+            self.editView.document().setDefaultTextOption(option)
+
+
     def textBold(self):
         fmt = QTextCharFormat()
         fmt.setFontWeight(QFont.Bold) # actionTextBold->isChecked() ? QFont::Bold : QFont::Normal);
@@ -240,8 +272,7 @@ class RichtextSampleWidget(QWidget):
 
 
     def blockList(self):
-        print("Formatting as list")
-        cursor = self.textView.textCursor()
+        cursor = self.editView.textCursor()
         cursor.beginEditBlock()
 
         blockFmt = cursor.blockFormat()
@@ -261,15 +292,93 @@ class RichtextSampleWidget(QWidget):
         cursor.endEditBlock()
 
 
+    def incrementIndent(self):
+        cursor = self.editView.textCursor()
+        theList = cursor.currentList();
+        if theList:
+            listFmt = theList.format()
+            listFmt.setIndent(listFmt.indent() + 1)
+            theList.setFormat(listFmt)
 
-    def loadLatest(self):
-        with open('sample.txt', 'r') as content_file:
+
+    def decrementIndent(self):
+        cursor = self.editView.textCursor()
+        theList = cursor.currentList();
+        if theList:
+            listFmt = theList.format()
+            listFmt.setIndent(listFmt.indent() - 1)
+            theList.setFormat(listFmt)
+
+
+    # Selects all blocks which are part of the current selection.
+    def selectWholeBlocks(self, cursor):
+        #cursor = self.editView.textCursor()
+
+        start = cursor.anchor()
+        end = cursor.position()
+        if start > end:
+            temp = end
+            end = start
+            start = temp
+
+        cursor.setPosition(start)
+        cursor.movePosition(QTextCursor.StartOfBlock)
+        cursor.setPosition(end, QTextCursor.KeepAnchor)
+        cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+        
+
+    def blockStyle(self, idx):
+        if idx == 0:
+            cursor = self.editView.textCursor()
+            self.selectWholeBlocks(cursor)
+            content = cursor.selection().toPlainText()
+            cursor.removeSelectedText()
+            cursor.deleteChar() # also delete the block http://stackoverflow.com/questions/16996679/remove-block-from-qtextdocument
+            cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
+
+        elif idx == 3:
+            cursor = self.editView.textCursor()
+            self.selectWholeBlocks(cursor)
+            content = cursor.selection().toPlainText()
+            cursor.removeSelectedText()
+            cursor.insertFragment(QTextDocumentFragment.fromHtml("<h1>" + content + "</h1>"))
+
+        elif idx == 4:
+            cursor = self.editView.textCursor()
+            self.selectWholeBlocks(cursor)
+            content = cursor.selection().toPlainText()
+            cursor.removeSelectedText()
+            cursor.insertFragment(QTextDocumentFragment.fromHtml("<h2>" + content + "</h2>"))
+
+        elif idx == 5:
+            content = ""
+            for block in self.selectedBlocks():
+                content = content + block.text() + "\u2028"
+
+            cursor = self.editView.textCursor()
+            self.selectWholeBlocks(cursor)
+            # content = cursor.selection().toPlainText()
+            cursor.removeSelectedText()
+            cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
+
+        else:
+            print("Formatting with %d" % idx)
+
+
+    def load(self, path):
+        self.contentFile = os.path.join(*path)
+        self.contentFile = os.path.join(self.contentFile, 'content.html')
+        with open(self.contentFile, 'r') as content_file:
             content = content_file.read()
             self.editView.setHtml(content)
+        self.parent().statusBar.showMessage("Loaded %s" % self.contentFile, 3000)
+
 
     def save(self):
-        with open('sample.txt', 'w') as content_file:
+        with open(self.contentFile, 'w') as content_file:
             content_file.write(self.editView.toHtml())
+        self.parent().statusBar.showMessage("Saved %s" % self.contentFile, 3000)
+
 
     def tabSelected(self, index):
         if index == 3:
@@ -330,6 +439,11 @@ class MainWindow(QMainWindow):
         helpMenu.addAction(aboutAction)
 
         self.setMenuBar(menuBar)
+
+        # Setup the status bar
+        self.statusBar = QStatusBar()
+        self.statusBar.showMessage("Ready.")
+        self.setStatusBar(self.statusBar)
 
         self.mainWidget = RichtextSampleWidget(self)
         self.setCentralWidget(self.mainWidget)
