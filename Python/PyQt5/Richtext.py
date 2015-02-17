@@ -91,28 +91,15 @@ class BrowserWidget(QTreeWidget):
         return result 
 
 
+
 class EditorWidget(QWidget):
+    message = pyqtSignal(str)
 
     def __init__(self, parentWidget):
         QWidget.__init__(self, parentWidget)
 
+        self.setStyleSheet(".QWidget { background-color: green; border: none; }")
 
-
-class RichtextSampleWidget(QWidget):
-
-    def __init__(self, parentWidget):
-        QWidget.__init__(self, parentWidget)
-
-        self.theLayout = QHBoxLayout()
-        self.splitter = QSplitter(self)
-        self.theLayout.addWidget(self.splitter)
-
-        self.leftWidget = BrowserWidget(self)
-        self.leftWidget.itemSelected.connect(self.itemSelected)
-
-        self.rightWidget = QTabWidget(self)
-
-        ###########################################
         toolbar = QToolBar(self)
         toolbar.setFloatable(False)
         toolbar.setMovable(False)
@@ -162,71 +149,46 @@ class RichtextSampleWidget(QWidget):
         self.comboStyle.activated.connect(self.blockStyle)
 
 
-        self.editView = QTextEdit(self.rightWidget)
+        self.editView = QTextEdit(self)
 
         editWidget = QWidget(self)
         hLayout = QVBoxLayout(editWidget)
         editWidget.setLayout(hLayout)
         hLayout.addWidget(toolbar)
         hLayout.addWidget(self.editView)
-        ###########################################
 
 
-        self.rightWidget.addTab(editWidget, "Edit")
+    def load(self, path):
+        self.contentFile = os.path.join(*path)
+        self.contentFile = os.path.join(self.contentFile, 'content.html')
+        with open(self.contentFile, 'r') as content_file:
+            content = content_file.read()
+            self.editView.setHtml(content)
+        self.message.emit("Loaded %s" % self.contentFile)
 
 
-        self.rightWidget.addTab(QWidget(self.rightWidget), "View web")
-
-        self.rightWidget.addTab(QWidget(self.rightWidget), "View pdf")
-
-        self.htmlView = QTextEdit(self.rightWidget)
-        self.htmlView.setReadOnly(True)
-        self.rightWidget.addTab(self.htmlView, "View html")
-
-        self.textView = QTextEdit(self.rightWidget)
-        self.textView.setReadOnly(True)
-        self.rightWidget.addTab(self.textView, "View plaintext")
-
-        self.customView = QTextEdit(self.rightWidget)
-        self.customView.setReadOnly(True)
-        self.rightWidget.addTab(self.customView, "View XML")
-
-        self.rightWidget.currentChanged.connect(self.tabSelected)
-
-        self.splitter.addWidget(self.leftWidget)
-
-        #self.rightLayoutWidget = QHBoxLayout()
-        #self.rightLayoutWidget.addWidget(self.rightWidget)
-        #self.rightW = QWidget(self.splitter)
-        #self.rightW.setLayout(self.rightLayoutWidget)
-        self.splitter.addWidget(self.rightWidget)
-
-        self.setLayout(self.theLayout)
-        self.splitter.setSizes([100, 400])
-
-        self.leftWidget.refresh()
-        self.load(['SampleWiki'])
+    def save(self):
+        with open(self.contentFile, 'w') as content_file:
+            content_file.write(self.editView.toHtml())
+        self.message.emit("Saved %s" % self.contentFile)
 
 
-    def itemSelected(self):
-        path = self.leftWidget.getCurrentPath()
-        # path = os.path.join('SampleWiki', *path)
-        self.load(path)
-
-
-    def selectedBlocks(self):
+    def incrementIndent(self):
         cursor = self.editView.textCursor()
-        document = self.editView.document()
+        theList = cursor.currentList();
+        if theList:
+            listFmt = theList.format()
+            listFmt.setIndent(listFmt.indent() + 1)
+            theList.setFormat(listFmt)
 
-        startBlock = document.findBlock(cursor.selectionStart()) 
-        endBlock = document.findBlock(cursor.selectionEnd())
-        done = False
-        while not done:
-            yield startBlock
-            if startBlock == endBlock:
-                done = True
-            else:
-                startBlock = startBlock.next()
+
+    def decrementIndent(self):
+        cursor = self.editView.textCursor()
+        theList = cursor.currentList();
+        if theList:
+            listFmt = theList.format()
+            listFmt.setIndent(listFmt.indent() - 1)
+            theList.setFormat(listFmt)
 
 
     def textCode(self):
@@ -292,24 +254,6 @@ class RichtextSampleWidget(QWidget):
         cursor.endEditBlock()
 
 
-    def incrementIndent(self):
-        cursor = self.editView.textCursor()
-        theList = cursor.currentList();
-        if theList:
-            listFmt = theList.format()
-            listFmt.setIndent(listFmt.indent() + 1)
-            theList.setFormat(listFmt)
-
-
-    def decrementIndent(self):
-        cursor = self.editView.textCursor()
-        theList = cursor.currentList();
-        if theList:
-            listFmt = theList.format()
-            listFmt.setIndent(listFmt.indent() - 1)
-            theList.setFormat(listFmt)
-
-
     # Selects all blocks which are part of the current selection.
     def selectWholeBlocks(self, cursor):
         #cursor = self.editView.textCursor()
@@ -365,19 +309,86 @@ class RichtextSampleWidget(QWidget):
             print("Formatting with %d" % idx)
 
 
-    def load(self, path):
-        self.contentFile = os.path.join(*path)
-        self.contentFile = os.path.join(self.contentFile, 'content.html')
-        with open(self.contentFile, 'r') as content_file:
-            content = content_file.read()
-            self.editView.setHtml(content)
-        self.parent().statusBar.showMessage("Loaded %s" % self.contentFile, 3000)
 
 
-    def save(self):
-        with open(self.contentFile, 'w') as content_file:
-            content_file.write(self.editView.toHtml())
-        self.parent().statusBar.showMessage("Saved %s" % self.contentFile, 3000)
+class RichtextSampleWidget(QWidget):
+
+    def __init__(self, parentWidget):
+        QWidget.__init__(self, parentWidget)
+
+        self.theLayout = QHBoxLayout()
+        self.splitter = QSplitter(self)
+        self.theLayout.addWidget(self.splitter)
+
+        self.leftWidget = BrowserWidget(self)
+        self.leftWidget.itemSelected.connect(self.itemSelected)
+
+        self.rightWidget = QTabWidget(self)
+
+        #w = QWidget(self.rightWidget)
+        #layout = QVBoxLayout(w);
+        self.editorWidget = EditorWidget(self.rightWidget)
+        #layout.addWidget(self.editorWidget)
+
+        self.editorWidget.setObjectName("EditorWidget1")
+        self.editorWidget.message.connect(self.showMessage)
+        self.rightWidget.addTab(self.editorWidget, "Edit")
+
+        self.rightWidget.addTab(QWidget(self.rightWidget), "View web")
+
+        self.rightWidget.addTab(QWidget(self.rightWidget), "View pdf")
+
+        self.htmlView = QTextEdit(self.rightWidget)
+        self.htmlView.setReadOnly(True)
+        self.rightWidget.addTab(self.htmlView, "View html")
+
+        self.textView = QTextEdit(self.rightWidget)
+        self.textView.setReadOnly(True)
+        self.rightWidget.addTab(self.textView, "View plaintext")
+
+        self.customView = QTextEdit(self.rightWidget)
+        self.customView.setReadOnly(True)
+        self.rightWidget.addTab(self.customView, "View XML")
+
+        self.rightWidget.currentChanged.connect(self.tabSelected)
+
+        self.splitter.addWidget(self.leftWidget)
+
+        #self.rightLayoutWidget = QHBoxLayout()
+        #self.rightLayoutWidget.addWidget(self.rightWidget)
+        #self.rightW = QWidget(self.splitter)
+        #self.rightW.setLayout(self.rightLayoutWidget)
+        self.splitter.addWidget(self.rightWidget)
+
+        self.setLayout(self.theLayout)
+        self.splitter.setSizes([100, 400])
+
+        self.leftWidget.refresh()
+        self.editorWidget.load(['SampleWiki'])
+
+    def showMessage(self, message):
+        self.parent().statusBar.showMessage(message, 3000)
+
+    def itemSelected(self):
+        path = self.leftWidget.getCurrentPath()
+        # path = os.path.join('SampleWiki', *path)
+        self.load(path)
+
+
+    def selectedBlocks(self):
+        cursor = self.editView.textCursor()
+        document = self.editView.document()
+
+        startBlock = document.findBlock(cursor.selectionStart()) 
+        endBlock = document.findBlock(cursor.selectionEnd())
+        done = False
+        while not done:
+            yield startBlock
+            if startBlock == endBlock:
+                done = True
+            else:
+                startBlock = startBlock.next()
+
 
 
     def tabSelected(self, index):
@@ -474,7 +485,8 @@ class MainWindow(QMainWindow):
 def main():
     # Create the application object
     app = QApplication(sys.argv)
-    
+    #app.setStyleSheet("QWidget#EditorWidget1 { background-color: green; border: none; }")
+
     # Create the main window
     mainWindow = MainWindow(app)
 
