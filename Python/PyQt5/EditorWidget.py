@@ -104,7 +104,7 @@ class EditorWidget(QWidget):
 
     def load(self, path):
         self.contentFile = os.path.join(*path)
-        self.contentFile = os.path.join(self.contentFile, 'content.html')
+        self.contentFile = os.path.join(self.contentFile, 'content.xml')
 
         # NOTE: HTML can be loaded with styles attached, but when written back 
         # with toHtml the resulting HTML code does not contain the style information
@@ -125,8 +125,11 @@ class EditorWidget(QWidget):
         #return
 
         with open(self.contentFile, 'r') as content_file:
+
+            # TODO: Use an XML Importer!
             content = content_file.read()
             self.editView.setHtml(content)
+
         self.message.emit("Loaded %s" % self.contentFile)
 
 
@@ -137,7 +140,7 @@ class EditorWidget(QWidget):
             # See QTextHtmlExporter in qtbase/src/gui/text/qtextdocument.cpp
             #content_file.write(self.editView.toHtml())
             content_file.write(self.externalize())
-        self.message.emit("Saved %s" % self.contentFile)
+        self.message.emit("Saved %s" % self.contentFile2)
 
 
     def incrementIndent(self):
@@ -252,6 +255,17 @@ class EditorWidget(QWidget):
         cursor.setPosition(end, QTextCursor.KeepAnchor)
         cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
 
+    def selectFrame(self, frame, cursor):
+        start = frame.firstPosition()
+        end = frame.lastPosition()
+
+        print("%d/%d" % (start, end))
+
+        cursor.setPosition(start)
+        cursor.movePosition(QTextCursor.StartOfBlock)
+        cursor.setPosition(end, QTextCursor.KeepAnchor)
+        cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+
 
     def selectedBlocks(self):
         cursor = self.editView.textCursor()
@@ -313,11 +327,23 @@ class EditorWidget(QWidget):
             self.selectWholeBlocks(cursor)
             # content = cursor.selection().toPlainText()
             cursor.removeSelectedText()
+
             fmt = QTextFrameFormat()
-            fmt.setBorder(2.0)
+            fmt.setBorder(1.0)
+            fmt.setBorderStyle(QTextFrameFormat.BorderStyle_Dotted)    
+            fmt.setBorderBrush(Qt.darkGray)
+            fmt.setBackground(Qt.lightGray)
+            fmt.setMargin(5)
+            fmt.setPadding(5)
+
             frame = cursor.insertFrame(fmt)
             cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
-            cursor.block().setUserData(UserData("javacode"))
+            self.selectFrame(frame, cursor)
+            charFmt = QTextCharFormat()
+            charFmt.setForeground(Qt.black)
+            charFmt.setFontFamily("Courier")
+            charFmt.setFontPointSize(10)
+            cursor.setCharFormat(charFmt)
 
         else:
             print("Formatting with %d" % idx)
@@ -326,16 +352,16 @@ class EditorWidget(QWidget):
 
 
     def externalize(self):
-        # self.result = "<?xml version = '1.0' encoding = 'UTF-8'?>\n<page>\n"
+        self.result = "<?xml version = '1.0' encoding = 'UTF-8'?>\n<page>\n"
+        # self.result = "<html>\n"
 
-        self.result = "<html>\n"
         document = self.editView.document()
         textBlock = document.firstBlock()
         while textBlock.isValid():
             self.emitTextBlock(textBlock)
             textBlock = textBlock.next()
 
-        self.result = self.result + "</html>"
+        self.result = self.result + "</page>"
         return self.result
 
 
