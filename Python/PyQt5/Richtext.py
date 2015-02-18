@@ -31,16 +31,32 @@ class BrowserWidget(QTreeWidget):
             self.itemSelected.emit()
 
 
+    # platform independant path.split function
+    # See http://stackoverflow.com/questions/4579908/cross-platform-splitting-of-path-in-python
+    def os_path_split(self, path, debug=False):
+        parts = []
+        while True:
+            newpath, tail = os.path.split(path)
+            if debug: print(repr(path), (newpath, tail))
+            if newpath == path:
+                assert not tail
+                if path: parts.append(path)
+                break
+            parts.append(tail)
+            path = newpath
+        parts.reverse()
+        return parts
+
+
     def refresh(self):
         self.rootNodes = []
 
         for root, dirs, files in os.walk('SampleWiki'):
-           dirs.sort()
-           for d in dirs:
-               path = os.path.join(root, d)
-               path = path.split("/")
-               # path = path[1:]
-               self.addPath(path)
+            dirs.sort()
+            for d in dirs:
+                path = os.path.join(root, d)
+                path = self.os_path_split(path)
+                self.addPath(path)
 
         self.addTopLevelItems(self.rootNodes)
 
@@ -98,8 +114,6 @@ class EditorWidget(QWidget):
     def __init__(self, parentWidget):
         QWidget.__init__(self, parentWidget)
 
-        self.setStyleSheet(".QWidget { background-color: green; border: none; }")
-
         toolbar = QToolBar(self)
         toolbar.setFloatable(False)
         toolbar.setMovable(False)
@@ -148,12 +162,9 @@ class EditorWidget(QWidget):
         self.comboStyle.addItem("Code (SQL)")
         self.comboStyle.activated.connect(self.blockStyle)
 
-
         self.editView = QTextEdit(self)
 
-        editWidget = QWidget(self)
-        hLayout = QVBoxLayout(editWidget)
-        editWidget.setLayout(hLayout)
+        hLayout = QVBoxLayout(self)
         hLayout.addWidget(toolbar)
         hLayout.addWidget(self.editView)
 
@@ -311,6 +322,7 @@ class EditorWidget(QWidget):
 
 
 
+
 class RichtextSampleWidget(QWidget):
 
     def __init__(self, parentWidget):
@@ -325,14 +337,19 @@ class RichtextSampleWidget(QWidget):
 
         self.rightWidget = QTabWidget(self)
 
-        #w = QWidget(self.rightWidget)
-        #layout = QVBoxLayout(w);
-        self.editorWidget = EditorWidget(self.rightWidget)
-        #layout.addWidget(self.editorWidget)
+        tab = QWidget()
+
+        tabLayout = QVBoxLayout(tab)
+        tab.setLayout(tabLayout)
+
+        self.editorWidget = EditorWidget(tab)
 
         self.editorWidget.setObjectName("EditorWidget1")
         self.editorWidget.message.connect(self.showMessage)
-        self.rightWidget.addTab(self.editorWidget, "Edit")
+
+        tabLayout.addWidget(self.editorWidget)
+        self.rightWidget.addTab(tab, "Edit")
+#############################
 
         self.rightWidget.addTab(QWidget(self.rightWidget), "View web")
 
