@@ -100,8 +100,8 @@ class EditorWidget(QWidget):
 
 
     def load(self, path):
-        self.contentFile = os.path.join(*path)
-        self.contentFile = os.path.join(self.contentFile, 'content.xml')
+        contentPath = os.path.join(*path)
+        contentFile = 'content.xml'
         # self.contentFile = os.path.join(self.contentFile, 'content.html')
 
         # NOTE: HTML can be loaded with styles attached, but when written back 
@@ -125,16 +125,16 @@ class EditorWidget(QWidget):
         #self.contentFile = os.path.join(self.contentFile, 'Section3')
         #self.contentFile = os.path.join(self.contentFile, 'content.html')
 
-        with open(self.contentFile, 'r') as content_file:
-            importer = XMLImporter(content_file)
-            doc = importer.importDocument()
-            self.editView.setDocument(doc)
+        importer = XMLImporter(contentPath, contentFile)
+        doc = importer.importDocument()
+        self.editView.setDocument(doc)
 
             # self.editView.setHtml("<h1>Header</h1><pre>Java Code\nLine 1</pre>")
 
             #content = content_file.read()
             #self.editView.setHtml(content)
 
+        self.contentFile = os.path.join(contentPath, contentFile)
         self.message.emit("Loaded %s" % self.contentFile)
 
 

@@ -38,15 +38,15 @@ class XMLExporter:
         #print("USERDATA:" + str(userData))
         #print("USERPROPERTY:" + str(textBlock.blockFormat().property(QTextFormat.UserProperty)))
 
-        blkFmt = textBlock.blockFormat()
-        print("Block format: " + str(blkFmt.type()))
-        print("User data: " + str(userData))
+        #blkFmt = textBlock.blockFormat()
+        #print("Block format: " + str(blkFmt.type()))
+        #print("User data: " + str(userData))
 
         if textBlock.textList() is not None:
             self.emitList(textBlock)
         else:
             if userData is None:
-                self.emitParagraph(textBlock)
+                self.emitBlock(textBlock)
             elif userData == "h1":
                 self.result = self.result + "\n   <h1>" + escape(textBlock.text()) + "</h1>\n"
             elif userData == "h2":
@@ -54,7 +54,7 @@ class XMLExporter:
             elif userData == "h3":
                 self.result = self.result + "\n   <h3>" + escape(textBlock.text()) + "</h3>\n"
             elif userData == "p":
-                self.emitParagraph(textBlock)
+                self.emitBlock(textBlock)
                 #self.result = self.result + "   <p>" + textBlock.text() + "</p>\n"
             elif userData == "code":
                 frag = textBlock.text()
@@ -75,19 +75,36 @@ class XMLExporter:
             self.result = self.result + "   </ul>\n";
 
 
-    def emitParagraph(self, textBlock):
+    def emitBlock(self, textBlock):
 
         self.result = self.result + "   <p>"
 
         fragments = textBlock.begin()
         while not fragments.atEnd():
-            fragment = fragments.fragment()
-            text = escape(fragment.text())
-            charFormat = fragment.charFormat()
-            if charFormat.fontWeight() == QFont.Bold:
-                self.result = self.result + "<em>" + text + "</em>"
-            else:
-                self.result = self.result + text
+            self.emitFragment(fragments.fragment())
             fragments += 1
 
         self.result = self.result + "</p>\n"
+
+
+    def emitFragment(self, fragment):
+        text = fragment.text()
+        charFormat = fragment.charFormat()
+
+        isObject = (text.find('\ufffc') != -1)
+        isImage = isObject and charFormat.isImageFormat()
+
+        if isImage:
+            imgFmt = charFormat.toImageFormat()
+            imgName = imgFmt.name().split("/")[-1]
+
+            # If the same image repeats multiple times, it is simply represented by
+            # yet another object replacement character ...
+            for img in range(0, len(text)):
+                self.result = self.result + "<img src=\"%s\" />" % imgName
+            
+        elif charFormat.fontWeight() == QFont.Bold:
+            self.result = self.result + "<em>" + escape(text) + "</em>"
+        else:
+            self.result = self.result + escape(text)
+    

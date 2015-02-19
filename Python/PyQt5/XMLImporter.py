@@ -1,9 +1,9 @@
 
-
+import os
 import xml.sax
 
 from PyQt5.QtGui import QTextDocument, QTextBlockFormat, QTextListFormat, QTextDocumentFragment 
-from PyQt5.QtGui import QTextCursor, QTextBlockUserData, QFont
+from PyQt5.QtGui import QTextCursor, QTextBlockUserData, QFont, QTextImageFormat
 from PyQt5.Qt import QTextCharFormat, Qt, QColor
 
 class UserData(QTextBlockUserData):
@@ -18,9 +18,10 @@ class UserData(QTextBlockUserData):
 
 class Handler(xml.sax.handler.ContentHandler):
 
-    def __init__(self):
+    def __init__(self, contentPath):
         self.state = 0
         self.content = ""
+        self.contentPath = contentPath
 
         self.h1BlockFmt = QTextBlockFormat()
         self.h1BlockFmt.setTopMargin(18)
@@ -176,6 +177,8 @@ class Handler(xml.sax.handler.ContentHandler):
             self.firstLi = True
         elif name == "li":
             self.state = 9
+        elif name == "img":
+            self.insertImage(attrs)
         else:
             print("INVALID TAG:" + name)
 
@@ -228,15 +231,17 @@ class Handler(xml.sax.handler.ContentHandler):
                 self.cursor.setBlockFormat(self.pBlockFmt)
                 self.cursor.insertList(self.ul1Fmt)
                 self.cursor.setBlockCharFormat(self.pCharFmt)
-                print("FIRST:" + self.content)
+
                 self.cursor.insertText(self.content)
                 self.firstLi = False
                 self.state = 0
             else:
                 self.cursor.insertBlock()
                 self.cursor.insertText(self.content)
-                print("NEXT:" + self.content)
+
                 self.state = 0
+        elif name == "img":
+            pass
         else:
             print("INVALID END TAG/STATE combination:" + name + "/" + str(topState))
         self.content = ""
@@ -261,18 +266,28 @@ class Handler(xml.sax.handler.ContentHandler):
         #self.cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
         self.cursor.insertText(content, fragFmt)
 
+    def insertImage(self, attrs):
+        imageFile = attrs.getValue("src")
+        imagePath = os.path.join(self.contentPath, imageFile)
+        imageFmt = QTextImageFormat()
+        imageFmt.setName(imagePath)
+        #self.cursor.insertBlock()
+        self.cursor.insertImage(imageFmt)
+
 
 class XMLImporter:
 
-    def __init__(self, fileHandle):
-        self.fileHandle = fileHandle
-
+    def __init__(self, contentPath, contentFile):
+        self.contentPath = contentPath
+        self.contentFile = contentFile
 
     def importDocument(self):
-        parser = xml.sax.make_parser()
-        handler = Handler()
-        parser.setContentHandler(handler)
-        parser.parse(self.fileHandle)
+        contentFilePath = os.path.join(self.contentPath, self.contentFile)
+        with open(contentFilePath, 'r') as content_file:
+            parser = xml.sax.make_parser()
+            handler = Handler(self.contentPath)
+            parser.setContentHandler(handler)
+            parser.parse(content_file)
 
         return handler.result
 
