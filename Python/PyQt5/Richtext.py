@@ -6,12 +6,16 @@ Created on Feb 13, 2015
 @author: andreas
 '''
 
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
+from PyQt5.QtCore import QSize, PYQT_VERSION_STR, QT_VERSION_STR, qVersion, pyqtSignal
+from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QTabWidget
+from PyQt5.QtWidgets import QTextEdit, QSplitter, QHBoxLayout, QVBoxLayout, QMainWindow
+from PyQt5.QtWidgets import QAction, QStatusBar, QMenuBar, QApplication, QMessageBox
+
 import sys, os
 
 from EditorWidget import EditorWidget
+from XMLExporter import XMLExporter
+
 
 class BrowserWidget(QTreeWidget):
 
@@ -98,6 +102,7 @@ class BrowserWidget(QTreeWidget):
                 currentItem.addChild(foundItem)
             currentItem = foundItem
 
+
     def getCurrentPath(self):
         result = [self.currentItem.text(0)]
         parent = self.currentItem.parent()
@@ -105,8 +110,6 @@ class BrowserWidget(QTreeWidget):
             result.insert(0, parent.text(0))
             parent = parent.parent()
         return result 
-
-
 
 
 class RichtextSampleWidget(QWidget):
@@ -181,12 +184,9 @@ class RichtextSampleWidget(QWidget):
         elif index == 4:
             self.textView.setPlainText(self.editorWidget.editView.toPlainText())
         elif index == 5:
-            self.updateCustomFormat()
-            
-
-    def updateCustomFormat(self):
-        externalized = self.editorWidget.externalize()
-        self.customView.setPlainText(externalized)
+            exporter = XMLExporter(None)
+            xmlText = exporter.getXmlString(self.editorWidget.editView.document())
+            self.customView.setPlainText(xmlText)
 
 
 class MainWindow(QMainWindow):

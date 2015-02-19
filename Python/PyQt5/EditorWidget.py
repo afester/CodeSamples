@@ -4,20 +4,16 @@ Created on 18.02.2015
 @author: afester
 '''
 
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
+from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtWidgets import QToolBar, QWidget, QAction, QLabel, QComboBox
+from PyQt5.QtWidgets import QTextEdit, QVBoxLayout
+from PyQt5.QtGui import QIcon, QTextDocumentFragment, QTextCursor, QTextCharFormat 
+from PyQt5.QtGui import QTextOption, QFont, QTextListFormat, QTextFrameFormat
+
 import os
+from XMLImporter import XMLImporter, UserData
+from XMLExporter import XMLExporter 
 
-class UserData(QTextBlockUserData):
-    
-    def __init__(self, data):
-        QTextBlockUserData.__init__(self)
-
-        self.data = data
-        
-    def getData(self):
-        return self.data
 
 
 class EditorWidget(QWidget):
@@ -79,9 +75,9 @@ class EditorWidget(QWidget):
         self.comboStyle.activated.connect(self.blockStyle)
 
         self.editView = QTextEdit(self)
-        doc = self.editView.document()
-        css = "h1 { color: red; } "
-        doc.addResource( QTextDocument.StyleSheetResource, QUrl( "format.css" ), css );
+        #doc = self.editView.document()
+        #css = "h1 { color: red; } "
+        #doc.addResource( QTextDocument.StyleSheetResource, QUrl( "format.css" ), css );
         # self.editView.setStyleSheet("h1 { color: red; } ")
 
         self.editView.cursorPositionChanged.connect(self.cursorPositionChanged)
@@ -100,11 +96,13 @@ class EditorWidget(QWidget):
         cursor = self.editView.textCursor()
         block = cursor.block()
         print("  Tag:" + str(block.userData()))
+        print("  Margin: %d/%d" % (block.blockFormat().topMargin(),block.blockFormat().bottomMargin()))  
 
 
     def load(self, path):
         self.contentFile = os.path.join(*path)
         self.contentFile = os.path.join(self.contentFile, 'content.xml')
+        # self.contentFile = os.path.join(self.contentFile, 'content.html')
 
         # NOTE: HTML can be loaded with styles attached, but when written back 
         # with toHtml the resulting HTML code does not contain the style information
@@ -123,12 +121,19 @@ class EditorWidget(QWidget):
         #doc.addResource( QTextDocument.StyleSheetResource, QUrl( "format.css" ), css );
 
         #return
+        #self.contentFile = os.path.join(*path)
+        #self.contentFile = os.path.join(self.contentFile, 'Section3')
+        #self.contentFile = os.path.join(self.contentFile, 'content.html')
 
         with open(self.contentFile, 'r') as content_file:
+            importer = XMLImporter(content_file)
+            doc = importer.importDocument()
+            self.editView.setDocument(doc)
 
-            # TODO: Use an XML Importer!
-            content = content_file.read()
-            self.editView.setHtml(content)
+            # self.editView.setHtml("<h1>Header</h1><pre>Java Code\nLine 1</pre>")
+
+            #content = content_file.read()
+            #self.editView.setHtml(content)
 
         self.message.emit("Loaded %s" % self.contentFile)
 
@@ -137,10 +142,14 @@ class EditorWidget(QWidget):
         with open(self.contentFile, 'w') as content_file:
             # NOTE: toHtml() writes the text document in a "hard coded"
             # HTML format, converting all style properties to inline style="..." attributes
-            # See QTextHtmlExporter in qtbase/src/gui/text/qtextdocument.cpp
+            # See QTextHtmlExporter in qtbase/src/gui/text/qtextdocument.cpp.
+            # We are using a custom XML exporter therefore ...
+
             #content_file.write(self.editView.toHtml())
-            content_file.write(self.externalize())
-        self.message.emit("Saved %s" % self.contentFile2)
+
+            exporter = XMLExporter(content_file)
+            exporter.exportDocument(self.editView.document())
+        self.message.emit("Saved %s" % self.contentFile)
 
 
     def incrementIndent(self):
@@ -348,56 +357,3 @@ class EditorWidget(QWidget):
         else:
             print("Formatting with %d" % idx)
 
-
-
-
-    def externalize(self):
-        self.result = "<?xml version = '1.0' encoding = 'UTF-8'?>\n<page>\n"
-        # self.result = "<html>\n"
-
-        document = self.editView.document()
-        textBlock = document.firstBlock()
-        while textBlock.isValid():
-            self.emitTextBlock(textBlock)
-            textBlock = textBlock.next()
-
-        self.result = self.result + "</page>"
-        return self.result
-
-
-    def emitTextBlock(self, textBlock):
-        userData = None
-        if textBlock.userData():
-            userData = textBlock.userData().getData()
-        print("USERDATA:" + str(userData))
-
-        print("USERPROPERTY:" + str(textBlock.blockFormat().property(QTextFormat.UserProperty)))
-
-        if userData is None:
-            self.emitParagraph(textBlock)
-        elif userData == "h1":
-            self.result = self.result + "\n   <h1>" + textBlock.text() + "</h1>\n"
-        elif userData == "h2":
-            self.result = self.result + "\n   <h2>" + textBlock.text() + "</h2>\n"
-        elif userData == "h3":
-            self.result = self.result + "\n   <h3>" + textBlock.text() + "</h3>\n"
-        elif userData == "javacode":
-            self.result = self.result + "\n   <pre class=\"java\">" + textBlock.text() + "</pre>\n"
-
-
-    def emitParagraph(self, textBlock):
-
-        self.result = self.result + "   <p>"
-
-        fragments = textBlock.begin()
-        while not fragments.atEnd():
-            fragment = fragments.fragment()
-            text = fragment.text()
-            charFormat = fragment.charFormat()
-            if charFormat.fontWeight() == QFont.Bold:
-                self.result = self.result + "<em>" + text + "</em>"
-            else:
-                self.result = self.result + text
-            fragments += 1
-
-        self.result = self.result + "</p>\n"

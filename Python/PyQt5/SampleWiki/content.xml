@@ -11,16 +11,18 @@
    <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. <em>At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</em> Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
 
    <h2>Java Code</h2>
-   <pre>public TreeNode&lt;String&gt; createTree(int childCount, int depth) {
-    tree = new TreeNode&lt;&gt;("Root");
-    createSubTree(tree, childCount, depth, "Node");
-    return tree;
-}</pre>
+   <code lang="java">public TreeNode&lt;String&gt; createTree(int childCount, int depth) {
+    tree = new TreeNode&lt;&gt;("Root");
+    createSubTree(tree, childCount, depth, "Node");
+    return tree;
+}</code>
 
    <h2>A List</h2>
-   <p>Item 1</p>
-   <p>Item 2</p>
-   <p>Item 3</p>
+   <ul>
+     <li>Item 1</li>
+     <li>Item 2</li>
+     <li>Item 3</li>
+   </ul>
 
    <h2>An Image</h2>
 </page>
