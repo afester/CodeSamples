@@ -91,6 +91,15 @@ class XMLExporter:
         text = fragment.text()
         charFormat = fragment.charFormat()
 
+        closeAnchor = False
+        if charFormat.isAnchor():
+            href = charFormat.anchorHref()
+            # if (!href.isEmpty()) {
+            self.result = self.result + '<a href="'
+            self.result = self.result + escape(href)
+            self.result = self.result + '">'
+            closeAnchor = True
+
         isObject = (text.find('\ufffc') != -1)
         isImage = isObject and charFormat.isImageFormat()
 
@@ -102,9 +111,11 @@ class XMLExporter:
             # yet another object replacement character ...
             for img in range(0, len(text)):
                 self.result = self.result + "<img src=\"%s\" />" % imgName
-            
+
         elif charFormat.fontWeight() == QFont.Bold:
             self.result = self.result + "<em>" + escape(text) + "</em>"
         else:
             self.result = self.result + escape(text)
     
+        if closeAnchor:
+            self.result = self.result + '</a>'

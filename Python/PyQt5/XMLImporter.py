@@ -22,6 +22,7 @@ class Handler(xml.sax.handler.ContentHandler):
         self.state = 0
         self.content = ""
         self.contentPath = contentPath
+        self.href = ""
 
         self.h1BlockFmt = QTextBlockFormat()
         self.h1BlockFmt.setTopMargin(18)
@@ -50,6 +51,16 @@ class Handler(xml.sax.handler.ContentHandler):
         self.pCharFmt.setFontFamily("Sans")
         self.emCharFmt = QTextCharFormat(self.pCharFmt)
         self.emCharFmt.setFontWeight(QFont.Bold)
+        self.linkCharFmt = QTextCharFormat(self.pCharFmt)
+        self.linkCharFmt.setAnchor(True)
+        self.linkCharFmt.setForeground(Qt.blue)
+        self.linkCharFmt.setBackground(QColor(220, 220, 220))
+        self.linkCharFmt.setFontUnderline(True)
+        self.extLinkCharFmt = QTextCharFormat(self.pCharFmt)
+        self.extLinkCharFmt.setAnchor(True)
+        self.extLinkCharFmt.setForeground(Qt.blue)
+        # self.linkCharFmt.setBackground(Qt.blue)
+        self.extLinkCharFmt.setFontUnderline(True)
 
         self.pCodeBlockFmt = QTextBlockFormat()
         self.pCodeBlockFmt.setTopMargin(5)
@@ -166,19 +177,29 @@ class Handler(xml.sax.handler.ContentHandler):
         elif name == "p":
             self.state = 5
             self.insertBlock("", self.pBlockFmt, self.pCharFmt, "p")
+        elif name == "code":
+            self.state = 7
+
+        # Fragments
         elif name == "em":
+            # insert previous fragment
             self.insertFragment(self.content, self.pCharFmt)
             self.content = ""
             self.state = 6
-        elif name == "code":
-            self.state = 7
+        elif name == "a":
+            # insert previous fragment
+            self.insertFragment(self.content, self.pCharFmt)
+            self.content = ""
+            self.state = 6
+            self.href = attrs.getValue("href")
+        elif name == "img":
+            self.insertImage(attrs)
+
         elif name == "ul":
             self.state = 8
             self.firstLi = True
         elif name == "li":
             self.state = 9
-        elif name == "img":
-            self.insertImage(attrs)
         else:
             print("INVALID TAG:" + name)
 
@@ -223,6 +244,16 @@ class Handler(xml.sax.handler.ContentHandler):
             self.state = 0
         elif name == "em" and topState == 6:
             self.insertFragment(self.content, self.emCharFmt)
+            self.state = 5
+        elif name == "a" and topState == 6:
+            # Insert the link text
+            if self.href.startswith("http://") or self.href.startswith("https://"):
+                self.extLinkCharFmt.setAnchorHref(self.href)
+                self.insertFragment(self.content, self.extLinkCharFmt)
+            else:
+                self.linkCharFmt.setAnchorHref(self.href)
+                self.insertFragment(self.content, self.linkCharFmt)
+                
             self.state = 5
         elif name == "ul" and topState == 10:
             self.state = 0

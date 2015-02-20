@@ -6,8 +6,8 @@ Created on 18.02.2015
 
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtWidgets import QToolBar, QWidget, QAction, QLabel, QComboBox
-from PyQt5.QtWidgets import QTextEdit, QVBoxLayout
-from PyQt5.QtGui import QIcon, QTextDocumentFragment, QTextCursor, QTextCharFormat 
+from PyQt5.QtWidgets import QTextEdit, QVBoxLayout, QDialog, QLineEdit
+from PyQt5.QtGui import QGuiApplication, QIcon, QTextDocumentFragment, QTextCursor, QTextCharFormat 
 from PyQt5.QtGui import QTextOption, QFont, QTextListFormat, QTextFrameFormat
 
 import os
@@ -15,9 +15,21 @@ from XMLImporter import XMLImporter, UserData
 from XMLExporter import XMLExporter 
 
 
+class UrlEditor(QDialog):
+    
+    def __init__(self, parentWidget, href):
+        QDialog.__init__(self, parentWidget)
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+        
+        self.editLine = QLineEdit(href, self)
+        layout.addWidget(self.editLine)
+
+
 
 class EditorWidget(QWidget):
     message = pyqtSignal(str)
+    l = None
 
     def __init__(self, parentWidget):
         QWidget.__init__(self, parentWidget)
@@ -38,13 +50,23 @@ class EditorWidget(QWidget):
 
         toolbar.addSeparator()
 
-        textKeywordAction = QAction(QIcon("icons/format-keyword.png"), "Keyword", toolbar)
+        textKeywordAction = QAction(QIcon("icons/format-keyword.png"), "Keyword link", toolbar)
         textKeywordAction.triggered.connect(self.textKeyword)
         toolbar.addAction(textKeywordAction)
+
+        textLinkAction = QAction(QIcon("icons/format-link.png"), "Internet link", toolbar)
+        #textKeywordAction.triggered.connect(self.textKeyword)
+        toolbar.addAction(textLinkAction)
 
         textBoldAction = QAction(QIcon("icons/format-text-bold.png"), "Bold", toolbar)
         textBoldAction.triggered.connect(self.textBold)
         toolbar.addAction(textBoldAction)
+
+        insertImageAction = QAction(QIcon("icons/edit-insert-image.png"), "Insert Image", toolbar)
+        #textBoldAction.triggered.connect(self.textBold)
+        toolbar.addAction(insertImageAction)
+
+        toolbar.addSeparator()
 
         blockListAction = QAction(QIcon("icons/format-list-unordered.png"), "List", toolbar)
         blockListAction.triggered.connect(self.blockList)
@@ -89,14 +111,25 @@ class EditorWidget(QWidget):
 
 
     def currentCharFormatChanged(self, fmt):
-        print("Char format: %s / %d" % (fmt.fontFamily(), fmt.fontWeight()))  
+        #print("Char format: %s / %d" % (fmt.fontFamily(), fmt.fontWeight()))
+        pass  
+
 
     def cursorPositionChanged(self):
-        print("Cursor repositioned")
         cursor = self.editView.textCursor()
-        block = cursor.block()
-        print("  Tag:" + str(block.userData()))
-        print("  Margin: %d/%d" % (block.blockFormat().topMargin(),block.blockFormat().bottomMargin()))  
+        charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
+        if charFmt.isAnchor():
+            if QGuiApplication.keyboardModifiers() & Qt.ControlModifier:
+                print("NAVIGATE to %s" % charFmt.anchorHref())
+            else:
+                print("EDIT URL %s" % charFmt.anchorHref())
+                self.l = UrlEditor(self, charFmt.anchorHref())
+                # self.l = QLabel(charFmt.anchorHref())
+                self.l.show()
+        else:
+            print("UNEDIT URL")
+            if self.l:
+                self.l.hide()
 
 
     def load(self, path):
