@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QTabWidget
 from PyQt5.QtWidgets import QTextEdit, QSplitter, QHBoxLayout, QVBoxLayout, QMainWindow
 from PyQt5.QtWidgets import QAction, QStatusBar, QMenuBar, QApplication, QMessageBox
 
-import sys, os
+import sys, os, tools
 
 from EditorWidget import EditorWidget
 from XMLExporter import XMLExporter
@@ -35,23 +35,6 @@ class BrowserWidget(QTreeWidget):
             self.itemSelected.emit()
 
 
-    # platform independant path.split function
-    # See http://stackoverflow.com/questions/4579908/cross-platform-splitting-of-path-in-python
-    def os_path_split(self, path, debug=False):
-        parts = []
-        while True:
-            newpath, tail = os.path.split(path)
-            if debug: print(repr(path), (newpath, tail))
-            if newpath == path:
-                assert not tail
-                if path: parts.append(path)
-                break
-            parts.append(tail)
-            path = newpath
-        parts.reverse()
-        return parts
-
-
     def refresh(self):
         self.rootNodes = []
 
@@ -59,7 +42,7 @@ class BrowserWidget(QTreeWidget):
             dirs.sort()
             for d in dirs:
                 path = os.path.join(root, d)
-                path = self.os_path_split(path)
+                path = tools.os_path_split(path)
                 self.addPath(path)
 
         self.addTopLevelItems(self.rootNodes)

@@ -6,24 +6,63 @@ Created on 18.02.2015
 
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtWidgets import QToolBar, QWidget, QAction, QLabel, QComboBox
-from PyQt5.QtWidgets import QTextEdit, QVBoxLayout, QDialog, QLineEdit
+from PyQt5.QtWidgets import QTextEdit, QVBoxLayout, QDialog, QLineEdit, QFrame
 from PyQt5.QtGui import QGuiApplication, QIcon, QTextDocumentFragment, QTextCursor, QTextCharFormat 
-from PyQt5.QtGui import QTextOption, QFont, QTextListFormat, QTextFrameFormat
+from PyQt5.QtGui import QTextOption, QFont, QTextListFormat, QTextFrameFormat, QCursor
 
 import os
 from XMLImporter import XMLImporter, UserData
 from XMLExporter import XMLExporter 
+from FormatManager import FormatManager
 
 
-class UrlEditor(QDialog):
-    
+class UrlEditor(QFrame):
+
     def __init__(self, parentWidget, href):
-        QDialog.__init__(self, parentWidget)
+        QFrame.__init__(self, parentWidget, Qt.Tool )
         layout = QVBoxLayout()
         self.setLayout(layout)
         
         self.editLine = QLineEdit(href, self)
         layout.addWidget(self.editLine)
+
+
+class TextEdit(QTextEdit):
+
+    def __init__(self, parentWidget):
+        QTextEdit.__init__(self, parentWidget)
+
+
+    def checkAnchorCursor(self, pos):
+        cursor = self.cursorForPosition(pos)
+        charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
+        if charFmt.isAnchor():
+            self.viewport().setCursor(Qt.PointingHandCursor)
+        else:
+            self.viewport().setCursor(Qt.IBeamCursor)
+
+
+    def mouseMoveEvent(self, event):
+        self.checkAnchorCursor(event.pos())
+
+        return QTextEdit.mouseMoveEvent(self, event)
+
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Control:
+            self.setMouseTracking(True)
+            pos = self.mapFromGlobal(QCursor.pos())
+            self.checkAnchorCursor(pos)
+
+        return QTextEdit.keyPressEvent(self, event)
+
+
+    def keyReleaseEvent(self, event):
+        if event.key() == Qt.Key_Control:
+            self.setMouseTracking(False)
+            self.viewport().setCursor(Qt.IBeamCursor)
+
+        return QTextEdit.keyReleaseEvent(self, event)
 
 
 
@@ -33,6 +72,9 @@ class EditorWidget(QWidget):
 
     def __init__(self, parentWidget):
         QWidget.__init__(self, parentWidget)
+
+        self.formatManager = FormatManager()
+        self.formatManager.loadFormats()
 
         toolbar = QToolBar(self)
         toolbar.setFloatable(False)
@@ -96,7 +138,7 @@ class EditorWidget(QWidget):
         self.comboStyle.addItem("Code (SQL)")
         self.comboStyle.activated.connect(self.blockStyle)
 
-        self.editView = QTextEdit(self)
+        self.editView = TextEdit(self)
         #doc = self.editView.document()
         #css = "h1 { color: red; } "
         #doc.addResource( QTextDocument.StyleSheetResource, QUrl( "format.css" ), css );
@@ -158,10 +200,11 @@ class EditorWidget(QWidget):
         #self.contentFile = os.path.join(self.contentFile, 'Section3')
         #self.contentFile = os.path.join(self.contentFile, 'content.html')
 
-        importer = XMLImporter(contentPath, contentFile)
+        importer = XMLImporter(contentPath, contentFile, self.formatManager)
         doc = importer.importDocument()
         self.editView.setDocument(doc)
 
+        self.editView.setFocus()
             # self.editView.setHtml("<h1>Header</h1><pre>Java Code\nLine 1</pre>")
 
             #content = content_file.read()
@@ -225,9 +268,7 @@ class EditorWidget(QWidget):
 
 
     def textKeyword(self):
-        fmt = QTextCharFormat()
-        fmt.setForeground(Qt.red)
-        fmt.setAnchor(True)
+        fmt = self.formatManager.getFormat("keyword").getCharFormat()
 
         cursor = self.editView.textCursor()
         if not cursor.hasSelection():

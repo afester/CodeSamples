@@ -5,6 +5,7 @@ import xml.sax
 from PyQt5.QtGui import QTextDocument, QTextBlockFormat, QTextListFormat, QTextDocumentFragment 
 from PyQt5.QtGui import QTextCursor, QTextBlockUserData, QFont, QTextImageFormat
 from PyQt5.Qt import QTextCharFormat, Qt, QColor
+from FormatManager import FormatManager
 
 class UserData(QTextBlockUserData):
     
@@ -18,92 +19,12 @@ class UserData(QTextBlockUserData):
 
 class Handler(xml.sax.handler.ContentHandler):
 
-    def __init__(self, contentPath):
+    def __init__(self, contentPath, formatManager):
         self.state = 0
         self.content = ""
         self.contentPath = contentPath
         self.href = ""
-
-        self.h1BlockFmt = QTextBlockFormat()
-        self.h1BlockFmt.setTopMargin(18)
-        self.h1BlockFmt.setBottomMargin(5)
-        #self.h1BlockFmt.setBackground(Qt.red)
-        self.h1CharFmt = QTextCharFormat()
-        self.h1CharFmt.setFontPointSize(18)
-        #self.h1CharFmt.setForeground(Qt.yellow)
-        #self.h1CharFmt.setBackground(Qt.blue)
-
-        self.h2BlockFmt = QTextBlockFormat()
-        self.h2BlockFmt.setTopMargin(14)
-        self.h2BlockFmt.setBottomMargin(3)
-        self.h2CharFmt = QTextCharFormat()
-        self.h2CharFmt.setFontPointSize(16)
-
-        self.h3BlockFmt = QTextBlockFormat()
-        self.h3BlockFmt.setTopMargin(10)
-        self.h3BlockFmt.setBottomMargin(3)
-        self.h3CharFmt = QTextCharFormat()
-        self.h3CharFmt.setFontPointSize(14)
-
-        self.pBlockFmt = QTextBlockFormat()
-        self.pCharFmt = QTextCharFormat()
-        self.pCharFmt.setFontPointSize(10)
-        self.pCharFmt.setFontFamily("Sans")
-        self.emCharFmt = QTextCharFormat(self.pCharFmt)
-        self.emCharFmt.setFontWeight(QFont.Bold)
-        self.linkCharFmt = QTextCharFormat(self.pCharFmt)
-        self.linkCharFmt.setAnchor(True)
-        self.linkCharFmt.setForeground(Qt.blue)
-        self.linkCharFmt.setBackground(QColor(220, 220, 220))
-        self.linkCharFmt.setFontUnderline(True)
-        self.extLinkCharFmt = QTextCharFormat(self.pCharFmt)
-        self.extLinkCharFmt.setAnchor(True)
-        self.extLinkCharFmt.setForeground(Qt.blue)
-        # self.linkCharFmt.setBackground(Qt.blue)
-        self.extLinkCharFmt.setFontUnderline(True)
-
-        self.pCodeBlockFmt = QTextBlockFormat()
-        self.pCodeBlockFmt.setTopMargin(5)
-        self.pCodeBlockFmt.setLeftMargin(5)
-        self.pCodeBlockFmt.setRightMargin(5)
-        self.pCodeBlockFmt.setBottomMargin(5)
-        self.pCodeBlockFmt.setBackground(QColor(240, 240, 240))
-        self.pCodeCharFmt = QTextCharFormat()
-        self.pCodeCharFmt.setForeground(Qt.black)
-        self.pCodeCharFmt.setFontFamily("Courier")
-        self.pCodeCharFmt.setFontPointSize(10)
-
-        self.ul1Fmt = QTextListFormat()
-        self.ul1Fmt.setStyle(QTextListFormat.ListDisc)
-        self.ul1Fmt.setIndent(1)
-
-        self.ul2Fmt = QTextListFormat()
-        self.ul2Fmt.setStyle(QTextListFormat.ListCircle)
-        self.ul2Fmt.setIndent(2)
-
-        self.ul3Fmt = QTextListFormat()
-        self.ul3Fmt.setStyle(QTextListFormat.ListSquare)
-        self.ul3Fmt.setIndent(3)
-
-        self.ol1Fmt = QTextListFormat()
-        self.ol1Fmt.setStyle(QTextListFormat.ListDecimal)
-        self.ol1Fmt.setIndent(1)
-
-        self.ol2Fmt = QTextListFormat()
-        self.ol2Fmt.setStyle(QTextListFormat.ListDecimal)
-        self.ol2Fmt.setIndent(2)
-
-        self.ol3Fmt = QTextListFormat()
-        self.ol3Fmt.setStyle(QTextListFormat.ListDecimal)
-        self.ol3Fmt.setIndent(3)
-
-        #self.codeFrameFmt = QTextFrameFormat()
-        #self.codeFrameFmt.setBorder(1.0)
-        #self.codeFrameFmt.setBorderStyle(QTextFrameFormat.BorderStyle_Dotted)    
-        #self.codeFrameFmt.setBorderBrush(Qt.darkGray)
-        #self.codeFrameFmt.setBackground(Qt.lightGray)
-        #self.codeFrameFmt.setMargin(5)
-        #self.codeFrameFmt.setPadding(5)
+        self.formatManager = formatManager
 
         # Note: an empty, newly created QTextDocument() always contains one 
         # initial block. Furthermore, this initial block can not be
@@ -176,19 +97,19 @@ class Handler(xml.sax.handler.ContentHandler):
             self.state = 4
         elif name == "p":
             self.state = 5
-            self.insertBlock("", self.pBlockFmt, self.pCharFmt, "p")
+            self.insertBlock("", "p")
         elif name == "code":
             self.state = 7
 
         # Fragments
         elif name == "em":
             # insert previous fragment
-            self.insertFragment(self.content, self.pCharFmt)
+            self.insertFragment(self.content, "p") # self.pCharFmt)
             self.content = ""
             self.state = 6
         elif name == "a":
             # insert previous fragment
-            self.insertFragment(self.content, self.pCharFmt)
+            self.insertFragment(self.content, "p") # self.pCharFmt)
             self.content = ""
             self.state = 6
             self.href = attrs.getValue("href")
@@ -226,42 +147,40 @@ class Handler(xml.sax.handler.ContentHandler):
                     cursor.select(QTextCursor.BlockUnderCursor)
                     cursor.deleteChar()
         elif name == "h1" and topState == 2:
-            self.insertBlock(self.content, self.h1BlockFmt, self.h1CharFmt, "h1")
+            self.insertBlock(self.content, "h1")
             self.state = 0
         elif name == "h2" and topState == 3:
-            self.insertBlock(self.content, self.h2BlockFmt, self.h2CharFmt, "h2")
+            self.insertBlock(self.content, "h2")
             self.state = 0
         elif name == "h3" and topState == 4:
-            self.insertBlock(self.content, self.h3BlockFmt, self.h3CharFmt, "h3")
+            self.insertBlock(self.content, "h3")
             self.state = 0
         elif name == "p" and topState == 5:
-            self.insertFragment(self.content, self.pCharFmt)
+            self.insertFragment(self.content, "p") # self.pCharFmt)
             self.state = 0
         elif name == "code" and topState == 7:
             self.content = self.content.replace('\n', '\u2028')
-            self.insertBlock(self.content, self.pCodeBlockFmt, self.pCodeCharFmt, "code")
+            self.insertBlock(self.content, "code")
             # self.insertFrame(self.content, self.codeFrameFmt)
             self.state = 0
         elif name == "em" and topState == 6:
-            self.insertFragment(self.content, self.emCharFmt)
+            self.insertFragment(self.content, "em")# self.emCharFmt)
             self.state = 5
         elif name == "a" and topState == 6:
             # Insert the link text
             if self.href.startswith("http://") or self.href.startswith("https://"):
-                self.extLinkCharFmt.setAnchorHref(self.href)
-                self.insertFragment(self.content, self.extLinkCharFmt)
+                self.insertAnchor(self.content, "a", self.href) # self.extLinkCharFmt)
             else:
-                self.linkCharFmt.setAnchorHref(self.href)
-                self.insertFragment(self.content, self.linkCharFmt)
+                self.insertAnchor(self.content, "keyword", self.href) # self.linkCharFmt)
                 
             self.state = 5
         elif name == "ul" and topState == 10:
             self.state = 0
         elif name == "li": # and topState == 9:
             if self.firstLi:
-                self.cursor.setBlockFormat(self.pBlockFmt)
-                self.cursor.insertList(self.ul1Fmt)
-                self.cursor.setBlockCharFormat(self.pCharFmt)
+                self.cursor.setBlockFormat(self.formatManager.getFormat("p").getBlockFormat()) # self.pBlockFmt)
+                self.cursor.insertList(self.formatManager.getFormat("ul1").getListFormat()) # self.ul1Fmt)
+                self.cursor.setBlockCharFormat(self.formatManager.getFormat("p").getCharFormat()) # self.pCharFmt)
 
                 self.cursor.insertText(self.content)
                 self.firstLi = False
@@ -287,16 +206,27 @@ class Handler(xml.sax.handler.ContentHandler):
 
 
 
-    def insertBlock(self, content, blockFmt, charFmt, className):
-        self.cursor.insertBlock(blockFmt, charFmt)
+    def insertBlock(self, content, className):
+        fmt = self.formatManager.getFormat(className)
+        self.cursor.insertBlock(fmt.getBlockFormat(), fmt.getCharFormat()) #  blockFmt, charFmt)
         self.cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
         self.cursor.block().setUserData(UserData(className))
 
 
-    def insertFragment(self, content, fragFmt):
+    def insertFragment(self, content, className):
+        fmt = self.formatManager.getFormat(className)
         #self.cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
-        self.cursor.insertText(content, fragFmt)
+        self.cursor.insertText(content, fmt.getCharFormat())
 
+    def insertAnchor(self, content, className, href):
+        fmt = self.formatManager.getFormat(className)
+        charFmt = fmt.getCharFormat()
+        charFmt.setAnchorHref(href)
+
+        #self.cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
+        self.cursor.insertText(content, charFmt)
+
+                                  
     def insertImage(self, attrs):
         imageFile = attrs.getValue("src")
         imagePath = os.path.join(self.contentPath, imageFile)
@@ -308,15 +238,16 @@ class Handler(xml.sax.handler.ContentHandler):
 
 class XMLImporter:
 
-    def __init__(self, contentPath, contentFile):
+    def __init__(self, contentPath, contentFile, formatManager):
         self.contentPath = contentPath
         self.contentFile = contentFile
+        self.formatManager = formatManager
 
     def importDocument(self):
         contentFilePath = os.path.join(self.contentPath, self.contentFile)
         with open(contentFilePath, 'r') as content_file:
             parser = xml.sax.make_parser()
-            handler = Handler(self.contentPath)
+            handler = Handler(self.contentPath, self.formatManager)
             parser.setContentHandler(handler)
             parser.parse(content_file)
 

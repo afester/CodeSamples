@@ -4,6 +4,8 @@ Created on 19.02.2015
 @author: afester
 '''
 
+import tools
+
 from PyQt5.QtGui import QFont
 from xml.sax.saxutils import escape
 
@@ -105,7 +107,7 @@ class XMLExporter:
 
         if isImage:
             imgFmt = charFormat.toImageFormat()
-            imgName = imgFmt.name().split("/")[-1]
+            imgName = tools.os_path_split(imgFmt.name())[-1]
 
             # If the same image repeats multiple times, it is simply represented by
             # yet another object replacement character ...
