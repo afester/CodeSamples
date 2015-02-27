@@ -8,14 +8,21 @@ import tools
 
 from PyQt5.QtGui import QFont
 from xml.sax.saxutils import escape
+import os
 
 
 class XMLExporter:
-    def __init__(self, fileHandle):
-        self.fileHandle = fileHandle
+    def __init__(self, contentPath, contentFile):
+    #def __init__(self, fileHandle):
+        self.contentPath = contentPath
+        self.contentFile = contentFile
+
+        # self.fileHandle = fileHandle
 
     def exportDocument(self, document):
-        self.fileHandle.write(self.getXmlString(document))
+        contentFilePath = os.path.join(self.contentPath, self.contentFile)
+        with open(contentFilePath, 'w') as content_file:
+            content_file.write(self.getXmlString(document))
 
 
     def getXmlString(self, document):
@@ -71,7 +78,9 @@ class XMLExporter:
         if itemNumber == 0:
             self.result = self.result + "   <ul>\n";
 
-        self.result = self.result + "     <li>" + escape(block.text()) + "</li>\n"
+        self.result = self.result + "     <li>"
+        self.emitFragments(block)
+        self.result = self.result + "</li>\n"
 
         if itemNumber == listx.count() - 1:
             self.result = self.result + "   </ul>\n";
@@ -80,13 +89,15 @@ class XMLExporter:
     def emitBlock(self, textBlock):
 
         self.result = self.result + "   <p>"
+        self.emitFragments(textBlock)
+        self.result = self.result + "</p>\n"
 
+
+    def emitFragments(self, textBlock):
         fragments = textBlock.begin()
         while not fragments.atEnd():
             self.emitFragment(fragments.fragment())
             fragments += 1
-
-        self.result = self.result + "</p>\n"
 
 
     def emitFragment(self, fragment):

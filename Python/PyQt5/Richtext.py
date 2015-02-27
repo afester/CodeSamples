@@ -6,105 +6,30 @@ Created on Feb 13, 2015
 @author: andreas
 '''
 
-from PyQt5.QtCore import QSize, PYQT_VERSION_STR, QT_VERSION_STR, qVersion, pyqtSignal
-from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QTabWidget
+from PyQt5.QtCore import PYQT_VERSION_STR, QT_VERSION_STR, qVersion, Qt
+from PyQt5.QtWidgets import QWidget, QTabWidget
 from PyQt5.QtWidgets import QTextEdit, QSplitter, QHBoxLayout, QVBoxLayout, QMainWindow
 from PyQt5.QtWidgets import QAction, QStatusBar, QMenuBar, QApplication, QMessageBox
 
-import sys, os, tools
+import sys
+import logging.config
 
 from EditorWidget import EditorWidget
+from BrowserWidget import BrowserWidget
 from XMLExporter import XMLExporter
-
-
-class BrowserWidget(QTreeWidget):
-
-    itemSelected = pyqtSignal()
-
-    def __init__(self, parentWidget):
-        QTreeWidget.__init__(self, parentWidget)
-        self.setColumnCount(1)
-        self.setHeaderLabel("Sections")
-        self.itemSelectionChanged.connect(self.handleItemSelected)
-
-
-    def handleItemSelected(self):
-        selItems = self.selectedItems()
-        if len(selItems) == 1:
-            self.currentItem = selItems[0]
-            self.itemSelected.emit()
-
-
-    def refresh(self):
-        self.rootNodes = []
-
-        for root, dirs, files in os.walk('SampleWiki'):
-            dirs.sort()
-            for d in dirs:
-                path = os.path.join(root, d)
-                path = tools.os_path_split(path)
-                self.addPath(path)
-
-        self.addTopLevelItems(self.rootNodes)
-
-        for node in self.rootNodes:
-            node.setExpanded(True)
-
-
-    def addPath(self, path):
-        rootElement = path[0]
-        subPath = path[1:]
-
-        # Lookup the root element
-        rootItem = None
-        for treeWidgetItem in self.rootNodes:
-            label = treeWidgetItem.text(0)
-            if label == rootElement:
-                rootItem = treeWidgetItem
-                break
-
-        # Create the root element
-        if rootItem is None:
-            rootItem = QTreeWidgetItem([rootElement])
-            self.rootNodes.append(rootItem)
-
-        # add the remaining child path
-        currentItem = rootItem
-        for element in subPath:
-
-            # Lookup the current element in the child items of the current node
-            foundItem = None
-            for idx in range(0, currentItem.childCount()):
-                childItem = currentItem.child(idx)
-                label = childItem.text(0)
-                if label == element:
-                    foundItem = childItem
-                    break
-            if foundItem is None:
-                foundItem = QTreeWidgetItem([element])
-                currentItem.addChild(foundItem)
-            currentItem = foundItem
-
-
-    def getCurrentPath(self):
-        result = [self.currentItem.text(0)]
-        parent = self.currentItem.parent()
-        while parent is not None:
-            result.insert(0, parent.text(0))
-            parent = parent.parent()
-        return result 
-
+from Settings import Settings
 
 class RichtextSampleWidget(QWidget):
 
-    def __init__(self, parentWidget):
+    def __init__(self, parentWidget, settings):
         QWidget.__init__(self, parentWidget)
 
+        self.settings = settings
         self.theLayout = QHBoxLayout()
         self.splitter = QSplitter(self)
         self.theLayout.addWidget(self.splitter)
 
-        self.browserWidget = BrowserWidget(self)
+        self.browserWidget = BrowserWidget(self, self.settings)
         self.browserWidget.itemSelected.connect(self.itemSelected)
 
         self.tabWidget = QTabWidget(self)
@@ -118,6 +43,7 @@ class RichtextSampleWidget(QWidget):
 
         self.editorWidget.setObjectName("EditorWidget1")
         self.editorWidget.message.connect(self.showMessage)
+        self.editorWidget.navigate.connect(self.navigate, Qt.QueuedConnection)
 
         tabLayout.addWidget(self.editorWidget)
         self.tabWidget.addTab(tab, "Edit")
@@ -147,18 +73,26 @@ class RichtextSampleWidget(QWidget):
         self.setLayout(self.theLayout)
         self.splitter.setSizes([100, 400])
 
-        self.browserWidget.refresh()
-        self.editorWidget.load(['SampleWiki'])
+        self.editorWidget.setEnabled(False)
+
+        self.browserWidget.refresh()    # refresh the browser tree 
 
 
     def showMessage(self, message):
         self.parent().statusBar.showMessage(message, 3000)
 
 
-    def itemSelected(self):
-        path = self.browserWidget.getCurrentPath()
-        self.editorWidget.load(path)
+    def navigate(self, pageId):
+        print("navigating to {}".format(pageId))
+        self.editorWidget.save()
+        self.editorWidget.load(self.editorWidget.page.notepad, pageId)
 
+
+    def itemSelected(self):
+        treeNode = self.browserWidget.currentItem
+        print("Selected tree node: {}".format(treeNode))
+        self.editorWidget.setEnabled(True)
+        self.editorWidget.load(treeNode.getNotepad(), treeNode.getPageId())
 
 
     def tabSelected(self, index):
@@ -167,17 +101,27 @@ class RichtextSampleWidget(QWidget):
         elif index == 4:
             self.textView.setPlainText(self.editorWidget.editView.toPlainText())
         elif index == 5:
-            exporter = XMLExporter(None)
+            exporter = XMLExporter(None, None)
             xmlText = exporter.getXmlString(self.editorWidget.editView.document())
             self.customView.setPlainText(xmlText)
 
 
 class MainWindow(QMainWindow):
 
+    l = logging.getLogger('MainWindow')
+
     def __init__(self, app):
         QMainWindow.__init__(self, None)
-        self.setWindowTitle("Richtext editor sample")
+        
+        self.l.debug('Initializing MainWindow ...')
+        
+        self.setWindowTitle("My Notepad")
         self.theApplication = app
+        app.aboutToQuit.connect(self.saveState)
+
+        # read the local configuration file
+        self.settings = Settings()
+        self.settings.load()
 
         # Set up the menu bar
         menuBar = QMenuBar(self)
@@ -197,11 +141,23 @@ class MainWindow(QMainWindow):
         self.statusBar.showMessage("Ready.")
         self.setStatusBar(self.statusBar)
 
-        self.mainWidget = RichtextSampleWidget(self)
+        self.mainWidget = RichtextSampleWidget(self, self.settings)
         self.setCentralWidget(self.mainWidget)
 
-        self.move(240, 200)
-        self.resize(QSize(1200, 700))
+        # Reset main window size and position
+        pos = self.settings.getMainWindowPos()
+        self.move(pos.x(), pos.y())
+        size = self.settings.getMainWindowSize()
+        self.resize(size)
+
+
+    def saveState(self):
+
+        # Note: there is no way to have eclipse shutdown the application faithfully,
+        # see also http://stackoverflow.com/questions/677531/is-it-possible-for-eclipse-to-terminate-gently-instead-of-using-sigkill
+        self.settings.setMainWindowPos(self.pos())
+        self.settings.setMainWindowSize(self.size())
+        self.settings.save()
 
 
     def handleAbout(self):
@@ -221,9 +177,10 @@ class MainWindow(QMainWindow):
 
 
 def main():
+    logging.config.fileConfig('logging.ini')
+
     # Create the application object
     app = QApplication(sys.argv)
-    #app.setStyleSheet("QWidget#EditorWidget1 { background-color: green; border: none; }")
 
     # Create the main window
     mainWindow = MainWindow(app)

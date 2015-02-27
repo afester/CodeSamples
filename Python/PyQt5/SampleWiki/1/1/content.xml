@@ -1,0 +1,21 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<page>
+
+   <h1>TODO list for MyNotes</h1>
+
+   <h2>Important topics</h2>
+   <ul>
+     <li>Browser</li>
+     <li>Back and Forward button</li>
+     <li>Search function</li>
+   </ul>
+
+   <h2>Ideas</h2>
+   <ul>
+     <li>Directly paste Images from the clipboard</li>
+     <li>"Highlight" character style</li>
+     <li>"Emphasized" character style instead of "Bold"</li>
+     <li>Style Editor</li>
+   </ul>
+   <p></p>
+</page>

@@ -8,6 +8,9 @@ import dropbox
 import configparser
 import time
 
+from dropbox.datastore import DatastoreError, DatastoreManager, Date, Bytes
+
+
 class DropShell:
     
     def __init__(self):
@@ -15,7 +18,7 @@ class DropShell:
         self.config.read('dropshell.ini')
         self.settings = self.config["DropBox"]
         self.wdPath = []
-
+        self.datastoreManager = None
 
     def getFilePath(self, fileName):
         if len(self.wdPath) == 0:
@@ -58,31 +61,35 @@ class DropShell:
 
 
     def processCommand(self, tokens):
-        cmd = tokens[0]
-        if tokens[0] == "quit":
+        cmd = tokens[0].lower()
+        if cmd == "quit":
             self.isRunning = False
-        elif tokens[0] == "connect":
+        elif cmd == "connect":
             self.connect(tokens[1:])
-        elif tokens[0] == "ls":
+        elif cmd == "ls":
             self.listFiles(tokens[1:])
-        elif tokens[0] == "cd":
+        elif cmd == "cd":
             self.changeDirectory(tokens[1:])
-        elif tokens[0] == "info":
+        elif cmd == "info":
             self.showAccountInfo()
-        elif tokens[0] == "put":
+        elif cmd == "put":
             self.putFile(tokens[1:])
-        elif tokens[0] == "get":
+        elif cmd == "get":
             self.getFile(tokens[1:])
-        elif tokens[0] == "rm":
+        elif cmd == "rm":
             self.deleteFile(tokens[1:])
-        elif tokens[0] == "mkdir":
+        elif cmd == "mkdir":
             self.mkdir(tokens[1:])
-        elif tokens[0] == "rmdir":
+        elif cmd == "rmdir":
             self.rmdir(tokens[1:])
-        elif tokens[0] == "help":
+        elif cmd == "help":
             self.showHelp()
+        elif cmd == "dscreate":
+            self.dsCreate(tokens[1:])
+        elif cmd == "dslist":
+            self.dsList()
         else:
-            print("Syntax error")
+            print("Syntax error: {}".format(tokens))
 
 
     def showHelp(self):
@@ -101,6 +108,8 @@ Available commands:
   put fileName      - Upload a file to the current folder
   get fileName      - Download a file from the current folder
   rm name           - Deletes the specified file or folder from the current folder
+
+  ds                - execute a Datastore API sample
 
   quit              - Leave the command line client''')
 
@@ -198,6 +207,30 @@ Available commands:
         remoteFileName = self.getFilePath(params[0])
         response = self.client.file_delete(remoteFileName)
         print("Removed {} {}".format("directory" if response['is_dir'] else "file", response['path']))
+
+
+# Datastore API samples
+
+    def dsCreate(self, params):
+        if self.datastoreManager is None:
+            self.datastoreManager = DatastoreManager(self.client)
+        result = self.datastoreManager.open_or_create_datastore(params[0])
+        print(str(result))
+
+
+    def dsDelete(self, params):
+        if self.datastoreManager is None:
+            self.datastoreManager = DatastoreManager(self.client)
+        result = self.datastoreManager.delete_datastore(params[0], True)
+        print(str(result))
+
+
+    def dsList(self):
+        if self.datastoreManager is None:
+            self.datastoreManager = DatastoreManager(self.client)
+        result = self.datastoreManager.list_datastores()
+        for ds in result:
+            print(str(ds))
 
 
     def processInput(self):

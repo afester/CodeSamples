@@ -6,13 +6,13 @@ Created on 18.02.2015
 
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtWidgets import QToolBar, QWidget, QAction, QLabel, QComboBox
-from PyQt5.QtWidgets import QTextEdit, QVBoxLayout, QDialog, QLineEdit, QFrame
+from PyQt5.QtWidgets import QTextEdit, QVBoxLayout, QLineEdit, QFrame
 from PyQt5.QtGui import QGuiApplication, QIcon, QTextDocumentFragment, QTextCursor, QTextCharFormat 
 from PyQt5.QtGui import QTextOption, QFont, QTextListFormat, QTextFrameFormat, QCursor
 
 import os
-from XMLImporter import XMLImporter, UserData
-from XMLExporter import XMLExporter 
+from XMLImporter import UserData
+
 from FormatManager import FormatManager
 
 
@@ -68,6 +68,7 @@ class TextEdit(QTextEdit):
 
 class EditorWidget(QWidget):
     message = pyqtSignal(str)
+    navigate = pyqtSignal(int)
     l = None
 
     def __init__(self, parentWidget):
@@ -158,73 +159,49 @@ class EditorWidget(QWidget):
 
 
     def cursorPositionChanged(self):
+        print("CURSOR POSITION CHANGED")
+
         cursor = self.editView.textCursor()
         charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
         if charFmt.isAnchor():
+            url = charFmt.anchorHref()
             if QGuiApplication.keyboardModifiers() & Qt.ControlModifier:
-                print("NAVIGATE to %s" % charFmt.anchorHref())
+                if url.startswith("http://") or url.startswith("https://"):
+                    print('OPEN EXTERNAL URL {}'.format(url))
+                else:
+                    pageId = int(url)
+                    print("Navigate to page {}".format(pageId))
+                    self.navigate.emit(pageId)
             else:
-                print("EDIT URL %s" % charFmt.anchorHref())
-                self.l = UrlEditor(self, charFmt.anchorHref())
-                # self.l = QLabel(charFmt.anchorHref())
-                self.l.show()
+                if url.startswith("http://") or url.startswith("https://"):
+                    print("Edit URL {}".format(url))
+                    self.l = UrlEditor(self, url)
+                    self.l.show()
         else:
             print("UNEDIT URL")
             if self.l:
                 self.l.hide()
 
+        print("LEAVE CURSOR POSITION CHANGED")
 
-    def load(self, path):
-        contentPath = os.path.join(*path)
-        contentFile = 'content.xml'
-        # self.contentFile = os.path.join(self.contentFile, 'content.html')
 
-        # NOTE: HTML can be loaded with styles attached, but when written back 
-        # with toHtml the resulting HTML code does not contain the style information
-        # anymore.
-        #self.editView.setHtml('''
-        #<html><head>
-        #     <meta http-equiv='Content-Type' content='text/html;charset=utf-8'/>
-        #     <link rel='stylesheet' type='text/css' href='format.css'>
-        #     </head>
-        #<body>
-        #<h1>Title</h1>
-        #</body></html>''')
+    def load(self, notepad, pageId):
+        print('Loading page {} from notepad "{}"'.format(pageId, notepad.getName()))
 
-        #doc = self.editView.document()
-        #css = "h1 { color: red; } "
-        #doc.addResource( QTextDocument.StyleSheetResource, QUrl( "format.css" ), css );
-
-        #return
-        #self.contentFile = os.path.join(*path)
-        #self.contentFile = os.path.join(self.contentFile, 'Section3')
-        #self.contentFile = os.path.join(self.contentFile, 'content.html')
-
-        importer = XMLImporter(contentPath, contentFile, self.formatManager)
-        doc = importer.importDocument()
+        self.page = notepad.getPage(pageId)
+        doc = self.page.getDocument()
+        
+        self.editView.blockSignals(True)
         self.editView.setDocument(doc)
+        self.editView.blockSignals(False)
 
         self.editView.setFocus()
-            # self.editView.setHtml("<h1>Header</h1><pre>Java Code\nLine 1</pre>")
-
-            #content = content_file.read()
-            #self.editView.setHtml(content)
-
-        self.contentFile = os.path.join(contentPath, contentFile)
+        self.contentFile = os.path.join(notepad.getName(),str(pageId))
         self.message.emit("Loaded %s" % self.contentFile)
 
 
     def save(self):
-        with open(self.contentFile, 'w') as content_file:
-            # NOTE: toHtml() writes the text document in a "hard coded"
-            # HTML format, converting all style properties to inline style="..." attributes
-            # See QTextHtmlExporter in qtbase/src/gui/text/qtextdocument.cpp.
-            # We are using a custom XML exporter therefore ...
-
-            #content_file.write(self.editView.toHtml())
-
-            exporter = XMLExporter(content_file)
-            exporter.exportDocument(self.editView.document())
+        self.page.save()
         self.message.emit("Saved %s" % self.contentFile)
 
 
@@ -273,7 +250,10 @@ class EditorWidget(QWidget):
         cursor = self.editView.textCursor()
         if not cursor.hasSelection():
             cursor.select(QTextCursor.WordUnderCursor)
-        fmt.setAnchorHref(cursor.selectedText())
+
+        # TODO: check if the selected text already exists as keyword!
+        href = self.page.notepad.getNextPageId()
+        fmt.setAnchorHref(str(href))
 
         cursor.mergeCharFormat(fmt);
         self.editView.mergeCurrentCharFormat(fmt);
@@ -367,67 +347,50 @@ class EditorWidget(QWidget):
 
     def blockStyle(self, idx):
         if idx == 0:
-            cursor = self.editView.textCursor()
-            self.selectWholeBlocks(cursor)
-            content = cursor.selection().toPlainText()
-            cursor.removeSelectedText()
-            cursor.deleteChar() # also delete the block http://stackoverflow.com/questions/16996679/remove-block-from-qtextdocument
-            cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
+            self.reformat('p')
 
         elif idx == 3:
-            cursor = self.editView.textCursor()
-            self.selectWholeBlocks(cursor)
-            content = cursor.selection().toPlainText()
-            cursor.removeSelectedText()
-            cursor.insertFragment(QTextDocumentFragment.fromHtml("<h1>" + content + "</h1>"))
-            
-            # NOTE: user data is neither persisted, nor retained when copy&pasting!
-            cursor.block().setUserData(UserData("h1"))
-            # cursor.blockFormat().setProperty(QTextFormat.UserProperty, "h1")
+            self.reformat('h1')
 
         elif idx == 4:
-            cursor = self.editView.textCursor()
-            self.selectWholeBlocks(cursor)
-            content = cursor.selection().toPlainText()
-            cursor.removeSelectedText()
-            cursor.insertFragment(QTextDocumentFragment.fromHtml("<h2>" + content + "</h2>"))
-            cursor.block().setUserData(UserData("h2"))
+            self.reformat('h2')
 
         elif idx == 5:
-            cursor = self.editView.textCursor()
-            self.selectWholeBlocks(cursor)
-            content = cursor.selection().toPlainText()
-            cursor.removeSelectedText()
-            cursor.insertFragment(QTextDocumentFragment.fromHtml("<h3>" + content + "</h3>"))
-            cursor.block().setUserData(UserData("h3"))
+            self.reformat('h3')
 
         elif idx == 6:
             content = ""
             for block in self.selectedBlocks():
-                content = content + block.text() + "\n" # \u2028"
+                content = content + block.text() + "\u2028"
 
+            fmt = self.formatManager.getFormat('code')
+    
             cursor = self.editView.textCursor()
             self.selectWholeBlocks(cursor)
-            # content = cursor.selection().toPlainText()
             cursor.removeSelectedText()
-
-            fmt = QTextFrameFormat()
-            fmt.setBorder(1.0)
-            fmt.setBorderStyle(QTextFrameFormat.BorderStyle_Dotted)    
-            fmt.setBorderBrush(Qt.darkGray)
-            fmt.setBackground(Qt.lightGray)
-            fmt.setMargin(5)
-            fmt.setPadding(5)
-
-            frame = cursor.insertFrame(fmt)
-            cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
-            self.selectFrame(frame, cursor)
-            charFmt = QTextCharFormat()
-            charFmt.setForeground(Qt.black)
-            charFmt.setFontFamily("Courier")
-            charFmt.setFontPointSize(10)
-            cursor.setCharFormat(charFmt)
+    
+            cursor.setBlockFormat(fmt.getBlockFormat())
+            cursor.setCharFormat(fmt.getCharFormat())
+            cursor.insertText(content)
+    
+            # NOTE: user data is neither persisted, nor retained when copy&pasting!
+            cursor.block().setUserData(UserData('code'))
 
         else:
             print("Formatting with %d" % idx)
 
+#
+    def reformat(self, formatName):
+        fmt = self.formatManager.getFormat(formatName)
+
+        cursor = self.editView.textCursor()
+        self.selectWholeBlocks(cursor)
+        content = cursor.selection().toPlainText()
+        cursor.removeSelectedText()
+
+        cursor.setBlockFormat(fmt.getBlockFormat())
+        cursor.setCharFormat(fmt.getCharFormat())
+        cursor.insertText(content)
+
+        # NOTE: user data is neither persisted, nor retained when copy&pasting!
+        cursor.block().setUserData(UserData(formatName))

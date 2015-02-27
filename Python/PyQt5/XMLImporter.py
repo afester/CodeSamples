@@ -2,10 +2,9 @@
 import os
 import xml.sax
 
-from PyQt5.QtGui import QTextDocument, QTextBlockFormat, QTextListFormat, QTextDocumentFragment 
-from PyQt5.QtGui import QTextCursor, QTextBlockUserData, QFont, QTextImageFormat
-from PyQt5.Qt import QTextCharFormat, Qt, QColor
-from FormatManager import FormatManager
+from PyQt5.QtGui import QTextDocument, QTextDocumentFragment 
+from PyQt5.QtGui import QTextCursor, QTextBlockUserData, QTextImageFormat
+
 
 class UserData(QTextBlockUserData):
     
@@ -25,6 +24,7 @@ class Handler(xml.sax.handler.ContentHandler):
         self.contentPath = contentPath
         self.href = ""
         self.formatManager = formatManager
+        self.keywordLinks = []
 
         # Note: an empty, newly created QTextDocument() always contains one 
         # initial block. Furthermore, this initial block can not be
@@ -64,20 +64,22 @@ class Handler(xml.sax.handler.ContentHandler):
         #self.cursor.insertText("Header 2\n")
 
         # List test
-        #self.cursor.insertText("Before List")
-
-        #self.cursor.insertList(self.ul1Fmt)
-        #self.cursor.insertText("Item1")
-        #self.cursor.insertBlock()
-        #self.cursor.insertText("Item2")
-
-        #self.cursor.insertList(self.ul2Fmt)
-        #self.cursor.insertText("Item1")
-        #self.cursor.insertBlock()
-        #self.cursor.insertText("Item3")
-
-        #self.cursor.insertBlock(self.pBlockFmt, self.pCharFmt)
-        #self.cursor.insertText("After List")
+#===============================================================================
+#         self.cursor.insertText("Before List")
+# 
+#         self.cursor.insertList(self.formatManager.getFormat("ul1").getListFormat())
+#         self.cursor.insertText("Item1")
+#         self.cursor.insertBlock()
+#         self.cursor.insertText("Item2")
+# 
+#         self.cursor.insertList(self.formatManager.getFormat("ul2").getListFormat())
+#         self.cursor.insertText("Item1")
+#         self.cursor.insertBlock()
+#         self.cursor.insertText("Item2")
+# 
+#         self.cursor.insertBlock(self.formatManager.getFormat("p").getBlockFormat(), self.formatManager.getFormat("p").getCharFormat())
+#         self.cursor.insertText("After List")
+#===============================================================================
 
         # Clean up document
         #self.cursor.movePosition(QTextCursor.Start)
@@ -89,38 +91,55 @@ class Handler(xml.sax.handler.ContentHandler):
     def startElement(self, name, attrs):
         if name == "page":
             self.state = 1
+
+        # blocks
         elif name == "h1":
             self.state = 2
+            self.insertBlock("", "h1")
         elif name == "h2":
             self.state = 3
+            self.insertBlock("", "h2")
         elif name == "h3":
             self.state = 4
+            self.insertBlock("", "h3")
         elif name == "p":
             self.state = 5
             self.insertBlock("", "p")
         elif name == "code":
             self.state = 7
+            self.insertBlock("", "code")
+        elif name == "ul":
+            self.state = 8
+            self.firstLi = True
+        elif name == "li":
+            self.state = 9
+            if self.firstLi:
+                self.cursor.setBlockFormat(self.formatManager.getFormat("p").getBlockFormat())
+                self.cursor.insertList(self.formatManager.getFormat("ul1").getListFormat())
+                # self.cursor.setBlockFormat(self.formatManager.getFormat("p").getBlockFormat())
+                self.cursor.setBlockCharFormat(self.formatManager.getFormat("p").getCharFormat())
+            else:
+                fmt = self.formatManager.getFormat("p")
+                # self.cursor.setBlockFormat(fmt.getBlockFormat())
+                self.cursor.insertBlock()
+                self.cursor.setCharFormat(fmt.getCharFormat())
+                self.cursor.block().setUserData(UserData("ul1"))
 
         # Fragments
         elif name == "em":
             # insert previous fragment
-            self.insertFragment(self.content, "p") # self.pCharFmt)
+            self.insertFragment(self.content, "p")
             self.content = ""
             self.state = 6
         elif name == "a":
             # insert previous fragment
-            self.insertFragment(self.content, "p") # self.pCharFmt)
+            self.insertFragment(self.content, "p")
             self.content = ""
             self.state = 6
             self.href = attrs.getValue("href")
         elif name == "img":
             self.insertImage(attrs)
 
-        elif name == "ul":
-            self.state = 8
-            self.firstLi = True
-        elif name == "li":
-            self.state = 9
         else:
             print("INVALID TAG:" + name)
 
@@ -146,50 +165,49 @@ class Handler(xml.sax.handler.ContentHandler):
                     cursor = QTextCursor(self.result.findBlockByLineNumber(0))
                     cursor.select(QTextCursor.BlockUnderCursor)
                     cursor.deleteChar()
+
+        # Blocks
         elif name == "h1" and topState == 2:
-            self.insertBlock(self.content, "h1")
+            self.insertFragment(self.content, "h1")
             self.state = 0
         elif name == "h2" and topState == 3:
-            self.insertBlock(self.content, "h2")
+            self.insertFragment(self.content, "h2")
             self.state = 0
         elif name == "h3" and topState == 4:
-            self.insertBlock(self.content, "h3")
+            self.insertFragment(self.content, "h3")
             self.state = 0
         elif name == "p" and topState == 5:
-            self.insertFragment(self.content, "p") # self.pCharFmt)
+            self.insertFragment(self.content, "p")
             self.state = 0
         elif name == "code" and topState == 7:
             self.content = self.content.replace('\n', '\u2028')
-            self.insertBlock(self.content, "code")
+            self.insertFragment(self.content, "code")
             # self.insertFrame(self.content, self.codeFrameFmt)
             self.state = 0
-        elif name == "em" and topState == 6:
-            self.insertFragment(self.content, "em")# self.emCharFmt)
-            self.state = 5
-        elif name == "a" and topState == 6:
-            # Insert the link text
-            if self.href.startswith("http://") or self.href.startswith("https://"):
-                self.insertAnchor(self.content, "a", self.href) # self.extLinkCharFmt)
-            else:
-                self.insertAnchor(self.content, "keyword", self.href) # self.linkCharFmt)
-                
-            self.state = 5
         elif name == "ul" and topState == 10:
             self.state = 0
         elif name == "li": # and topState == 9:
             if self.firstLi:
-                self.cursor.setBlockFormat(self.formatManager.getFormat("p").getBlockFormat()) # self.pBlockFmt)
-                self.cursor.insertList(self.formatManager.getFormat("ul1").getListFormat()) # self.ul1Fmt)
-                self.cursor.setBlockCharFormat(self.formatManager.getFormat("p").getCharFormat()) # self.pCharFmt)
-
                 self.cursor.insertText(self.content)
                 self.firstLi = False
                 self.state = 0
             else:
-                self.cursor.insertBlock()
                 self.cursor.insertText(self.content)
-
                 self.state = 0
+
+        # Fragments
+        elif name == "em" and topState == 6:
+            self.insertFragment(self.content, "em")
+            self.state = 5
+        elif name == "a" and topState == 6:
+            # Insert the link text
+            if self.href.startswith("http://") or self.href.startswith("https://"):
+                self.insertAnchor(self.content, "a", self.href)
+            else:
+                self.insertAnchor(self.content, "keyword", self.href)
+                self.keywordLinks.append( (self.href, self.content) )
+            self.state = 5
+
         elif name == "img":
             pass
         else:
@@ -208,7 +226,7 @@ class Handler(xml.sax.handler.ContentHandler):
 
     def insertBlock(self, content, className):
         fmt = self.formatManager.getFormat(className)
-        self.cursor.insertBlock(fmt.getBlockFormat(), fmt.getCharFormat()) #  blockFmt, charFmt)
+        self.cursor.insertBlock(fmt.getBlockFormat(), fmt.getCharFormat())
         self.cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
         self.cursor.block().setUserData(UserData(className))
 
@@ -251,7 +269,14 @@ class XMLImporter:
             parser.setContentHandler(handler)
             parser.parse(content_file)
 
-        return handler.result
+        self.document = handler.result
+        self.links = handler.keywordLinks
 
+    def getDocument(self):
+        return self.document
+    
+
+    def getLinks(self):
+        return self.links
 
 
