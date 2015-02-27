@@ -8,10 +8,9 @@ from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtWidgets import QToolBar, QWidget, QAction, QLabel, QComboBox
 from PyQt5.QtWidgets import QTextEdit, QVBoxLayout, QLineEdit, QFrame
 from PyQt5.QtGui import QGuiApplication, QIcon, QTextDocumentFragment, QTextCursor, QTextCharFormat 
-from PyQt5.QtGui import QTextOption, QFont, QTextListFormat, QTextFrameFormat, QCursor
+from PyQt5.QtGui import QTextOption, QFont, QTextListFormat, QCursor
 
 import os
-from XMLImporter import UserData
 
 from FormatManager import FormatManager
 
@@ -372,9 +371,6 @@ class EditorWidget(QWidget):
             cursor.setBlockFormat(fmt.getBlockFormat())
             cursor.setCharFormat(fmt.getCharFormat())
             cursor.insertText(content)
-    
-            # NOTE: user data is neither persisted, nor retained when copy&pasting!
-            cursor.block().setUserData(UserData('code'))
 
         else:
             print("Formatting with %d" % idx)
@@ -391,6 +387,3 @@ class EditorWidget(QWidget):
         cursor.setBlockFormat(fmt.getBlockFormat())
         cursor.setCharFormat(fmt.getCharFormat())
         cursor.insertText(content)
-
-        # NOTE: user data is neither persisted, nor retained when copy&pasting!
-        cursor.block().setUserData(UserData(formatName))

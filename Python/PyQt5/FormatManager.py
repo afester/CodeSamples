@@ -4,7 +4,7 @@ Created on 20.02.2015
 @author: afester
 '''
 
-from PyQt5.QtGui import QTextBlockFormat, QTextCharFormat, QTextListFormat, QFont, QColor
+from PyQt5.QtGui import QTextFormat, QTextBlockFormat, QTextCharFormat, QTextListFormat, QFont, QColor
 from PyQt5.QtCore import Qt
 
 class Format:
@@ -86,6 +86,7 @@ class FormatManager:
         blockFmt = QTextBlockFormat()
         blockFmt.setTopMargin(18)
         blockFmt.setBottomMargin(5)
+        blockFmt.setProperty(QTextFormat.UserProperty, 'h1')
         #blockFmt.setBackground(Qt.red)
         charFmt = QTextCharFormat()
         charFmt.setFontPointSize(18)
@@ -97,6 +98,7 @@ class FormatManager:
         blockFmt = QTextBlockFormat()
         blockFmt.setTopMargin(14)
         blockFmt.setBottomMargin(3)
+        blockFmt.setProperty(QTextFormat.UserProperty, 'h2')
         charFmt = QTextCharFormat()
         charFmt.setFontPointSize(16)
         charFmt.setFontFamily("Arial")
@@ -105,12 +107,14 @@ class FormatManager:
         blockFmt = QTextBlockFormat()
         blockFmt.setTopMargin(10)
         blockFmt.setBottomMargin(3)
+        blockFmt.setProperty(QTextFormat.UserProperty, 'h3')
         charFmt = QTextCharFormat()
         charFmt.setFontPointSize(14)
         charFmt.setFontFamily("Arial")
         self.formats['h3'] = Format(blockFmt, charFmt)
 
         blockFmt = QTextBlockFormat()
+        blockFmt.setProperty(QTextFormat.UserProperty, 'p')
         pcharFmt = QTextCharFormat()
         pcharFmt.setFontPointSize(10)
         pcharFmt.setFontFamily("Sans")
@@ -121,48 +125,59 @@ class FormatManager:
         blockFmt.setLeftMargin(5)
         blockFmt.setRightMargin(5)
         blockFmt.setBottomMargin(5)
-        blockFmt.setBackground(QColor(240, 240, 240))
+        #blockFmt.setBackground(QColor(240, 240, 240))
+        blockFmt.setBackground(Qt.blue)
+        blockFmt.setProperty(QTextFormat.UserProperty, 'code')
         charFmt = QTextCharFormat()
-        charFmt.setForeground(Qt.black)
+        #charFmt.setForeground(Qt.red)
+        charFmt.setForeground(Qt.yellow)
         charFmt.setFontFamily("Courier")
-        charFmt.setFontPointSize(10)
+        charFmt.setFontPointSize(11)
+        charFmt.setFontWeight(QFont.Bold)
         self.formats['code'] = Format(blockFmt, charFmt)
 
         ### List formats
         listFmt = QTextListFormat()
         listFmt.setStyle(QTextListFormat.ListDisc)
         listFmt.setIndent(1)
+        listFmt.setProperty(QTextFormat.UserProperty, 'ul1')
         self.formats['ul1'] = Format(None, None, listFmt)
 
         listFmt = QTextListFormat()
         listFmt.setStyle(QTextListFormat.ListCircle)
         listFmt.setIndent(2)
+        listFmt.setProperty(QTextFormat.UserProperty, 'ul2')
         self.formats['ul2'] = Format(None, None, listFmt)
 
         listFmt = QTextListFormat()
         listFmt.setStyle(QTextListFormat.ListSquare)
         listFmt.setIndent(3)
+        listFmt.setProperty(QTextFormat.UserProperty, 'ul3')
         self.formats['ul3'] = Format(None, None, listFmt)
 
         listFmt = QTextListFormat()
         listFmt.setStyle(QTextListFormat.ListDecimal)
         listFmt.setIndent(1)
+        listFmt.setProperty(QTextFormat.UserProperty, 'ol1')
         self.formats['ol1'] = Format(None, None, listFmt)
 
         listFmt = QTextListFormat()
         listFmt.setStyle(QTextListFormat.ListDecimal)
         listFmt.setIndent(2)
+        listFmt.setProperty(QTextFormat.UserProperty, 'ol2')
         self.formats['ol2'] = Format(None, None, listFmt)
 
         listFmt = QTextListFormat()
         listFmt.setStyle(QTextListFormat.ListDecimal)
         listFmt.setIndent(3)
+        listFmt.setProperty(QTextFormat.UserProperty, 'ol3')
         self.formats['ol3'] = Format(None, None, listFmt)
 
         
         ### Inline formats
         charFmt = QTextCharFormat(pcharFmt)
         charFmt.setFontWeight(QFont.Bold)
+        charFmt.setProperty(QTextFormat.UserProperty, 'em')
         self.formats['em'] = Format(None, charFmt)
 
         charFmt = QTextCharFormat(pcharFmt)
@@ -170,6 +185,7 @@ class FormatManager:
         charFmt.setForeground(Qt.blue)
         charFmt.setBackground(QColor(220, 220, 220))
         charFmt.setFontUnderline(True)
+        charFmt.setProperty(QTextFormat.UserProperty, 'keyword')
         self.formats['keyword'] = Format(None, charFmt)
 
         charFmt = QTextCharFormat(pcharFmt)
@@ -177,6 +193,7 @@ class FormatManager:
         charFmt.setForeground(Qt.blue)
         # charFmt.setBackground(Qt.blue)
         charFmt.setFontUnderline(True)
+        charFmt.setProperty(QTextFormat.UserProperty, 'a')
         self.formats['a'] = Format(None, charFmt)
 
 

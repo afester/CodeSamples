@@ -6,7 +6,7 @@ Created on 19.02.2015
 
 import tools
 
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QTextFormat
 from xml.sax.saxutils import escape
 import os
 
@@ -40,32 +40,23 @@ class XMLExporter:
 
 
     def emitTextBlock(self, textBlock):
-        userData = None
-        if textBlock.userData():
-            userData = textBlock.userData().getData()
-
-        #print("USERDATA:" + str(userData))
-        #print("USERPROPERTY:" + str(textBlock.blockFormat().property(QTextFormat.UserProperty)))
-
-        #blkFmt = textBlock.blockFormat()
-        #print("Block format: " + str(blkFmt.type()))
-        #print("User data: " + str(userData))
+        blockStyle = str(textBlock.blockFormat().property(QTextFormat.UserProperty))
 
         if textBlock.textList() is not None:
             self.emitList(textBlock)
         else:
-            if userData is None:
-                self.emitBlock(textBlock)
-            elif userData == "h1":
+            if blockStyle is None:
+                # self.emitBlock(textBlock)
+                assert False
+            elif blockStyle == "h1":
                 self.result = self.result + "\n   <h1>" + escape(textBlock.text()) + "</h1>\n"
-            elif userData == "h2":
+            elif blockStyle == "h2":
                 self.result = self.result + "\n   <h2>" + escape(textBlock.text()) + "</h2>\n"
-            elif userData == "h3":
+            elif blockStyle == "h3":
                 self.result = self.result + "\n   <h3>" + escape(textBlock.text()) + "</h3>\n"
-            elif userData == "p":
+            elif blockStyle == "p":
                 self.emitBlock(textBlock)
-                #self.result = self.result + "   <p>" + textBlock.text() + "</p>\n"
-            elif userData == "code":
+            elif blockStyle == "code":
                 frag = textBlock.text()
                 frag = frag.replace('\u2028', '\n')
                 self.result = self.result + "   <code lang=\"java\">" + escape(frag) + "</code>\n"
@@ -103,9 +94,11 @@ class XMLExporter:
     def emitFragment(self, fragment):
         text = fragment.text()
         charFormat = fragment.charFormat()
+        
+        styleClass = str(charFormat.property(QTextFormat.UserProperty))
 
         closeAnchor = False
-        if charFormat.isAnchor():
+        if styleClass == 'a':
             href = charFormat.anchorHref()
             # if (!href.isEmpty()) {
             self.result = self.result + '<a href="'
@@ -125,8 +118,10 @@ class XMLExporter:
             for img in range(0, len(text)):
                 self.result = self.result + "<img src=\"%s\" />" % imgName
 
-        elif charFormat.fontWeight() == QFont.Bold:
+        elif styleClass == 'em':
             self.result = self.result + "<em>" + escape(text) + "</em>"
+        elif styleClass == 'keyword':
+            self.result = self.result + "<keyword>" + escape(text) + "</keyword>"
         else:
             self.result = self.result + escape(text)
     

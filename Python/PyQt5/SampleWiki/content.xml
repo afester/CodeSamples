@@ -5,7 +5,7 @@
 
    <h2>Introduction</h2>
    <p>This sample Wiki is used to test and show the various features of the <a href="http://www.qt.org">Rich Text Editor in Qt.</a></p>
-   <p>See the <a href="1">TODO list</a> for stuff which is still missing.</p>
+   <p>See the <keyword>TODO list</keyword> for stuff which is still missing.</p>
 
    <h2>A long text</h2>
    <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. <em>At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</em> Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
@@ -16,8 +16,7 @@
     createSubTree(tree, childCount, depth, "Node");
     return tree;
 }</code>
-
-   <h2>A List</h2>
+   <p>A List</p>
    <ul>
      <li>Item 1</li>
      <li>Item 2</li>

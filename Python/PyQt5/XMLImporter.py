@@ -3,18 +3,8 @@ import os
 import xml.sax
 
 from PyQt5.QtGui import QTextDocument, QTextDocumentFragment 
-from PyQt5.QtGui import QTextCursor, QTextBlockUserData, QTextImageFormat
+from PyQt5.QtGui import QTextCursor, QTextImageFormat
 
-
-class UserData(QTextBlockUserData):
-    
-    def __init__(self, data):
-        QTextBlockUserData.__init__(self)
-
-        self.data = data
-        
-    def getData(self):
-        return self.data
 
 class Handler(xml.sax.handler.ContentHandler):
 
@@ -123,7 +113,6 @@ class Handler(xml.sax.handler.ContentHandler):
                 # self.cursor.setBlockFormat(fmt.getBlockFormat())
                 self.cursor.insertBlock()
                 self.cursor.setCharFormat(fmt.getCharFormat())
-                self.cursor.block().setUserData(UserData("ul1"))
 
         # Fragments
         elif name == "em":
@@ -137,6 +126,11 @@ class Handler(xml.sax.handler.ContentHandler):
             self.content = ""
             self.state = 6
             self.href = attrs.getValue("href")
+        elif name == "keyword":
+            self.insertFragment(self.content, "p")
+            self.content = ""
+            self.state = 6
+            #self.href = attrs.getValue("href")
         elif name == "img":
             self.insertImage(attrs)
 
@@ -203,10 +197,12 @@ class Handler(xml.sax.handler.ContentHandler):
             # Insert the link text
             if self.href.startswith("http://") or self.href.startswith("https://"):
                 self.insertAnchor(self.content, "a", self.href)
-            else:
-                self.insertAnchor(self.content, "keyword", self.href)
-                self.keywordLinks.append( (self.href, self.content) )
             self.state = 5
+        elif name == "keyword": #  and topState == :
+            self.insertAnchor(self.content, "keyword", self.content)
+            self.keywordLinks.append( (self.content, self.content) )
+            self.state = 5
+
 
         elif name == "img":
             pass
@@ -223,12 +219,10 @@ class Handler(xml.sax.handler.ContentHandler):
     #    self.cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
 
 
-
     def insertBlock(self, content, className):
         fmt = self.formatManager.getFormat(className)
         self.cursor.insertBlock(fmt.getBlockFormat(), fmt.getCharFormat())
         self.cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
-        self.cursor.block().setUserData(UserData(className))
 
 
     def insertFragment(self, content, className):
@@ -261,6 +255,7 @@ class XMLImporter:
         self.contentFile = contentFile
         self.formatManager = formatManager
 
+
     def importDocument(self):
         contentFilePath = os.path.join(self.contentPath, self.contentFile)
         with open(contentFilePath, 'r') as content_file:
@@ -272,11 +267,10 @@ class XMLImporter:
         self.document = handler.result
         self.links = handler.keywordLinks
 
+
     def getDocument(self):
         return self.document
     
 
     def getLinks(self):
         return self.links
-
-
