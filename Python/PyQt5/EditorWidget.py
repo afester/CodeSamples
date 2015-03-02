@@ -67,7 +67,7 @@ class TextEdit(QTextEdit):
 
 class EditorWidget(QWidget):
     message = pyqtSignal(str)
-    navigate = pyqtSignal(int)
+    navigate = pyqtSignal(str)
     l = None
 
     def __init__(self, parentWidget):
@@ -168,7 +168,7 @@ class EditorWidget(QWidget):
                 if url.startswith("http://") or url.startswith("https://"):
                     print('OPEN EXTERNAL URL {}'.format(url))
                 else:
-                    pageId = int(url)
+                    pageId = url
                     print("Navigate to page {}".format(pageId))
                     self.navigate.emit(pageId)
             else:

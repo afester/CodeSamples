@@ -92,7 +92,10 @@ class RichtextSampleWidget(QWidget):
         treeNode = self.browserWidget.currentItem
         print("Selected tree node: {}".format(treeNode))
         self.editorWidget.setEnabled(True)
-        self.editorWidget.load(treeNode.getNotepad(), treeNode.getPageId())
+        if treeNode.parent() is None:
+            self.editorWidget.load(treeNode.getNotepad(), None)
+        else:
+            self.editorWidget.load(treeNode.getNotepad(), treeNode.getLabel())
 
 
     def tabSelected(self, index):

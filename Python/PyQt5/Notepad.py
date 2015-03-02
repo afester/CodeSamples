@@ -7,7 +7,7 @@ Created on 24.02.2015
 from XMLImporter import XMLImporter
 from XMLExporter import XMLExporter
 from FormatManager import FormatManager
-import os
+import os, urllib.parse
 
 
 class Notepad:
@@ -61,8 +61,6 @@ class Notepad:
 
 
     def getPage(self, pageId):
-        assert type(pageId) is int
-
         result = Page(self, pageId)
         result.load()
         return result
@@ -87,6 +85,8 @@ class Notepad:
 class Page:
 
     def __init__(self, notepad, pageId):
+        assert pageId is None or type(pageId) is str
+
         self.notepad = notepad
         self.pageId = pageId
         self.links = []
@@ -95,8 +95,9 @@ class Page:
 
     def getPagePath(self):
         pagePath = self.notepad.getRootpath()
-        if self.pageId > 0:
-            pageIdx = [str(self.pageId)[0], str(self.pageId)]
+        if self.pageId is not None:     # not the root page
+            pageFilename = urllib.parse.quote(self.pageId)
+            pageIdx = [self.pageId[0], pageFilename]
             pagePath = os.path.join(pagePath, *pageIdx)
         return pagePath
 

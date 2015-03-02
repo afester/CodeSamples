@@ -200,7 +200,7 @@ class Handler(xml.sax.handler.ContentHandler):
             self.state = 5
         elif name == "keyword": #  and topState == :
             self.insertAnchor(self.content, "keyword", self.content)
-            self.keywordLinks.append( (self.content, self.content) )
+            self.keywordLinks.append(self.content)
             self.state = 5
 
 

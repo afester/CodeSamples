@@ -29,21 +29,15 @@ class AddNotepadDlg(QDialog):
 
 class TreeNode(QTreeWidgetItem):
 
-    def __init__(self, notepad, label, pageId):
+    def __init__(self, notepad, label):
         QTreeWidgetItem.__init__(self, [label])
-        assert type(pageId) is int
-        
-        self.pageId = pageId
+
         self.notepad = notepad
         self.wasExpanded = False
 
 
     def getLabel(self):
         return self.text(0)
-
-
-    def getPageId(self):
-        return self.pageId
 
 
     def getNotepad(self):
@@ -58,7 +52,7 @@ class TreeNode(QTreeWidgetItem):
         return self.wasExpanded
 
     def __repr__(self, *args, **kwargs):
-        return 'TreeNode[label={}, notepad={}, pageId={}]'.format(self.text(0), self.notepad.getName(), self.pageId)
+        return 'TreeNode[label={}, notepad={}]'.format(self.text(0), self.notepad.getName())
 
 
 class TreeWidget(QTreeWidget):
@@ -74,13 +68,16 @@ class TreeWidget(QTreeWidget):
     def expandItem(self, item):
         if not item.isWasExpanded():
             notepad = item.getNotepad()
-            page = notepad.getPage(item.getPageId())
+            
+            if item.parent() is None:
+                page = notepad.getPage(None)
+            else:
+                page = notepad.getPage(item.getLabel())
     
-            for l in page.getLinks():
-                label = '{} (Id:{})'.format(l[1], l[0])
-                linkItem = TreeNode(notepad, label, int(l[0]))
+            for keyword in page.getLinks():
+                linkItem = TreeNode(notepad, keyword)
     
-                page = notepad.getPage(int(l[0]))
+                page = notepad.getPage(keyword)
                 page.load()
                 if len(page.getLinks()) > 0:
                     linkItem.setChildIndicatorPolicy(QTreeWidgetItem.ShowIndicator)
@@ -92,9 +89,9 @@ class TreeWidget(QTreeWidget):
     # As soon as one of them is expanded (either by the user or programmatically),
     # the expandHandler method takes care of adding the childs as required
     def refresh(self, notepad):
-        rootPage = notepad.getPage(0)
+        rootPage = notepad.getPage(None)
 
-        rootItem = TreeNode(notepad, notepad.getName(), 0)
+        rootItem = TreeNode(notepad, notepad.getName())
         self.addTopLevelItem(rootItem)
 
         if len(rootPage.getLinks()) > 0:
