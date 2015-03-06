@@ -7,6 +7,8 @@ Created on 25.02.2015
 from PyQt5.QtCore import QSize, QPoint
 import configparser
 import logging
+import ast
+
 
 class Settings(object):
 
@@ -17,12 +19,19 @@ class Settings(object):
         self.notepads = []
         self.mainWindowSize = QSize(1200, 700)
         self.mainWindowPos = QPoint(240, 200)
+        self.browserPath = []
 
     
     def load(self, fileName = 'notepad.ini'):
         self.l.debug('Loading local settings ...')
         config = configparser.ConfigParser()
         config.read(fileName)
+
+        # load browser state
+        if config.has_section('browser'):
+            browserSettings = config['browser']
+            path = browserSettings.get('path')
+            self.browserPath = ast.literal_eval(path)
 
         # load main window position and size
         if config.has_section('mainWindow'):
@@ -61,6 +70,9 @@ class Settings(object):
         config.set('mainWindow', 'pos', '{},{}'.format(self.mainWindowPos.x(), self.mainWindowPos.y()))
         config.set('mainWindow', 'size', '{},{}'.format(self.mainWindowSize.width(), self.mainWindowSize.height()))
 
+        config.add_section('browser')
+        config.set('browser', 'path', str(self.browserPath))
+
         idx = 0
         for s in self.notepads:
             sectName = "notepad_{}".format(idx)
@@ -83,22 +95,23 @@ class Settings(object):
     def getNotepads(self):
         return self.notepads
 
-
     def addNotepad(self, npDef):
         self.notepads.append(npDef)
-
 
     def setMainWindowPos(self, pos):
         self.mainWindowPos = pos    
 
+    def setBrowserPath(self, path):
+        self.browserPath = path
 
     def setMainWindowSize(self, size):
         self.mainWindowSize = size
 
-
     def getMainWindowPos(self):
         return self.mainWindowPos
 
-
     def getMainWindowSize(self):
         return self.mainWindowSize
+
+    def getBrowserPath(self):
+        return self.browserPath

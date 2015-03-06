@@ -1,25 +1,49 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <page>
 
-   <h1>Sample Wiki</h1>
+   <h1>Sample Page</h1>
+
+   <h2>Requirements</h2>
+   <ul>
+     <li>Python 3.3</li>
+     <li>PyQt 5.4</li>
+     <li>cssutils 1.0</li>
+   </ul>
 
    <h2>Introduction</h2>
    <p>This sample Wiki is used to test and show the various features of the <a href="http://www.qt.org">Rich Text Editor in Qt.</a></p>
    <p>See the <keyword>TODO list</keyword> for stuff which is still missing.</p>
+   <p><keyword>Sample Page</keyword></p>
 
    <h2>A long text</h2>
-   <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. <em>At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</em> Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+   <p><tt>Lorem ipsum</tt> dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. <em>At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</em> Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor <em>invidunt</em> ut 
+labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est <tt>Lorem ipsum</tt> dolor sit amet.</p>
 
    <h2>Java Code</h2>
-   <code lang="java">public TreeNode&lt;String&gt; createTree(int childCount, int depth) {
+   <javacode>public TreeNode&lt;String&gt; createTree(int childCount, int depth) {
     tree = new TreeNode&lt;&gt;("Root");
     createSubTree(tree, childCount, depth, "Node");
     return tree;
-}</code>
-   <p>A List</p>
+}</javacode>
+
+   <h2>C++ code</h2>
+   <cppcode>#include &lt;stdio.h&gt;
+
+int main() {
+   printf("Hello World")
+}</cppcode>
+
+   <h2>XML Code</h2>
+   <xmlcode>   &lt;h2&gt;Introduction&lt;/h2&gt;
+   &lt;p&gt;This sample Wiki is used to test and show the various features of the &lt;a href="http://www.qt.org"&gt;Rich Text Editor in Qt.&lt;/a&gt;&lt;/p&gt;
+   &lt;p&gt;See the &lt;keyword&gt;TODO list&lt;/keyword&gt; for stuff which is still missing.&lt;/p&gt;
+   &lt;p&gt;&lt;keyword&gt;Sample Page&lt;/keyword&gt;&lt;/p&gt;</xmlcode>
+
+   <h2>A List</h2>
    <ul>
-     <li>Item 1</li>
-     <li>Item 2</li>
+     <li><keyword>Item 1</keyword></li>
+     <li>Item 2
+An item with a second line</li>
      <li>Item 3</li>
    </ul>
 

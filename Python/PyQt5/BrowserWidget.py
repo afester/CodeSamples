@@ -11,7 +11,6 @@ from PyQt5 import uic
 
 import os, logging
 from Notepad import Notepad
-from PyQt5.Qt import QAbstractItemView
 
 class AddNotepadDlg(QDialog):
     
@@ -23,8 +22,8 @@ class AddNotepadDlg(QDialog):
 
 
     def choosePath(self):
-        dir = QFileDialog.getExistingDirectory(self, caption='Select Notepad to add')
-        self.ui.localPath.setText(dir)
+        pathName = QFileDialog.getExistingDirectory(self, caption='Select Notepad to add')
+        self.ui.localPath.setText(pathName)
 
 
 class TreeNode(QTreeWidgetItem):
@@ -78,7 +77,6 @@ class TreeWidget(QTreeWidget):
                 linkItem = TreeNode(notepad, keyword)
     
                 page = notepad.getPage(keyword)
-                page.load()
                 if len(page.getLinks()) > 0:
                     linkItem.setChildIndicatorPolicy(QTreeWidgetItem.ShowIndicator)
                 item.addChild(linkItem)
@@ -99,10 +97,38 @@ class TreeWidget(QTreeWidget):
 
 
     def addNotepad(self, notepad):
-        rootItem = TreeNode(notepad, notepad.getName(), 0)
+        rootItem = TreeNode(notepad, notepad.getName())
         self.addTopLevelItem(rootItem)
         self.setCurrentItem(rootItem)
         rootItem.setExpanded(True)
+
+
+    def expandChild(self, item, path):
+        item.setExpanded(True)
+        if len(path) == 0:
+            self.setCurrentItem(item)
+            return
+
+        for idx in range(0, item.childCount()):
+            childItem = item.child(idx)
+            if childItem.getLabel() == path[0]:
+                self.expandChild(childItem, path[1:])
+                break
+
+
+    def expandPath(self, path):
+        if len(path) == 0:
+            return
+
+        rootItem = None
+        for idx in range(0, self.topLevelItemCount()):
+            item = self.topLevelItem(idx)
+            if item.getLabel() == path[0]:
+                rootItem = item
+                break
+
+        if rootItem is not None:
+            self.expandChild(rootItem, path[1:])
 
 
 class BrowserWidget(QWidget):
@@ -131,6 +157,7 @@ class BrowserWidget(QWidget):
         self.browserView = TreeWidget(self)
 
         hLayout = QVBoxLayout(self)
+        hLayout.setContentsMargins(0, 0, 0, 1)
         hLayout.addWidget(toolbar)
         hLayout.addWidget(self.browserView)
 
@@ -181,13 +208,42 @@ class BrowserWidget(QWidget):
     def refresh(self):
         # Reload all notepads
         self.l.debug("Refreshing browser ...")
+        
+        # Add notepads to the browser tree
         notepads = self.settings.getNotepads()
         for np in notepads:
             notepad = Notepad(np)
             self.browserView.refresh(notepad)
 
-        # Select and expand the first notepad (todo: store last selection as preference)
-        first = self.browserView.topLevelItem(0)
-        if first:
-            first.setSelected(True)
-            first.setExpanded(True)
+        # Expand to and select the previous item
+        path = self.settings.getBrowserPath()
+        self.browserView.expandPath(path)
+
+        #first = self.browserView.topLevelItem(0)
+        #if first:
+        #    first.setExpanded(True)
+        #    self.browserView.setCurrentItem(first)
+
+
+    def navigate(self, pageId):
+        current = self.browserView.currentItem()
+        label = current.getLabel()
+        self.browserView.expandItem(current)
+
+        for idx in range(0, current.childCount()):
+            child = current.child(idx)
+            label = child.getLabel()
+            if label == pageId:
+                self.browserView.setCurrentItem(child)
+                break
+
+
+    def getCurrentPath(self):
+        result = []
+
+        current = self.browserView.currentItem()
+        while current is not None:
+            result.insert(0, current.getLabel()) 
+            current = current.parent()
+
+        return result

@@ -6,10 +6,11 @@ Created on Feb 13, 2015
 @author: andreas
 '''
 
-from PyQt5.QtCore import PYQT_VERSION_STR, QT_VERSION_STR, qVersion, Qt
+from PyQt5.QtCore import PYQT_VERSION_STR, QT_VERSION_STR, qVersion, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QTabWidget
 from PyQt5.QtWidgets import QTextEdit, QSplitter, QHBoxLayout, QVBoxLayout, QMainWindow
 from PyQt5.QtWidgets import QAction, QStatusBar, QMenuBar, QApplication, QMessageBox
+from PyQt5.QtGui import QTextFormat
 
 import sys
 import logging.config
@@ -19,7 +20,9 @@ from BrowserWidget import BrowserWidget
 from XMLExporter import XMLExporter
 from Settings import Settings
 
-class RichtextSampleWidget(QWidget):
+class MynPad(QWidget):
+
+    updateWindowTitle = pyqtSignal(str)
 
     def __init__(self, parentWidget, settings):
         QWidget.__init__(self, parentWidget)
@@ -43,7 +46,8 @@ class RichtextSampleWidget(QWidget):
 
         self.editorWidget.setObjectName("EditorWidget1")
         self.editorWidget.message.connect(self.showMessage)
-        self.editorWidget.navigate.connect(self.navigate, Qt.QueuedConnection)
+        self.editorWidget.titleChanged.connect(self.updateWindowTitle)
+        self.editorWidget.navigate.connect(self.navigate)
 
         tabLayout.addWidget(self.editorWidget)
         self.tabWidget.addTab(tab, "Edit")
@@ -59,7 +63,7 @@ class RichtextSampleWidget(QWidget):
 
         self.textView = QTextEdit(self.tabWidget)
         self.textView.setReadOnly(True)
-        self.tabWidget.addTab(self.textView, "View plaintext")
+        self.tabWidget.addTab(self.textView, "View text structure")
 
         self.customView = QTextEdit(self.tabWidget)
         self.customView.setReadOnly(True)
@@ -72,10 +76,8 @@ class RichtextSampleWidget(QWidget):
 
         self.setLayout(self.theLayout)
         self.splitter.setSizes([100, 400])
-
+        # self.splitter.setChildrenCollapsible(False)
         self.editorWidget.setEnabled(False)
-
-        self.browserWidget.refresh()    # refresh the browser tree 
 
 
     def showMessage(self, message):
@@ -83,18 +85,24 @@ class RichtextSampleWidget(QWidget):
 
 
     def navigate(self, pageId):
-        print("navigating to {}".format(pageId))
+        print('Navigating to "{}"'.format(pageId))
         self.editorWidget.save()
         self.editorWidget.load(self.editorWidget.page.notepad, pageId)
+
+        self.browserWidget.navigate(pageId)
 
 
     def itemSelected(self):
         treeNode = self.browserWidget.currentItem
         print("Selected tree node: {}".format(treeNode))
         self.editorWidget.setEnabled(True)
+
+        self.editorWidget.save()
         if treeNode.parent() is None:
+            # Load title page
             self.editorWidget.load(treeNode.getNotepad(), None)
         else:
+            # Load normal page
             self.editorWidget.load(treeNode.getNotepad(), treeNode.getLabel())
 
 
@@ -102,11 +110,39 @@ class RichtextSampleWidget(QWidget):
         if index == 3:
             self.htmlView.setPlainText(self.editorWidget.editView.toHtml())
         elif index == 4:
-            self.textView.setPlainText(self.editorWidget.editView.toPlainText())
+            self.dumpTextStructure()
         elif index == 5:
             exporter = XMLExporter(None, None)
             xmlText = exporter.getXmlString(self.editorWidget.editView.document())
             self.customView.setPlainText(xmlText)
+
+
+    def blocks(self, frame):
+        blocks = frame.begin()
+        while not blocks.atEnd():
+            block = blocks.currentBlock()
+            yield block
+            blocks += 1
+
+
+    def dumpTextStructure(self):
+        self.textView.clear()
+
+        doc = self.editorWidget.editView.document()
+        frm = doc.rootFrame()
+
+        for block in self.blocks(frm):
+            bfmt = block.blockFormat()
+            style = bfmt.property(QTextFormat.UserProperty)
+
+            fmtType = 'B'
+            # if bfmt.isListFormat():
+            if block.textList() is not None:
+                fmtType = 'L({})'.format(block.textList().count())
+
+            self.textView.append('  {}&lt;{}&gt;: <span style="background: yellow">{}</span>\n'.format(fmtType, style, block.text()))
+
+        
 
 
 class MainWindow(QMainWindow):
@@ -118,7 +154,7 @@ class MainWindow(QMainWindow):
         
         self.l.debug('Initializing MainWindow ...')
         
-        self.setWindowTitle("My Notepad")
+        self.setWindowTitle("MynPad")
         self.theApplication = app
         app.aboutToQuit.connect(self.saveState)
 
@@ -143,8 +179,8 @@ class MainWindow(QMainWindow):
         self.statusBar = QStatusBar()
         self.statusBar.showMessage("Ready.")
         self.setStatusBar(self.statusBar)
-
-        self.mainWidget = RichtextSampleWidget(self, self.settings)
+        self.mainWidget = MynPad(self, self.settings)
+        self.mainWidget.updateWindowTitle.connect(self.updateWindowTitle)
         self.setCentralWidget(self.mainWidget)
 
         # Reset main window size and position
@@ -153,11 +189,20 @@ class MainWindow(QMainWindow):
         size = self.settings.getMainWindowSize()
         self.resize(size)
 
+        # refresh the browser tree 
+        self.mainWidget.browserWidget.refresh()
+
+
+    def updateWindowTitle(self, title):
+        self.setWindowTitle('{} - MynPad'.format(title))
+
 
     def saveState(self):
 
         # Note: there is no way to have eclipse shutdown the application faithfully,
         # see also http://stackoverflow.com/questions/677531/is-it-possible-for-eclipse-to-terminate-gently-instead-of-using-sigkill
+        path = self.mainWidget.browserWidget.getCurrentPath()
+        self.settings.setBrowserPath(path)
         self.settings.setMainWindowPos(self.pos())
         self.settings.setMainWindowSize(self.size())
         self.settings.save()

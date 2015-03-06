@@ -5,7 +5,7 @@ Created on 20.02.2015
 '''
 
 from PyQt5.QtGui import QTextFormat, QTextBlockFormat, QTextCharFormat, QTextListFormat, QFont, QColor
-from PyQt5.QtCore import Qt
+import cssutils
 
 class Format:
     
@@ -80,121 +80,177 @@ class FormatManager:
     def __init__(self):
         pass
 
+
+    def simpleLookup(self, styleSheet, searchText):
+        '''Return the CSSRule for a given selector'''
+
+        rules = styleSheet.cssRules
+        for idx in range(0, rules.length):
+            rule = rules.item(idx)
+
+            if rule.type == cssutils.css.CSSRule.STYLE_RULE:    # type(rule) = <class CSSStyleRule>
+                # Iterate all (comma separated) selectors
+                for sel in rule.selectorList:   # class cssutils.css.Selector
+                    if sel.selectorText == searchText:
+                        return rule
+        return None
+
+
+    def getIntValue(self, cssRule, propertyName):
+        prop = cssRule.style.getProperty(propertyName)
+        if prop is None:
+            return None
+
+        value = prop.propertyValue.item(0)
+        if value.type == cssutils.css.Value.NUMBER:
+            return value.value
+        elif value.type == cssutils.css.Value.DIMENSION:
+            return value.value
+
+        return None
+
+
+    def getStringValue(self, cssRule, propertyName):
+        prop = cssRule.style.getProperty(propertyName)
+        if prop is None:
+            return None
+
+        value = prop.propertyValue.item(0)
+        if value.type in [cssutils.css.Value.STRING, cssutils.css.Value.IDENT]:
+            return value.value
+
+        return None
+
+
+    def getColorValue(self, cssRule, propertyName):
+        prop = cssRule.style.getProperty(propertyName)
+        if prop is None:
+            return None
+
+        value = prop.propertyValue.item(0)
+        if value.type != cssutils.css.Value.COLOR_VALUE:
+            return None
+
+        return QColor(value.red, value.green, value.blue)
+
+
     def loadFormats(self):
         self.formats = {}
 
-        blockFmt = QTextBlockFormat()
-        blockFmt.setTopMargin(18)
-        blockFmt.setBottomMargin(5)
-        blockFmt.setProperty(QTextFormat.UserProperty, 'h1')
-        #blockFmt.setBackground(Qt.red)
-        charFmt = QTextCharFormat()
-        charFmt.setFontPointSize(18)
-        #charFmt.setForeground(Qt.yellow)
-        #charFmt.setBackground(Qt.blue)
-        charFmt.setFontFamily("Arial")
-        self.formats['h1'] = Format(blockFmt, charFmt)
+        styleSheet = cssutils.parseFile('styles.css')
 
-        blockFmt = QTextBlockFormat()
-        blockFmt.setTopMargin(14)
-        blockFmt.setBottomMargin(3)
-        blockFmt.setProperty(QTextFormat.UserProperty, 'h2')
-        charFmt = QTextCharFormat()
-        charFmt.setFontPointSize(16)
-        charFmt.setFontFamily("Arial")
-        self.formats['h2'] = Format(blockFmt, charFmt)
+        blockFormats = { 'h1' : 'h1', 'h2' : 'h2', 'h3' : 'h3', 'p' : 'p', 
+                         'code[lang="java"]' : 'javacode',
+                         'code[lang="cpp"]' : 'cppcode',
+                         'code[lang="xml"]' : 'xmlcode',
+                         'code[lang="sql"]' : 'sqlcode',
+                         'code[lang="python"]' : 'pycode',
+                         'pre' : 'pre'}
 
-        blockFmt = QTextBlockFormat()
-        blockFmt.setTopMargin(10)
-        blockFmt.setBottomMargin(3)
-        blockFmt.setProperty(QTextFormat.UserProperty, 'h3')
-        charFmt = QTextCharFormat()
-        charFmt.setFontPointSize(14)
-        charFmt.setFontFamily("Arial")
-        self.formats['h3'] = Format(blockFmt, charFmt)
+        for cssKey in blockFormats.keys():
+            tagKey = blockFormats[cssKey]
+            cssRule = self.simpleLookup(styleSheet, cssKey)
 
-        blockFmt = QTextBlockFormat()
-        blockFmt.setProperty(QTextFormat.UserProperty, 'p')
+            blockFmt = QTextBlockFormat()
+            blockFmt.setProperty(QTextFormat.UserProperty, tagKey)
+
+            value = self.getIntValue(cssRule, 'margin-top')
+            if value:
+                blockFmt.setTopMargin(value)
+            value = self.getIntValue(cssRule, 'margin-right')
+            if value:
+                blockFmt.setRightMargin(value)
+            value = self.getIntValue(cssRule, 'margin-bottom')
+            if value:
+                blockFmt.setBottomMargin(value)
+            value = self.getIntValue(cssRule, 'margin-left')
+            if value:
+                blockFmt.setLeftMargin(value)
+            value = self.getColorValue(cssRule, 'background-color')
+            if value:
+                blockFmt.setBackground(value)
+
+            charFmt = QTextCharFormat()
+
+            value = self.getIntValue(cssRule, 'font-size')
+            if value:
+                charFmt.setFontPointSize(value)
+            value = self.getColorValue(cssRule, 'color')
+            if value:
+                charFmt.setForeground(value)
+            value = self.getStringValue(cssRule, 'font-family')
+            if value:
+                charFmt.setFontFamily(value)
+
+            self.formats[tagKey] = Format(blockFmt, charFmt)
+
+### List formats
+
+        listFormats = {'ul li' : 'ul1', 'ul ul li' : 'ul2', 'ul ul ul li' : 'ul3', 
+                       'ol li' : 'ol1', 'ol ol li' : 'ol2', 'ol ol ol li' : 'ol3'} 
+        for cssKey in listFormats.keys():
+            tagKey = listFormats[cssKey]
+            cssRule = self.simpleLookup(styleSheet, cssKey)
+
+            listFmt = QTextListFormat()
+            listFmt.setProperty(QTextFormat.UserProperty, tagKey)
+
+            value = self.getStringValue(cssRule, 'list-style-type')
+            if value:
+                if value == 'disc':
+                    listFmt.setStyle(QTextListFormat.ListDisc)
+                elif value == 'circle':
+                    listFmt.setStyle(QTextListFormat.ListCircle)
+                elif value == 'square':
+                    listFmt.setStyle(QTextListFormat.ListSquare)
+                elif value == 'decimal':
+                    listFmt.setStyle(QTextListFormat.ListDecimal)
+
+            listFmt.setIndent(1)    # TODO!
+
+            self.formats[tagKey] = Format(None, None, listFmt)
+
+### Inline formats
+
+        # Base format (?????)
         pcharFmt = QTextCharFormat()
         pcharFmt.setFontPointSize(10)
         pcharFmt.setFontFamily("Sans")
-        self.formats['p'] = Format(blockFmt, pcharFmt)
 
-        blockFmt = QTextBlockFormat()
-        blockFmt.setTopMargin(5)
-        blockFmt.setLeftMargin(5)
-        blockFmt.setRightMargin(5)
-        blockFmt.setBottomMargin(5)
-        #blockFmt.setBackground(QColor(240, 240, 240))
-        blockFmt.setBackground(Qt.blue)
-        blockFmt.setProperty(QTextFormat.UserProperty, 'code')
-        charFmt = QTextCharFormat()
-        #charFmt.setForeground(Qt.red)
-        charFmt.setForeground(Qt.yellow)
-        charFmt.setFontFamily("Courier")
-        charFmt.setFontPointSize(11)
-        charFmt.setFontWeight(QFont.Bold)
-        self.formats['code'] = Format(blockFmt, charFmt)
+        inlineFormats = { 'em' : 'em', 'strong' : 'strong', 'tt' : 'tt', 
+                          'keyword' : 'keyword', 'a' : 'a'}
 
-        ### List formats
-        listFmt = QTextListFormat()
-        listFmt.setStyle(QTextListFormat.ListDisc)
-        listFmt.setIndent(1)
-        listFmt.setProperty(QTextFormat.UserProperty, 'ul1')
-        self.formats['ul1'] = Format(None, None, listFmt)
+        for cssKey in inlineFormats.keys():
+            tagKey = inlineFormats[cssKey]
+            cssRule = self.simpleLookup(styleSheet, cssKey)
 
-        listFmt = QTextListFormat()
-        listFmt.setStyle(QTextListFormat.ListCircle)
-        listFmt.setIndent(2)
-        listFmt.setProperty(QTextFormat.UserProperty, 'ul2')
-        self.formats['ul2'] = Format(None, None, listFmt)
+            charFmt = QTextCharFormat(pcharFmt)
+            charFmt.setProperty(QTextFormat.UserProperty, tagKey)
 
-        listFmt = QTextListFormat()
-        listFmt.setStyle(QTextListFormat.ListSquare)
-        listFmt.setIndent(3)
-        listFmt.setProperty(QTextFormat.UserProperty, 'ul3')
-        self.formats['ul3'] = Format(None, None, listFmt)
+            # TODO: better approach?
+            if tagKey in ['a', 'keyword']:
+                charFmt.setAnchor(True)
 
-        listFmt = QTextListFormat()
-        listFmt.setStyle(QTextListFormat.ListDecimal)
-        listFmt.setIndent(1)
-        listFmt.setProperty(QTextFormat.UserProperty, 'ol1')
-        self.formats['ol1'] = Format(None, None, listFmt)
+            value = self.getStringValue(cssRule, 'font-family')
+            if value:
+                charFmt.setFontFamily(value)
+            value = self.getStringValue(cssRule, 'font-weight')
+            if value and value == 'bold':
+                charFmt.setFontWeight(QFont.Bold)
+            value = self.getIntValue(cssRule, 'font-size')
+            if value:
+                charFmt.setFontPointSize(value)
+            value = self.getColorValue(cssRule, 'background-color')
+            if value:
+                charFmt.setBackground(value)
+            value = self.getColorValue(cssRule, 'color')
+            if value:
+                charFmt.setForeground(value)
+            value = self.getStringValue(cssRule, 'text-decoration')
+            if value and value == 'underline':
+                charFmt.setFontUnderline(True)
 
-        listFmt = QTextListFormat()
-        listFmt.setStyle(QTextListFormat.ListDecimal)
-        listFmt.setIndent(2)
-        listFmt.setProperty(QTextFormat.UserProperty, 'ol2')
-        self.formats['ol2'] = Format(None, None, listFmt)
-
-        listFmt = QTextListFormat()
-        listFmt.setStyle(QTextListFormat.ListDecimal)
-        listFmt.setIndent(3)
-        listFmt.setProperty(QTextFormat.UserProperty, 'ol3')
-        self.formats['ol3'] = Format(None, None, listFmt)
-
-        
-        ### Inline formats
-        charFmt = QTextCharFormat(pcharFmt)
-        charFmt.setFontWeight(QFont.Bold)
-        charFmt.setProperty(QTextFormat.UserProperty, 'em')
-        self.formats['em'] = Format(None, charFmt)
-
-        charFmt = QTextCharFormat(pcharFmt)
-        charFmt.setAnchor(True)
-        charFmt.setForeground(Qt.blue)
-        charFmt.setBackground(QColor(220, 220, 220))
-        charFmt.setFontUnderline(True)
-        charFmt.setProperty(QTextFormat.UserProperty, 'keyword')
-        self.formats['keyword'] = Format(None, charFmt)
-
-        charFmt = QTextCharFormat(pcharFmt)
-        charFmt.setAnchor(True)
-        charFmt.setForeground(Qt.blue)
-        # charFmt.setBackground(Qt.blue)
-        charFmt.setFontUnderline(True)
-        charFmt.setProperty(QTextFormat.UserProperty, 'a')
-        self.formats['a'] = Format(None, charFmt)
+            self.formats[tagKey] = Format(None, charFmt)
 
 
     def getFormat(self, fmtId):

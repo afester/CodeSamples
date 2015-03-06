@@ -7,7 +7,7 @@ Created on 24.02.2015
 from XMLImporter import XMLImporter
 from XMLExporter import XMLExporter
 from FormatManager import FormatManager
-import os, urllib.parse
+import os, urllib.parse, uuid
 
 
 class Notepad:
@@ -39,25 +39,6 @@ class Notepad:
   <h1>{}</h1>
 </page>
 '''.format(self.getName()))
-
-
-    def getNextPageId(self):
-        sequenceFile = os.path.join(self.getRootpath(), 'sequence.dat')
-
-        cur = 0
-        try:
-            with open(sequenceFile, 'r') as fd:
-                cur = int(fd.read())
-        except:
-            pass
-
-        # 0 is in any case reserved for the root page!
-        nextSeq = cur + 1
-
-        with open(sequenceFile, 'w') as fd:
-            fd.write("{}".format(nextSeq))
-
-        return nextSeq
 
 
     def getPage(self, pageId):
@@ -93,6 +74,13 @@ class Page:
         self.document = None
 
 
+    def getName(self):
+        if self.pageId is None:
+            return "Title page"
+        else:
+            return self.pageId
+
+
     def getPagePath(self):
         pagePath = self.notepad.getRootpath()
         if self.pageId is not None:     # not the root page
@@ -106,7 +94,7 @@ class Page:
         if self.notepad.getType() == 'local':
             pagePath = self.getPagePath()
             print("  Loading page at {} ".format(pagePath))
-    
+
             if not os.path.isdir(pagePath):
                 print(pagePath + " does not exist, creating directory ...")
                 os.makedirs(pagePath)
@@ -119,7 +107,7 @@ class Page:
 <page>
   <h1>{}</h1>
 </page>
-'''.format(self.notepad.getName()))
+'''.format(self.pageId))
 
             importer = XMLImporter(pagePath, "content.xml", self.notepad.getFormatManager())
             importer.importDocument()
@@ -134,6 +122,9 @@ class Page:
         exporter = XMLExporter(pagePath, 'content.xml')
         exporter.exportDocument(self.document)
 
+        self.document.setModified(False)
+
+
 #===============================================================================
 #         with open(self.contentFile, 'w') as content_file:
 #             # NOTE: toHtml() writes the text document in a "hard coded"
@@ -146,6 +137,14 @@ class Page:
 #             exporter = XMLExporter(content_file)
 #             exporter.exportDocument(self.editView.document())
 #===============================================================================
+
+    def saveImage(self, image):
+        fileName = str(uuid.uuid4()).replace('-', '') + '.png'
+        filePath = os.path.join(self.getPagePath(), fileName)
+        print("Saving image to {}".format(filePath))
+        image.save(filePath)
+
+        return fileName
 
 
     def getLinks(self):
