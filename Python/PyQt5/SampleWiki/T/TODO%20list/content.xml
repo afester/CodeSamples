@@ -1,48 +1,38 @@
-<?xml version = '1.0' encoding = 'UTF-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <page>
-
-   <h1>TODO list for MyNotes</h1>
-
-   <h2>Next steps</h2>
-   <ul>
-     <li>Internal copy&amp;paste</li>
-   </ul>
-   <ul>
-     <li>External URL editor</li>
-     <li>List indents</li>
-   </ul>
-
-   <h2>Bugs</h2>
-   <ul>
-     <li>UNDO/REDO state not reset when saving a page</li>
-     <li><em>Page not saved when application is exitted</em></li>
-     <li>List format not reflected in Block style toolbar</li>
-     <li><em>Make XMLExporter more robust - must not destroy existing page!!!</em></li>
-   </ul>
-
-   <h2>Important topics</h2>
-   <ul>
-     <li>Update Browser when new page is created</li>
-     <li>Additional code format for generic preformatted text (log files etc.)</li>
-     <li>Search functionality</li>
-     <li>Return key inside block (e.g. inside code block)</li>
-     <li>Tab key - inside lists, should increase indent</li>
-     <li>Back and Forward navigation</li>
-     <li>Maintain creation date and last update date for each page</li>
-     <li>Clean up unused image files - probably simply delete unused files when saving the page</li>
-   </ul>
-
-   <h2>Enhancements</h2>
-   <ul>
-     <li>Show current cursor position (line/column)</li>
-   </ul>
-
-   <h2>Ideas</h2>
-   <ul>
-     <li>Style Editor</li>
-     <li>Version Control of pages</li>
-     <li>Syntax highlighting inside code blocks</li>
-     <li>Inline resizing of images through some kind of handles - this will most likely require the implementation of a custom text object, see <a href="">http://doc.qt.io/qt-5/qtsvg-richtext-textobject-example.html</a></li>
-   </ul>
-   <p></p>
+  <h1>TODO list for MyNotes</h1>
+  <h2>Next steps</h2>
+  <ul>
+    <li>Internal copy&amp;paste</li>
+  </ul>
+  <h2>Bugs</h2>
+  <ul>
+    <li>UNDO/REDO state not reset when saving a page</li>
+    <li>List format not reflected in Block style toolbar</li>
+    <li><em>Make XMLExporter more robust - must not destroy existing page!!!</em></li>
+  </ul>
+  <h2>Important topics</h2>
+  <ul>
+    <li>Update Browser when new page is created</li>
+    <li>Additional code format for generic preformatted text (log files etc.)</li>
+    <li>Search functionality</li>
+    <li>Return key inside block (e.g. inside code block)</li>
+    <li>Tab key - inside lists, should increase indent</li>
+    <li>Back and Forward navigation</li>
+    <li>Maintain creation date and last update date for each page</li>
+    <li>Clean up unused image files - probably simply delete unused files when saving the page</li>
+    <li>Support of tables. Currently an issue since the <tt>QTextTableCell</tt> is missing the python methods for <tt>begin()</tt> and <tt>end()</tt>, so that it is not possible to traverse the table cells contents.</li>
+  </ul>
+  <h2>Enhancements</h2>
+  <ul>
+    <li>Show current cursor position (line/column)</li>
+  </ul>
+  <h2>Ideas</h2>
+  <ul>
+    <li>Style Editor</li>
+    <li>Version Control of pages</li>
+    <li>Syntax highlighting inside code blocks</li>
+    <li>Inline resizing of images through some kind of handles - this will most likely require the implementation of a custom text object, see <a href="">http://doc.qt.io/qt-5/qtsvg-richtext-textobject-example.html</a></li>
+  </ul>
+  <p></p>
 </page>

@@ -145,7 +145,7 @@ class FormatManager:
                          'code[lang="xml"]' : 'xmlcode',
                          'code[lang="sql"]' : 'sqlcode',
                          'code[lang="python"]' : 'pycode',
-                         'pre' : 'pre'}
+                         'screen' : 'screen'}
 
         for cssKey in blockFormats.keys():
             tagKey = blockFormats[cssKey]
@@ -206,7 +206,9 @@ class FormatManager:
                 elif value == 'decimal':
                     listFmt.setStyle(QTextListFormat.ListDecimal)
 
-            listFmt.setIndent(1)    # TODO!
+            # HACK!!! TODO!
+            indent = cssKey.count(' ')
+            listFmt.setIndent(indent)
 
             self.formats[tagKey] = Format(None, None, listFmt)
 

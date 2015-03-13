@@ -10,15 +10,15 @@ from PyQt5.QtCore import PYQT_VERSION_STR, QT_VERSION_STR, qVersion, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QTabWidget
 from PyQt5.QtWidgets import QTextEdit, QSplitter, QHBoxLayout, QVBoxLayout, QMainWindow
 from PyQt5.QtWidgets import QAction, QStatusBar, QMenuBar, QApplication, QMessageBox
-from PyQt5.QtGui import QTextFormat
 
 import sys
 import logging.config
 
 from EditorWidget import EditorWidget
 from BrowserWidget import BrowserWidget
-from XMLExporter import XMLExporter
 from Settings import Settings
+from TextDocumentTraversal import TextDocumentPrinter, TextXMLPrinter, TextHTMLPrinter
+
 
 class MynPad(QWidget):
 
@@ -57,17 +57,23 @@ class MynPad(QWidget):
 
         self.tabWidget.addTab(QWidget(self.tabWidget), "View pdf")
 
-        self.htmlView = QTextEdit(self.tabWidget)
-        self.htmlView.setReadOnly(True)
-        self.tabWidget.addTab(self.htmlView, "View html")
-
         self.textView = QTextEdit(self.tabWidget)
         self.textView.setReadOnly(True)
-        self.tabWidget.addTab(self.textView, "View text structure")
+        self.textView.setFontFamily('Courier')
+        self.textView.setFontPointSize(10)
+        self.tabWidget.addTab(self.textView, "View document structure")
 
         self.customView = QTextEdit(self.tabWidget)
         self.customView.setReadOnly(True)
+        self.customView.setFontFamily('Courier')
+        self.customView.setFontPointSize(10)
         self.tabWidget.addTab(self.customView, "View XML")
+
+        self.htmlView = QTextEdit(self.tabWidget)
+        self.htmlView.setReadOnly(True)
+        self.htmlView.setFontFamily('Courier')
+        self.htmlView.setFontPointSize(10)
+        self.tabWidget.addTab(self.htmlView, "View Html")
 
         self.tabWidget.currentChanged.connect(self.tabSelected)
 
@@ -108,13 +114,21 @@ class MynPad(QWidget):
 
     def tabSelected(self, index):
         if index == 3:
-            self.htmlView.setPlainText(self.editorWidget.editView.toHtml())
-        elif index == 4:
             self.dumpTextStructure()
+
+        elif index == 4:
+            self.customView.clear()
+
+            doc = self.editorWidget.editView.document()
+            traversal = TextXMLPrinter(self.customView.insertPlainText)
+            traversal.traverse(doc)
+
         elif index == 5:
-            exporter = XMLExporter(None, None)
-            xmlText = exporter.getXmlString(self.editorWidget.editView.document())
-            self.customView.setPlainText(xmlText)
+            self.htmlView.clear()
+
+            doc = self.editorWidget.editView.document()
+            traversal = TextHTMLPrinter(self.htmlView.insertPlainText)
+            traversal.traverse(doc)
 
 
     def blocks(self, frame):
@@ -129,18 +143,51 @@ class MynPad(QWidget):
         self.textView.clear()
 
         doc = self.editorWidget.editView.document()
-        frm = doc.rootFrame()
+        traversal = TextDocumentPrinter(self.textView.insertPlainText)
+        traversal.traverse(doc)
 
-        for block in self.blocks(frm):
-            bfmt = block.blockFormat()
-            style = bfmt.property(QTextFormat.UserProperty)
 
-            fmtType = 'B'
-            # if bfmt.isListFormat():
-            if block.textList() is not None:
-                fmtType = 'L({})'.format(block.textList().count())
+    def hexdumpString(self, contents):
+        # Convert the string into a byte sequence.
+        # contents = bytes(contents, encoding='utf-16')
+        contents = contents.replace('\u2028', '\n')
+        contents = bytes(contents, encoding='utf-16')
+        for hexLine in self.hexdumpLines(contents):
+            print('{:08X}: {:48} |{:16}|'.format(hexLine[0], hexLine[1], hexLine[2]))
+        print()
 
-            self.textView.append('  {}&lt;{}&gt;: <span style="background: yellow">{}</span>\n'.format(fmtType, style, block.text()))
+
+    def hexdumpLines(self, contents):
+        addr = 0
+        hexDump = ""
+        asciiDump = ""
+        column = 0
+        for c in contents:
+            hexDump = hexDump + "{:02X} ".format(c)
+            asciiDump = asciiDump + ( chr(c) if c > 31 and c < 128 else '.')
+            column += 1
+            if (column % 16) == 0:
+                yield (addr, hexDump, asciiDump)
+
+                asciiDump = ""
+                hexDump = ""
+                column = 0
+                addr += 16
+        if column > 0:
+            yield (addr, hexDump, asciiDump)
+
+#===============================================================================
+#         for block in self.blocks(frm):
+#             bfmt = block.blockFormat()
+#             style = bfmt.property(QTextFormat.UserProperty)
+# 
+#             fmtType = 'B'
+#             # if bfmt.isListFormat():
+#             if block.textList() is not None:
+#                 fmtType = 'L({})'.format(block.textList().count())
+# 
+#             self.textView.append('  {}&lt;{}&gt;: <span style="background: yellow">{}</span>\n'.format(fmtType, style, block.text()))
+#===============================================================================
 
         
 
@@ -198,6 +245,8 @@ class MainWindow(QMainWindow):
 
 
     def saveState(self):
+        # Make sure that the current notepad page is saved
+        self.mainWidget.editorWidget.save()
 
         # Note: there is no way to have eclipse shutdown the application faithfully,
         # see also http://stackoverflow.com/questions/677531/is-it-possible-for-eclipse-to-terminate-gently-instead-of-using-sigkill

@@ -22,3 +22,8 @@ def os_path_split(path, debug = False):
     parts.reverse()
     return parts
 
+# http://stackoverflow.com/questions/3663450/python-remove-substring-only-at-the-end-of-string
+def rchop(thestring, ending):
+    if thestring.endswith(ending):
+        return thestring[:-len(ending)]
+    return thestring

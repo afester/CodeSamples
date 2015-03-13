@@ -15,6 +15,7 @@ class Handler(xml.sax.handler.ContentHandler):
         self.href = ""
         self.formatManager = formatManager
         self.keywordLinks = []
+        self.lists = []
 
         # Note: an empty, newly created QTextDocument() always contains one 
         # initial block. Furthermore, this initial block can not be
@@ -84,19 +85,31 @@ class Handler(xml.sax.handler.ContentHandler):
             pass
 
         # blocks
-        elif name in ['h1', 'h2', 'h3', 'p', 'javacode', 'cppcode', 'sqlcode', 'pycode', 'xmlcode', 'pre']:
+        elif name == 'programlisting':
+            self.codeFormat = attrs.getValue('language') + 'code'  # Hack
+            self.collectContent = True
+            self.insertBlock('', self.codeFormat)
+
+        elif name in ['h1', 'h2', 'h3', 'p', 'screen']:
             self.collectContent = True
             self.insertBlock('', name)
+
         elif name == "ul":
             self.firstLi = True
+
+            listFormat = 'ul{}'.format(len(self.lists) + 1) # Hack
+            self.cursor.insertBlock(self.formatManager.getFormat("p").getBlockFormat(), self.formatManager.getFormat("p").getCharFormat())
+            newList = self.cursor.createList(self.formatManager.getFormat(listFormat).getListFormat())
+            self.lists.append(newList)
+
         elif name == "li":
             self.collectContent = True
             if self.firstLi:
-                self.cursor.insertBlock(self.formatManager.getFormat("p").getBlockFormat(), self.formatManager.getFormat("p").getCharFormat())
-                self.cursor.createList(self.formatManager.getFormat("ul1").getListFormat())
+                self.firstLi = False
             else:
                 fmt = self.formatManager.getFormat("p")
                 self.cursor.insertBlock()
+                self.lists[-1].add(self.cursor.block())
                 self.cursor.setCharFormat(fmt.getCharFormat())
 
         # Fragments
@@ -104,6 +117,7 @@ class Handler(xml.sax.handler.ContentHandler):
             # insert previous fragment
             self.insertFragment(self.content, "p")
             self.content = ""
+
         elif name == "a":
             # insert previous fragment
             self.insertFragment(self.content, "p")
@@ -132,27 +146,31 @@ class Handler(xml.sax.handler.ContentHandler):
                     cursor.deleteChar()
 
         # Blocks
-        elif name in ['h1', 'h2', 'h3', 'p', 'javacode', 'cppcode', 'sqlcode', 'pycode', 'xmlcode', 'pre']:
+        elif name == 'programlisting':
+            self.collectContent = False
+            self.insertFragment(self.content, self.codeFormat)
+
+        elif name in ['h1', 'h2', 'h3', 'p', 'screen']:
             self.collectContent = False
             self.insertFragment(self.content, name)
+
         elif name == "ul":
             self.collectContent = False
+            self.lists.pop()
+
         elif name == "li":
-            if self.firstLi:
-                self.insertFragment(self.content, 'p')
-                self.firstLi = False
-                self.collectContent = False
-            else:
-                self.insertFragment(self.content, 'p')
-                self.collectContent = False
+            self.insertFragment(self.content, 'p')
+            self.collectContent = False
 
         # Fragments
         elif name in ['em', 'strong', 'tt']:
             self.insertFragment(self.content, name)
+
         elif name == 'a':
             # Insert the link text
             # if self.href.startswith("http://") or self.href.startswith("https://"):
             self.insertAnchor(self.content, "a", self.href)
+
         elif name == 'keyword':
             self.insertAnchor(self.content, "keyword", self.content)
             self.keywordLinks.append(self.content)
@@ -215,10 +233,14 @@ class XMLImporter:
     def importDocument(self):
         contentFilePath = os.path.join(self.contentPath, self.contentFile)
         with open(contentFilePath, 'r') as content_file:
-            parser = xml.sax.make_parser()
-            handler = Handler(self.contentPath, self.formatManager)
-            parser.setContentHandler(handler)
-            parser.parse(content_file)
+            self.importFromFile(content_file)
+
+
+    def importFromFile(self, fileDesc):
+        parser = xml.sax.make_parser()
+        handler = Handler(self.contentPath, self.formatManager)
+        parser.setContentHandler(handler)
+        parser.parse(fileDesc)
 
         self.document = handler.result
         self.links = handler.keywordLinks

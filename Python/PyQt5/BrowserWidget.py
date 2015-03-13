@@ -6,24 +6,73 @@ Created on 25.02.2015
 
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QToolBar, QAction
-from PyQt5.QtWidgets import QVBoxLayout, QDialog, QFileDialog
+from PyQt5.QtWidgets import QVBoxLayout, QDialog, QFileDialog, QDialogButtonBox
 from PyQt5 import uic
 
 import os, logging
-from Notepad import Notepad
+from Notepad import LocalNotepad, DropboxNotepad
+import dropbox
+from dropbox.rest import ErrorResponse
+
 
 class AddNotepadDlg(QDialog):
     
-    def __init__(self, parentWidget):
+    def __init__(self, parentWidget, settings):
         QDialog.__init__(self, parentWidget)
+        self.settings = settings
+
         self.ui = uic.loadUi('AddNotepadDlg.ui', self)
 
+        self.ui.buttonBox.clicked.connect(self.applyAuth)   # TODO
+ 
+        self.ui.storageTypeUI.setCurrentIndex(0)
+        self.ui.dropboxPages.setCurrentIndex(0)
+        self.ui.localPath.setFocus()
+
         self.ui.selectDirectory.clicked.connect(self.choosePath)
+        self.ui.storageType.activated.connect(self.changeStorage)
 
 
     def choosePath(self):
         pathName = QFileDialog.getExistingDirectory(self, caption='Select Notepad to add')
         self.ui.localPath.setText(pathName)
+
+
+    def changeStorage(self, index):
+        if index == 0:
+            self.ui.buttonBox.setStandardButtons(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        elif index == 1:
+            if len(self.settings.getDropboxToken()) == 0:
+                # No authentication token available
+                self.ui.dropboxPages.setCurrentIndex(0)
+                self.ui.buttonBox.setStandardButtons(QDialogButtonBox.Apply| QDialogButtonBox.Cancel)
+
+                self.flow = dropbox.client.DropboxOAuth2FlowNoRedirect('6yfxxrbb74fm81o','qhrorjahvrtke5o') 
+                authorize_url = self.flow.start()
+
+                self.ui.authUrl.setText('<a href="{0}">{0}</a>'.format(authorize_url))
+                self.ui.authCode.setFocus()
+            else:
+                self.ui.buttonBox.setStandardButtons(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+                self.ui.dropboxPages.setCurrentIndex(1)
+
+                client = dropbox.client.DropboxClient(self.settings.getDropboxToken())
+                info = client.account_info()
+
+                self.ui.userName.setText('{} <{}>'.format(info['display_name'], info['email']))
+                self.ui.notepadName.setFocus()
+
+
+    def applyAuth(self, button):
+        if button.text() == "Apply":    # TODO!!!!
+            authCode = self.ui.authCode.text()
+
+            try:
+                accessToken, user_id = self.flow.finish(authCode)
+                self.settings.setDropboxToken(accessToken)
+                self.changeStorage(1)
+            except ErrorResponse as rsp:
+                self.ui.errorMessage.setText('Error: {}'.format(rsp))
 
 
 class TreeNode(QTreeWidgetItem):
@@ -173,9 +222,9 @@ class BrowserWidget(QWidget):
 
 
     def addNotepad(self):
-        dlg = AddNotepadDlg(self)
+        dlg = AddNotepadDlg(self, self.settings)
         if dlg.exec() == QDialog.Accepted:
-            npDef = None
+            notepad = None
 
             # create a notepad definition from user input
             npType = dlg.ui.storageType.currentIndex()
@@ -185,13 +234,14 @@ class BrowserWidget(QWidget):
                 npDef = {'name' : npName,
                          'type'  : 'local',
                          'path'   : npPath }
+                notepad = LocalNotepad(npDef)
             elif npType == 1:       # DROPBOX (TODO: enum)
-                npDef = {'name' : 'TODO',
+                npName = dlg.ui.notepadName.text()
+                npDef = {'name' : npName,
                          'type' : 'dropbox'}
+                notepad = DropboxNotepad(npDef, self.settings)
 
-
-            if npDef is not None:
-                notepad = Notepad(npDef)
+            if notepad is not None:
                 notepad.ensureExists()
 
                 # Add the new notepad to the local settings
@@ -212,7 +262,10 @@ class BrowserWidget(QWidget):
         # Add notepads to the browser tree
         notepads = self.settings.getNotepads()
         for np in notepads:
-            notepad = Notepad(np)
+            if np['type'] == 'local':
+                notepad = LocalNotepad(np)
+            elif np['type'] == 'dropbox':
+                notepad = DropboxNotepad(np, self.settings)
             self.browserView.refresh(notepad)
 
         # Expand to and select the previous item

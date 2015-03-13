@@ -7,29 +7,27 @@ Created on 24.02.2015
 from XMLImporter import XMLImporter
 from XMLExporter import XMLExporter
 from FormatManager import FormatManager
-import os, urllib.parse, uuid
+import os, urllib.parse, uuid, io
+import dropbox
+from dropbox.rest import ErrorResponse
 
 
-class Notepad:
+class LocalNotepad:
 
     def __init__(self, npDef):
         self.type = npDef['type']
         self.name = npDef['name']
-
-        if self.type == 'local':
-            self.rootPath = npDef['path']
-        else:
-            self.rootPath = 'dropbox:' + self.name
+        self.rootPath = npDef['path']
 
         self.formatManager = FormatManager()
-        self.formatManager.loadFormats()
+        self.formatManager.loadFormats()    # TODO: Only required once
 
 
     def ensureExists(self):
         if not os.path.isdir(self.getRootpath()):
             print(self.getRootpath() + " does not exist, creating directory ...")
             os.mkdir(self.getRootpath())
-
+  
         contentFile = os.path.join(self.getRootpath(), 'content.xml')
         if not os.path.isfile(contentFile):
             print(contentFile + " does not exist, creating file ...")
@@ -42,7 +40,7 @@ class Notepad:
 
 
     def getPage(self, pageId):
-        result = Page(self, pageId)
+        result = LocalPage(self, pageId)
         result.load()
         return result
 
@@ -63,7 +61,7 @@ class Notepad:
         return self.rootPath
 
 
-class Page:
+class LocalPage:
 
     def __init__(self, notepad, pageId):
         assert pageId is None or type(pageId) is str
@@ -91,28 +89,27 @@ class Page:
 
 
     def load(self):
-        if self.notepad.getType() == 'local':
-            pagePath = self.getPagePath()
-            print("  Loading page at {} ".format(pagePath))
+        pagePath = self.getPagePath()
+        print("  Loading page at {} ".format(pagePath))
 
-            if not os.path.isdir(pagePath):
-                print(pagePath + " does not exist, creating directory ...")
-                os.makedirs(pagePath)
+        if not os.path.isdir(pagePath):
+            print(pagePath + " does not exist, creating directory ...")
+            os.makedirs(pagePath)
 
-            contentFile = os.path.join(pagePath, 'content.xml')
-            if not os.path.isfile(contentFile):
-                print(contentFile + " does not exist, creating file ...")
-                with open(contentFile, 'w') as fd:
-                    fd.write('''<?xml version = '1.0' encoding = 'UTF-8'?>
+        contentFile = os.path.join(pagePath, 'content.xml')
+        if not os.path.isfile(contentFile):
+            print(contentFile + " does not exist, creating file ...")
+            with open(contentFile, 'w') as fd:
+                fd.write('''<?xml version = '1.0' encoding = 'UTF-8'?>
 <page>
   <h1>{}</h1>
 </page>
 '''.format(self.pageId))
 
-            importer = XMLImporter(pagePath, "content.xml", self.notepad.getFormatManager())
-            importer.importDocument()
-            self.document = importer.getDocument()
-            self.links = importer.getLinks()
+        importer = XMLImporter(pagePath, "content.xml", self.notepad.getFormatManager())
+        importer.importDocument()
+        self.document = importer.getDocument()
+        self.links = importer.getLinks()
 
 
     def save(self):
@@ -153,3 +150,93 @@ class Page:
 
     def getDocument(self):
         return self.document
+
+
+
+class DropboxNotepad(LocalNotepad):
+
+    def __init__(self, npDef, settings):
+        self.type = npDef['type']
+        self.name = npDef['name']
+        self.rootPath = self.name
+        self.client = dropbox.client.DropboxClient(settings.getDropboxToken())
+
+        self.formatManager = FormatManager()
+        self.formatManager.loadFormats()    # TODO: Only required once
+
+
+    def getPage(self, pageId):
+        result = DropboxPage(self, pageId)
+        result.load()
+        return result
+
+
+    def ensureExists(self):
+        print("DROPBOX: EnsureExists({})".format(self.getRootpath()))
+        try:
+            self.client.file_create_folder(self.getRootpath())
+        except ErrorResponse as rsp:
+            print(str(rsp))
+
+
+class DropboxPage(LocalPage):
+
+    def __init__(self, notepad, pageId):
+        LocalPage.__init__(self, notepad, pageId)
+
+
+    def load(self):
+        pagePath = self.getPagePath()
+        contentFile = '{}/{}'.format(pagePath, 'content.xml')
+        print("  DROPBOX: Loading page from {} ".format(contentFile))
+
+        try:
+            with self.notepad.client.get_file(contentFile) as f:
+                importer = XMLImporter(pagePath, "content.xml", self.notepad.getFormatManager())
+                importer.importFromFile(f)
+                self.document = importer.getDocument()
+                self.links = importer.getLinks()
+        except ErrorResponse as rsp:
+            if rsp.status == 404:
+                self.createPage(contentFile)
+            else:
+                print(str(rsp))
+
+
+    def createPage(self, pagePath):
+        print("  DROPBOX: CREATING PAGE {}".format(pagePath))
+        contents = io.StringIO('''<?xml version = '1.0' encoding = 'UTF-8'?>
+<page>
+  <h1>{}</h1>
+</page>
+'''.format(self.pageId))
+        try:
+            self.notepad.client.put_file(pagePath, contents)
+        except ErrorResponse as rsp:
+            print(str(rsp))
+
+        contents.close()
+
+
+    def getPagePath(self):
+        pagePath = self.notepad.getRootpath()
+        if self.pageId is not None:     # not the root page
+            pageFilename = urllib.parse.quote(self.pageId)
+            pageIdx = [pagePath, self.pageId[0], pageFilename]
+            pagePath = '/'.join(pageIdx)
+            
+        return pagePath
+
+
+    def save(self):
+        pagePath = self.getPagePath()
+        contentFile = '{}/{}'.format(pagePath, 'content.xml')
+        print("  DROPBOX: saving page to {} ".format(contentFile))
+
+        try:
+            exporter = XMLExporter(pagePath, 'content.xml')
+            contents = io.StringIO(exporter.getXmlString(self.document))
+            self.notepad.client.put_file(contentFile, contents, True)
+            contents.close()
+        except ErrorResponse as rsp:
+            print(str(rsp))

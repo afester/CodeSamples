@@ -3,28 +3,39 @@ Created on 18.02.2015
 
 @author: afester
 '''
-
+ 
+from PyQt5.Qt import QMimeData
 from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtWidgets import QToolBar, QWidget, QAction, QLabel, QComboBox, QSpacerItem, QMessageBox
+from PyQt5.QtGui import QTextCursor, QTextFormat, QGuiApplication
+from PyQt5.QtGui import QTextOption, QCursor, QImage, QTextFrameFormat
+from PyQt5.QtWidgets import QWidget, QSpacerItem, QMessageBox, QPushButton
 from PyQt5.QtWidgets import QTextEdit, QVBoxLayout, QLineEdit, QFrame, QHBoxLayout, QSizePolicy, QFileDialog
-from PyQt5.QtGui import QIcon, QTextCursor, QTextFormat, QGuiApplication
-from PyQt5.QtGui import QTextOption, QCursor, QPixmap, QImage
 
 import os
 
 from FormatManager import FormatManager
-from PyQt5.Qt import QMimeData
+from Toolbars import ActionSelector, TextStyleSelector, BlockStyleSelector
 
 
 class UrlEditor(QFrame):
 
+    applyUrl = pyqtSignal(str)
+
     def __init__(self, parentWidget):
         QFrame.__init__(self, parentWidget, Qt.Tool )
-        layout = QVBoxLayout()
+        layout = QHBoxLayout()
+        self.setWindowTitle('Edit URL reference')
         self.setLayout(layout)
-        
+
         self.editLine = QLineEdit(self)
         layout.addWidget(self.editLine)
+        applyButton = QPushButton('Apply')
+        applyButton.clicked.connect(self.doApply)
+        layout.addWidget(applyButton)
+
+
+    def doApply(self):
+        self.applyUrl.emit(self.editLine.text())
 
 
     def setUrl(self, text):
@@ -33,11 +44,18 @@ class UrlEditor(QFrame):
 
 class TextEdit(QTextEdit):
 
+    updateBlockFormat = pyqtSignal(str)
+    updateCharFormat = pyqtSignal(str)
     navigate = pyqtSignal(str)
-
+ 
     def __init__(self, parentWidget):
         QTextEdit.__init__(self, parentWidget)
         self.tracking = False
+
+        self.l = UrlEditor(self)
+        self.l.applyUrl.connect(self.setCurrentUrl)
+        self.cursorPositionChanged.connect(self.handleCursorPositionChanged)
+        # self.editView.currentCharFormatChanged.connect(self.currentCharFormatChanged)
 
 
     def selectCurrentFragment(self, cursor):
@@ -71,6 +89,69 @@ class TextEdit(QTextEdit):
         return result
 
 
+    def handleCursorPositionChanged(self):
+        cursor = self.textCursor()
+
+        # update block format toolbar
+        blockFmt = cursor.blockFormat()
+        blockStyle = blockFmt.property(QTextFormat.UserProperty)
+        self.updateBlockFormat.emit(blockStyle)
+
+        # update text format toolbar
+        charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
+        charStyle = charFmt.property(QTextFormat.UserProperty)
+        self.updateCharFormat.emit(charStyle)
+
+        # open/close URL editor for external links
+        if charStyle == 'a':
+            url = charFmt.anchorHref()
+            if QGuiApplication.keyboardModifiers() & Qt.ControlModifier:
+                print("OPEN: '{}'".format(url))
+            else:
+                # get global cursor position
+                pos = self.cursorRect()
+                pos = pos.bottomLeft()
+                pos = self.viewport().mapToGlobal(pos)
+
+                self.l.move(pos)
+                self.l.setUrl(url)
+                self.l.show()
+
+        else:
+            self.l.hide()
+
+#===============================================================================
+#         # We would like to render the bullets of the current list in a different
+#         # color to make it clear which list items belong to the current list.
+#         # However, it does currently not seem possible to influence the
+#         # bullet color individually, either not at all or only for specific bullet types
+#         # Therefore, we currently simply switch the bullet style
+# 
+#         # Reset previous list
+#         listBlock = cursor.block().textList()
+#         if self.currentList and listBlock is not self.currentList:
+#             fmt = self.currentList.format()
+#             fmt.setStyle(QTextListFormat.ListDisc)
+#             self.currentList.setFormat(fmt)
+# 
+#         if listBlock:
+#             # Set current list
+#             fmt = listBlock.format()
+#             fmt.setStyle(QTextListFormat.ListCircle)
+#             listBlock.setFormat(fmt)
+#             self.currentList = listBlock
+#===============================================================================
+
+    def setCurrentUrl(self, url):
+        cursor = self.textCursor()
+        charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
+        charStyle = charFmt.property(QTextFormat.UserProperty)
+        if charStyle == 'a':
+            self.selectCurrentFragment(cursor)
+            charFmt.setAnchorHref(url)
+            cursor.setCharFormat(charFmt)
+
+
     def isAtAnchor(self, pos):
         cursor = self.cursorForPosition(pos)
         charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
@@ -91,7 +172,8 @@ class TextEdit(QTextEdit):
 
 
     def mouseMoveEvent(self, event):
-        self.updateIBeamCursor(event.pos())
+        if self.tracking:
+            self.updateIBeamCursor(event.pos())
 
         return QTextEdit.mouseMoveEvent(self, event)
 
@@ -160,296 +242,6 @@ class TextEdit(QTextEdit):
             QTextEdit.insertFromMimeData(self, data)
 
 
-class IconDropDown(QWidget):
-    
-    entrySelected = pyqtSignal(int)
-
-    def __init__(self, parentWidget, iconName):
-        QWidget.__init__(self, parentWidget)
-
-        icon = QLabel(self)
-        icon.setPixmap(QPixmap(iconName))
-
-        self.dropdown = QComboBox(self)
-        self.dropdown.activated.connect(self.entrySelected)
-
-        hLayout = QVBoxLayout(self)
-        hLayout.setContentsMargins(5, 5, 5, 5)
-        
-        self.setLayout(hLayout)
-        hLayout.addWidget(icon, 0, Qt.AlignHCenter)
-        hLayout.addWidget(self.dropdown)
-
-
-    def addItem(self, title, tag):
-        self.dropdown.addItem(title, tag)
-        self.dropdown.setCurrentIndex(-1)   # TODO - can not set index to -1 before items have been added
-
-
-    def setCurrentIndex(self, idx):
-        self.dropdown.setCurrentIndex(idx)
-
-
-class TitledToolbar(QFrame):
-
-    def __init__(self, parent, title):
-        QFrame.__init__(self, parent)
-        self.setFrameStyle(QFrame.StyledPanel)
-
-        titleLabel = QLabel(title, self)
-        contentPanel = QWidget(self)
-        contentPanel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.MinimumExpanding)
-        self.contentLayout = QHBoxLayout()
-        self.contentLayout.setContentsMargins(0, 0, 0, 0)
-        contentPanel.setLayout(self.contentLayout)
-
-        # style for the label
-        titleLabel.setStyleSheet('''.QLabel {
-            color: #3E6AAA;
-        }''') 
-
-        # style for the content panel
-        contentPanel.setStyleSheet('''.QWidget { 
-            border-bottom-left-radius: 5px;  
-            border-bottom-right-radius: 5px;
-            background-color: #D6E5F3; 
-        }''')
-
-        # style for the whole toolbar
-        self.setStyleSheet('''TitledToolbar { 
-            background-color:#C1D9F1; 
-            color:#6D6AB7; 
-            border-radius: 5px;  
-            border-style: solid; 
-            border-width: 1px; 
-            border-color: #6D6AB7;
-        }''')
-
-        myLayout = QVBoxLayout()
-        myLayout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(myLayout)
-
-        myLayout.addWidget(titleLabel, 0, Qt.AlignHCenter | Qt.AlignTop)
-        myLayout.addWidget(contentPanel)
-
-
-    def addWidget(self, wdg):
-        self.contentLayout.addWidget(wdg)
-
-
-class BlockStyleSelector(TitledToolbar):
-
-    styleChanged = pyqtSignal(str)
-
-    def __init__(self, parent):
-        TitledToolbar.__init__(self, parent, 'Block style')
-        self.currentStyle = None
-
-        self.styleToIndex = {}
-        self.styleToDropdown = {}
-
-        d2 = IconDropDown(self, "icons/format-text-header.png")
-        d2.entrySelected.connect(self.styleSelected)
-        d2.addItem('Header 1', 'h1')
-        self.styleToDropdown['h1'] = d2
-        self.styleToIndex['h1'] = 0
-        d2.addItem('Header 2', 'h2')
-        self.styleToDropdown['h2'] = d2
-        self.styleToIndex['h2'] = 1
-        d2.addItem('Header 3', 'h3')
-        self.styleToDropdown['h3'] = d2
-        self.styleToIndex['h3'] = 2
-
-        d1 = IconDropDown(self, "icons/format-text-paragraph.png")
-        d1.entrySelected.connect(self.styleSelected)
-        d1.addItem("Standard", 'p')
-        self.styleToDropdown['p'] = d1
-        self.styleToIndex['p'] = 0
-        d1.addItem("Centered", 'pcenter')
-        self.styleToDropdown['pcenter'] = d1
-        self.styleToIndex['pcenter'] = 1
-        d1.addItem("Block", 'pblock')
-        self.styleToDropdown['pblock'] = d1
-        self.styleToIndex['pblock'] = 2
-
-        d3 = IconDropDown(self, "icons/format-list-unordered.png")
-        d3.entrySelected.connect(self.styleSelected)
-        d3.addItem("Unordered List", 'ul1')
-        self.styleToDropdown['u1l'] = d3
-        self.styleToIndex['ul1'] = 0
-        d3.addItem("Ordered List", 'ol1')
-        self.styleToDropdown['ol1'] = d3
-        self.styleToIndex['ol1'] = 1
-
-        d4 = IconDropDown(self, "icons/format-text-code.png")
-        d4.entrySelected.connect(self.styleSelected)
-        d4.addItem("C++", 'cppcode')
-        self.styleToDropdown['cppcode'] = d4
-        self.styleToIndex['cppcode'] = 0
-        d4.addItem("Java", 'javacode')
-        self.styleToDropdown['javacode'] = d4
-        self.styleToIndex['javacode'] = 1
-        d4.addItem("Python", 'pycode')
-        self.styleToDropdown['pycode'] = d4
-        self.styleToIndex['pycode'] = 2
-        d4.addItem("SQL", 'sqlcode')
-        self.styleToDropdown['sqlcode'] = d4
-        self.styleToIndex['sqlcode'] = 3
-        d4.addItem("XML", 'xmlcode')
-        self.styleToDropdown['xmlcode'] = d4
-        self.styleToIndex['xmlcode'] = 4
-        d4.addItem("Generic", 'pre')
-        self.styleToDropdown['pre'] = d4
-        self.styleToIndex['pre'] = 5
-
-        self.addWidget(d1)
-        self.addWidget(d2)
-        self.addWidget(d3)
-        self.addWidget(d4)
-
-
-    def addCategory(self):
-        pass
-    
-
-    def addStyle(self):
-        pass
-
-
-    def styleSelected(self):
-        icd = self.sender()
-        dd = icd.dropdown
-        style = dd.currentData()
-        self.styleChanged.emit(style)
-
-
-    def setCurrentStyle(self, styleName):
-        if self.currentStyle != styleName:
-            self.currentStyle = styleName
-            for dd in self.styleToDropdown.values():
-                dd.setCurrentIndex(-1)
-            if styleName is not None:
-                dd = self.styleToDropdown[styleName]
-                di = self.styleToIndex[styleName]
-                if dd is not None and di is not None:
-                    dd.setCurrentIndex(di)
-
-
-class TextStyleSelector(TitledToolbar):
-
-    styleChanged = pyqtSignal(str, bool)
-
-    def __init__(self, toolbar):
-        TitledToolbar.__init__(self, toolbar, 'Text style')
-        self.currentStyle = None
-
-        toolbar = QToolBar(self)
-        toolbar.setFloatable(False)
-        toolbar.setMovable(False)
-
-        self.styleToAction = {}
-
-        textKeywordAction = QAction(QIcon("icons/format-keyword.png"), "Notepad link", toolbar)
-        textKeywordAction.setCheckable(True);
-        textKeywordAction.setProperty('style', 'keyword')
-        self.styleToAction['keyword'] = textKeywordAction
-        textKeywordAction.triggered.connect(self.styleSelected)
-        toolbar.addAction(textKeywordAction)
-
-        textLinkAction = QAction(QIcon("icons/format-link.png"), "Internet link", toolbar)
-        textLinkAction.setCheckable(True);
-        textLinkAction.setProperty('style', 'a')
-        self.styleToAction['a'] = textLinkAction 
-        textLinkAction.triggered.connect(self.styleSelected)
-        toolbar.addAction(textLinkAction)
-
-        textBoldAction = QAction(QIcon("icons/format-text-emphasized.png"), "Emphasize", toolbar)
-        textBoldAction.setCheckable(True);
-        textBoldAction.setProperty('style', 'strong')
-        self.styleToAction['strong'] = textBoldAction
-        textBoldAction.triggered.connect(self.styleSelected)
-        toolbar.addAction(textBoldAction)
-
-        textHighlightAction = QAction(QIcon("icons/format-text-highlight.png"), "Highlight", toolbar)
-        textHighlightAction.setCheckable(True);
-        textHighlightAction.setProperty('style', 'em')
-        self.styleToAction['em'] = textHighlightAction
-        textHighlightAction.triggered.connect(self.styleSelected)
-        toolbar.addAction(textHighlightAction)
- 
-        textCodeAction = QAction(QIcon("icons/format-text-code.png"), "Code", toolbar)
-        textCodeAction.setCheckable(True);
-        textCodeAction.setProperty('style', 'tt')
-        self.styleToAction['tt'] = textCodeAction
-        textCodeAction.triggered.connect(self.styleSelected)
-        toolbar.addAction(textCodeAction)
-
-        self.addWidget(toolbar)
-
-
-    def styleSelected(self):
-        action = self.sender()
-        style = action.property('style')
-        flag = action.isChecked()
-        self.styleChanged.emit(style, flag)
-
-
-    def setCurrentStyle(self, styleName):
-        if self.currentStyle != styleName:
-            self.currentStyle = styleName
-            for action in self.styleToAction.values():
-                action.setChecked(False)
-            if styleName is not None:
-                action = self.styleToAction[styleName]
-                if action is not None:
-                    action.setChecked(True)
-
-
-class ActionSelector(TitledToolbar):
-
-    def __init__(self, parent):
-        TitledToolbar.__init__(self, parent, 'Actions')
- 
-        toolbar = QToolBar(self)
-        toolbar.setFloatable(False)
-        toolbar.setMovable(False)
-
-        self.saveAction = QAction(QIcon("icons/file-save.png"), "Save (Ctrl-S)", toolbar)
-        self.saveAction.setShortcut(Qt.CTRL + Qt.Key_S);
-        self.saveAction.triggered.connect(parent.save)
-        toolbar.addAction(self.saveAction)
-
-        self.nonprintableAction = QAction(QIcon("icons/view-nonprintable.png"), "View nonprintable chars", toolbar)
-        self.nonprintableAction.setCheckable(True);
-        self.nonprintableAction.triggered.connect(parent.toggleNonprintable)
-        toolbar.addAction(self.nonprintableAction)
-
-        self.undoAction = QAction(QIcon("icons/edit-undo.png"), "Undo (Ctrl-Z)", toolbar)
-        # saveAction.setShortcut(Qt.CTRL + Qt.Key_Z);
-        self.undoAction.triggered.connect(parent.undo)
-        toolbar.addAction(self.undoAction)
-
-        self.redoAction = QAction(QIcon("icons/edit-redo.png"), "Redo (Ctrl-Y)", toolbar)
-        # saveAction.setShortcut(Qt.CTRL + Qt.Key_Y);
-        self.redoAction.triggered.connect(parent.redo)
-        toolbar.addAction(self.redoAction)
-
-        self.backAction = QAction(QIcon("icons/view-back.png"), "Back", toolbar)
-        self.backAction.setEnabled(False)
-        self.backAction.triggered.connect(parent.navigateBack)
-        toolbar.addAction(self.backAction)
-
-        self.forwardAction = QAction(QIcon("icons/view-forward.png"), "Forward", toolbar)
-        self.forwardAction.setEnabled(False)
-        self.forwardAction.triggered.connect(parent.navigateForward)
-        toolbar.addAction(self.forwardAction)
-
-        insertImageAction = QAction(QIcon("icons/edit-insert-image.png"), "Insert Image", toolbar)
-        insertImageAction.triggered.connect(parent.insertImage)
-        toolbar.addAction(insertImageAction)
-
-        self.addWidget(toolbar)
-
 
 class EditorWidget(QWidget):
     message = pyqtSignal(str)
@@ -463,8 +255,7 @@ class EditorWidget(QWidget):
         self.formatManager = FormatManager()
         self.formatManager.loadFormats()
 
-        self.currentList = None
-        self.l = UrlEditor(self)
+        #self.currentList = None
 
         self.editView = TextEdit(self)
         self.editView.navigate.connect(self.navigate)
@@ -479,17 +270,19 @@ class EditorWidget(QWidget):
 
         self.textFormatSelector = TextStyleSelector(self)
         self.textFormatSelector.styleChanged.connect(self.textFormatChanged)
+        self.editView.updateCharFormat.connect(self.textFormatSelector.setCurrentStyle)
         layout.addWidget(self.textFormatSelector)
 
         self.styleSelector = BlockStyleSelector(self)
         self.styleSelector.styleChanged.connect(self.blockStyleChanged)
+        self.styleSelector.indentLess.connect(self.indentLess)
+        self.styleSelector.indentMore.connect(self.indentMore)
+        self.styleSelector.insertTable.connect(self.insertTable)
+        self.editView.updateBlockFormat.connect(self.styleSelector.setCurrentStyle)
         layout.addWidget(self.styleSelector)
 
         horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         layout.addItem(horizontalSpacer)
-
-        self.editView.cursorPositionChanged.connect(self.cursorPositionChanged)
-        # self.editView.currentCharFormatChanged.connect(self.currentCharFormatChanged)
 
         hLayout = QVBoxLayout(self)
         hLayout.setContentsMargins(0, 0, 0, 0)
@@ -499,54 +292,6 @@ class EditorWidget(QWidget):
         # The toolbar should take the minimum space and the edit view the remaining space
         hLayout.setStretch(0, 0)
         hLayout.setStretch(1, 1)
-
-
-    def cursorPositionChanged(self):
-        cursor = self.editView.textCursor()
-
-        # update block format toolbar
-        blockFmt = cursor.blockFormat()
-        blockStyle = blockFmt.property(QTextFormat.UserProperty)
-        self.styleSelector.setCurrentStyle(blockStyle)
-
-        # update text format toolbar
-        charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
-        charStyle = charFmt.property(QTextFormat.UserProperty)
-        self.textFormatSelector.setCurrentStyle(charStyle)
-
-        # open/close URL editor for external links
-        if charStyle == 'a':
-            url = charFmt.anchorHref()
-            if QGuiApplication.keyboardModifiers() & Qt.ControlModifier:
-                print("OPEN: '{}'".format(url))
-            else:
-                self.l.setUrl(url)
-                self.l.show()
-
-        else:
-            self.l.hide()
-
-#===============================================================================
-#         # We would like to render the bullets of the current list in a different
-#         # color to make it clear which list items belong to the current list.
-#         # However, it does currently not seem possible to influence the
-#         # bullet color individually, either not at all or only for specific bullet types
-#         # Therefore, we currently simply switch the bullet style
-# 
-#         # Reset previous list
-#         listBlock = cursor.block().textList()
-#         if self.currentList and listBlock is not self.currentList:
-#             fmt = self.currentList.format()
-#             fmt.setStyle(QTextListFormat.ListDisc)
-#             self.currentList.setFormat(fmt)
-# 
-#         if listBlock:
-#             # Set current list
-#             fmt = listBlock.format()
-#             fmt.setStyle(QTextListFormat.ListCircle)
-#             listBlock.setFormat(fmt)
-#             self.currentList = listBlock
-#===============================================================================
 
 
     def load(self, notepad, pageId):
@@ -572,7 +317,7 @@ class EditorWidget(QWidget):
         self.actionsSelector.redoAction.setEnabled(False)
 
         self.editView.setFocus()
-        self.cursorPositionChanged()    # update toolbars
+        self.editView.handleCursorPositionChanged()    # update toolbars
 
         self.contentFile = os.path.join(notepad.getName(),str(pageId))
         self.message.emit("Loaded %s" % self.contentFile)
@@ -669,6 +414,51 @@ class EditorWidget(QWidget):
             self.reformatBlock(style)
 
         self.editView.textCursor().setPosition(pos)
+
+
+    def indentLess(self):
+        cursor = self.editView.textCursor()
+        curList = cursor.currentList()
+        if curList:
+            fmt = curList.format()
+            indent = fmt.indent()
+            if indent > 1:
+                indent -= 1
+
+                # HACK!!
+                listStyle = "ul" + str(indent)
+                style = self.formatManager.getFormat(listStyle)
+                if style:
+                    listFormat = style.getListFormat()
+                    curList.setFormat(listFormat)
+
+
+    def indentMore(self):
+        cursor = self.editView.textCursor()
+        curList = cursor.currentList()
+        if curList:
+            fmt = curList.format()
+            indent = fmt.indent()
+            if indent < 3:
+                indent += 1
+
+                listStyle = "ul" + str(indent)
+                style = self.formatManager.getFormat(listStyle)
+                if style:
+                    listFormat = style.getListFormat()
+                    cursor.createList(listFormat)
+
+
+    def insertTable(self):
+        cursor = self.editView.textCursor()
+        
+        #fmt = QTextFrameFormat()
+        #fmt.setBorder(2)
+        #fmt.setBorderStyle(QTextFrameFormat.BorderStyle_Dashed)
+        #cursor.insertFrame(fmt)
+
+        cursor.insertTable(2, 2)
+        cursor.insertText("Hello World")
 
 
     # Selects all blocks which are part of the current selection.

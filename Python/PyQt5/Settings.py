@@ -27,6 +27,11 @@ class Settings(object):
         config = configparser.ConfigParser()
         config.read(fileName)
 
+        # load dropbox configuration
+        self.dropboxToken = ''
+        if config.has_section('dropbox'):
+            self.dropboxToken = config['dropbox'].get('dropboxToken')
+
         # load browser state
         if config.has_section('browser'):
             browserSettings = config['browser']
@@ -66,12 +71,15 @@ class Settings(object):
         self.l.debug('Saving local settings ...')
         config = configparser.ConfigParser()
 
-        config.add_section('mainWindow')
-        config.set('mainWindow', 'pos', '{},{}'.format(self.mainWindowPos.x(), self.mainWindowPos.y()))
-        config.set('mainWindow', 'size', '{},{}'.format(self.mainWindowSize.width(), self.mainWindowSize.height()))
+        config.add_section('dropbox')
+        config.set('dropbox', 'dropboxToken', self.dropboxToken)
 
         config.add_section('browser')
         config.set('browser', 'path', str(self.browserPath))
+
+        config.add_section('mainWindow')
+        config.set('mainWindow', 'pos', '{},{}'.format(self.mainWindowPos.x(), self.mainWindowPos.y()))
+        config.set('mainWindow', 'size', '{},{}'.format(self.mainWindowSize.width(), self.mainWindowSize.height()))
 
         idx = 0
         for s in self.notepads:
@@ -115,3 +123,9 @@ class Settings(object):
 
     def getBrowserPath(self):
         return self.browserPath
+
+    def getDropboxToken(self):
+        return self.dropboxToken 
+
+    def setDropboxToken(self, token):
+        self.dropboxToken = token 

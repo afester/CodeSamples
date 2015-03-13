@@ -89,14 +89,14 @@ code[lang="python"] {
 	font-size: 10pt;
 }
 
-pre {
+screen {
 	margin-top: 5px;
 	margin-right: 5px;
 	margin-bottom: 5px;
 	margin-left: 5px;
-	background-color: #f0f0f0;
+	background-color: #000000;
 
-	color: black;
+	color: green;
 	font-family: "Courier";
 	font-size: 10pt;
 }
@@ -158,7 +158,7 @@ keyword {
 	text-decoration: underline;
 }
 
-a, h4 {
+a {
 	color: blue;
 	text-decoration: underline;
 }
