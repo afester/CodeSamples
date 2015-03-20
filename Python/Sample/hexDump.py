@@ -2,9 +2,10 @@
 
 import sys
 
-from PySide.QtCore import Qt 
-from PySide.QtGui import QApplication, QMainWindow, QWidget, QTextEdit
-from PySide.QtGui import QPushButton, QVBoxLayout, QGridLayout, QFileDialog, QTextCursor, QPainter
+from PyQt5.QtCore import Qt, QMimeData
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QTextEdit
+from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QGridLayout, QFileDialog
+from PyQt5.QtGui import QTextCursor, QPainter
 
 
 class HexEditWidget(QTextEdit):
@@ -22,6 +23,13 @@ class HexEditWidget(QTextEdit):
 
         self.bytesPerLine = 16
         self.addressWidth = 10
+
+        self.addrColor = Qt.red
+        self.addrBackground = Qt.white
+        self.dataColor = Qt.black
+        self.dataBackground = Qt.white
+        self.asciiColor = Qt.black
+        self.asciiBackground = Qt.lightGray
 
         self.cursorPositionChanged.connect(self.showPosition)
 
@@ -48,11 +56,19 @@ class HexEditWidget(QTextEdit):
 
 
     def keyPressEvent(self, event):
-        text = event.text()
-        if text:
-            print(event.text())
+        # Ensure that shortcuts like CTRL-C are working
+        if event.modifiers() & Qt.ControlModifier:
+            if event.key() == Qt.Key_C:
+                QTextEdit.keyPressEvent(self, event)
+
         else:
-            print("KEY: {}".format(event.key()))
+            # Filter keys (TODO)
+            text = event.text()
+            if text:
+                print(event.text())
+            else:
+                print("KEY: {}".format(event.key()))
+
 
 
     def keyReleaseEvent(self, event):
@@ -87,31 +103,96 @@ class HexEditWidget(QTextEdit):
         self.viewport().update()    # necessary to get the right coordinates in the paint event
 
 
-    def showPosition(self):
-        crsr = self.textCursor()
 
-        # the Cursor's block number corresponds to the current line number, since
-        # each line is a block (a paragraph terminated by \n)
+    def getCurrentAddr(self, crsr):
+        '''Returns the address of the byte where the cursor is located'''
+
         lineNumber = crsr.blockNumber()
         columnNumber = crsr.positionInBlock()
-        if columnNumber < 58:
+        if columnNumber < 58:   # data area
             addr = self.bytesPerLine * lineNumber + (columnNumber - self.addressWidth) // 3
         else:
             addr = self.bytesPerLine * lineNumber + (columnNumber - 58)
-        print("Byte address: 0x{0:08X}".format(addr, columnNumber))
+        return addr
+
+
+    def getDataPositionForAddr(self, addr):
+        '''returns the cursor position within the data area for the given address'''
+        lineLength = self.addressWidth + 3* self.bytesPerLine + 16 + 1  # addr: data ascii\n
+        blockNo = addr // self.bytesPerLine
+        column = (addr % self.bytesPerLine) * 3 + self.addressWidth
+        result = blockNo * lineLength + column
+        return result
+
+
+    def getByte(self, addr):
+        crsr = self.textCursor()
+
+        byteStart = self.getDataPositionForAddr(addr)
+        byteEnd = byteStart + 2
+        crsr.setPosition(byteStart)
+        crsr.setPosition(byteEnd, QTextCursor.KeepAnchor)
+        data = int(crsr.selectedText(), 16)
+        return data
+
+
+    def showPosition(self):
+        '''cursorPositionChanged() slot'''
+
+        crsr = self.textCursor()
+        addr = self.getCurrentAddr(crsr)
+        data = self.getByte(addr)
+
+        # TODO: result be invalid if improper data is available
+        if (data & 0b11111110) == 0b11111100:
+            count = 6
+            unicode = (data & 0b00000001)
+        elif (data & 0b11111100) == 0b11111000:
+            count = 5
+            unicode = (data & 0b00000011)
+        elif (data & 0b11111000) == 0b11110000:
+            count = 4
+            unicode = (data & 0b00000111)
+        elif (data & 0b11110000) == 0b11100000:
+            count = 3
+            unicode = (data & 0b00001111)
+        elif (data & 0b11100000) == 0b11000000:
+            count = 2
+            unicode = (data & 0b00011111)
+        elif (data & 0b10000000) == 0b00000000:
+            count = 1
+            unicode = data
+        else:
+            count = 0
+
+        for x in range(1, count):
+            nextByte = self.getByte(addr + x)
+
+            # shift bits by 6 to get space for the next bunch of bits
+            unicode = unicode * 0x40
+
+            # add the next bunch of bits to the unicode value
+            unicode = unicode + (nextByte & 0b00111111)
+
+        if count == 0:
+            print('Byte address: 0x{0:08X} = {1:02X} = \\u (N/A)'.format(addr, data))
+        else:
+            print('Byte address: 0x{0:08X} = {1:02X} = \\u{2:2X}'.format(addr, data, unicode))
 
 
     def addLine(self, addr, hexDump, asciiDump):
         self.textCursor().movePosition(QTextCursor.End)
 
-        self.setTextColor(Qt.red)
-        self.setTextBackgroundColor(Qt.white)
+        self.setTextColor(self.addrColor)
+        self.setTextBackgroundColor(self.addrBackground)
         self.insertPlainText("{0:08X}: ".format(addr))
-        self.setTextColor(Qt.white)
-        self.setTextBackgroundColor(Qt.lightGray)
+
+        self.setTextColor(self.dataColor)
+        self.setTextBackgroundColor(self.dataBackground)
         self.insertPlainText("{0:48}".format(hexDump))
-        self.setTextColor(Qt.black)
-        self.setTextBackgroundColor(Qt.yellow)
+
+        self.setTextColor(self.asciiColor)
+        self.setTextBackgroundColor(self.asciiBackground)
         self.insertPlainText("{0}\n".format(asciiDump))
 
 
@@ -122,6 +203,8 @@ class HexEditWidget(QTextEdit):
         hexDump = ""
         asciiDump = ""
         column = 0
+        
+        self.clear()
         for c in contents:
             hexDump = hexDump + "{0:02X} ".format(c)
             asciiDump = asciiDump + ( chr(c) if c > 31 and c < 128 else '.')
