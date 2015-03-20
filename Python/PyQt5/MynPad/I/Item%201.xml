@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article version="5.0" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title></title>
+
+  <section>
+    <title>Test</title>
+    <itemizedlist>
+      <listitem>
+        <para>Item 1</para>
+        <itemizedlist>
+          <listitem>
+            <para>Item 2</para>
+            <itemizedlist>
+              <listitem>
+                <para>Item 3</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+          <listitem>
+            <para>Item 4</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+      <listitem>
+        <para>Item 5</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+</article>

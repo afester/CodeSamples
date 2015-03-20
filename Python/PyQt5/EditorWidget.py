@@ -4,10 +4,10 @@ Created on 18.02.2015
 @author: afester
 '''
  
-from PyQt5.Qt import QMimeData
+from PyQt5.Qt import QMimeData, QDesktopServices, QUrl, QSize
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QTextCursor, QTextFormat, QGuiApplication
-from PyQt5.QtGui import QTextOption, QCursor, QImage, QTextFrameFormat
+from PyQt5.QtGui import QTextOption, QCursor, QImage
 from PyQt5.QtWidgets import QWidget, QSpacerItem, QMessageBox, QPushButton
 from PyQt5.QtWidgets import QTextEdit, QVBoxLayout, QLineEdit, QFrame, QHBoxLayout, QSizePolicy, QFileDialog
 
@@ -36,6 +36,7 @@ class UrlEditor(QFrame):
 
     def doApply(self):
         self.applyUrl.emit(self.editLine.text())
+        self.hide()
 
 
     def setUrl(self, text):
@@ -44,8 +45,8 @@ class UrlEditor(QFrame):
 
 class TextEdit(QTextEdit):
 
-    updateBlockFormat = pyqtSignal(str)
-    updateCharFormat = pyqtSignal(str)
+    updateBlockFormat = pyqtSignal(object)
+    updateCharFormat = pyqtSignal(object)
     navigate = pyqtSignal(str)
  
     def __init__(self, parentWidget):
@@ -54,6 +55,7 @@ class TextEdit(QTextEdit):
 
         self.l = UrlEditor(self)
         self.l.applyUrl.connect(self.setCurrentUrl)
+        self.l.resize(QSize(500, self.l.size().height()))
         self.cursorPositionChanged.connect(self.handleCursorPositionChanged)
         # self.editView.currentCharFormatChanged.connect(self.currentCharFormatChanged)
 
@@ -103,11 +105,10 @@ class TextEdit(QTextEdit):
         self.updateCharFormat.emit(charStyle)
 
         # open/close URL editor for external links
-        if charStyle == 'a':
-            url = charFmt.anchorHref()
-            if QGuiApplication.keyboardModifiers() & Qt.ControlModifier:
-                print("OPEN: '{}'".format(url))
-            else:
+        if charStyle and charStyle[0] == 'link':
+            if not (QGuiApplication.keyboardModifiers() & Qt.ControlModifier):
+                url = charFmt.anchorHref()
+
                 # get global cursor position
                 pos = self.cursorRect()
                 pos = pos.bottomLeft()
@@ -146,7 +147,7 @@ class TextEdit(QTextEdit):
         cursor = self.textCursor()
         charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
         charStyle = charFmt.property(QTextFormat.UserProperty)
-        if charStyle == 'a':
+        if charStyle and charStyle[0] == 'link':
             self.selectCurrentFragment(cursor)
             charFmt.setAnchorHref(url)
             cursor.setCharFormat(charFmt)
@@ -157,8 +158,7 @@ class TextEdit(QTextEdit):
         charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
 
         style = charFmt.property(QTextFormat.UserProperty)
-
-        if style in ['keyword', 'a']:
+        if style and style[0] in ['link', 'olink']:
             return True
 
         return False
@@ -206,20 +206,32 @@ class TextEdit(QTextEdit):
         #     print("IMAGE {}: {} x {}".format(imgFmt.name(), imgFmt.width(), imgFmt.height()))
         #=======================================================================
 
-        if self.tracking and self.isAtAnchor(event.pos()):
+        if self.tracking: #  and self.isAtAnchor(event.pos()):
+
             cursor = self.cursorForPosition(event.pos())
-            keyword = self.getTextForCurrentFragment(cursor)
-            self.navigate.emit(keyword)
-            return
+            charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
+            style = charFmt.property(QTextFormat.UserProperty)
+
+            if style and style[0] == 'link':
+                url = charFmt.anchorHref()
+                QDesktopServices.openUrl(QUrl(url))
+                return
+
+            if style and style[0] == 'olink':
+                keyword = self.getTextForCurrentFragment(cursor)
+                self.navigate.emit(keyword)
+                return
 
         return QTextEdit.mousePressEvent(self, event)
 
 
     def createMimeDataFromSelection(self):
         result = QMimeData()
-        result.setText("NOT YET!")
+        cursor = self.textCursor()
+        selection = cursor.selectedText()
+        selection = selection.replace('\u2029', '\n')
+        result.setText(selection)
         return result
-        # return QTextEdit.createMimeDataFromSelection(self)
 
 
     def insertImage(self, image):
@@ -235,12 +247,17 @@ class TextEdit(QTextEdit):
 
 
     def insertFromMimeData(self, data):
+
         if data.hasImage():
             image = data.imageData()
             self.insertImage(image)
+        elif data.hasText():
+            self.insertPlainText(data.text())
         else:
-            QTextEdit.insertFromMimeData(self, data)
-
+            msg = ''
+            for f in data.formats():
+                msg = msg + '\n   ' + f
+            QMessageBox.information(self, 'Error', 'Unsupported clipboard content: {}'.format(msg))
 
 
 class EditorWidget(QWidget):
@@ -296,8 +313,8 @@ class EditorWidget(QWidget):
 
     def load(self, notepad, pageId):
         print('Loading page "{}" from notepad "{}"'.format(pageId if pageId is not None else 'titlePage', notepad.getName()))
-
         self.page = notepad.getPage(pageId)
+
         doc = self.page.getDocument()
 
         self.editView.blockSignals(True)
@@ -320,7 +337,7 @@ class EditorWidget(QWidget):
         self.editView.handleCursorPositionChanged()    # update toolbars
 
         self.contentFile = os.path.join(notepad.getName(),str(pageId))
-        self.message.emit("Loaded %s" % self.contentFile)
+        self.message.emit('Loaded {}: {}'.format(notepad.getName(), self.page.getName()))
 
 
     def updateWindowTitle(self, flag):
@@ -333,7 +350,7 @@ class EditorWidget(QWidget):
     def save(self):
         if self.editView.document().isModified():
             self.page.save()
-            self.message.emit("Saved %s" % self.contentFile)
+            self.message.emit('Saved {}: {}'.format(self.page.notepad.getName(), self.page.getName()))
 
 
     def toggleNonprintable(self):
@@ -376,6 +393,7 @@ class EditorWidget(QWidget):
 ## Text format
 
     def textFormatChanged(self, style, flag):
+        print("TEXT FORMAT {} {}".format(style, flag))
         pos = self.editView.textCursor().position()
 
         if flag == True:
@@ -397,7 +415,7 @@ class EditorWidget(QWidget):
 
 
     def removeTextFormat(self):
-        fmt = self.formatManager.getFormat('p').getCharFormat()
+        fmt = self.formatManager.getFormat( ('para', None, None) ).getCharFormat()
         cursor = self.editView.textCursor()
         self.editView.selectCurrentFragment(cursor)
         cursor.setCharFormat(fmt)
@@ -408,7 +426,7 @@ class EditorWidget(QWidget):
     def blockStyleChanged(self, style):
         pos = self.editView.textCursor().position()
 
-        if style in ['javacode', 'sqlcode', 'cppcode', 'pycode', 'xmlcode', 'pre']:
+        if style[0] in ['programlisting', 'screen']:
             self.textCode(style)
         else:
             self.reformatBlock(style)
@@ -421,16 +439,16 @@ class EditorWidget(QWidget):
         curList = cursor.currentList()
         if curList:
             fmt = curList.format()
-            indent = fmt.indent()
+            styleSelector = fmt.property(QTextFormat.UserProperty)
+            indent = int(styleSelector[2])
             if indent > 1:
                 indent -= 1
 
-                # HACK!!
-                listStyle = "ul" + str(indent)
-                style = self.formatManager.getFormat(listStyle)
+                styleSelector = (styleSelector[0], styleSelector[1], str(indent))
+                style = self.formatManager.getFormat(styleSelector)
                 if style:
                     listFormat = style.getListFormat()
-                    curList.setFormat(listFormat)
+                    cursor.createList(listFormat)
 
 
     def indentMore(self):
@@ -438,12 +456,13 @@ class EditorWidget(QWidget):
         curList = cursor.currentList()
         if curList:
             fmt = curList.format()
-            indent = fmt.indent()
-            if indent < 3:
+            styleSelector = fmt.property(QTextFormat.UserProperty)
+            indent = int(styleSelector[2])
+            if indent < 4:
                 indent += 1
 
-                listStyle = "ul" + str(indent)
-                style = self.formatManager.getFormat(listStyle)
+                styleSelector = (styleSelector[0], styleSelector[1], str(indent))
+                style = self.formatManager.getFormat(styleSelector)
                 if style:
                     listFormat = style.getListFormat()
                     cursor.createList(listFormat)
@@ -492,7 +511,7 @@ class EditorWidget(QWidget):
 
 
     def reformatBlock(self, style):
-        if style in ['ul1', 'ol1']:
+        if style[0] in ['itemizedlist', 'orderedlist']:
             self.formatAsList(style)
         else:
             fmt = self.formatManager.getFormat(style)

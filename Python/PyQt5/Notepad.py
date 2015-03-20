@@ -7,10 +7,10 @@ Created on 24.02.2015
 from XMLImporter import XMLImporter
 from XMLExporter import XMLExporter
 from FormatManager import FormatManager
-import os, urllib.parse, uuid, io
+import os, urllib.parse, uuid
 import dropbox
 from dropbox.rest import ErrorResponse
-
+from PyQt5.QtGui import QTextDocument, QTextCursor
 
 class LocalNotepad:
 
@@ -21,22 +21,6 @@ class LocalNotepad:
 
         self.formatManager = FormatManager()
         self.formatManager.loadFormats()    # TODO: Only required once
-
-
-    def ensureExists(self):
-        if not os.path.isdir(self.getRootpath()):
-            print(self.getRootpath() + " does not exist, creating directory ...")
-            os.mkdir(self.getRootpath())
-  
-        contentFile = os.path.join(self.getRootpath(), 'content.xml')
-        if not os.path.isfile(contentFile):
-            print(contentFile + " does not exist, creating file ...")
-            with open(contentFile, 'w') as fd:
-                fd.write('''<?xml version = '1.0' encoding = 'UTF-8'?>
-<page>
-  <h1>{}</h1>
-</page>
-'''.format(self.getName()))
 
 
     def getPage(self, pageId):
@@ -64,6 +48,9 @@ class LocalNotepad:
 class LocalPage:
 
     def __init__(self, notepad, pageId):
+        '''@param notepad  The Notepad instance for this page
+           @param pageId   The page name / page id for this page
+'''
         assert pageId is None or type(pageId) is str
 
         self.notepad = notepad
@@ -73,67 +60,89 @@ class LocalPage:
 
 
     def getName(self):
+        '''@return The page id (page name) of this page
+        '''
         if self.pageId is None:
             return "Title page"
         else:
             return self.pageId
 
 
-    def getPagePath(self):
+    def getFilename(self):
+        '''@return The file name for this page, like "Todo%20List.xml" 
+        '''
+        return urllib.parse.quote(self.getName()) + '.xml'
+
+
+    def getPageDir(self):
+        '''@return The directory for this page, like "c:\temp\testpad\T" 
+        '''
         pagePath = self.notepad.getRootpath()
+
         if self.pageId is not None:     # not the root page
-            pageFilename = urllib.parse.quote(self.pageId)
-            pageIdx = [self.pageId[0], pageFilename]
-            pagePath = os.path.join(pagePath, *pageIdx)
+            pageIdx = self.pageId[0]
+            pagePath = os.path.join(pagePath, pageIdx)
         return pagePath
 
 
+    def getPagePath(self):
+        '''@return The absolute path name to the page.xml file,
+                   like "c:\temp\testpad\T\Todo%20List.xml" 
+        '''
+        return os.path.join(self.getPageDir(), self.getFilename())
+
+
     def load(self):
-        pagePath = self.getPagePath()
-        print("  Loading page at {} ".format(pagePath))
+        pageFullPath = self.getPagePath()
+        print("  Loading page at {} ".format(pageFullPath))
 
-        if not os.path.isdir(pagePath):
-            print(pagePath + " does not exist, creating directory ...")
-            os.makedirs(pagePath)
+        if not os.path.isfile(pageFullPath):
+            print('    Page does not exist, creating empty document ...')
 
-        contentFile = os.path.join(pagePath, 'content.xml')
-        if not os.path.isfile(contentFile):
-            print(contentFile + " does not exist, creating file ...")
-            with open(contentFile, 'w') as fd:
-                fd.write('''<?xml version = '1.0' encoding = 'UTF-8'?>
-<page>
-  <h1>{}</h1>
-</page>
-'''.format(self.pageId))
+            # Create empty document - TODO: encapsulate
+            self.document = QTextDocument()
+            self.document.setUndoRedoEnabled(False)
+            self.document.setIndentWidth(20)
+            # add title
+            cursor = QTextCursor(self.document)
+            titleStyle = ('title', 'level', '1')
+            titleFmt = self.notepad.formatManager.getFormat(titleStyle)
+            cursor.insertBlock(titleFmt.getBlockFormat(), titleFmt.getCharFormat())
+            cursor.insertText(self.pageId)
+            # add empty paragraph to start with
+            paraStyle = ('para', None, None)
+            paraFmt = self.notepad.formatManager.getFormat(paraStyle)
+            cursor.insertBlock(paraFmt.getBlockFormat(), paraFmt.getCharFormat())
+            cursor.movePosition(QTextCursor.Start)
+            b = cursor.block()
+            if b.length() == 1:
+                cursor = QTextCursor(self.document.findBlockByLineNumber(0))
+                cursor.select(QTextCursor.BlockUnderCursor)
+                cursor.deleteChar()
 
-        importer = XMLImporter(pagePath, "content.xml", self.notepad.getFormatManager())
-        importer.importDocument()
-        self.document = importer.getDocument()
-        self.links = importer.getLinks()
+            self.links = []
+        else:
+            pageDir = self.getPageDir()
+            importer = XMLImporter(pageDir, self.getFilename(), self.notepad.getFormatManager())
+            importer.importDocument()
+            self.document = importer.getDocument()
+            self.links = importer.getLinks()
 
 
     def save(self):
         pagePath = self.getPagePath()
         print("  Saving page to {} ".format(pagePath))
 
-        exporter = XMLExporter(pagePath, 'content.xml')
+        pageDir = self.getPageDir()
+        if not os.path.isdir(pageDir):
+            print('    {} does not exist, creating directory ...'.format(pageDir))
+            os.makedirs(pageDir)
+
+        exporter = XMLExporter(self.getPageDir(), self.getFilename())
         exporter.exportDocument(self.document)
 
         self.document.setModified(False)
 
-
-#===============================================================================
-#         with open(self.contentFile, 'w') as content_file:
-#             # NOTE: toHtml() writes the text document in a "hard coded"
-#             # HTML format, converting all style properties to inline style="..." attributes
-#             # See QTextHtmlExporter in qtbase/src/gui/text/qtextdocument.cpp.
-#             # We are using a custom XML exporter therefore ...
-# 
-#             #content_file.write(self.editView.toHtml())
-# 
-#             exporter = XMLExporter(content_file)
-#             exporter.exportDocument(self.editView.document())
-#===============================================================================
 
     def saveImage(self, image):
         fileName = str(uuid.uuid4()).replace('-', '') + '.png'
@@ -171,72 +180,86 @@ class DropboxNotepad(LocalNotepad):
         return result
 
 
-    def ensureExists(self):
-        print("DROPBOX: EnsureExists({})".format(self.getRootpath()))
-        try:
-            self.client.file_create_folder(self.getRootpath())
-        except ErrorResponse as rsp:
-            print(str(rsp))
-
-
 class DropboxPage(LocalPage):
 
     def __init__(self, notepad, pageId):
         LocalPage.__init__(self, notepad, pageId)
 
 
+    def getPageDir(self):
+        '''@return The directory for this page, like "testpad/T" 
+        '''
+        pagePath = self.notepad.getRootpath()
+
+        if self.pageId is not None:     # not the root page
+            pageIdx = self.pageId[0]
+            pagePath = pagePath + '/' + pageIdx
+        return pagePath
+
+
+    def getPagePath(self):
+        '''@return The absolute path name to the page.xml file,
+                   like "testpad/T/Todo%20List.xml" 
+        '''
+        return self.getPageDir() + '/' + self.getFilename()
+
+
     def load(self):
         pagePath = self.getPagePath()
-        contentFile = '{}/{}'.format(pagePath, 'content.xml')
-        print("  DROPBOX: Loading page from {} ".format(contentFile))
+        print("  DROPBOX: Loading page from {} ".format(pagePath))
 
         try:
-            with self.notepad.client.get_file(contentFile) as f:
-                importer = XMLImporter(pagePath, "content.xml", self.notepad.getFormatManager())
+            # NOTE: get_file retrieves a BINARY file, with no character decoding applied!
+            # The sax parser seems to use the proper encoding, based on the xml header
+            with self.notepad.client.get_file(pagePath) as f:
+                importer = XMLImporter(self.getPageDir(), self.getFilename(), self.notepad.getFormatManager())
                 importer.importFromFile(f)
                 self.document = importer.getDocument()
                 self.links = importer.getLinks()
         except ErrorResponse as rsp:
             if rsp.status == 404:
-                self.createPage(contentFile)
+                self.createPage(pagePath)
+
+                # TODO: Should not require an additional roundtrip after page creation
+                with self.notepad.client.get_file(pagePath) as f:
+                    importer = XMLImporter(self.getPageDir(), self.getFilename(), self.notepad.getFormatManager())
+                    importer.importFromFile(f)
+                    self.document = importer.getDocument()
+                    self.links = importer.getLinks()
             else:
                 print(str(rsp))
 
 
     def createPage(self, pagePath):
         print("  DROPBOX: CREATING PAGE {}".format(pagePath))
-        contents = io.StringIO('''<?xml version = '1.0' encoding = 'UTF-8'?>
-<page>
-  <h1>{}</h1>
-</page>
-'''.format(self.pageId))
+        xmlString = '''<?xml version="1.0" encoding="utf-8"?>
+<article version="5.0" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title></title>
+
+  <section>
+    <title>{}</title>
+  </section>
+</article>
+'''.format(self.pageId)
         try:
-            self.notepad.client.put_file(pagePath, contents)
+            fileData = bytes(xmlString, encoding='utf-8')
+            self.notepad.client.put_file(pagePath, fileData)
         except ErrorResponse as rsp:
             print(str(rsp))
-
-        contents.close()
-
-
-    def getPagePath(self):
-        pagePath = self.notepad.getRootpath()
-        if self.pageId is not None:     # not the root page
-            pageFilename = urllib.parse.quote(self.pageId)
-            pageIdx = [pagePath, self.pageId[0], pageFilename]
-            pagePath = '/'.join(pageIdx)
-            
-        return pagePath
 
 
     def save(self):
         pagePath = self.getPagePath()
-        contentFile = '{}/{}'.format(pagePath, 'content.xml')
-        print("  DROPBOX: saving page to {} ".format(contentFile))
+        print("  DROPBOX: saving page to {} ".format(pagePath))
 
         try:
-            exporter = XMLExporter(pagePath, 'content.xml')
-            contents = io.StringIO(exporter.getXmlString(self.document))
-            self.notepad.client.put_file(contentFile, contents, True)
-            contents.close()
+            exporter = XMLExporter(self.getPageDir(), self.getFilename())
+            xmlString = exporter.getXmlString(self.document)
+
+            # NOTE: put_file stores a BINARY file, with no character encoding applied!
+            fileData = bytes(xmlString, encoding='utf-8')
+            self.notepad.client.put_file(pagePath, fileData, True)
         except ErrorResponse as rsp:
             print(str(rsp))

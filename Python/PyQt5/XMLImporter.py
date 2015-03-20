@@ -14,8 +14,9 @@ class Handler(xml.sax.handler.ContentHandler):
         self.contentPath = contentPath
         self.href = ""
         self.formatManager = formatManager
-        self.keywordLinks = []
-        self.lists = []
+        self.keywordLinks = set()
+        self.listLevel = 0
+        self.sectionLevel = 0
 
         # Note: an empty, newly created QTextDocument() always contains one 
         # initial block. Furthermore, this initial block can not be
@@ -81,49 +82,86 @@ class Handler(xml.sax.handler.ContentHandler):
         self.firstLi = False
 
     def startElement(self, name, attrs):
-        if name == "page":
+        if name == "article":
             pass
 
         # blocks
+        elif name == 'section':
+            self.sectionLevel += 1
+
+        elif name == 'title':
+            if self.sectionLevel > 0:   # ignore article title
+                style = ('title', 'level', str(self.sectionLevel))
+                self.collectContent = True
+                self.insertBlock('', style)
+
+        elif name == 'para':
+            self.collectContent = True
+            if self.listLevel == 0:
+                self.insertBlock('', ('para', None, None))
+
         elif name == 'programlisting':
-            self.codeFormat = attrs.getValue('language') + 'code'  # Hack
+            self.codeFormat =  ('programlisting', 'language', attrs.getValue('language')) 
             self.collectContent = True
             self.insertBlock('', self.codeFormat)
 
-        elif name in ['h1', 'h2', 'h3', 'p', 'screen']:
+        elif name == 'screen':
             self.collectContent = True
-            self.insertBlock('', name)
+            self.insertBlock('', ('screen', None, None))
 
-        elif name == "ul":
-            self.firstLi = True
+        elif name == "itemizedlist":
+            self.listLevel += 1
+#===============================================================================
+#             self.firstLi = True
+# 
+#             listFormat = ('itemizedlist', 'level', str(len(self.lists) + 1))
+#             self.cursor.insertBlock(self.formatManager.getFormat( ('para', None, None) ).getBlockFormat(), self.formatManager.getFormat( ('para', None, None) ).getCharFormat())
+#             newList = self.cursor.createList(self.formatManager.getFormat(listFormat).getListFormat())
+#             self.lists.append(newList)
+#===============================================================================
 
-            listFormat = 'ul{}'.format(len(self.lists) + 1) # Hack
-            self.cursor.insertBlock(self.formatManager.getFormat("p").getBlockFormat(), self.formatManager.getFormat("p").getCharFormat())
+        elif name == "listitem":
+            listFormat = ('itemizedlist', 'level', str(self.listLevel))
+            self.cursor.insertBlock(self.formatManager.getFormat( ('para', None, None) ).getBlockFormat(), self.formatManager.getFormat( ('para', None, None) ).getCharFormat())
             newList = self.cursor.createList(self.formatManager.getFormat(listFormat).getListFormat())
-            self.lists.append(newList)
 
-        elif name == "li":
-            self.collectContent = True
-            if self.firstLi:
-                self.firstLi = False
-            else:
-                fmt = self.formatManager.getFormat("p")
-                self.cursor.insertBlock()
-                self.lists[-1].add(self.cursor.block())
-                self.cursor.setCharFormat(fmt.getCharFormat())
+            #===================================================================
+            # self.collectContent = True
+            # if self.firstLi:
+            #     self.firstLi = False
+            # else:
+            #     fmt = self.formatManager.getFormat( ('para', None, None) )
+            #     self.cursor.insertBlock()
+            #     self.lists[-1].add(self.cursor.block())
+            #     self.cursor.setCharFormat(fmt.getCharFormat())
+            #===================================================================
 
         # Fragments
-        elif name in ['em', 'strong', 'tt', 'keyword']:
+        elif name == 'emphasis':
             # insert previous fragment
-            self.insertFragment(self.content, "p")
+            self.emphasizeRole = attrs.get('role', '')
+            self.insertFragment(self.content, ('para', None, None))
             self.content = ""
 
-        elif name == "a":
+        elif name == 'code':
             # insert previous fragment
-            self.insertFragment(self.content, "p")
+            self.insertFragment(self.content, ('para', None, None))
             self.content = ""
-            self.href = attrs.getValue("href")
-        elif name == "img":
+
+        elif name == 'olink':    # internal link / keyword
+            self.insertFragment(self.content, ('para', None, None))
+            self.content = ""
+
+        elif name == 'link':   # external link / URL
+            # insert previous fragment
+            self.insertFragment(self.content, ('para', None, None))
+            self.content = ""
+            self.href = attrs.get('xlink:href', '')
+
+        elif name in ['mediaobject', 'imageobject']:
+            pass
+
+        elif name == "imagedata":
             self.insertImage(attrs)
 
         else:
@@ -136,7 +174,7 @@ class Handler(xml.sax.handler.ContentHandler):
 
 
     def endElement(self, name):
-        if name == "page":
+        if name == "article":
             if not self.result.isEmpty():
                 self.cursor.movePosition(QTextCursor.Start)
                 b = self.cursor.block()
@@ -146,37 +184,62 @@ class Handler(xml.sax.handler.ContentHandler):
                     cursor.deleteChar()
 
         # Blocks
+        elif name == 'section':
+            self.sectionLevel -= 1
+
+        elif name == 'title':
+            if self.sectionLevel > 0:   # ignore article title
+                style = ('title', 'level', str(self.sectionLevel))
+                self.collectContent = False
+                self.insertFragment(self.content, style)
+
+        elif name == 'para':
+            self.collectContent = False
+            self.insertFragment(self.content, ('para', None, None))
+
+        elif name == 'screen':
+            self.collectContent = False
+            self.insertFragment(self.content, ('screen', None, None))
+
         elif name == 'programlisting':
             self.collectContent = False
             self.insertFragment(self.content, self.codeFormat)
 
-        elif name in ['h1', 'h2', 'h3', 'p', 'screen']:
-            self.collectContent = False
-            self.insertFragment(self.content, name)
+        elif name == "itemizedlist":
+            self.listLevel -= 1
+            #self.collectContent = False
+            #self.lists.pop()
 
-        elif name == "ul":
-            self.collectContent = False
-            self.lists.pop()
-
-        elif name == "li":
-            self.insertFragment(self.content, 'p')
-            self.collectContent = False
+        elif name == "listitem":
+            pass
+            #self.insertFragment(self.content, ('para', None, None))
+            #self.collectContent = False
 
         # Fragments
-        elif name in ['em', 'strong', 'tt']:
-            self.insertFragment(self.content, name)
+        elif name == 'code':
+            self.insertFragment(self.content, ('code', None, None))
 
-        elif name == 'a':
+        elif name == 'emphasis':
+            if self.emphasizeRole == 'highlight':
+                self.insertFragment(self.content, ('emphasis', 'role', 'highlight'))
+            else:
+                self.insertFragment(self.content, ('emphasis', None, None))
+
+        elif name == 'link':
             # Insert the link text
             # if self.href.startswith("http://") or self.href.startswith("https://"):
-            self.insertAnchor(self.content, "a", self.href)
+            self.insertAnchor(self.content, ('link', None, None), self.href)
 
-        elif name == 'keyword':
-            self.insertAnchor(self.content, "keyword", self.content)
-            self.keywordLinks.append(self.content)
+        elif name == 'olink':
+            self.insertAnchor(self.content, ('olink', None, None), self.content)
 
-        elif name == "img":
+            keyword = self.content
+            if not keyword in self.keywordLinks:
+                self.keywordLinks.add(keyword) 
+
+        elif name in ['mediaobject', 'imageobject', 'imagedata']:
             pass
+
         else:
             print("INVALID TAG: " + name)
         self.content = ""
@@ -189,8 +252,8 @@ class Handler(xml.sax.handler.ContentHandler):
     #    self.cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
 
 
-    def insertBlock(self, content, className):
-        fmt = self.formatManager.getFormat(className)
+    def insertBlock(self, content, selector):
+        fmt = self.formatManager.getFormat(selector)
         self.cursor.insertBlock(fmt.getBlockFormat(), fmt.getCharFormat())
         self.cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
 
@@ -214,7 +277,7 @@ class Handler(xml.sax.handler.ContentHandler):
 
                                   
     def insertImage(self, attrs):
-        imageFile = attrs.getValue("src")
+        imageFile = attrs.getValue("fileref")
         imagePath = os.path.join(self.contentPath, imageFile)
         imageFmt = QTextImageFormat()
         imageFmt.setName(imagePath)
@@ -232,7 +295,7 @@ class XMLImporter:
 
     def importDocument(self):
         contentFilePath = os.path.join(self.contentPath, self.contentFile)
-        with open(contentFilePath, 'r') as content_file:
+        with open(contentFilePath, 'r', encoding='utf-8') as content_file:
             self.importFromFile(content_file)
 
 
@@ -243,7 +306,7 @@ class XMLImporter:
         parser.parse(fileDesc)
 
         self.document = handler.result
-        self.links = handler.keywordLinks
+        self.links = sorted(handler.keywordLinks)
 
 
     def getDocument(self):

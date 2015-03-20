@@ -47,7 +47,7 @@ class AddNotepadDlg(QDialog):
                 self.ui.dropboxPages.setCurrentIndex(0)
                 self.ui.buttonBox.setStandardButtons(QDialogButtonBox.Apply| QDialogButtonBox.Cancel)
 
-                self.flow = dropbox.client.DropboxOAuth2FlowNoRedirect('6yfxxrbb74fm81o','qhrorjahvrtke5o') 
+                self.flow = dropbox.client.DropboxOAuth2FlowNoRedirect('9tuq93gk3wkq242','4au1g1d5vp6phq3') 
                 authorize_url = self.flow.start()
 
                 self.ui.authUrl.setText('<a href="{0}">{0}</a>'.format(authorize_url))
@@ -242,12 +242,12 @@ class BrowserWidget(QWidget):
                 notepad = DropboxNotepad(npDef, self.settings)
 
             if notepad is not None:
-                notepad.ensureExists()
-
                 # Add the new notepad to the local settings
                 self.settings.addNotepad(npDef)
 
-                # Add the new notepad to the browser tree
+                # Add the new notepad to the browser tree.
+                # This will expand the node and load the page, and the page
+                # will get created if it does not exist yet
                 self.browserView.addNotepad(notepad)
 
 

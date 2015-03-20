@@ -10,6 +10,8 @@ from PyQt5.QtCore import PYQT_VERSION_STR, QT_VERSION_STR, qVersion, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QTabWidget
 from PyQt5.QtWidgets import QTextEdit, QSplitter, QHBoxLayout, QVBoxLayout, QMainWindow
 from PyQt5.QtWidgets import QAction, QStatusBar, QMenuBar, QApplication, QMessageBox
+from PyQt5.QtWebKitWidgets import QWebView
+from PyQt5.QtCore import QUrl 
 
 import sys
 import logging.config
@@ -53,7 +55,8 @@ class MynPad(QWidget):
         self.tabWidget.addTab(tab, "Edit")
 #############################
 
-        self.tabWidget.addTab(QWidget(self.tabWidget), "View web")
+        self.browser = QWebView(self.tabWidget)
+        self.tabWidget.addTab(self.browser, "View web")
 
         self.tabWidget.addTab(QWidget(self.tabWidget), "View pdf")
 
@@ -113,7 +116,25 @@ class MynPad(QWidget):
 
 
     def tabSelected(self, index):
-        if index == 3:
+        if index == 1:        # Web View
+            self.htmlView.clear()
+            doc = self.editorWidget.editView.document()
+            traversal = TextHTMLPrinter(self.htmlView.insertPlainText, self.editorWidget.page)
+            traversal.traverse(doc)
+
+            ########### set stylesheet
+            import os
+            mypath = os.getcwd()
+            mypath = mypath.replace('\\', '/')
+            self.browser.settings().setUserStyleSheetUrl(QUrl('file:///{}/webpage.css'.format(mypath)))
+            ###########
+
+            self.browser.setHtml(self.htmlView.toPlainText())
+
+        elif index == 2:      # PDF
+            pass
+
+        elif index == 3:
             self.dumpTextStructure()
 
         elif index == 4:
@@ -127,7 +148,7 @@ class MynPad(QWidget):
             self.htmlView.clear()
 
             doc = self.editorWidget.editView.document()
-            traversal = TextHTMLPrinter(self.htmlView.insertPlainText)
+            traversal = TextHTMLPrinter(self.htmlView.insertPlainText, self.editorWidget.page)
             traversal.traverse(doc)
 
 
@@ -147,34 +168,6 @@ class MynPad(QWidget):
         traversal.traverse(doc)
 
 
-    def hexdumpString(self, contents):
-        # Convert the string into a byte sequence.
-        # contents = bytes(contents, encoding='utf-16')
-        contents = contents.replace('\u2028', '\n')
-        contents = bytes(contents, encoding='utf-16')
-        for hexLine in self.hexdumpLines(contents):
-            print('{:08X}: {:48} |{:16}|'.format(hexLine[0], hexLine[1], hexLine[2]))
-        print()
-
-
-    def hexdumpLines(self, contents):
-        addr = 0
-        hexDump = ""
-        asciiDump = ""
-        column = 0
-        for c in contents:
-            hexDump = hexDump + "{:02X} ".format(c)
-            asciiDump = asciiDump + ( chr(c) if c > 31 and c < 128 else '.')
-            column += 1
-            if (column % 16) == 0:
-                yield (addr, hexDump, asciiDump)
-
-                asciiDump = ""
-                hexDump = ""
-                column = 0
-                addr += 16
-        if column > 0:
-            yield (addr, hexDump, asciiDump)
 
 #===============================================================================
 #         for block in self.blocks(frm):

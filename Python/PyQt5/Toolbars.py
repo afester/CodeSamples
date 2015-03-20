@@ -85,7 +85,7 @@ class TitledToolbar(QFrame):
 
 class BlockStyleSelector(TitledToolbar):
 
-    styleChanged = pyqtSignal(str)
+    styleChanged = pyqtSignal(object)
     indentLess = pyqtSignal()
     indentMore = pyqtSignal()
     insertTable = pyqtSignal()
@@ -94,7 +94,6 @@ class BlockStyleSelector(TitledToolbar):
         TitledToolbar.__init__(self, parent, 'Block style')
         self.currentStyle = None
 
-
         toolbar = QToolBar(self)
         toolbar.setFloatable(False)
         toolbar.setMovable(False)
@@ -102,59 +101,89 @@ class BlockStyleSelector(TitledToolbar):
         self.styleToIndex = {}
         self.styleToDropdown = {}
 
+##########################
         d2 = IconDropDown(self, "icons/format-text-header.png")
         d2.entrySelected.connect(self.styleSelected)
-        d2.addItem('Header 1', 'h1')
-        self.styleToDropdown['h1'] = d2
-        self.styleToIndex['h1'] = 0
-        d2.addItem('Header 2', 'h2')
-        self.styleToDropdown['h2'] = d2
-        self.styleToIndex['h2'] = 1
-        d2.addItem('Header 3', 'h3')
-        self.styleToDropdown['h3'] = d2
-        self.styleToIndex['h3'] = 2
 
+        selector = ('title', 'level', '1')
+        d2.addItem('Title 1', selector)
+        self.styleToDropdown[selector] = d2
+        self.styleToIndex[selector] = 0
+
+        selector = ('title', 'level', '2')
+        d2.addItem('Title 2', selector)
+        self.styleToDropdown[selector] = d2
+        self.styleToIndex[selector] = 1
+
+        selector = ('title', 'level', '3')
+        d2.addItem('Title 3', selector)
+        self.styleToDropdown[selector] = d2
+        self.styleToIndex[selector] = 2
+
+##########################
         d1 = IconDropDown(self, "icons/format-text-paragraph.png")
         d1.entrySelected.connect(self.styleSelected)
-        d1.addItem("Standard", 'p')
-        self.styleToDropdown['p'] = d1
-        self.styleToIndex['p'] = 0
-        d1.addItem("Centered", 'pcenter')
-        self.styleToDropdown['pcenter'] = d1
-        self.styleToIndex['pcenter'] = 1
-        d1.addItem("Block", 'pblock')
-        self.styleToDropdown['pblock'] = d1
-        self.styleToIndex['pblock'] = 2
 
+        selector = ('para', None, None)
+        d1.addItem("Standard", selector)
+        self.styleToDropdown[selector] = d1
+        self.styleToIndex[selector] = 0
+        #=======================================================================
+        # d1.addItem("Centered", 'pcenter')
+        # self.styleToDropdown['pcenter'] = d1
+        # self.styleToIndex['pcenter'] = 1
+        # d1.addItem("Block", 'pblock')
+        # self.styleToDropdown['pblock'] = d1
+        # self.styleToIndex['pblock'] = 2
+        #=======================================================================
+
+##########################
         d3 = IconDropDown(self, "icons/format-list-unordered.png")
         d3.entrySelected.connect(self.styleSelected)
-        d3.addItem("Unordered List", 'ul1')
-        self.styleToDropdown['u1l'] = d3
-        self.styleToIndex['ul1'] = 0
-        d3.addItem("Ordered List", 'ol1')
-        self.styleToDropdown['ol1'] = d3
-        self.styleToIndex['ol1'] = 1
 
+        selector = ('itemizedlist', 'level', '1')
+        d3.addItem("Unordered List", selector)
+        self.styleToDropdown[selector] = d3
+        self.styleToIndex[selector] = 0
+
+        selector = ('orderedlist', 'level', '1')
+        d3.addItem("Ordered List", selector)
+        self.styleToDropdown[selector] = d3
+        self.styleToIndex[selector] = 1
+
+##########################
         d4 = IconDropDown(self, "icons/format-text-code.png")
         d4.entrySelected.connect(self.styleSelected)
-        d4.addItem("C++", 'cppcode')
-        self.styleToDropdown['cppcode'] = d4
-        self.styleToIndex['cppcode'] = 0
-        d4.addItem("Java", 'javacode')
-        self.styleToDropdown['javacode'] = d4
-        self.styleToIndex['javacode'] = 1
-        d4.addItem("Python", 'pycode')
-        self.styleToDropdown['pycode'] = d4
-        self.styleToIndex['pycode'] = 2
-        d4.addItem("SQL", 'sqlcode')
-        self.styleToDropdown['sqlcode'] = d4
-        self.styleToIndex['sqlcode'] = 3
-        d4.addItem("XML", 'xmlcode')
-        self.styleToDropdown['xmlcode'] = d4
-        self.styleToIndex['xmlcode'] = 4
-        d4.addItem("Generic", 'screen')
-        self.styleToDropdown['screen'] = d4
-        self.styleToIndex['screen'] = 5
+
+        selector = ('programlisting', 'language', 'cpp')
+        d4.addItem("C++", selector)
+        self.styleToDropdown[selector] = d4
+        self.styleToIndex[selector] = 0
+
+        selector = ('programlisting', 'language', 'java')
+        d4.addItem("Java", selector)
+        self.styleToDropdown[selector] = d4
+        self.styleToIndex[selector] = 1
+        
+        selector = ('programlisting', 'language', 'python')
+        d4.addItem("Python", selector)
+        self.styleToDropdown[selector] = d4
+        self.styleToIndex[selector] = 2
+        
+        selector = ('programlisting', 'language', 'sql')
+        d4.addItem("SQL", selector)
+        self.styleToDropdown[selector] = d4
+        self.styleToIndex[selector] = 3
+        
+        selector = ('programlisting', 'language', 'xml')
+        d4.addItem("XML", selector)
+        self.styleToDropdown[selector] = d4
+        self.styleToIndex[selector] = 4
+        
+        selector = ('screen', None, None)
+        d4.addItem("Generic", selector)
+        self.styleToDropdown[selector] = d4
+        self.styleToIndex[selector] = 5
 
         toolbar.addWidget(d1)
         toolbar.addWidget(d2)
@@ -207,7 +236,7 @@ class BlockStyleSelector(TitledToolbar):
 
 class TextStyleSelector(TitledToolbar):
 
-    styleChanged = pyqtSignal(str, bool)
+    styleChanged = pyqtSignal(object, bool)
 
     def __init__(self, toolbar):
         TitledToolbar.__init__(self, toolbar, 'Text style')
@@ -221,36 +250,41 @@ class TextStyleSelector(TitledToolbar):
 
         textKeywordAction = QAction(QIcon("icons/format-keyword.png"), "Notepad link", toolbar)
         textKeywordAction.setCheckable(True);
-        textKeywordAction.setProperty('style', 'keyword')
-        self.styleToAction['keyword'] = textKeywordAction
+        selector = ('olink', None, None)
+        textKeywordAction.setProperty('style', selector)
+        self.styleToAction[selector] = textKeywordAction
         textKeywordAction.triggered.connect(self.styleSelected)
         toolbar.addAction(textKeywordAction)
 
         textLinkAction = QAction(QIcon("icons/format-link.png"), "Internet link", toolbar)
         textLinkAction.setCheckable(True);
-        textLinkAction.setProperty('style', 'a')
-        self.styleToAction['a'] = textLinkAction 
+        selector = ('link', None, None)
+        textLinkAction.setProperty('style', selector)
+        self.styleToAction[selector] = textLinkAction 
         textLinkAction.triggered.connect(self.styleSelected)
         toolbar.addAction(textLinkAction)
 
         textBoldAction = QAction(QIcon("icons/format-text-emphasized.png"), "Emphasize", toolbar)
         textBoldAction.setCheckable(True);
-        textBoldAction.setProperty('style', 'strong')
-        self.styleToAction['strong'] = textBoldAction
+        selector = ('emphasis', None, None)
+        textBoldAction.setProperty('style', selector)
+        self.styleToAction[selector] = textBoldAction
         textBoldAction.triggered.connect(self.styleSelected)
         toolbar.addAction(textBoldAction)
 
         textHighlightAction = QAction(QIcon("icons/format-text-highlight.png"), "Highlight", toolbar)
         textHighlightAction.setCheckable(True);
-        textHighlightAction.setProperty('style', 'em')
-        self.styleToAction['em'] = textHighlightAction
+        selector = ('emphasis', 'role', 'highlight')
+        textHighlightAction.setProperty('style', selector)
+        self.styleToAction[selector] = textHighlightAction
         textHighlightAction.triggered.connect(self.styleSelected)
         toolbar.addAction(textHighlightAction)
  
         textCodeAction = QAction(QIcon("icons/format-text-code.png"), "Code", toolbar)
         textCodeAction.setCheckable(True);
-        textCodeAction.setProperty('style', 'tt')
-        self.styleToAction['tt'] = textCodeAction
+        selector = ('code', None, None)
+        textCodeAction.setProperty('style', selector)
+        self.styleToAction[selector] = textCodeAction
         textCodeAction.triggered.connect(self.styleSelected)
         toolbar.addAction(textCodeAction)
 

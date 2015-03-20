@@ -6,6 +6,8 @@ Created on 20.02.2015
 
 from PyQt5.QtGui import QTextFormat, QTextBlockFormat, QTextCharFormat, QTextListFormat, QFont, QColor
 import cssutils
+import re
+
 
 class Format:
     
@@ -139,20 +141,27 @@ class FormatManager:
 
         styleSheet = cssutils.parseFile('styles.css')
 
-        blockFormats = { 'h1' : 'h1', 'h2' : 'h2', 'h3' : 'h3', 'p' : 'p', 
-                         'code[lang="java"]' : 'javacode',
-                         'code[lang="cpp"]' : 'cppcode',
-                         'code[lang="xml"]' : 'xmlcode',
-                         'code[lang="sql"]' : 'sqlcode',
-                         'code[lang="python"]' : 'pycode',
-                         'screen' : 'screen'}
+        blockFormats = ['title[level="1"]', 
+                        'title[level="2"]', 
+                        'title[level="3"]', 
+                        'para',
+                        'programlisting[language="java"]',
+                        'programlisting[language="cpp"]',
+                        'programlisting[language="xml"]',
+                        'programlisting[language="sql"]',
+                        'programlisting[language="python"]',
+                        'screen']
 
-        for cssKey in blockFormats.keys():
-            tagKey = blockFormats[cssKey]
+        for cssKey in blockFormats:
             cssRule = self.simpleLookup(styleSheet, cssKey)
 
+            # get the selector as a tuple of class and one attribute selector
+            # (Can be extended later, but currently sufficient)
+            m = re.match(r'^(\S*?)(?:\[(.*)="(.*)"])?$', cssKey)
+            selector = m.groups()
+
             blockFmt = QTextBlockFormat()
-            blockFmt.setProperty(QTextFormat.UserProperty, tagKey)
+            blockFmt.setProperty(QTextFormat.UserProperty, selector)
 
             value = self.getIntValue(cssRule, 'margin-top')
             if value:
@@ -182,18 +191,30 @@ class FormatManager:
             if value:
                 charFmt.setFontFamily(value)
 
-            self.formats[tagKey] = Format(blockFmt, charFmt)
+            self.formats[selector] = Format(blockFmt, charFmt)
 
 ### List formats
 
-        listFormats = {'ul li' : 'ul1', 'ul ul li' : 'ul2', 'ul ul ul li' : 'ul3', 
-                       'ol li' : 'ol1', 'ol ol li' : 'ol2', 'ol ol ol li' : 'ol3'} 
-        for cssKey in listFormats.keys():
-            tagKey = listFormats[cssKey]
+        listFormats = ['itemizedlist[level="1"]',
+                       'itemizedlist[level="2"]',
+                       'itemizedlist[level="3"]', 
+                       'itemizedlist[level="4"]',
+                       'orderedlist[level="1"]',
+                       'orderedlist[level="2"]' ,
+                       'orderedlist[level="3"]',
+                       'orderedlist[level="4"]'] 
+        for cssKey in listFormats:
             cssRule = self.simpleLookup(styleSheet, cssKey)
 
+            indent = 0
+            m = re.match(r'^(\S*?)(?:\[(.*)="(.*)"])?$', cssKey)
+            selector = m.groups()
+            if selector[1] == 'level':
+                indent = int(selector[2])
+
             listFmt = QTextListFormat()
-            listFmt.setProperty(QTextFormat.UserProperty, tagKey)
+            listFmt.setProperty(QTextFormat.UserProperty, selector)
+            listFmt.setIndent(indent)
 
             value = self.getStringValue(cssRule, 'list-style-type')
             if value:
@@ -206,11 +227,7 @@ class FormatManager:
                 elif value == 'decimal':
                     listFmt.setStyle(QTextListFormat.ListDecimal)
 
-            # HACK!!! TODO!
-            indent = cssKey.count(' ')
-            listFmt.setIndent(indent)
-
-            self.formats[tagKey] = Format(None, None, listFmt)
+            self.formats[selector] = Format(None, None, listFmt)
 
 ### Inline formats
 
@@ -219,18 +236,23 @@ class FormatManager:
         pcharFmt.setFontPointSize(10)
         pcharFmt.setFontFamily("Sans")
 
-        inlineFormats = { 'em' : 'em', 'strong' : 'strong', 'tt' : 'tt', 
-                          'keyword' : 'keyword', 'a' : 'a'}
+        inlineFormats = ['emphasis[role="highlight"]', 
+                         'emphasis',
+                         'code',
+                         'link',
+                         'olink']
 
-        for cssKey in inlineFormats.keys():
-            tagKey = inlineFormats[cssKey]
+        for cssKey in inlineFormats:
             cssRule = self.simpleLookup(styleSheet, cssKey)
 
+            m = re.match(r'^(\S*?)(?:\[(.*)="(.*)"])?$', cssKey)
+            selector = m.groups()
+
             charFmt = QTextCharFormat(pcharFmt)
-            charFmt.setProperty(QTextFormat.UserProperty, tagKey)
+            charFmt.setProperty(QTextFormat.UserProperty, selector)
 
             # TODO: better approach?
-            if tagKey in ['a', 'keyword']:
+            if cssKey in ['link', 'olink']:
                 charFmt.setAnchor(True)
 
             value = self.getStringValue(cssRule, 'font-family')
@@ -252,7 +274,7 @@ class FormatManager:
             if value and value == 'underline':
                 charFmt.setFontUnderline(True)
 
-            self.formats[tagKey] = Format(None, charFmt)
+            self.formats[selector] = Format(None, charFmt)
 
 
     def getFormat(self, fmtId):
