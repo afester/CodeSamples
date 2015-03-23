@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.transform.*?>
+<?import javafx.scene.effect.*?>
+
+<Group id='_root' xmlns:fx="http://javafx.com/fxml" xmlns:fxsvg="http://efxclipse.org/fxml-svg">
+	<children>
+		<fx:define>
+			<!-- Unhandled type 'SvgPatternElement' -->
+		</fx:define>
+		<!-- Unhandled type 'SvgMetadataElement' -->
+		<Group
+			opacity="1.0"
+			id="layer1"
+			>
+			<children>
+				<SVGPath
+					content="m 21.007618,17.153303 0,75 50,0 0,-75 -50,0 z"
+					opacity="1"
+					fillRule="EVEN_ODD"
+					id="panel"
+					>
+					<fill>
+						<Color>
+							<red>0.9490196078431372</red>
+							<green>0.9490196078431372</green>
+							<blue>0.9490196078431372</blue>
+						</Color>
+					</fill>
+				</SVGPath>
+				<SVGPath
+					content="m 64.164066,27.127193 2.740706,3.32731 -4.156085,23.44556 -6.038036,-3.37143 3.539611,-20.07413 3.913814,-3.32731 z"
+					opacity="1"
+					fillRule="EVEN_ODD"
+					id="segB"
+					>
+					<fill>
+						<Color>
+							<red>0.8509803921568627</red>
+							<green>0.8509803921568627</green>
+							<blue>0.8509803921568627</blue>
+						</Color>
+					</fill>
+				</SVGPath>
+				<SVGPath
+					content="m 55.554408,51.586403 -19.98587,0 -7.167468,3.28309 6.00186,3.3274 19.978111,0.044 7.241511,-3.3274 -6.068139,-3.32712 z"
+					opacity="1"
+					fillRule="EVEN_ODD"
+					id="segG"
+					>
+					<fill>
+						<Color>
+							<red>0.8509803921568627</red>
+							<green>0.8509803921568627</green>
+							<blue>0.8509803921568627</blue>
+						</Color>
+					</fill>
+				</SVGPath>
+				<SVGPath
+					content="m 35.572813,27.193283 -3.914022,3.32735 -4.154879,23.31339 7.251765,-3.26136 3.557714,-20.05203 -2.740638,-3.32735 z"
+					opacity="1"
+					fillRule="EVEN_ODD"
+					id="segF"
+					>
+					<fill>
+						<Color>
+							<red>0.8509803921568627</red>
+							<green>0.8509803921568627</green>
+							<blue>0.8509803921568627</blue>
+						</Color>
+					</fill>
+				</SVGPath>
+				<SVGPath
+					content="m 50.381669,80.298283 -19.98599,0 -3.914031,3.3274 2.740659,3.32712 19.98599,0 3.936071,-3.32712 -2.762699,-3.3274 z"
+					opacity="1"
+					fillRule="EVEN_ODD"
+					id="segD"
+					>
+					<fill>
+						<Color>
+							<red>0.8509803921568627</red>
+							<green>0.8509803921568627</green>
+							<blue>0.8509803921568627</blue>
+						</Color>
+					</fill>
+				</SVGPath>
+				<SVGPath
+					content="m 60.653369,22.918463 -20.00789,0 -3.917903,3.34936 2.740624,3.32732 20.00789,0 3.914096,-3.32732 -2.736817,-3.34936 z"
+					opacity="1"
+					fillRule="EVEN_ODD"
+					id="segA"
+					>
+					<fill>
+						<Color>
+							<red>0.8509803921568627</red>
+							<green>0.8509803921568627</green>
+							<blue>0.8509803921568627</blue>
+						</Color>
+					</fill>
+				</SVGPath>
+				<SVGPath
+					content="m 54.318454,82.964433 3.917942,-3.34913 4.112094,-23.44561 -7.230865,3.39344 -3.535739,20.05217 2.736578,3.34913 z"
+					opacity="1"
+					fillRule="EVEN_ODD"
+					id="segC"
+					>
+					<fill>
+						<Color>
+							<red>0.8509803921568627</red>
+							<green>0.8509803921568627</green>
+							<blue>0.8509803921568627</blue>
+						</Color>
+					</fill>
+				</SVGPath>
+				<SVGPath
+					content="m 25.808771,82.567913 -2.736728,-3.34941 4.066655,-23.31325 6.101685,3.26107 -3.51374,20.05218 -3.917932,3.34941 z"
+					opacity="1"
+					fillRule="EVEN_ODD"
+					id="segE"
+					>
+					<fill>
+						<Color>
+							<red>0.8509803921568627</red>
+							<green>0.8509803921568627</green>
+							<blue>0.8509803921568627</blue>
+						</Color>
+					</fill>
+				</SVGPath>
+				<SVGPath
+					content="m 59.667868,83.625683 c 0,-2.20359 1.78477,-4.01038 3.98836,-4.01038 2.20359,0 3.98837,1.80679 3.98837,4.01038 0,0 0,0 0,0 0,2.20331 -1.78478,3.98836 -3.98837,3.98836 -2.20359,0 -3.98836,-1.78505 -3.98836,-3.98836 z"
+					opacity="1"
+					fillRule="EVEN_ODD"
+					id="segDP"
+					>
+					<fill>
+						<Color>
+							<red>0.8509803921568627</red>
+							<green>0.8509803921568627</green>
+							<blue>0.8509803921568627</blue>
+						</Color>
+					</fill>
+				</SVGPath>
+			</children>
+		</Group>
+	</children>
+</Group>

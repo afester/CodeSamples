@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article version="5.0" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title></title>
+
+  <section>
+    <title>TODO list for MynPad</title>
+
+    <section>
+      <title>Next steps</title>
+      <itemizedlist>
+        <listitem>
+          <para>Update Browser when new page is created</para>
+        </listitem>
+        <listitem>
+          <para>Search functionality</para>
+        </listitem>
+        <listitem>
+          <para>Add page name to article's &lt;title&gt; tag</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Bugs</title>
+      <itemizedlist>
+        <listitem>
+          <para><emphasis>List where the next level is indented more than one additional level misses a &lt;listitem&gt; tag</emphasis></para>
+        </listitem>
+        <listitem>
+          <para>UNDO/REDO state not reset when saving a page</para>
+        </listitem>
+        <listitem>
+          <para>List format not reflected in Block style toolbar</para>
+        </listitem>
+        <listitem>
+          <para><emphasis role="highlight">Make XMLExporter more robust - must not destroy existing page!!!</emphasis></para>
+        </listitem>
+        <listitem>
+          <para>Unindent List must add item to right list (important for numbered / ordered lists)</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Important topics</title>
+      <itemizedlist>
+        <listitem>
+          <para>How to delete / rename pages? Should we maintain a global "database" of pages and their links? Would allow to query the database to build the browser tree instead of loading the page to get its links</para>
+        </listitem>
+        <listitem>
+          <para>Copy&amp;Paste should support format - currently only plain text is copied into the clipboard</para>
+        </listitem>
+        <listitem>
+          <para>support of numbered (ordered) lists</para>
+        </listitem>
+        <listitem>
+          <para>Return key inside block (e.g. inside code block)</para>
+        </listitem>
+        <listitem>
+          <para>Tab key - inside lists, should increase indent</para>
+        </listitem>
+        <listitem>
+          <para>Back and Forward navigation</para>
+        </listitem>
+        <listitem>
+          <para>Rework page creation - especially on Dropbox, requires too many roundtrips</para>
+        </listitem>
+        <listitem>
+          <para>Maintain creation date and last update date for each page</para>
+        </listitem>
+        <listitem>
+          <para>Clean up unused image files - probably simply delete unused files when saving the page</para>
+        </listitem>
+        <listitem>
+          <para>Support of tables. Currently an issue since the <code>QTextTableCell</code> is missing the python methods for <code>begin()</code> and <code>end()</code>, so that it is not possible to traverse the table cells contents.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Enhancements</title>
+      <itemizedlist>
+        <listitem>
+          <para>Show current cursor position (line/column)</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Ideas</title>
+      <itemizedlist>
+        <listitem>
+          <para>Style Editor</para>
+        </listitem>
+        <listitem>
+          <para>Version Control of pages</para>
+        </listitem>
+        <listitem>
+          <para>Syntax highlighting inside code blocks</para>
+        </listitem>
+        <listitem>
+          <para>Inline resizing of images through some kind of handles - this will most likely require the implementation of a custom text object, see <link xlink:href="http://doc.qt.io/qt-5/qtsvg-richtext-textobject-example.html">http://doc.qt.io/qt-5/qtsvg-richtext-textobject-example.html</link></para>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+</article>

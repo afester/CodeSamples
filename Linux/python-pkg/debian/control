@@ -1,0 +1,18 @@
+Source: sample
+Maintainer: Andreas Fester <Andreas.Fester@gmx.de>
+Section: python
+Priority: optional
+X-Python-Version: >= 2.6
+X-Python3-Version: >= 3.0
+Build-Depends: python-all (>= 2.6.6-3), debhelper (>= 7), python3-all
+Standards-Version: 3.9.5
+
+Package: python-sample
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}
+Description: Python Package Sample
+
+Package: python3-sample
+Architecture: all
+Depends: ${misc:Depends}, ${python3:Depends}
+Description: Python Package Sample

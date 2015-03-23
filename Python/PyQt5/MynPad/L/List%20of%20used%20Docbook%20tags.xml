@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article version="5.0" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title></title>
+
+  <section>
+    <title>List of used Docbook tags</title>
+
+    <section>
+      <title>Structural tags</title>
+      <itemizedlist>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/article.html">article</link></para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/section.html">section</link></para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/title.html">title</link></para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/itemizedlist.html">itemizedlist</link></para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/orderedlist.html">orderedlist</link></para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/listitem.html">listitem</link></para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/para.html">para</link></para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/programlisting.html">programlisting</link></para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/screen.html">screen</link></para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Inline tags</title>
+      <itemizedlist>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/emphasis.html">emphasis</link></para>
+        </listitem>
+        <listitem>
+          <para>code</para>
+        </listitem>
+        <listitem>
+          <para>olink</para>
+        </listitem>
+        <listitem>
+          <para>link</para>
+        </listitem>
+        <listitem>
+          <para>mediaobject</para>
+        </listitem>
+        <listitem>
+          <para>imageobject</para>
+        </listitem>
+        <listitem>
+          <para>imagedata</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+</article>

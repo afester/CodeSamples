@@ -1,0 +1,12 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<page>
+
+   <h1>List Samples</h1>
+   <ul>
+     <li>Item 1</li>
+     <li>Item 2</li>
+     <li>Item 3</li>
+   </ul>
+   <p></p>
+   <p></p>
+</page>

@@ -2,32 +2,67 @@
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.Qt import PYQT_VERSION_STR
+
+from sip import SIP_VERSION_STR
 
 import pyudev
 import sys
+import usb1, libusb1
 
+
+class TwoColumnTable(QTableWidget):
+
+    def __init__(self, parentWidget):
+        QTableWidget.__init__(self, parentWidget)
+
+    def resizeEvent(self, *args, **kwargs):
+        width = args[0].size().width()
+        self.setColumnWidth(0, width/2)
+        self.setColumnWidth(1, width - width/2)
+        return QTableWidget.resizeEvent(self, *args, **kwargs)
 
 
 class SearchWidget(QWidget):
     
+    
+    startSearch = pyqtSignal()
+    searchNext = pyqtSignal()
+    searchPrev = pyqtSignal()
+
     def __init__(self, parentWidget):
         QWidget.__init__(self, parentWidget)
 
         self.theLayout = QHBoxLayout()
 
-        self.searchInputWidget = QLineEdit("Test", self)
-        self.searchStartButton = QPushButton("S", self)
-        self.searchNextButton = QPushButton("^ ", self)
-        self.searchPrevButton = QPushButton("v", self)
+        self.searchInputWidget = QLineEdit(self)
+
+        self.searchStartButton = QToolButton(self, clicked = self.startSearch)
+        self.searchStartButton.setIcon(QIcon("icons/start-search.png"))
+
+        self.findNextButton = QToolButton(self, clicked = self.searchNext)
+        self.findNextButton.setIcon(QIcon("icons/find-next.png"))
+
+        self.findPrevButton = QToolButton(self, clicked = self.searchPrev)
+        self.findPrevButton.setIcon(QIcon("icons/find-prev.png"))
 
         self.theLayout.addWidget(self.searchInputWidget)
         self.theLayout.addWidget(self.searchStartButton)
-        self.theLayout.addWidget(self.searchNextButton)
-        self.theLayout.addWidget(self.searchPrevButton)
+        self.theLayout.addWidget(self.findNextButton)
+        self.theLayout.addWidget(self.findPrevButton)
 
         self.setLayout(self.theLayout)
 
+    def getSearchText(self):
+        return self.searchInputWidget.text()
+
+
 class UDevTreeWidget(QWidget):
+
+    itemSelected = pyqtSignal()
+    usbDevices = {}
+    usbCtx = usb1.USBContext()
 
     def __init__(self, parentWidget):
         QWidget.__init__(self, parentWidget)
@@ -35,33 +70,117 @@ class UDevTreeWidget(QWidget):
         self.theLayout = QVBoxLayout()
 
         self.searchWidget = SearchWidget(self)
+        self.searchWidget.startSearch.connect(self.startSearch)
+        self.searchWidget.searchNext.connect(self.searchNext)
+        self.searchWidget.searchPrev.connect(self.searchPrev)
 
         self.treeWidget = QTreeWidget(self)
         self.treeWidget.setColumnCount(1)
+        self.treeWidget.setHeaderLabel("Device browser")
+        self.treeWidget.itemSelectionChanged.connect(self.handleItemSelected)
 
         self.theLayout.addWidget(self.searchWidget)
         self.theLayout.addWidget(self.treeWidget)
         self.setLayout(self.theLayout)
 
+    def handleItemSelected(self):
+        selItems = self.treeWidget.selectedItems()
+        if len(selItems) == 1:
+            self.currentItem = selItems[0]
+            self.itemSelected.emit()
 
-class UDevBrowserWidget(QWidget):
+    def getCurrentPath(self):
+        result = [self.currentItem.text(0)]
+        parent = self.currentItem.parent()
+        while parent is not None:
+            result.insert(0, parent.text(0))
+            parent = parent.parent()
+        return result 
 
-    def __init__(self, parentWidget):
-        QWidget.__init__(self, parentWidget)
 
-        self.theLayout = QHBoxLayout()
-        self.splitter = QSplitter(self)
-        self.theLayout.addWidget(self.splitter)
+    def childNodes(self, parent):
+        yield parent
+        for idx in range(0, parent.childCount()):
+            childItem = parent.child(idx)
+            for c in self.childNodes(childItem):
+                yield c
 
-        self.leftWidget = UDevTreeWidget(self)
-        # self.treeWidget.setColumnCount(1)
+    def treeNodes(self):
+        for topIdx in range(0, self.treeWidget.topLevelItemCount()):
+            rootItem = self.treeWidget.topLevelItem(topIdx)
+            for c in self.childNodes(rootItem):
+                yield c
 
-        self.rightWidget = QTextEdit(self)
+    def searchItem(self, item, searchText):
+        nodes = self.treeNodes()
+        print("Node:" + next(nodes).text(0))
+        print("Node:" + next(nodes).text(0))
 
-        self.splitter.addWidget(self.leftWidget)
-        self.splitter.addWidget(self.rightWidget)
-        self.setLayout(self.theLayout)
+        return
 
+        print("Searching ", item.text(0))
+        if searchText in item.text(0):
+            self.found = True
+            self.itemFound = item
+            print("*** FOUND!!")
+        else:
+            for idx in range(0, item.childCount()):
+                childItem = item.child(idx)
+                self.searchItem(childItem, searchText)
+                if self.found:
+                    break;
+
+    def startSearch(self):
+        # get all nodes into a list - this is currently the best effort to
+        # support a wrap-around like search in both directions!
+        self.allNodes = [n for n in self.treeNodes()]
+        self.foundIndex = -1
+        self.searchNext()
+
+    def searchNext(self):
+        searchIndex = self.foundIndex
+        searchText = self.searchWidget.getSearchText()
+        searching = True
+        while searching:
+            # calculate next index
+            searchIndex = searchIndex + 1
+            if searchIndex >= len(self.allNodes):
+                searching = False
+                searchIndex = 0
+
+            node = self.allNodes[searchIndex]
+            if (searchText in node.text(0)):
+                searching = False
+                self.foundIndex = searchIndex
+                self.expandToRoot(node)
+
+    def searchPrev(self):
+        searchIndex = self.foundIndex
+        searchText = self.searchWidget.getSearchText()
+        searching = True
+        while searching:
+            # calculate next index
+            searchIndex = searchIndex - 1
+            if searchIndex < 0:
+                searching = False
+                searchIndex = len(self.allNodes) - 1
+
+            node = self.allNodes[searchIndex]
+            if (searchText in node.text(0)):
+                searching = False
+                self.foundIndex = searchIndex
+                self.expandToRoot(node)
+                
+    def expandToRoot(self, node):
+        parent = node.parent()
+        while parent is not None:
+            parent.setExpanded(True)
+            parent = parent.parent()
+
+        for selNode in self.treeWidget.selectedItems():
+            selNode.setSelected(False)
+        node.setSelected(True)
+        self.treeWidget.scrollToItem(node)
 
     def addPath(self, path):
         rootElement = path[0]
@@ -102,58 +221,247 @@ class UDevBrowserWidget(QWidget):
 
         self.rootNodes = []
         for device in context.list_devices():
+        # for device in context.list_devices(subsystem='block'):
             path = device.device_path[1:].split("/")
             self.addPath(path)
+
+        self.usbDevices = {}
+        usbPaths = []
+        # '->'.join(str(x) for x in ['Bus %03i' % (device.getBusNumber(), )] + device.getPortNumberList()),
+        for device in self.usbCtx.getDeviceList(skip_on_error=True):
+            usbEntry = ['usb',
+                        'Bus %03i' % device.getBusNumber()]
+            usbEntry.extend('Port %d' % x for x in device.getPortNumberList())
+            usbEntry.append('Device %d: %04x:%04x' % (device.getDeviceAddress(), device.getVendorID(), device.getProductID()))
+
+            entryPath = '/' + '/'.join(usbEntry)
+            self.usbDevices[entryPath] = device
+
+            usbPaths.append(usbEntry)
+
+        usbPaths = sorted(usbPaths, key = lambda k : k[1])
+
+        for p in usbPaths:
+            self.addPath(p)
 
         self.treeWidget.addTopLevelItems(self.rootNodes)
         for node in self.rootNodes:
             node.setExpanded(True)
 
 
+
+class UDevBrowserWidget(QWidget):
+
+    def __init__(self, parentWidget):
+        QWidget.__init__(self, parentWidget)
+
+        self.theLayout = QHBoxLayout()
+        self.splitter = QSplitter(self)
+        self.theLayout.addWidget(self.splitter)
+
+        self.leftWidget = UDevTreeWidget(self)
+        self.leftWidget.itemSelected.connect(self.itemSelected)
+
+        self.rightWidget = TwoColumnTable(self)
+        self.rightWidget.setColumnCount(2)
+        self.rightWidget.setHorizontalHeaderLabels(['Name', 'Value'])
+        self.rightWidget.verticalHeader().hide()
+
+        self.splitter.addWidget(self.leftWidget)
+
+        self.rightLayoutWidget = QHBoxLayout()
+        self.rightLayoutWidget.addWidget(self.rightWidget)
+        self.rightW = QWidget(self.splitter)
+        self.rightW.setLayout(self.rightLayoutWidget)
+        self.splitter.addWidget(self.rightW)
+
+        self.setLayout(self.theLayout)
+        self.splitter.setSizes([200, 400])
+
+
+    def itemSelected(self):
+        self.rightWidget.clearContents()
+        self.rightWidget.setRowCount(0)
+
+        path = self.leftWidget.getCurrentPath()
+        
+        if path[0] == 'usb':
+            self.handleUsb(path)
+        elif path[0] == 'devices':
+            self.handleDevice(path)
+
+
+    def handleUsb(self, path):
+
+        pathStr = '/' + '/'.join(path)
+        usbDevice = self.leftWidget.usbDevices.get(pathStr)
+        if usbDevice is not None:
+            self.insertLine("Device", pathStr)
+            self.insertLine("Bus Number", usbDevice.getBusNumber())
+            self.insertLine("Port  Number", usbDevice.getPortNumber())
+            self.insertLine("Device Address", usbDevice.getDeviceAddress())
+            self.insertLine("USB Spec", "0x%02x" % usbDevice.getbcdUSB())
+            self.insertLine("Class ID", usbDevice.getDeviceClass())
+            self.insertLine("Subclass ID", usbDevice.getDeviceSubClass())
+            self.insertLine("Protocol ID", usbDevice.getDeviceProtocol())
+            self.insertLine("EP0 Max packet size", usbDevice.getMaxPacketSize0())
+            self.insertLine("Vendor ID", '0x%04x' % usbDevice.getVendorID())
+            self.insertLine("Product ID", '0x%04x' % usbDevice.getProductID())
+            self.insertLine("Device release", '0x%04x' % usbDevice.getbcdDevice())
+            self.insertLine("Speed", libusb1.libusb_speed.get(usbDevice.getDeviceSpeed()))
+
+            cfgCount = 0
+            self.insertLine("Number of Configurations", usbDevice.getNumConfigurations())
+            for usbCfg in usbDevice.iterConfigurations():
+                self.insertLine("  Configuration %d" % cfgCount, "")
+                self.insertLine("    Max Power", "%d mA" % usbCfg.getMaxPower())
+                self.insertLine("    Descriptor", usbCfg.getDescriptor())
+                
+                ifCount = 0
+                self.insertLine("    Number of Interfaces", usbCfg.getNumInterfaces())
+                for usbIf in usbCfg:
+                    self.insertLine("      Interface %d" % ifCount, "")
+                    self.insertLine("        Number of Settings", usbIf.getNumSettings())
+
+                    setCount = 0
+                    for usbSetting in usbIf:
+                        self.insertLine("          Setting %d" % setCount, "")
+                        self.insertLine("            Protocol", usbSetting.getProtocol())
+                        self.insertLine("            Number of Endpoints", usbSetting.getNumEndpoints())
+
+                        epCount = 1
+                        for ep in usbSetting:
+                            self.insertLine("              EP %d" % (int(ep.getAddress()) & 0x7F), "")
+                            self.insertLine("                Address", ep.getAddress())
+                            self.insertLine("                Interval", ep.getInterval())
+                            self.insertLine("                Max packet size", ep.getMaxPacketSize())
+                            epCount += 1
+
+                        setCount += 1
+
+                    ifCount += 1
+
+                cfgCount += 1
+
+            # USBDevice.getProduct() and USBDevice.getManufacturer() read
+            # the data from the devices string descriptor - unfortunately,
+            # libusb opens the device in read/write mode for that, which leads
+            # to an EACCESS error.  
+            # self.insertLine("Product", '%04x' % usbDevice.getProduct())
+            # self.insertLine("Manufacturer", '%04x' % usbDevice.getManufacturer())
+
+
+    def handleDevice(self, path):
+        pathStr = '/'.join(path)
+        sysPath = "/sys/" + pathStr
+        try:
+            ctx = pyudev.Context()
+            device = pyudev.Device.from_sys_path(ctx, sysPath)
+
+            self.insertLine("Sys path", device.sys_path)
+            self.insertLine("Sys name", device.sys_name)
+            self.insertLine("Sys number", device.sys_number)
+            self.insertLine("Device path", device.device_path)
+
+            for t in device.tags:
+                self.insertLine("Device Tag", t)
+            else:
+                self.insertLine("Device Tags", "None")
+
+            try:
+                self.insertLine("Device subsystem", device.subsystem)
+            except AttributeError:
+                self.insertLine("Device subsystem", "None")
+
+            self.insertLine("Device driver", device.driver)
+            self.insertLine("Device type", device.device_type)
+            self.insertLine("Device Node", device.device_node)
+            self.insertLine("Device number", device.device_number);
+            self.insertLine("All properties", "");
+            #self.rightWidget.insertPlainText("\nAll properties:\n")
+            for p in device:
+                self.insertLine("  " + p, device[p])
+        except pyudev.device.DeviceNotFoundAtPathError:
+            pass
+
+
+    def insertLine(self, label, value):
+        newRow = self.rightWidget.rowCount()
+        self.rightWidget.insertRow(newRow)
+        self.rightWidget.setItem(newRow, 0, QTableWidgetItem(label))
+        self.rightWidget.setItem(newRow, 1, QTableWidgetItem(str(value)))
+        self.rightWidget.setRowHeight(newRow, 20)
+        if (newRow % 2) == 0:
+            color = QColor(255, 255, 0xDE)
+        else:
+            color = QColor(255, 255, 0xBF)
+        self.rightWidget.item( newRow, 0).setBackground( color );
+        self.rightWidget.item( newRow, 0).setForeground( Qt.blue );
+        self.rightWidget.item( newRow, 1).setBackground( color );
+        self.rightWidget.item( newRow, 1).setForeground( Qt.blue );
+
+    def refresh(self):
+        self.leftWidget.refresh()
+
+
 class MainWindow(QMainWindow):
 
-    def __init__(self):
+    def __init__(self, app):
         QMainWindow.__init__(self, None)
         self.setWindowTitle("udev Device browser")
+        self.theApplication = app
 
         # Set up the menu bar
         menuBar = QMenuBar(self)
 
-        exitAction = QAction("Exit", self)
+        exitAction = QAction("Exit", self, triggered=self.theApplication.exit)
         fileMenu = menuBar.addMenu("&File")
         fileMenu.addAction(exitAction)
 
-        aboutQtAction = QAction("About Qt ...", self)
-        aboutAction = QAction("About ...", self)
+        aboutAction = QAction("About ...", self, triggered = self.handleAbout)
         helpMenu = menuBar.addMenu("&Help")
-        helpMenu.addAction(aboutQtAction)
         helpMenu.addAction(aboutAction)
 
-        # menuBar.addAction(fileMenu.menuAction())
-
-#        QObject.connect(exitAction, SIGNAL("triggered()"), app.exit)
-#        QObject.connect(aboutQtAction, SIGNAL("triggered()"), self.aboutQt)
-#        QObject.connect(aboutAction, SIGNAL("triggered()"), self.about)
         self.setMenuBar(menuBar)
 
         self.udevBrowserWidget = UDevBrowserWidget(self)
-        #self.udevBrowserWidget.refresh()
+        self.udevBrowserWidget.refresh()
         self.setCentralWidget(self.udevBrowserWidget)
 
         self.move(240, 200)
-        self.resize(QSize(640, 480))
+        self.resize(QSize(1024, 768))
+        
+
+    def handleAbout(self):
+        appVersion = "Development version"
+        pythonVersion = "%s.%s.%s (%s)" % (sys.version_info[0], sys.version_info[1], sys.version_info[2], sys.version_info[3])
+        pyUdevVersion = pyudev.__version__
+        sipVersion = SIP_VERSION_STR
+        pyQtVersion = PYQT_VERSION_STR
+        pyQtQtVersion = QT_VERSION_STR
+        qtRuntimeVersion = qVersion()
+
+        QMessageBox.about(self, "About udev Device browser",
+                          "<table>"+
+                          "<tr><th align=\"right\">udev Browser version:</th><td>{}</td></tr>".format(appVersion) +
+                          "<tr><th align=\"right\">Python version:</th><td>{}</td></tr>".format(pythonVersion) +
+                          "<tr><th align=\"right\">PyUdev version:</th><td>{}</td></tr>".format(pyUdevVersion) +
+                          "<tr><th align=\"right\">SIP version:</th><td>{}</td></tr>".format(sipVersion) +
+                          "<tr><th align=\"right\">PyQt version:</th><td>{} for Qt {}</td></tr>".format(pyQtVersion, pyQtQtVersion) +
+                          "<tr><th align=\"right\">Qt runtime version:</th><td>{}</td></tr>".format(qtRuntimeVersion)+
+                          "</table>")
 
 
+def main():
+    # Create the application object
+    app = QApplication(sys.argv)
+    
+    # Create the main window
+    mainWindow = MainWindow(app)
 
-print('Using PyDev  {}'.format(pyudev.__version__))
-print('Using libudev {}'.format(pyudev.udev_version()))
+    # Show and run the application
+    mainWindow.show()
+    app.exec()
 
-# Create the application object
-app = QApplication(sys.argv)
-
-# Create the main window
-mainWindow = MainWindow()
-
-# Show and run the application
-mainWindow.show()
-app.exec_()
+if __name__ == "__main__":
+    main()
