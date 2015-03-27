@@ -45,6 +45,39 @@ class LocalNotepad:
         return self.rootPath
 
 
+    def recFind(self, parentId, pageId):
+        page = LocalPage(self, parentId)
+        page.load()
+
+        for link in page.getLinks():
+            self.path.append(link)
+
+            if link == pageId:
+                self.found = True
+                return
+
+            self.recFind(link, pageId)
+            if self.found:
+                break
+
+            self.path = self.path[:-1]
+
+
+    def findPathToPage(self, pageId):
+        '''Find the first path to a given page id.
+
+        NOTE: This is currently an expensive operation since it requires to load
+        many pages to get their links!
+'''
+
+        self.path = [self.getName()]
+        self.found = False
+
+        self.recFind(None, pageId)
+
+        return self.path
+
+
 class LocalPage:
 
     def __init__(self, notepad, pageId):
@@ -71,7 +104,7 @@ class LocalPage:
     def getFilename(self):
         '''@return The file name for this page, like "Todo%20List.xml" 
         '''
-        return urllib.parse.quote(self.getName()) + '.xml'
+        return urllib.parse.quote(self.getName(), '') + '.xml'
 
 
     def getPageDir(self):

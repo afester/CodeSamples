@@ -334,7 +334,7 @@ class TextXMLPrinter(TextDocumentTraversal):
                     self.emitter('\n{}</section>'.format(self.prefix()))
                     self.currentSectionLevel -= 1
                     self.indent -= 1
-    
+
                 # Open sections until the required level is reached
                 for x in range(self.currentSectionLevel, newLevel):
                     self.emitter('\n\n{}<section>'.format(self.prefix()))
@@ -343,11 +343,17 @@ class TextXMLPrinter(TextDocumentTraversal):
 
             self.emitter('\n{}<title>'.format(self.prefix()))
 
+        elif style[0] == 'tip':
+            self.emitter('\n{}<tip><para>'.format(self.prefix()))
         else:
             self.emitter('\n{}<{}>'.format(self.prefix(), style[0]))
 
     def endBlock(self, style):
-        self.emitter('</{}>'.format(style[0]))
+        if style[0] == 'tip':
+            self.emitter('</para></tip>'.format())
+            pass
+        else:
+            self.emitter('</{}>'.format(style[0]))
 
     def fragment(self, text, style):
         if style is None:
@@ -358,7 +364,7 @@ class TextXMLPrinter(TextDocumentTraversal):
             else:
                 self.emitter('<emphasis>{}</emphasis>'.format(text))
         elif style[0] == 'olink':
-            linkend = urllib.parse.quote(text)
+            linkend = urllib.parse.quote(text, '')
             self.emitter('<olink targetdoc="{}">{}</olink>'.format(linkend, text))
         else:
             self.emitter('<{}>{}</{}>'.format(style[0], text, style[0]))
@@ -421,19 +427,20 @@ class TextHTMLPrinter(TextDocumentTraversal):
 
 
     def beginBlock(self, style):
-        
+
         if style[0] == 'programlisting':
             self.emitter('\n{}<pre><code class="{}">'.format(self.prefix(), style[2]))
         elif style[0] == 'screen':
             self.emitter('\n{}<pre>'.format(self.prefix()))
         elif style[0] == 'title':
             self.emitter('\n\n{}<h{}>'.format(self.prefix(), int(style[2])))
+        elif style[0] == 'tip':
+            self.emitter('\n{}<table class="tip"><tr><td><img src="icons/tip.png" /></td><td>'.format(self.prefix()))
         elif style[0] == 'para':
             if self.currentList == 0:
                 self.emitter('\n{}<p>'.format(self.prefix()))
         else:
             print("INVALID FORMAT: {}".format(style))
-            # self.emitter('\n{}<{}>'.format(self.prefix(), style[0]))
 
     def endBlock(self, style):
         if style[0] == 'programlisting':
@@ -442,9 +449,11 @@ class TextHTMLPrinter(TextDocumentTraversal):
             self.emitter('</pre>')
         elif style[0] == 'title':
             self.emitter('</h{}>'.format(int(style[2])))
+        elif style[0] == 'tip':
+            self.emitter('</td></tr></table>')
         elif style[0] == 'para':
             if self.currentList == 0:
-                self.emitter('</p>'.format(self.prefix()))
+                self.emitter('</p>')
         else:
             print("INVALID FORMAT: {}".format(style))
 

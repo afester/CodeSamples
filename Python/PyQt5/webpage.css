@@ -32,6 +32,14 @@ h4 {
   font-weight: normal;
 }
 
+table.tip {
+  margin-left: 20px;
+  font-style: italic;
+}
+
+table.tip td {
+	vertical-align: top;
+}
 
 tt {
   font-size: 9pt;

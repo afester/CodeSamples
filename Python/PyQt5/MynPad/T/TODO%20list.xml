@@ -11,10 +11,15 @@
       <title>Next steps</title>
       <itemizedlist>
         <listitem>
-          <para>Update Browser when new page is created</para>
-        </listitem>
-        <listitem>
           <para>Search functionality</para>
+          <itemizedlist>
+            <listitem>
+              <para>Need to find a concept for navigation - currently an issue when switching between notepads and then selecting the search result from an earlier search!</para>
+            </listitem>
+            <listitem>
+              <para>Navigation to title page fails (since its page id is "None")</para>
+            </listitem>
+          </itemizedlist>
         </listitem>
         <listitem>
           <para>Add page name to article's &lt;title&gt; tag</para>
@@ -29,16 +34,22 @@
           <para><emphasis>List where the next level is indented more than one additional level misses a &lt;listitem&gt; tag</emphasis></para>
         </listitem>
         <listitem>
+          <para>Update Browser when new page is created - done, but item is not yet created at the right location!</para>
+        </listitem>
+        <listitem>
           <para>UNDO/REDO state not reset when saving a page</para>
         </listitem>
         <listitem>
           <para>List format not reflected in Block style toolbar</para>
         </listitem>
         <listitem>
-          <para><emphasis role="highlight">Make XMLExporter more robust - must not destroy existing page!!!</emphasis></para>
+          <para><emphasis>Make XMLExporter more robust - must not destroy existing page!!!</emphasis></para>
         </listitem>
         <listitem>
           <para>Unindent List must add item to right list (important for numbered / ordered lists)</para>
+        </listitem>
+        <listitem>
+          <para>Editing a list of keyword links is a mess - the format of the previous list item is taken, thus effectively inserting a keyword link - even if resetting the format, once the list item content is deleted to its beginning (with backspace), when entering new characters, again the format from the previous item is used.</para>
         </listitem>
       </itemizedlist>
     </section>
@@ -47,7 +58,7 @@
       <title>Important topics</title>
       <itemizedlist>
         <listitem>
-          <para>How to delete / rename pages? Should we maintain a global "database" of pages and their links? Would allow to query the database to build the browser tree instead of loading the page to get its links</para>
+          <para>How to delete / rename pages? Should we maintain a global "database" of pages and their links?<emphasis> Would allow to query the database to build the browser tree</emphasis> instead of loading the page to get its links. The database needs to be updated when a page is saved (we have a current list of linked pages there). Would also allow to add features like "what links here" and "where does this page link"</para>
         </listitem>
         <listitem>
           <para>Copy&amp;Paste should support format - currently only plain text is copied into the clipboard</para>
@@ -85,6 +96,9 @@
         <listitem>
           <para>Show current cursor position (line/column)</para>
         </listitem>
+        <listitem>
+          <para>Code blocks as part of a list</para>
+        </listitem>
       </itemizedlist>
     </section>
 
@@ -95,10 +109,19 @@
           <para>Style Editor</para>
         </listitem>
         <listitem>
+          <para>MathML integration</para>
+        </listitem>
+        <listitem>
+          <para>Thumbnail view of all Images contained in a Notepad</para>
+        </listitem>
+        <listitem>
           <para>Version Control of pages</para>
         </listitem>
         <listitem>
           <para>Syntax highlighting inside code blocks</para>
+        </listitem>
+        <listitem>
+          <para>Spell checker</para>
         </listitem>
         <listitem>
           <para>Inline resizing of images through some kind of handles - this will most likely require the implementation of a custom text object, see <link xlink:href="http://doc.qt.io/qt-5/qtsvg-richtext-textobject-example.html">http://doc.qt.io/qt-5/qtsvg-richtext-textobject-example.html</link></para>

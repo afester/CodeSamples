@@ -31,6 +31,11 @@
     </section>
 
     <section>
+      <title>A Tip</title>
+      <tip><para>This tip shows how a tip block looks like.</para></tip>
+    </section>
+
+    <section>
       <title>A long text</title>
       <para><code>Lorem ipsum</code> dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. <emphasis role="highlight">At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</emphasis> Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor <emphasis role="highlight">invidunt</emphasis> ut 
 labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est <code>Lorem ipsum</code> dolor sit amet.</para>

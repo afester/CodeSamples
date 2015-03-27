@@ -17,6 +17,7 @@ class Handler(xml.sax.handler.ContentHandler):
         self.keywordLinks = set()
         self.listLevel = 0
         self.sectionLevel = 0
+        self.hasBlock = False
 
         # Note: an empty, newly created QTextDocument() always contains one 
         # initial block. Furthermore, this initial block can not be
@@ -95,9 +96,13 @@ class Handler(xml.sax.handler.ContentHandler):
                 self.collectContent = True
                 self.insertBlock('', style)
 
+        elif name == 'tip':
+            self.insertBlock('', ('tip', None, None))
+            self.hasBlock = True
+
         elif name == 'para':
             self.collectContent = True
-            if self.listLevel == 0:
+            if self.listLevel == 0 and self.hasBlock == False:
                 self.insertBlock('', ('para', None, None))
 
         elif name == 'programlisting':
@@ -195,7 +200,13 @@ class Handler(xml.sax.handler.ContentHandler):
 
         elif name == 'para':
             self.collectContent = False
-            self.insertFragment(self.content, ('para', None, None))
+            if self.hasBlock:   # TODO: Workaround for "tip"
+                self.insertFragment(self.content, ('tip', None, None))
+            else:
+                self.insertFragment(self.content, ('para', None, None))
+
+        elif name == 'tip':
+            self.hasBlock = False
 
         elif name == 'screen':
             self.collectContent = False
@@ -212,8 +223,6 @@ class Handler(xml.sax.handler.ContentHandler):
 
         elif name == "listitem":
             pass
-            #self.insertFragment(self.content, ('para', None, None))
-            #self.collectContent = False
 
         # Fragments
         elif name == 'code':
@@ -227,7 +236,6 @@ class Handler(xml.sax.handler.ContentHandler):
 
         elif name == 'link':
             # Insert the link text
-            # if self.href.startswith("http://") or self.href.startswith("https://"):
             self.insertAnchor(self.content, ('link', None, None), self.href)
 
         elif name == 'olink':

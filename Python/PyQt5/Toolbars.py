@@ -102,7 +102,21 @@ class BlockStyleSelector(TitledToolbar):
         self.styleToDropdown = {}
 
 ##########################
-        d2 = IconDropDown(self, "icons/format-text-header.png")
+        d1 = IconDropDown(self, 'icons/format-text-paragraph.png')
+        d1.entrySelected.connect(self.styleSelected)
+
+        selector = ('para', None, None)
+        d1.addItem("Standard", selector)
+        self.styleToDropdown[selector] = d1
+        self.styleToIndex[selector] = 0
+
+        selector = ('tip', None, None)
+        d1.addItem('Tip', selector)
+        self.styleToDropdown[selector] = d1
+        self.styleToIndex[selector] = 1
+
+##########################
+        d2 = IconDropDown(self, 'icons/format-text-header.png')
         d2.entrySelected.connect(self.styleSelected)
 
         selector = ('title', 'level', '1')
@@ -119,23 +133,6 @@ class BlockStyleSelector(TitledToolbar):
         d2.addItem('Title 3', selector)
         self.styleToDropdown[selector] = d2
         self.styleToIndex[selector] = 2
-
-##########################
-        d1 = IconDropDown(self, "icons/format-text-paragraph.png")
-        d1.entrySelected.connect(self.styleSelected)
-
-        selector = ('para', None, None)
-        d1.addItem("Standard", selector)
-        self.styleToDropdown[selector] = d1
-        self.styleToIndex[selector] = 0
-        #=======================================================================
-        # d1.addItem("Centered", 'pcenter')
-        # self.styleToDropdown['pcenter'] = d1
-        # self.styleToIndex['pcenter'] = 1
-        # d1.addItem("Block", 'pblock')
-        # self.styleToDropdown['pblock'] = d1
-        # self.styleToIndex['pblock'] = 2
-        #=======================================================================
 
 ##########################
         d3 = IconDropDown(self, "icons/format-list-unordered.png")
@@ -179,6 +176,11 @@ class BlockStyleSelector(TitledToolbar):
         d4.addItem("XML", selector)
         self.styleToDropdown[selector] = d4
         self.styleToIndex[selector] = 4
+
+        selector = ('programlisting', 'language', 'bash')
+        d4.addItem("Bash", selector)
+        self.styleToDropdown[selector] = d4
+        self.styleToIndex[selector] = 5
         
         selector = ('screen', None, None)
         d4.addItem("Generic", selector)
@@ -351,5 +353,10 @@ class ActionSelector(TitledToolbar):
         insertImageAction = QAction(QIcon("icons/edit-insert-image.png"), "Insert Image", toolbar)
         insertImageAction.triggered.connect(parent.insertImage)
         toolbar.addAction(insertImageAction)
+
+        findInPageAction = QAction(QIcon("icons/edit-find.png"), "Find in page (CTRL-F)", toolbar)
+        findInPageAction.setShortcut(Qt.CTRL + Qt.Key_F);
+        findInPageAction.triggered.connect(parent.findInPage)
+        toolbar.addAction(findInPageAction)
 
         self.addWidget(toolbar)

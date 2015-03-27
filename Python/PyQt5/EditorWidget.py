@@ -4,12 +4,12 @@ Created on 18.02.2015
 @author: afester
 '''
  
-from PyQt5.Qt import QMimeData, QDesktopServices, QUrl, QSize
+from PyQt5.Qt import QMimeData, QDesktopServices, QUrl, QSize, QIcon
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QTextCursor, QTextFormat, QGuiApplication
-from PyQt5.QtGui import QTextOption, QCursor, QImage
-from PyQt5.QtWidgets import QWidget, QSpacerItem, QMessageBox, QPushButton
-from PyQt5.QtWidgets import QTextEdit, QVBoxLayout, QLineEdit, QFrame, QHBoxLayout, QSizePolicy, QFileDialog
+from PyQt5.QtGui import QTextOption, QCursor, QImage, QTextDocument
+from PyQt5.QtWidgets import QWidget, QMessageBox, QPushButton, QAction
+from PyQt5.QtWidgets import QTextEdit, QVBoxLayout, QLineEdit, QFrame, QHBoxLayout, QFileDialog, QToolButton
 
 import os
 
@@ -43,6 +43,106 @@ class UrlEditor(QFrame):
         self.editLine.setText(text)
 
 
+class CancelAwareLineEdit(QLineEdit):
+    
+    def __init__(self, parentWidget):
+        QLineEdit.__init__(self, parentWidget)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            self.editingFinished.emit()
+
+        return QLineEdit.keyPressEvent(self, event)
+
+
+class FindWidget(QWidget):
+
+    def __init__(self, parentWidget, markerFmt, editWidget):
+        QWidget.__init__(self, parentWidget)
+
+        self.markerFormat = markerFmt
+        self.textEdit = editWidget
+        self.startPos = 0
+        self.endPos = 0
+        self.pattern = ''
+
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(layout)
+
+        self.searchPattern = CancelAwareLineEdit(self)
+        self.searchPattern.setPlaceholderText('Start typing to find in page')
+        self.searchPattern.editingFinished.connect(self.hideWidget)
+        self.searchPattern.textEdited.connect(self.doSearch)
+
+        upAction = QAction(QIcon('icons/find-up.png'), "Find backwards (Shift-F3)", self)
+        upAction.setShortcut(Qt.SHIFT + Qt.Key_F3);
+        upAction.triggered.connect(self.findUpwards)
+        self.upButton = QToolButton(self)
+        self.upButton.setDefaultAction(upAction)
+
+        downAction = QAction(QIcon('icons/find-down.png'), "Find next (F3)", self)
+        downAction.setShortcut(Qt.Key_F3);
+        downAction.triggered.connect(self.findDownwards)
+        self.downButton = QToolButton(self)
+        self.downButton.setDefaultAction(downAction)
+
+        layout.addWidget(self.searchPattern)
+        layout.addWidget(self.upButton)
+        layout.addWidget(self.downButton)
+
+
+    def hideWidget(self):
+        self.hide()
+        self.textEdit.setExtraSelections([])
+
+    def showWidget(self):
+        self.show()
+        self.searchPattern.setFocus()
+        self.searchPattern.clear()
+
+
+    def doSearch(self, pattern):
+        # Modifying the search pattern restarts from the beginning of the document.
+        self.startPos = 0
+        self.endPos = 0
+        self.pattern = pattern
+        self.textEdit.setExtraSelections([])
+        self.findDownwards()
+
+
+    def findUpwards(self):
+        # print('Search up "{}" starting at {} ...'.format(self.pattern, self.startPos))
+        self.find(True)
+
+
+    def findDownwards(self):
+        # print('Search down "{}" starting at {} ...'.format(self.pattern, self.endPos))
+        self.find(False)
+
+
+    def find(self, isUpwards):
+        doc = self.textEdit.document()
+        if isUpwards:
+            foundCrsr = doc.find(self.pattern, self.startPos, QTextDocument.FindBackward)
+        else:
+            foundCrsr = doc.find(self.pattern, self.endPos)
+
+        if not foundCrsr.isNull():
+            self.startPos = foundCrsr.selectionStart()
+            self.endPos = foundCrsr.selectionEnd()
+
+            sel = QTextEdit.ExtraSelection()
+            sel.cursor = foundCrsr
+            sel.format = self.markerFormat
+            self.textEdit.setExtraSelections([sel])
+
+            # make sure that the text which was found is also visible
+            crsr = self.textEdit.textCursor()
+            crsr.setPosition(self.endPos)
+            self.textEdit.setTextCursor(crsr)
+ 
+
 class TextEdit(QTextEdit):
 
     updateBlockFormat = pyqtSignal(object)
@@ -57,10 +157,22 @@ class TextEdit(QTextEdit):
         self.l.applyUrl.connect(self.setCurrentUrl)
         self.l.resize(QSize(500, self.l.size().height()))
         self.cursorPositionChanged.connect(self.handleCursorPositionChanged)
-        # self.editView.currentCharFormatChanged.connect(self.currentCharFormatChanged)
+        self.currentCharFormatChanged.connect(self.handleCharFormatChanged)
+
+
+    def handleCharFormatChanged(self):
+        print("CHAR FORMAT CHANGED, ADJUST CURSOR COLOR ...")
+        # self.setTextColor(Qt.blue)
+        #p = self.palette();
+        #p.setColor(QPalette.WindowText, QColor(255, 0, 0))
+        #self.setPalette(p);
+        #self.setCursorWidth(5)
+        #self.setStyleSheet("QPlainTextEdit{color: #ffff00; background-color: #303030;"
+        #                  " selection-background-color: #606060; selection-color: #ffffff;}")
 
 
     def selectCurrentFragment(self, cursor):
+
         cf = cursor.charFormat();
         style = cf.property(QTextFormat.UserProperty)
 
@@ -88,6 +200,7 @@ class TextEdit(QTextEdit):
     def getTextForCurrentFragment(self, cursor):
         self.selectCurrentFragment(cursor)
         result = cursor.selectedText()
+        print("RESULT:{}".format(result))
         return result
 
 
@@ -206,9 +319,35 @@ class TextEdit(QTextEdit):
         #     print("IMAGE {}: {} x {}".format(imgFmt.name(), imgFmt.width(), imgFmt.height()))
         #=======================================================================
 
-        if self.tracking: #  and self.isAtAnchor(event.pos()):
+        if self.tracking:
 
-            cursor = self.cursorForPosition(event.pos())
+            # get a cursor for the current mouse position.
+            # Note that the cursor is located AFTER the respective character:
+            # ABCDEF
+            #    ^ 
+            #    +- Mouse positioned on D 
+            #             => returns cursor which is located between C and D
+            #             => character addressed by cursor would be "C" !!!!!
+            #                (position() would return 2)
+            #cursor = self.cursorForPosition(event.pos())
+
+            # this is identical to calling the document layout's hitTest() 
+            # method with the FuzzyHit parameter:
+            docLayout = self.document().documentLayout()
+            #curPos = docLayout.hitTest(event.pos(), Qt.FuzzyHit)
+
+            # A better approch is to use the document layout with the hitTest()
+            # method and using the ExactHit parameter:
+            curPos = docLayout.hitTest(event.pos(), Qt.ExactHit)
+            if curPos == -1:
+                curPos = 0
+
+            # This returns the cursor position *before* the clicked character.
+            # To get the proper format, we need to position the cursor
+            # *after* the clicked character:
+            cursor = QTextCursor(self.document())
+            cursor.setPosition(curPos + 1);
+
             charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
             style = charFmt.property(QTextFormat.UserProperty)
 
@@ -230,6 +369,7 @@ class TextEdit(QTextEdit):
         cursor = self.textCursor()
         selection = cursor.selectedText()
         selection = selection.replace('\u2029', '\n')
+        selection = selection.replace('\u2028', '\n')
         result.setText(selection)
         return result
 
@@ -272,8 +412,6 @@ class EditorWidget(QWidget):
         self.formatManager = FormatManager()
         self.formatManager.loadFormats()
 
-        #self.currentList = None
-
         self.editView = TextEdit(self)
         self.editView.navigate.connect(self.navigate)
 
@@ -298,17 +436,23 @@ class EditorWidget(QWidget):
         self.editView.updateBlockFormat.connect(self.styleSelector.setCurrentStyle)
         layout.addWidget(self.styleSelector)
 
-        horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        layout.addItem(horizontalSpacer)
+        searchMarker = self.formatManager.getFormat( ('searchMarker', None, None) )
+        self.findWidget = FindWidget(self, searchMarker.getCharFormat(), self.editView)
+        self.findWidget.hide()
+
+        #horizontalSpacer = QSpacerItem(0, 0) # 40, 20) # , QSizePolicy.Expanding, QSizePolicy.Minimum)
+        #layout.addItem(horizontalSpacer)
 
         hLayout = QVBoxLayout(self)
         hLayout.setContentsMargins(0, 0, 0, 0)
         hLayout.addWidget(toolbar)
+        hLayout.addWidget(self.findWidget)
         hLayout.addWidget(self.editView)
 
         # The toolbar should take the minimum space and the edit view the remaining space
         hLayout.setStretch(0, 0)
-        hLayout.setStretch(1, 1)
+        hLayout.setStretch(1, 0)
+        hLayout.setStretch(2, 1)
 
 
     def load(self, notepad, pageId):
@@ -567,3 +711,7 @@ class EditorWidget(QWidget):
 
         cursor.endEditBlock()
         self.editView.setFocus()
+
+
+    def findInPage(self):
+        self.findWidget.showWidget()

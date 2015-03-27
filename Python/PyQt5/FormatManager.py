@@ -136,6 +136,36 @@ class FormatManager:
         return QColor(value.red, value.green, value.blue)
 
 
+    def setCharFormatAttributes(self, cssRule, charFmt):
+        value = self.getStringValue(cssRule, 'font-family')
+        if value:
+            charFmt.setFontFamily(value)
+        value = self.getStringValue(cssRule, 'font-weight')
+        if value and value == 'bold':
+            charFmt.setFontWeight(QFont.Bold)
+        value = self.getIntValue(cssRule, 'font-size')
+        if value:
+            charFmt.setFontPointSize(value)
+        value = self.getColorValue(cssRule, 'background-color')
+        if value:
+            charFmt.setBackground(value)
+        value = self.getColorValue(cssRule, 'color')
+        if value:
+            charFmt.setForeground(value)
+
+        value = self.getStringValue(cssRule, 'text-decoration')
+        if value:
+            if value == 'underline':
+                charFmt.setFontUnderline(True)
+            elif value == 'overline':
+                charFmt.setFontOverline(True)
+
+        value = self.getStringValue(cssRule, 'font-style')
+        if value:
+            if value == 'italic':
+                charFmt.setFontItalic(True)
+
+
     def loadFormats(self):
         self.formats = {}
 
@@ -145,11 +175,13 @@ class FormatManager:
                         'title[level="2"]', 
                         'title[level="3"]', 
                         'para',
+                        'tip',
                         'programlisting[language="java"]',
                         'programlisting[language="cpp"]',
                         'programlisting[language="xml"]',
                         'programlisting[language="sql"]',
                         'programlisting[language="python"]',
+                        'programlisting[language="bash"]',
                         'screen']
 
         for cssKey in blockFormats:
@@ -180,16 +212,7 @@ class FormatManager:
                 blockFmt.setBackground(value)
 
             charFmt = QTextCharFormat()
-
-            value = self.getIntValue(cssRule, 'font-size')
-            if value:
-                charFmt.setFontPointSize(value)
-            value = self.getColorValue(cssRule, 'color')
-            if value:
-                charFmt.setForeground(value)
-            value = self.getStringValue(cssRule, 'font-family')
-            if value:
-                charFmt.setFontFamily(value)
+            self.setCharFormatAttributes(cssRule, charFmt)
 
             self.formats[selector] = Format(blockFmt, charFmt)
 
@@ -254,27 +277,15 @@ class FormatManager:
             # TODO: better approach?
             if cssKey in ['link', 'olink']:
                 charFmt.setAnchor(True)
-
-            value = self.getStringValue(cssRule, 'font-family')
-            if value:
-                charFmt.setFontFamily(value)
-            value = self.getStringValue(cssRule, 'font-weight')
-            if value and value == 'bold':
-                charFmt.setFontWeight(QFont.Bold)
-            value = self.getIntValue(cssRule, 'font-size')
-            if value:
-                charFmt.setFontPointSize(value)
-            value = self.getColorValue(cssRule, 'background-color')
-            if value:
-                charFmt.setBackground(value)
-            value = self.getColorValue(cssRule, 'color')
-            if value:
-                charFmt.setForeground(value)
-            value = self.getStringValue(cssRule, 'text-decoration')
-            if value and value == 'underline':
-                charFmt.setFontUnderline(True)
+            self.setCharFormatAttributes(cssRule, charFmt)
 
             self.formats[selector] = Format(None, charFmt)
+
+### special formats
+        charFmt = QTextCharFormat()
+        cssRule = self.simpleLookup(styleSheet, 'searchMarker')
+        self.setCharFormatAttributes(cssRule, charFmt)
+        self.formats[('searchMarker', None, None)] = Format(None, charFmt)
 
 
     def getFormat(self, fmtId):

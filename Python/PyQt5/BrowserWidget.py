@@ -110,10 +110,30 @@ class TreeWidget(QTreeWidget):
         QTreeWidget.__init__(self, parentWidget)
         self.setColumnCount(1)
         self.setHeaderLabel("Notepads")
-        self.itemExpanded.connect(self.expandItem)
+        self.itemExpanded.connect(self.addLazyChildren)
 
 
-    def expandItem(self, item):
+    def getCurrentPath(self):
+        result = []
+
+        current = self.currentItem()
+        while current is not None:
+            result.insert(0, current.getLabel()) 
+            current = current.parent()
+
+        return result
+
+
+    def addLazyChildren(self, item):
+        """Adds the children to a given item after it has been clicked.
+
+        If the item was not previously expanded, the children will be added
+        to the item. 
+
+        Args:
+          item (TreeNode):  The item to expand.
+"""
+
         if not item.isWasExpanded():
             notepad = item.getNotepad()
             
@@ -153,6 +173,13 @@ class TreeWidget(QTreeWidget):
 
 
     def expandChild(self, item, path):
+        """Expands all nodes on the given path, starting at a specific item
+
+        Args:
+          item (TreeNode):  The start node
+
+          path ([str, str, ...]): The path to expand - a list of node labels
+"""
         item.setExpanded(True)
         if len(path) == 0:
             self.setCurrentItem(item)
@@ -166,6 +193,12 @@ class TreeWidget(QTreeWidget):
 
 
     def expandPath(self, path):
+        """Expands a given path starting with a root node.
+
+        Args:
+          path ([str, str, ...]): The path to expand - a list of node labels.
+            The first element is the root node.
+"""
         if len(path) == 0:
             return
 
@@ -178,6 +211,45 @@ class TreeWidget(QTreeWidget):
 
         if rootItem is not None:
             self.expandChild(rootItem, path[1:])
+
+
+    def navigateToChild(self, pageId):
+        """Sets a specific child item of the current item as the current item.
+
+        Args:
+          pageId (str): The label of the child item to activate.
+"""
+        current = self.currentItem()
+        label = current.getLabel()
+        self.addLazyChildren(current)
+
+        node = None
+        for idx in range(0, current.childCount()):
+            child = current.child(idx)
+            label = child.getLabel()
+            if label == pageId:
+                node = child
+                break
+
+        if node is None:
+            node = TreeNode(current.getNotepad(), pageId)
+            current.addChild(node)
+        self.setCurrentItem(node)
+
+
+    def navigateToFirstChild(self, pageId):
+        """Sets the first occurrence of a specific item in the current tree as the
+        current item.
+        TODO: This requires a (complete) tree traversal which might be expensive
+        due to the lazy initialization of the tree structure!
+
+        Args:
+          pageId (str): The label of the item to activate.
+"""
+        notepad = self.currentItem().getNotepad()
+        path = notepad.findPathToPage(pageId)
+        self.expandPath(path)
+
 
 
 class BrowserWidget(QWidget):
@@ -272,31 +344,12 @@ class BrowserWidget(QWidget):
         path = self.settings.getBrowserPath()
         self.browserView.expandPath(path)
 
-        #first = self.browserView.topLevelItem(0)
-        #if first:
-        #    first.setExpanded(True)
-        #    self.browserView.setCurrentItem(first)
-
 
     def navigate(self, pageId):
-        current = self.browserView.currentItem()
-        label = current.getLabel()
-        self.browserView.expandItem(current)
+        self.browserView.navigateToChild(pageId)
 
-        for idx in range(0, current.childCount()):
-            child = current.child(idx)
-            label = child.getLabel()
-            if label == pageId:
-                self.browserView.setCurrentItem(child)
-                break
-
+    def navigateDirect(self, pageId):
+        self.browserView.navigateToFirstChild(pageId)
 
     def getCurrentPath(self):
-        result = []
-
-        current = self.browserView.currentItem()
-        while current is not None:
-            result.insert(0, current.getLabel()) 
-            current = current.parent()
-
-        return result
+        return self.browserView.getCurrentPath()

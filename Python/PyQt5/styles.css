@@ -1,4 +1,12 @@
 
+
+/* the searchMarker is used to define the style for highlighting found text */
+searchMarker {
+	background-color: #800000;
+	color: white;
+}
+
+
 title[level="1"] {
 	margin-top: 18px;
 	margin-bottom: 5px;
@@ -25,6 +33,14 @@ para {
 	font-size: 10pt;
 }
 
+tip {
+	margin-left: 20px;
+	background-color: #e4e4e4;
+	color: #000000;
+	font-family: "Sans";
+	font-size: 10pt;
+	font-style: italic;
+}
 
 programlisting[language="java"] {
 	margin-top: 5px;
@@ -84,6 +100,18 @@ programlisting[language="python"] {
 	background-color: #f0f0f0;
 	
 	color: black;
+	font-family: "Courier";
+	font-size: 10pt;
+}
+
+programlisting[language="bash"] {
+	margin-top: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	margin-left: 5px;
+	background-color: #000000;
+	
+	color: #ffff00;
 	font-family: "Courier";
 	font-size: 10pt;
 }
