@@ -21,8 +21,21 @@ class XMLExporter:
 
     def getXmlString(self, document):
         self.contents = ''
+
+
+#===============================================================================
+#         from TextDocumentTraversal2 import TextDocumentTraversal2
+#         traversal = TextDocumentTraversal2()
+#         tree = traversal.traverse(document)
+# 
+#         from TextDocumentTraversal2 import DocbookPrinter
+#         dp = DocbookPrinter(tree, self.collect)
+#         dp.traverse()
+#===============================================================================
+
         traversal = TextXMLPrinter(self.collect)
         traversal.traverse(document)
+
         return self.contents
 
 

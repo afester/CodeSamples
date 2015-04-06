@@ -214,7 +214,7 @@ class MynPad(QWidget):
         self.textView = QTextEdit(self.tabWidget)
         self.textView.setReadOnly(True)
         self.textView.setFontFamily('Courier')
-        self.textView.setFontPointSize(10)
+        self.textView.setFontPointSize(8)
         self.tabWidget.addTab(self.textView, "View document structure")
 
         self.customView = QTextEdit(self.tabWidget)
@@ -329,15 +329,33 @@ class MynPad(QWidget):
             self.customView.clear()
 
             doc = self.editorWidget.editView.document()
-            traversal = TextXMLPrinter(self.customView.insertPlainText)
-            traversal.traverse(doc)
+            
+            from TextDocumentTraversal2 import TextDocumentTraversal2
+            traversal = TextDocumentTraversal2()
+            tree = traversal.traverse(doc)
+
+            from TextDocumentTraversal2 import DocbookPrinter
+            dp = DocbookPrinter(tree, self.customView.insertPlainText)
+            dp.traverse()
+
+            #traversal = TextXMLPrinter(self.customView.insertPlainText)
+            #traversal.traverse(doc)
 
         elif index == 5:
             self.htmlView.clear()
 
             doc = self.editorWidget.editView.document()
-            traversal = TextHTMLPrinter(self.htmlView.insertPlainText, self.editorWidget.page)
-            traversal.traverse(doc)
+
+            from TextDocumentTraversal2 import TextDocumentTraversal2
+            traversal = TextDocumentTraversal2()
+            tree = traversal.traverse(doc)
+             
+            from TextDocumentTraversal2 import HtmlPrinter
+            hp = HtmlPrinter(tree, self.htmlView.insertPlainText)
+            hp.traverse()
+
+            #traversal = TextHTMLPrinter(self.htmlView.insertPlainText, self.editorWidget.page)
+            #traversal.traverse(doc)
 
 
     def blocks(self, frame):
@@ -352,25 +370,16 @@ class MynPad(QWidget):
         self.textView.clear()
 
         doc = self.editorWidget.editView.document()
-        traversal = TextDocumentPrinter(self.textView.insertPlainText)
-        traversal.traverse(doc)
+        #traversal = TextDocumentPrinter(self.textView.insertPlainText)
 
-
-
-#===============================================================================
-#         for block in self.blocks(frm):
-#             bfmt = block.blockFormat()
-#             style = bfmt.property(QTextFormat.UserProperty)
-# 
-#             fmtType = 'B'
-#             # if bfmt.isListFormat():
-#             if block.textList() is not None:
-#                 fmtType = 'L({})'.format(block.textList().count())
-# 
-#             self.textView.append('  {}&lt;{}&gt;: <span style="background: yellow">{}</span>\n'.format(fmtType, style, block.text()))
-#===============================================================================
-
+        from TextDocumentTraversal2 import TextDocumentTraversal2
+        traversal = TextDocumentTraversal2()
+        tree = traversal.traverse(doc)
         
+        from TextDocumentTraversal2 import StructurePrinter
+        sp = StructurePrinter(tree, self.textView.insertPlainText)
+        sp.traverse()
+
 
 
 class MainWindow(QMainWindow):

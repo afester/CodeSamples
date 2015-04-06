@@ -50,7 +50,7 @@ class TextDocumentTraversal:
     
                 iterator += 1
 
-            self.closePendingLists(None)
+            self.closePendingLists()
 
             self.indent -= 1
             self.currentList = 0
@@ -94,48 +94,40 @@ class TextDocumentTraversal:
         textList = block.textList()
         if textList:                        # block is part of a list (it IS a list item)
             listFormat = textList.format()
+            listStyle = listFormat.property(QTextFormat.UserProperty)
 
-            self.beginItem(listFormat)
+            self.beginItem(listStyle)
             self.currentList = listFormat.indent()
 
             self.indent += 1
             iterator = block.begin()
             if not iterator.atEnd():
+                self.traverseBlock(block)
 
-                blockFormat = block.blockFormat()
-                blockStyle = blockFormat.property(QTextFormat.UserProperty)
-    
-                self.beginBlock(blockStyle)
-                self.indent += 1
-        
-                while not iterator.atEnd():
-                    fragment = iterator.fragment()
-                    self.dumpFragment(fragment)
-                    iterator += 1
-
-                self.indent -= 1
-                self.endBlock(blockStyle)
-
-            self.endItem(listFormat)
+            self.endItem()
         else:
-            blockFormat = block.blockFormat()
-            blockStyle = blockFormat.property(QTextFormat.UserProperty)
-
-            self.closePendingLists(None)
-
+            self.closePendingLists()
             self.currentList = 0
-            self.beginBlock(blockStyle)
-    
-            self.indent += 1
-            iterator = block.begin()
 
-            while not iterator.atEnd():
-                fragment = iterator.fragment()
-                self.dumpFragment(fragment)
-                iterator += 1
-    
-            self.indent -= 1
-            self.endBlock(blockStyle)
+            self.traverseBlock(block)
+
+
+    def traverseBlock(self, block):
+        iterator = block.begin()
+
+        blockFormat = block.blockFormat()
+        blockStyle = blockFormat.property(QTextFormat.UserProperty)
+
+        self.beginBlock(blockStyle)
+        self.indent += 1
+
+        while not iterator.atEnd():
+            fragment = iterator.fragment()
+            self.dumpFragment(fragment)
+            iterator += 1
+
+        self.indent -= 1
+        self.endBlock(blockStyle)
 
 
     def dumpFragment(self, fragment):
@@ -176,13 +168,13 @@ class TextDocumentTraversal:
     def endDocument(self):
         pass
 
-    def beginItem(self, format):
+    def beginItem(self, style):
         pass
 
-    def endItem(self, format):
+    def endItem(self):
         pass
 
-    def closePendingLists(self, style):
+    def closePendingLists(self):
         pass
 
     def beginBlock(self, style):
@@ -211,30 +203,44 @@ class TextDocumentPrinter(TextDocumentTraversal):
         self.firstFragment = True
         
     def prefix(self):
-        return '\u00a0' * self.indent * 4
+        return '\u00a0' * self.indent * 2
 
     def beginDocument(self):
-        self.emitter('\n{}<QTextDocument>'.format(self.prefix()))
+        self.emitter('{}<QTextDocument>'.format(self.prefix()))
 
     def endDocument(self):
         self.emitter('\n{}</QTextDocument>'.format(self.prefix()))
 
-    def beginList(self, style):
-        self.emitter('\n{}<QTextList style="{}">'.format(self.prefix(), style))
 
-    def beginItem(self):
+
+    def beginItem(self, style):
+        level = int(style[2])
+
         self.firstFragment = True
-        self.emitter('\n{}<QTextBlock>'.format(self.prefix()))
+
+        # if the level goes back, then close any previous lists
+        for x in range(level, self.currentList):
+            self.indent -= 1
+            self.emitter('\n{}</List>'.format(self.prefix()))
+
+        # if the level goes up, then open any number of required lists
+        for x in range(self.currentList, level):
+            self.emitter('\n\n{}<List {}>'.format(self.prefix(), style))
+            self.indent += 1
+        
+        self.indent -= 1    # TODO
 
     def endItem(self):
-        self.emitter('\n{}</QTextBlock>'.format(self.prefix()))
+        pass
 
-    def endList(self, style):
-        self.emitter('\n{}</QTextList>'.format(self.prefix()))
+    def closePendingLists(self):
+        for x in range(0, self.currentList):
+            self.indent -= 1
+            self.emitter('\n{}</List>'.format(self.prefix()))
 
     def beginBlock(self, style):
         self.firstFragment = True
-        self.emitter('\n{}<QTextBlock style="{}">'.format(self.prefix(), style))
+        self.emitter('\n\n{}<QTextBlock {}>'.format(self.prefix(), style))
 
     def endBlock(self, style):
         self.emitter('\n{}</QTextBlock>'.format(self.prefix()))
@@ -284,8 +290,8 @@ class TextXMLPrinter(TextDocumentTraversal):
         self.emitter('\n{}</article>'.format(self.prefix()))
 
 
-    def beginItem(self, listFormat):
-        level = listFormat.indent()
+    def beginItem(self, style):
+        level = int(style[2])
 
         # if we are currently in a list, then close previous list item
         if level <= self.currentList:
@@ -297,7 +303,9 @@ class TextXMLPrinter(TextDocumentTraversal):
             self.indent -= 1
             self.emitter('\n{}</itemizedlist>'.format(self.prefix()))
             self.indent -= 1
-            self.emitter('\n{}</listitem>'.format(self.prefix()))
+            self.emitter('\n{}</listitem>'.format(self.prefix()))  # TODO: This is NOT always correct.
+                                                                    # If a new list starts with a level > 1, 
+                                                                    # there will be NO corresponding <listitem>!
 
         # if the level goes up, then open any number of required lists
         for x in range(self.currentList, level):
@@ -308,7 +316,7 @@ class TextXMLPrinter(TextDocumentTraversal):
         self.emitter('\n{}<listitem>'.format(self.prefix()))
 
 
-    def closePendingLists(self, listFormat):
+    def closePendingLists(self):
         for x in range(0, self.currentList):
             self.indent -= 1
             self.emitter('\n{}</listitem>'.format(self.prefix()))
@@ -401,7 +409,7 @@ class TextHTMLPrinter(TextDocumentTraversal):
 
 
     def beginItem(self, style):
-        level = style.indent()
+        level = int(style[2])
 
         # if the level goes back, then close any previous lists
         for x in range(level, self.currentList):
@@ -416,11 +424,11 @@ class TextHTMLPrinter(TextDocumentTraversal):
         # we always DO have a list item here, so open one
         self.emitter('\n{}<li>'.format(self.prefix()))
 
-    def endItem(self, style):
+    def endItem(self):
         self.indent -= 1
         self.emitter('</li>')
 
-    def closePendingLists(self, listFormat):
+    def closePendingLists(self):
         for x in range(0, self.currentList):
             self.indent -= 1
             self.emitter('\n{}</ul>'.format(self.prefix()))
@@ -429,7 +437,7 @@ class TextHTMLPrinter(TextDocumentTraversal):
     def beginBlock(self, style):
 
         if style[0] == 'programlisting':
-            self.emitter('\n{}<pre><code class="{}">'.format(self.prefix(), style[2]))
+            self.emitter('\n{}<pre class="code"><code class="{}">'.format(self.prefix(), style[2]))
         elif style[0] == 'screen':
             self.emitter('\n{}<pre>'.format(self.prefix()))
         elif style[0] == 'title':

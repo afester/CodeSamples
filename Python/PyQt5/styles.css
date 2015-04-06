@@ -1,5 +1,3 @@
-
-
 /* the searchMarker is used to define the style for highlighting found text */
 searchMarker {
 	background-color: #800000;
@@ -7,6 +5,7 @@ searchMarker {
 }
 
 
+/**************** Block formats **********************************************/
 title[level="1"] {
 	margin-top: 18px;
 	margin-bottom: 5px;
@@ -29,11 +28,15 @@ title[level="3"] {
 }
 
 para {
+	margin-top: 3px;
+	margin-bottom: 3px;
 	font-family: "Sans";
 	font-size: 10pt;
 }
 
 tip {
+	margin-top: 3px;
+	margin-bottom: 3px;
 	margin-left: 20px;
 	background-color: #e4e4e4;
 	color: #000000;
@@ -109,7 +112,7 @@ programlisting[language="bash"] {
 	margin-right: 5px;
 	margin-bottom: 5px;
 	margin-left: 5px;
-	background-color: #000000;
+	background-color: #808080;
 	
 	color: #ffff00;
 	font-family: "Courier";
@@ -121,17 +124,14 @@ screen {
 	margin-right: 5px;
 	margin-bottom: 5px;
 	margin-left: 5px;
-	background-color: #191919;
+	background-color: #808080;
 
-	color: #00ff00;
+	color: #80ff80;
 	font-family: "Courier";
 	font-size: 10pt;
 }
 
-
-/******** List formats ********/
-/* Indent is the number of "ul"/"ol" in the selector */
-
+/**************** List formats **********************************************/
 itemizedlist[level="1"] {
 	list-style-type: disc;
 }
@@ -165,7 +165,7 @@ orderedlist[level="4"] {
 }
 
 
-/******** Inline formats ********/
+/**************** Inline formats **********************************************/
 
 /* Note: They are based on the "p" block format - not sure if this is the right approach!
    Note that these are char formats only - especially the backgrund-color refers

@@ -11,13 +11,24 @@
       <title>Next steps</title>
       <itemizedlist>
         <listitem>
+          <para>External URL handling</para>
+          <itemizedlist>
+            <listitem>
+              <para>when marking a text fragment as URL, then, if the text fragment starts with http:// or https://, then use the fragment as default for the HREF</para>
+            </listitem>
+            <listitem>
+              <para>Also open the url editor immediately when marking a fragment as URL</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
           <para>Search functionality</para>
           <itemizedlist>
             <listitem>
-              <para>Need to find a concept for navigation - currently an issue when switching between notepads and then selecting the search result from an earlier search!</para>
+              <para>Need to find a concept for navigation - currently an issue <emphasis role="highlight">when switching between notepads and then selecting the search result from an earlier search!</emphasis></para>
             </listitem>
             <listitem>
-              <para>Navigation to title page fails (since its page id is "None")</para>
+              <para><emphasis role="highlight">Navigation to title page fails</emphasis> (since its page id is "None")</para>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -31,7 +42,24 @@
       <title>Bugs</title>
       <itemizedlist>
         <listitem>
-          <para><emphasis>List where the next level is indented more than one additional level misses a &lt;listitem&gt; tag</emphasis></para>
+          <para>List related</para>
+          <itemizedlist>
+            <listitem>
+              <para><emphasis>List where the next level is indented more than one additional level misses a &lt;listitem&gt; tag</emphasis></para>
+            </listitem>
+            <listitem>
+              <para><emphasis>List where the first item starts with a level &gt; 1 has too many &lt;/listitem&gt; tags</emphasis></para>
+            </listitem>
+            <listitem>
+              <para>List format not reflected in Block style toolbar</para>
+            </listitem>
+            <listitem>
+              <para>Unindent List must add item to right list (important for numbered / ordered lists)</para>
+            </listitem>
+            <listitem>
+              <para>Editing a list of keyword links is a mess - the format of the previous list item is taken, thus effectively inserting a keyword link - even if resetting the format, once the list item content is deleted to its beginning (with backspace), when entering new characters, again the format from the previous item is used.</para>
+            </listitem>
+          </itemizedlist>
         </listitem>
         <listitem>
           <para>Update Browser when new page is created - done, but item is not yet created at the right location!</para>
@@ -40,16 +68,7 @@
           <para>UNDO/REDO state not reset when saving a page</para>
         </listitem>
         <listitem>
-          <para>List format not reflected in Block style toolbar</para>
-        </listitem>
-        <listitem>
           <para><emphasis>Make XMLExporter more robust - must not destroy existing page!!!</emphasis></para>
-        </listitem>
-        <listitem>
-          <para>Unindent List must add item to right list (important for numbered / ordered lists)</para>
-        </listitem>
-        <listitem>
-          <para>Editing a list of keyword links is a mess - the format of the previous list item is taken, thus effectively inserting a keyword link - even if resetting the format, once the list item content is deleted to its beginning (with backspace), when entering new characters, again the format from the previous item is used.</para>
         </listitem>
       </itemizedlist>
     </section>

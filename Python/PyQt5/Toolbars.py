@@ -185,7 +185,7 @@ class BlockStyleSelector(TitledToolbar):
         selector = ('screen', None, None)
         d4.addItem("Generic", selector)
         self.styleToDropdown[selector] = d4
-        self.styleToIndex[selector] = 5
+        self.styleToIndex[selector] = 6
 
         toolbar.addWidget(d1)
         toolbar.addWidget(d2)
