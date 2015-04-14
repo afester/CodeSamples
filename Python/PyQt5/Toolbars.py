@@ -115,6 +115,11 @@ class BlockStyleSelector(TitledToolbar):
         self.styleToDropdown[selector] = d1
         self.styleToIndex[selector] = 1
 
+        selector = ('blockquote', None, None)
+        d1.addItem('Quotation', selector)
+        self.styleToDropdown[selector] = d1
+        self.styleToIndex[selector] = 2
+
 ##########################
         d2 = IconDropDown(self, 'icons/format-text-header.png')
         d2.entrySelected.connect(self.styleSelected)

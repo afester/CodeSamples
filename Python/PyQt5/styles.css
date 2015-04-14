@@ -45,6 +45,17 @@ tip {
 	font-style: italic;
 }
 
+blockquote {
+	margin-top: 3px;
+	margin-bottom: 3px;
+	margin-left: 20px;
+	/*background-color: #caddff;*/
+	color: #000000;
+	font-family: "Sans";
+	font-size: 10pt;
+	font-style: italic;
+}
+
 programlisting[language="java"] {
 	margin-top: 5px;
 	margin-right: 5px;

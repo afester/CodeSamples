@@ -100,6 +100,10 @@ class Handler(xml.sax.handler.ContentHandler):
             self.insertBlock('', ('tip', None, None))
             self.hasBlock = True
 
+        elif name == 'blockquote':
+            self.collectContent = True
+            self.insertBlock('', ('blockquote', None, None))
+
         elif name == 'para':
             self.collectContent = True
             if self.listLevel == 0 and self.hasBlock == False:
@@ -207,6 +211,10 @@ class Handler(xml.sax.handler.ContentHandler):
 
         elif name == 'tip':
             self.hasBlock = False
+
+        elif name == 'blockquote':
+            self.collectContent = False
+            self.insertFragment(self.content, ('blockquote', None, None))
 
         elif name == 'screen':
             self.collectContent = False

@@ -32,6 +32,9 @@
           <para><link xlink:href="http://docbook.org/tdg51/en/html/para.html">para</link></para>
         </listitem>
         <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/blockquote.html">blockquote</link></para>
+        </listitem>
+        <listitem>
           <para><link xlink:href="http://docbook.org/tdg51/en/html/tip.html">tip</link></para>
         </listitem>
         <listitem>

@@ -35,7 +35,12 @@
 
     <section>
       <title>A Tip</title>
-      <tip><para>This tip shows how a tip block looks like.</para></tip>
+      <tip><para>This section shows how a tip looks like.</para></tip>
+    </section>
+
+    <section>
+      <title>A quotation</title>
+      <blockquote>This section shows how a quotation looks like.</blockquote>
     </section>
 
     <section>

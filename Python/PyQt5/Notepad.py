@@ -114,7 +114,7 @@ class LocalPage:
 
         if self.pageId is not None:     # not the root page
             pageIdx = self.pageId[0]
-            pagePath = os.path.join(pagePath, pageIdx)
+            pagePath = pagePath + "/" + pageIdx # os.path.join(pagePath, pageIdx)
         return pagePath
 
 

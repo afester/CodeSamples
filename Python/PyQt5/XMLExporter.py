@@ -5,7 +5,7 @@ Created on 19.02.2015
 '''
 
 import os
-from TextDocumentTraversal import TextXMLPrinter
+from TextDocumentTraversal import TextDocumentTraversal, DocbookPrinter
 
 class XMLExporter:
     def __init__(self, contentPath, contentFile):
@@ -22,22 +22,18 @@ class XMLExporter:
     def getXmlString(self, document):
         self.contents = ''
 
+        traversal = TextDocumentTraversal()
+        tree = traversal.traverse(document)
 
-#===============================================================================
-#         from TextDocumentTraversal2 import TextDocumentTraversal2
-#         traversal = TextDocumentTraversal2()
-#         tree = traversal.traverse(document)
-# 
-#         from TextDocumentTraversal2 import DocbookPrinter
-#         dp = DocbookPrinter(tree, self.collect)
-#         dp.traverse()
-#===============================================================================
+        dp = DocbookPrinter(tree, self.collect)
+        dp.traverse()
 
-        traversal = TextXMLPrinter(self.collect)
-        traversal.traverse(document)
+        #traversal = TextXMLPrinter(self.collect)
+        #traversal.traverse(document)
 
         return self.contents
 
 
     def collect(self, data):
-        self.contents += data
+        if data is not None:
+            self.contents += data

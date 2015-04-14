@@ -41,6 +41,13 @@ table.tip td {
 	vertical-align: top;
 }
 
+blockquote {
+  margin-left: 25px;
+  padding-left: 5px;
+  border-left: 2px solid #000000;
+  font-style: italic;
+}
+
 tt {
   font-size: 9pt;
   background-color: #EAEAEA;

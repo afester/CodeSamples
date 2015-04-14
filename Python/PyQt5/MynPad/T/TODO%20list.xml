@@ -45,10 +45,7 @@
           <para>List related</para>
           <itemizedlist>
             <listitem>
-              <para><emphasis>List where the next level is indented more than one additional level misses a &lt;listitem&gt; tag</emphasis></para>
-            </listitem>
-            <listitem>
-              <para><emphasis>List where the first item starts with a level &gt; 1 has too many &lt;/listitem&gt; tags</emphasis></para>
+              <para>if a nested list is indented more than once from its parent list, invalid docbook XML is created - in docbook, each itemizedlist MUST contain a listitem! Possible solution to generate valid docbook is to either prevent the user from creating lists with missing intermediate levels (might be too complex) or to use a special attribute to determine the actual nesting level (like role="level:2"). A third alternative would be to keep creating invalid docbook in this particular case - not a preferred approach, though...</para>
             </listitem>
             <listitem>
               <para>List format not reflected in Block style toolbar</para>

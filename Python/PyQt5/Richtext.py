@@ -10,7 +10,7 @@ from PyQt5.QtCore import PYQT_VERSION_STR, QT_VERSION_STR, qVersion, pyqtSignal,
 from PyQt5.QtWidgets import QWidget, QTabWidget
 from PyQt5.QtWidgets import QTextEdit, QSplitter, QHBoxLayout, QVBoxLayout, QMainWindow
 from PyQt5.QtWidgets import QAction, QStatusBar, QMenuBar, QApplication, QMessageBox, QListView
-from PyQt5.QtWebKitWidgets import QWebView
+from PyQt5.QtWebKitWidgets import QWebView, QWebPage
 from PyQt5.QtCore import QUrl, QObject, QThread 
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PyQt5 import uic
@@ -21,7 +21,7 @@ import logging.config
 from EditorWidget import EditorWidget
 from BrowserWidget import BrowserWidget
 from Settings import Settings
-from TextDocumentTraversal import TextDocumentPrinter, TextXMLPrinter, TextHTMLPrinter
+from TextDocumentTraversal import TextDocumentTraversal, StructurePrinter, DocbookPrinter, HtmlPrinter
 
 import urllib, re
 
@@ -207,6 +207,8 @@ class MynPad(QWidget):
 #############################
 
         self.browser = QWebView(self.tabWidget)
+        self.browser.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
+        self.browser.linkClicked.connect(self.navigateWeb)
         self.tabWidget.addTab(self.browser, "View web")
 
         self.tabWidget.addTab(QWidget(self.tabWidget), "View pdf")
@@ -253,6 +255,15 @@ class MynPad(QWidget):
         self.splitter.setSizes([100, 400])          # TODO
         # self.splitter.setChildrenCollapsible(False)
         self.editorWidget.setEnabled(False)
+
+
+    def navigateWeb(self, url):
+        if url.scheme() == 'file':
+            pageId = url.fileName()
+            self.navigate(pageId)
+            self.tabSelected(1)
+        elif url.scheme() == 'http' or url.scheme() == 'https':
+            self.browser.setUrl(url)
 
 
     def showMessage(self, message):
@@ -305,9 +316,13 @@ class MynPad(QWidget):
     def tabSelected(self, index):
         if index == 1:        # Web View
             self.htmlView.clear()
+
             doc = self.editorWidget.editView.document()
-            traversal = TextHTMLPrinter(self.htmlView.insertPlainText, self.editorWidget.page)
-            traversal.traverse(doc)
+            traversal = TextDocumentTraversal()
+            tree = traversal.traverse(doc)
+
+            hp = HtmlPrinter(tree, self.htmlView.insertPlainText, self.editorWidget.page.getPageDir())
+            hp.traverse()
 
             ########### get URL for the stylesheet and for the base URL
             mypath = os.getcwd()
@@ -329,33 +344,21 @@ class MynPad(QWidget):
             self.customView.clear()
 
             doc = self.editorWidget.editView.document()
-            
-            from TextDocumentTraversal2 import TextDocumentTraversal2
-            traversal = TextDocumentTraversal2()
+            traversal = TextDocumentTraversal()
             tree = traversal.traverse(doc)
 
-            from TextDocumentTraversal2 import DocbookPrinter
             dp = DocbookPrinter(tree, self.customView.insertPlainText)
             dp.traverse()
-
-            #traversal = TextXMLPrinter(self.customView.insertPlainText)
-            #traversal.traverse(doc)
 
         elif index == 5:
             self.htmlView.clear()
 
             doc = self.editorWidget.editView.document()
-
-            from TextDocumentTraversal2 import TextDocumentTraversal2
-            traversal = TextDocumentTraversal2()
+            traversal = TextDocumentTraversal()
             tree = traversal.traverse(doc)
-             
-            from TextDocumentTraversal2 import HtmlPrinter
-            hp = HtmlPrinter(tree, self.htmlView.insertPlainText)
-            hp.traverse()
 
-            #traversal = TextHTMLPrinter(self.htmlView.insertPlainText, self.editorWidget.page)
-            #traversal.traverse(doc)
+            hp = HtmlPrinter(tree, self.htmlView.insertPlainText, self.editorWidget.page.getPageDir())
+            hp.traverse()
 
 
     def blocks(self, frame):
@@ -370,13 +373,9 @@ class MynPad(QWidget):
         self.textView.clear()
 
         doc = self.editorWidget.editView.document()
-        #traversal = TextDocumentPrinter(self.textView.insertPlainText)
-
-        from TextDocumentTraversal2 import TextDocumentTraversal2
-        traversal = TextDocumentTraversal2()
+        traversal = TextDocumentTraversal()
         tree = traversal.traverse(doc)
         
-        from TextDocumentTraversal2 import StructurePrinter
         sp = StructurePrinter(tree, self.textView.insertPlainText)
         sp.traverse()
 

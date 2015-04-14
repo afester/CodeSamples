@@ -5,7 +5,7 @@ Created on 18.02.2015
 '''
  
 from PyQt5.Qt import QMimeData, QDesktopServices, QUrl, QSize, QIcon
-from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtCore import pyqtSignal, Qt, QPoint
 from PyQt5.QtGui import QTextCursor, QTextFormat, QGuiApplication
 from PyQt5.QtGui import QTextOption, QCursor, QImage, QTextDocument
 from PyQt5.QtWidgets import QWidget, QMessageBox, QPushButton, QAction
@@ -267,7 +267,7 @@ class TextEdit(QTextEdit):
 
 
     def isAtAnchor(self, pos):
-        cursor = self.cursorForPosition(pos)
+        cursor = self.exactCursorForPosition(pos)
         charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
 
         style = charFmt.property(QTextFormat.UserProperty)
@@ -310,6 +310,51 @@ class TextEdit(QTextEdit):
         return QTextEdit.keyReleaseEvent(self, event)
 
 
+    def mapToContents(self, point):
+        return QPoint(point.x() + self.horizontalScrollBar().value(), point.y() +  self.verticalScrollBar().value())
+
+
+    def exactCursorForPosition(self, pos):
+        # get a cursor for a given position
+        # Note that the cursor is located AFTER the respective character:
+        # ABCDEF
+        #    ^ 
+        #    +- Mouse positioned on D 
+        #             => returns cursor which is located between C and D
+        #             => character addressed by cursor would be "C" !!!!!
+        #                (position() would return 2)
+        #cursor = self.cursorForPosition(event.pos())
+
+        # this is identical to calling the document layout's hitTest() 
+        # method with the FuzzyHit parameter:
+
+        #curPos = docLayout.hitTest(event.pos(), Qt.FuzzyHit)
+
+        # A better approch is to use the document layout with the hitTest()
+        # method and using the ExactHit parameter:
+        docLayout = self.document().documentLayout()
+
+        # Note that docLayout.hitTest() takes the position as coordinates
+        # relative to the document itself - thus we need to map it 
+        # similar to what Qt does in QTextEdit::cursorForPosition().
+        # Unfortunately the mapToContents() method they use there is not
+        # public, so we need to provide our own implementation.
+        docPos = self.mapToContents(pos)
+        curPos = docLayout.hitTest(docPos, Qt.ExactHit)
+        if curPos == -1:
+            curPos = 0
+
+        # This returns the cursor position *before* the clicked character.
+        # To get the proper format, we need to position the cursor
+        # *after* the clicked character:
+        cursor = QTextCursor(self.document())
+        cursor.setPosition(curPos + 1);
+
+        return cursor
+
+
+
+
     def mousePressEvent(self, event):
         #=======================================================================
         # cursor = self.cursorForPosition(event.pos())
@@ -320,34 +365,7 @@ class TextEdit(QTextEdit):
         #=======================================================================
 
         if self.tracking:
-
-            # get a cursor for the current mouse position.
-            # Note that the cursor is located AFTER the respective character:
-            # ABCDEF
-            #    ^ 
-            #    +- Mouse positioned on D 
-            #             => returns cursor which is located between C and D
-            #             => character addressed by cursor would be "C" !!!!!
-            #                (position() would return 2)
-            #cursor = self.cursorForPosition(event.pos())
-
-            # this is identical to calling the document layout's hitTest() 
-            # method with the FuzzyHit parameter:
-            docLayout = self.document().documentLayout()
-            #curPos = docLayout.hitTest(event.pos(), Qt.FuzzyHit)
-
-            # A better approch is to use the document layout with the hitTest()
-            # method and using the ExactHit parameter:
-            curPos = docLayout.hitTest(event.pos(), Qt.ExactHit)
-            if curPos == -1:
-                curPos = 0
-
-            # This returns the cursor position *before* the clicked character.
-            # To get the proper format, we need to position the cursor
-            # *after* the clicked character:
-            cursor = QTextCursor(self.document())
-            cursor.setPosition(curPos + 1);
-
+            cursor= self.exactCursorForPosition(event.pos())
             charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
             style = charFmt.property(QTextFormat.UserProperty)
 

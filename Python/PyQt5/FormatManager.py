@@ -176,6 +176,7 @@ class FormatManager:
                         'title[level="3"]', 
                         'para',
                         'tip',
+                        'blockquote',
                         'programlisting[language="java"]',
                         'programlisting[language="cpp"]',
                         'programlisting[language="xml"]',

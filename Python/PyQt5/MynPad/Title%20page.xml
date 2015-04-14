@@ -8,6 +8,11 @@
     <title>Welcome to MynPad</title>
 
     <section>
+      <title>Introduction</title>
+      <para>MynPad is a <emphasis>structure based, stylable, link and cloud enabled</emphasis> notepad. It reads and writes its contents in Docbook 5 format and the rendering of the individual elements can be customized through a style sheet.</para>
+    </section>
+
+    <section>
       <title>Requirements</title>
       <itemizedlist>
         <listitem>
@@ -20,11 +25,6 @@
           <para>cssutils 1.0</para>
         </listitem>
       </itemizedlist>
-    </section>
-
-    <section>
-      <title>Introduction</title>
-      <para>MynPad is a <emphasis>structure based, stylable, link and cloud enabled</emphasis> notepad. It reads and writes its contents in Docbook 5 format and the rendering of the individual elements can be customized through a style sheet.</para>
     </section>
 
     <section>

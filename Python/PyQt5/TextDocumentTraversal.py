@@ -10,138 +10,186 @@ import tools
 import urllib
 
 
+class Node:
+
+    def __init__(self):
+        self.children = []
+
+    def add(self, child):
+        self.children.append(child)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+# A Frame is a container for child Frames and Paragraphs
+class Frame(Node):
+
+    def __init__(self):
+        Node.__init__(self)
+
+    def __str__(self):
+        return 'Frame'
+
+
+# A Paragraph is a container for Fragments
+class Paragraph(Node):
+
+    def __init__(self, indentLevel, style):
+        Node.__init__(self)
+
+        self.indent = indentLevel
+        self.style = style
+
+    def __str__(self):
+        return 'Paragraph[style={}]'.format(self.style)
+
+
+# A List is a container for Paragraphs and Lists on a deeper level
+class List(Node):
+
+    def __init__(self, style):
+        Node.__init__(self)
+        self.style = style
+
+    def __str__(self):
+        return 'List[style={}]'.format(self.style)
+
+
+
+class Table:
+    pass
+
+
+# Fragments do not have children
+class Fragment:
+
+    def __init__(self, style):
+        self.href = None
+        self.images = []
+        self.text = None
+        self.style = style
+
+
+    def addImage(self, img):
+        self.images.append(img)
+
+
+    def setText(self, text):
+        self.text = text
+
+    def setHref(self, text):
+        self.href = text
+
+    def __str__(self):
+        return 'Fragment[style={}, text="{}", images={}, href={}]'.format(self.style, self.text, self.images, self.href)
+
+
+
 class TextDocumentTraversal:
-    '''Generic implementation of the document structure traversal algorithm.
-    This class can be subclassed to write out the document in different
-    formats.'''
 
     def __init__(self):
         pass
 
     def traverse(self, document):
         frm = document.rootFrame()
+        result = self.dumpFrame(frm)
 
-        self.indent = 0
-        self.listStack = []
-        self.currentList = 0
-        self.beginDocument()
+        return result
 
-        self.dumpFrame(frm)
-
-        self.endDocument()
-        
 
     def dumpFrame(self, frm):
 
+        parentStack = [Frame()]
+
+        currentIndent = 0       # current indent within this frame
         if type(frm) is QTextTable:
-            self.dumpTable(frm)
+            tbl = self.dumpTable(frm)
         else:
-            self.indent += 1
             iterator = frm.begin()
             while not iterator.atEnd():
-                block = None
                 frame = iterator.currentFrame() # None if not a frame
                 block = iterator.currentBlock() # Invalid block if its a frame
-    
+
                 if frame:
-                    self.dumpFrame(frame)
+                    subframe = self.dumpFrame(frame)
+                    # ... TODO
                 else:
-                    self.dumpBlock(block)
-    
+
+                    # A block is not further structured (from a QTextDocument's point of view).
+                    # We can get the whole block here and handle the inherent structure below.
+                    para = self.getParagraph(block)
+                    listLevel = para.indent
+
+                    # Add additional List elements as required
+                    for x in range(currentIndent, listLevel):
+                        l = List(('itemizedlist', 'level', x))
+                        parent = parentStack[x]
+                        parent.add(l)
+                        parent = l
+                        if len(parentStack) > x+1:
+                            parentStack[x+1] = parent
+                        else:
+                            parentStack.append(parent)
+
+                    parent = parentStack[listLevel]
+                    parent.add(para)
+
+                    currentIndent = listLevel
+
                 iterator += 1
 
-            self.closePendingLists()
+        return parentStack[0]
 
-            self.indent -= 1
-            self.currentList = 0
 
     def dumpTable(self, table):
-        self.textView.append('{}Table ({}, {})'.format(self.prefix(), table.rows(), table.columns()))
-        self.indent += 1
+        raise None
+    
         for row in range(0, table.rows()):
-            self.textView.append('{}Row'.format(self.prefix()))
-            self.indent += 1
             for column in range(0, table.columns()):
                 tableCell = table.cellAt(row, column)
-                self.textView.append('{}Cell'.format(self.prefix()))
 
-                # PyQt's QTextTableCell does not expose the frame iterator (begin(), end()) 
-        #=======================================================================
-        #         # Same as above when iterating the frame contents!
-        #         self.indent += 1
-        #         iterator = tableCell.begin()        # AttributeError: 'QTextTableCell' object has no attribute 'begin'
-        #         while not iterator.atEnd():
-        #             block = None
-        #             frame = iterator.currentFrame() # None if not a frame
-        #             block = iterator.currentBlock() # Invalid block if its a frame
-        # 
-        #             if frame:
-        #                 self.dumpFrame(frame)
-        #             else:
-        #                 self.dumpBlock(block)
-        # 
-        #             iterator += 1
-        #         
-        #         self.indent -= 1
-        #=======================================================================
+                # BUG: PyQt's QTextTableCell does not expose the frame iterator (begin(), end()) 
+                iterator = tableCell.begin()        # AttributeError: 'QTextTableCell' object has no attribute 'begin'
+                while not iterator.atEnd():
+                    pass
 
-            self.indent -= 1
-        self.indent -= 1
+        return Table()  # Mock
 
 
-    def dumpBlock(self, block):
-
-        textList = block.textList()
-        if textList:                        # block is part of a list (it IS a list item)
-            listFormat = textList.format()
-            listStyle = listFormat.property(QTextFormat.UserProperty)
-
-            self.beginItem(listStyle)
-            self.currentList = listFormat.indent()
-
-            self.indent += 1
-            iterator = block.begin()
-            if not iterator.atEnd():
-                self.traverseBlock(block)
-
-            self.endItem()
-        else:
-            self.closePendingLists()
-            self.currentList = 0
-
-            self.traverseBlock(block)
-
-
-    def traverseBlock(self, block):
-        iterator = block.begin()
-
+    def getParagraph(self, block):
         blockFormat = block.blockFormat()
         blockStyle = blockFormat.property(QTextFormat.UserProperty)
 
-        self.beginBlock(blockStyle)
-        self.indent += 1
+        listLevel = 0
+        textList = block.textList()
+        if textList:
+            listFormat = textList.format()
+            listLevel = listFormat.indent()
+       
+        result = Paragraph(listLevel, blockStyle)
 
+        iterator = block.begin()
         while not iterator.atEnd():
             fragment = iterator.fragment()
-            self.dumpFragment(fragment)
+            frag = self.getFragment(fragment)
+            result.add(frag)
             iterator += 1
 
-        self.indent -= 1
-        self.endBlock(blockStyle)
+        return result
 
 
-    def dumpFragment(self, fragment):
+    def getFragment(self, fragment):
         text = fragment.text().replace('\u2028', '\n')
 
         charFormat = fragment.charFormat()
         style = charFormat.property(QTextFormat.UserProperty)
 
-        closeAnchor = False
+        result = Fragment(style)
         if style and style[0] == 'link':
             href = escape(charFormat.anchorHref())
-            self.beginLink(href)
-            closeAnchor = True
-            style = None
+            result.setHref(href)
+            result.style = None     # Link implicitly defined by setting href
 
         isObject = (text.find('\ufffc') != -1)
         isImage = isObject and charFormat.isImageFormat()
@@ -153,339 +201,270 @@ class TextDocumentTraversal:
             # If the same image repeats multiple times, it is simply represented by
             # yet another object replacement character ...
             for img in range(0, len(text)):
-                self.image(imgName)
+                result.addImage(imgName)
         else:
             text = escape(text)
-            self.fragment(text, style)
+            result.setText(text)
 
-        if closeAnchor:
-            self.endLink()
+        return result
 
 
-    def beginDocument(self):
-        pass
-
-    def endDocument(self):
-        pass
-
-    def beginItem(self, style):
-        pass
-
-    def endItem(self):
-        pass
-
-    def closePendingLists(self):
-        pass
-
-    def beginBlock(self, style):
-        pass
+class StructurePrinter:
     
-    def endBlock(self, style):
-        pass
+    def __init__(self, root, out):
+        self.rootFrame = root
+        self.indent = 0
+        self.out = out
 
-    def fragment(self, text, style):
-        pass
-
-    def beginLink(self, destination):
-        pass
-
-    def endLink(self):
-        pass
-
-    def image(self, name):
-        pass
-
-
-class TextDocumentPrinter(TextDocumentTraversal):
-
-    def __init__(self, emitter):
-        self.emitter = emitter
-        self.firstFragment = True
-        
     def prefix(self):
         return '\u00a0' * self.indent * 2
 
-    def beginDocument(self):
-        self.emitter('{}<QTextDocument>'.format(self.prefix()))
+    def traverse(self):
+        self.recursiveTraverse(self.rootFrame)
 
-    def endDocument(self):
-        self.emitter('\n{}</QTextDocument>'.format(self.prefix()))
+    def recursiveTraverse(self, parent):
+        self.out("{}{}\n".format(self.prefix(), parent))
+        if type(parent) == Paragraph or type(parent) == Frame or type(parent) == List:
+            for c in parent.children:
+                self.indent += 1
+                self.recursiveTraverse(c)
+                self.indent -= 1
+
+
+class HtmlPrinter:
+
+    def __init__(self, root, out, baseDir):
+        self.rootFrame = root
+        self.indent = 0
+        self.out = out
+        self.listLevel = 0
+        self.baseDir= baseDir
+
+    def prefix(self):
+        return '\u00a0' * self.indent * 2
+
+    def traverse(self):
+        self.out('''<!DOCTYPE html>
+<html lang="en">
+  <head></head>
+  <body>''')
+
+        self.indent = 2
+        for c in self.rootFrame.children:
+            self.visitNode(c)
+
+        self.out('''
+
+  </body>
+</html>''')
 
 
 
-    def beginItem(self, style):
-        level = int(style[2])
+    def visitNode(self, node):
+        if type(node) == Fragment:
+            self.emitFragment(node)
 
-        self.firstFragment = True
+        elif type(node) == Paragraph:
+            if node.style[0] == 'programlisting':
+                self.out('\n{}<pre class="code"><code class="{}">'.format(self.prefix(), node.style[2]))
+            elif node.style[0] == 'screen':
+                self.out('\n{}<pre>'.format(self.prefix()))
+            elif node.style[0] == 'title':
+                self.out('\n\n{}<h{}>'.format(self.prefix(), int(node.style[2])))
+            elif node.style[0] == 'tip':
+                self.out('\n{}<table class="tip"><tr><td><img src="icons/tip.png" /></td><td>'.format(self.prefix()))
+            elif node.style[0] == 'blockquote':
+                self.out('\n{}<blockquote>'.format(self.prefix()))
+            elif node.style[0] == 'para':
+                if self.listLevel == 0:
+                    self.out('\n{}<p>'.format(self.prefix()))
+                else:
+                    self.out('\n{}<li>'.format(self.prefix()))
 
-        # if the level goes back, then close any previous lists
-        for x in range(level, self.currentList):
-            self.indent -= 1
-            self.emitter('\n{}</List>'.format(self.prefix()))
-
-        # if the level goes up, then open any number of required lists
-        for x in range(self.currentList, level):
-            self.emitter('\n\n{}<List {}>'.format(self.prefix(), style))
             self.indent += 1
-        
-        self.indent -= 1    # TODO
-
-    def endItem(self):
-        pass
-
-    def closePendingLists(self):
-        for x in range(0, self.currentList):
+            for c in node.children:
+                self.emitFragment(c)
             self.indent -= 1
-            self.emitter('\n{}</List>'.format(self.prefix()))
 
-    def beginBlock(self, style):
-        self.firstFragment = True
-        self.emitter('\n\n{}<QTextBlock {}>'.format(self.prefix(), style))
+            if node.style[0] == 'programlisting':
+                self.out('</code></pre>')
+            elif node.style[0] == 'screen':
+                self.out('</pre>')
+            elif node.style[0] == 'title':
+                self.out('</h{}>'.format(int(node.style[2])))
+            elif node.style[0] == 'tip':
+                self.out('</td></tr></table>')
+            elif node.style[0] == 'blockquote':
+                self.out('</blockquote>')
+            elif node.style[0] == 'para':
+                if self.listLevel == 0:
+                    self.out("</p>")
+                else:
+                    self.out('</li>')
 
-    def endBlock(self, style):
-        self.emitter('\n{}</QTextBlock>'.format(self.prefix()))
+        elif type(node) == List:
+            self.out('\n{}<ul>'.format(self.prefix()))
+            self.listLevel += 1
 
-    def fragment(self, text, style):
-        if self.firstFragment:
-            self.firstFragment = False 
-            self.emitter('\n{}<QTextFragment style="{}">{}</QTextFragment>'.format(self.prefix(), style, text))
+            self.indent += 1
+            for c in node.children:
+                self.visitNode(c)
+
+            self.indent -= 1
+
+            self.out('\n{}</ul>'.format(self.prefix()))
+            self.listLevel -= 1
+
+
+    def emitFragment(self, fragment):
+        if fragment.href is not None:
+            self.out('<a href="{}">'.format(fragment.href))
+
+        if len(fragment.images) > 0:
+            for imgName in fragment.images:
+                prefix = "file:///{}/".format(self.baseDir)
+                self.out('<img src="{}"/>'.format(prefix + imgName))
         else:
-            self.emitter('<QTextFragment style="{}">{}</QTextFragment>'.format(style, text))
+            if fragment.style is None:
+                self.out(fragment.text)
+            elif fragment.style[0] == 'olink':
+                linkend = urllib.parse.quote(fragment.text, '')
+                self.out('<a href="{}">{}</a>'.format(linkend, fragment.text))
+            elif fragment.style[0] == 'emphasis':
+                if fragment.style[2] is not None and fragment.style[2] == 'highlight':
+                    self.out('<em>{}</em>'.format(fragment.text))
+                else:
+                    self.out('<strong>{}</strong>'.format(fragment.text))
+            elif fragment.style[0] == 'code':
+                self.out('<tt>{}</tt>'.format(fragment.text))
+            else:
+                self.out('<{}>{}</{}>'.format(fragment.style[0], fragment.text, fragment.style[0]))
 
-    def beginLink(self, destination):
-        pass
-
-    def endLink(self):
-        pass
-
-    def image(self, imgName):
-        if self.firstFragment:
-            self.firstFragment = False 
-            self.emitter('\n{}<img src="{}"/>'.format(self.prefix(), imgName))
-        else:
-            self.emitter('<img src="{}"/>'.format(imgName))
+        if fragment.href is not None:
+            self.out('</a>')
 
 
-class TextXMLPrinter(TextDocumentTraversal):
 
-    def __init__(self, emitter):
-        self.emitter = emitter
-        self.currentSectionLevel = 0
+class DocbookPrinter:
+
+    def __init__(self, root, out):
+        self.rootFrame = root
+        self.indent = 0
+        self.out = out
+        self.sectionLevel = 0
 
     def prefix(self):
         return ' ' * self.indent * 2
 
-    def beginDocument(self):
-        self.emitter('''<?xml version="1.0" encoding="utf-8"?>
+    def traverse(self):
+        self.out('''<?xml version="1.0" encoding="utf-8"?>
 <article version="5.0" xml:lang="en"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink">
   <title></title>''')
 
-    def endDocument(self):
-        for x in range(0, self.currentSectionLevel):
-            self.emitter('\n{}</section>'.format(self.prefix()))
-            self.currentSectionLevel -= 1
+        self.indent = 1
+        for c in self.rootFrame.children:
+            self.visitNode(c)
+
+        for x in range(0, self.sectionLevel):
             self.indent -= 1
-        self.emitter('\n{}</article>'.format(self.prefix()))
+            self.out('\n{}</section>'.format(self.prefix()))
+
+        self.out('\n</article>\n')
 
 
-    def beginItem(self, style):
-        level = int(style[2])
+    def visitNode(self, node):
+        if type(node) == Fragment:
+            self.emitFragment(node)
 
-        # if we are currently in a list, then close previous list item
-        if level <= self.currentList:
-            self.indent -= 1
-            self.emitter('\n{}</listitem>'.format(self.prefix()))
-
-        # if the level goes back, then close any previous lists
-        for x in range(level, self.currentList):
-            self.indent -= 1
-            self.emitter('\n{}</itemizedlist>'.format(self.prefix()))
-            self.indent -= 1
-            self.emitter('\n{}</listitem>'.format(self.prefix()))  # TODO: This is NOT always correct.
-                                                                    # If a new list starts with a level > 1, 
-                                                                    # there will be NO corresponding <listitem>!
-
-        # if the level goes up, then open any number of required lists
-        for x in range(self.currentList, level):
-            self.emitter('\n{}<itemizedlist>'.format(self.prefix()))
-            self.indent += 1
-
-        # we always DO have a list item here, so open one
-        self.emitter('\n{}<listitem>'.format(self.prefix()))
-
-
-    def closePendingLists(self):
-        for x in range(0, self.currentList):
-            self.indent -= 1
-            self.emitter('\n{}</listitem>'.format(self.prefix()))
-            self.indent -= 1
-            self.emitter('\n{}</itemizedlist>'.format(self.prefix()))
-
-
-    def beginBlock(self, style):
-
-        if style[0] == 'programlisting':
-            self.emitter('\n{}<programlisting language="{}">'.format(self.prefix(), style[2]))
-        
-        elif style[0] == 'title':
-            # close previous sections
-            newLevel = int(style[2])
-            if newLevel == self.currentSectionLevel:
-                self.indent -= 1
-                self.emitter('\n{}</section>'.format(self.prefix()))
-                self.emitter('\n\n{}<section>'.format(self.prefix()))
-                self.indent += 1
-            else:
-                for x in range(newLevel, self.currentSectionLevel):
-                    self.emitter('\n{}</section>'.format(self.prefix()))
-                    self.currentSectionLevel -= 1
+        elif type(node) == Paragraph:
+            if node.style[0] == 'programlisting':
+                    self.out('\n{}<programlisting language="{}">'.format(self.prefix(), node.style[2]))
+            elif node.style[0] == 'title':
+                # close previous sections
+                newLevel = int(node.style[2])
+                if newLevel == self.sectionLevel:
                     self.indent -= 1
-
-                # Open sections until the required level is reached
-                for x in range(self.currentSectionLevel, newLevel):
-                    self.emitter('\n\n{}<section>'.format(self.prefix()))
+                    self.out('\n{}</section>'.format(self.prefix()))
+                    self.out('\n\n{}<section>'.format(self.prefix()))
                     self.indent += 1
-                    self.currentSectionLevel += 1
+                else:
+                    for x in range(newLevel, self.sectionLevel):
+                        self.out('\n{}</section>'.format(self.prefix()))
+                        self.sectionLevel -= 1
+                        self.indent -= 1
+    
+                    # Open sections until the required level is reached
+                    for x in range(self.sectionLevel, newLevel):
+                        self.out('\n\n{}<section>'.format(self.prefix()))
+                        self.indent += 1
+                        self.sectionLevel += 1
+    
+                self.out('\n{}<title>'.format(self.prefix()))
 
-            self.emitter('\n{}<title>'.format(self.prefix()))
-
-        elif style[0] == 'tip':
-            self.emitter('\n{}<tip><para>'.format(self.prefix()))
-        else:
-            self.emitter('\n{}<{}>'.format(self.prefix(), style[0]))
-
-    def endBlock(self, style):
-        if style[0] == 'tip':
-            self.emitter('</para></tip>'.format())
-            pass
-        else:
-            self.emitter('</{}>'.format(style[0]))
-
-    def fragment(self, text, style):
-        if style is None:
-            self.emitter(text)
-        elif style[0] == 'emphasis':
-            if style[2] is not None and style[2] == 'highlight':
-                self.emitter('<emphasis role="highlight">{}</emphasis>'.format(text))
+            elif node.style[0] == 'tip':
+                self.out('\n{}<tip><para>'.format(self.prefix()))
             else:
-                self.emitter('<emphasis>{}</emphasis>'.format(text))
-        elif style[0] == 'olink':
-            linkend = urllib.parse.quote(text, '')
-            self.emitter('<olink targetdoc="{}">{}</olink>'.format(linkend, text))
-        else:
-            self.emitter('<{}>{}</{}>'.format(style[0], text, style[0]))
+                self.out('\n{}<{}>'.format(self.prefix(), node.style[0]))
 
-    def beginLink(self, destination):
-        self.emitter('<link xlink:href="{}">'.format(destination))
-
-    def endLink(self):
-        self.emitter('</link>')
-
-    def image(self, imgName):
-        self.emitter('<mediaobject><imageobject><imagedata fileref="{}"/></imageobject></mediaobject>'.format(imgName))
-
-
-class TextHTMLPrinter(TextDocumentTraversal):
-
-    def __init__(self, emitter, page):
-        self.emitter = emitter
-        self.currentSectionLevel = 0
-        self.page = page
-
-    def prefix(self):
-        return ' ' * self.indent * 2
-
-    def beginDocument(self):
-        self.emitter('''<!DOCTYPE html>
-<html lang="en">
-  <head></head>
-  <body>''')
-        self.indent += 1
-
-    def endDocument(self):
-        self.emitter('\n\n{}</body>\n</html>'.format(self.prefix()))
-
-
-    def beginItem(self, style):
-        level = int(style[2])
-
-        # if the level goes back, then close any previous lists
-        for x in range(level, self.currentList):
-            self.indent -= 1
-            self.emitter('\n{}</ul>'.format(self.prefix()))
-
-        # if the level goes up, then open any number of required lists
-        for x in range(self.currentList, level):
-            self.emitter('\n{}<ul>'.format(self.prefix()))
             self.indent += 1
-
-        # we always DO have a list item here, so open one
-        self.emitter('\n{}<li>'.format(self.prefix()))
-
-    def endItem(self):
-        self.indent -= 1
-        self.emitter('</li>')
-
-    def closePendingLists(self):
-        for x in range(0, self.currentList):
+            for c in node.children:
+                self.emitFragment(c)
             self.indent -= 1
-            self.emitter('\n{}</ul>'.format(self.prefix()))
 
-
-    def beginBlock(self, style):
-
-        if style[0] == 'programlisting':
-            self.emitter('\n{}<pre class="code"><code class="{}">'.format(self.prefix(), style[2]))
-        elif style[0] == 'screen':
-            self.emitter('\n{}<pre>'.format(self.prefix()))
-        elif style[0] == 'title':
-            self.emitter('\n\n{}<h{}>'.format(self.prefix(), int(style[2])))
-        elif style[0] == 'tip':
-            self.emitter('\n{}<table class="tip"><tr><td><img src="icons/tip.png" /></td><td>'.format(self.prefix()))
-        elif style[0] == 'para':
-            if self.currentList == 0:
-                self.emitter('\n{}<p>'.format(self.prefix()))
-        else:
-            print("INVALID FORMAT: {}".format(style))
-
-    def endBlock(self, style):
-        if style[0] == 'programlisting':
-            self.emitter('</code></pre>')
-        elif style[0] == 'screen':
-            self.emitter('</pre>')
-        elif style[0] == 'title':
-            self.emitter('</h{}>'.format(int(style[2])))
-        elif style[0] == 'tip':
-            self.emitter('</td></tr></table>')
-        elif style[0] == 'para':
-            if self.currentList == 0:
-                self.emitter('</p>')
-        else:
-            print("INVALID FORMAT: {}".format(style))
-
-    def fragment(self, text, style):
-        if style is None or style[0] is None:
-            self.emitter(text)
-        elif style[0] == 'olink':
-            self.emitter('<i>{}</i>'.format(text))
-        elif style[0] == 'code':
-            self.emitter('<tt>{}</tt>'.format(text))
-        elif style[0] == 'emphasis':
-            if style[1] == 'role' and style[2] == 'highlight':
-                self.emitter('<em>{}</em>'.format(text))
+            if node.style[0] == 'tip':
+                self.out('</para></tip>'.format())
             else:
-                self.emitter('<strong>{}</strong>'.format(text))
+                self.out('</{}>'.format(node.style[0]))
+
+        elif type(node) == List:
+            self.out('\n{}<itemizedlist>'.format(self.prefix()))
+
+            first = True
+            self.indent += 1
+            for c in node.children:
+
+                if type(c) == Paragraph and not first:
+                    self.indent -= 1
+                    self.out('\n{}</listitem>'.format(self.prefix()))
+                if type(c) == Paragraph:
+                    self.out('\n{}<listitem>'.format(self.prefix()))
+                    first = False
+                    self.indent += 1
+
+                self.visitNode(c)
+
+            if not first:
+                self.indent -= 1
+                self.out('\n{}</listitem>'.format(self.prefix()))
+            self.indent -= 1
+
+            self.out('\n{}</itemizedlist>'.format(self.prefix()))
+
+
+    def emitFragment(self, fragment):
+
+        if fragment.href is not None:
+            self.out('<link xlink:href="{}">'.format(fragment.href))
+
+        if len(fragment.images) > 0:
+            for imgName in fragment.images:
+                self.out('<mediaobject><imageobject><imagedata fileref="{}"/></imageobject></mediaobject>'.format(imgName))
         else:
-            self.emitter('<{}>{}</{}>'.format(style, text, style))
 
-    def beginLink(self, destination):
-        self.emitter('<a href="{}">'.format(destination))
+            if fragment.style is None:
+                self.out(fragment.text)
+            elif fragment.style[0] == 'olink':
+                linkend = urllib.parse.quote(fragment.text, '')
+                self.out('<olink targetdoc="{}">{}</olink>'.format(linkend, fragment.text))
+            elif fragment.style[0] == 'emphasis':
+                if fragment.style[2] is not None and fragment.style[2] == 'highlight':
+                    self.out('<emphasis role="highlight">{}</emphasis>'.format(fragment.text))
+                else:
+                    self.out('<emphasis>{}</emphasis>'.format(fragment.text))
+            else:
+                self.out('<{}>{}</{}>'.format(fragment.style[0], fragment.text, fragment.style[0]))
 
-    def endLink(self):
-        self.emitter('</a>')
-
-    def image(self, imgName):
-        prefix = "file:///{}/".format(self.page.getPageDir())
-        self.emitter('<img src="{}"/>'.format(prefix + imgName))
+        if fragment.href is not None:
+            self.out('</link>')
