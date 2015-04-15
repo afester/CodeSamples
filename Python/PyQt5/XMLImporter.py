@@ -17,7 +17,7 @@ class Handler(xml.sax.handler.ContentHandler):
         self.keywordLinks = set()
         self.listLevel = 0
         self.sectionLevel = 0
-        self.hasBlock = False
+        self.specialBlock = None
 
         # Note: an empty, newly created QTextDocument() always contains one 
         # initial block. Furthermore, this initial block can not be
@@ -98,15 +98,19 @@ class Handler(xml.sax.handler.ContentHandler):
 
         elif name == 'tip':
             self.insertBlock('', ('tip', None, None))
-            self.hasBlock = True
+            self.specialBlock = 'tip'
+
+        elif name == 'warning':
+            self.insertBlock('', ('warning', None, None))
+            self.specialBlock = 'warning'
 
         elif name == 'blockquote':
-            self.collectContent = True
             self.insertBlock('', ('blockquote', None, None))
+            self.specialBlock = 'blockquote'
 
         elif name == 'para':
             self.collectContent = True
-            if self.listLevel == 0 and self.hasBlock == False:
+            if self.listLevel == 0 and self.specialBlock is None:
                 self.insertBlock('', ('para', None, None))
 
         elif name == 'programlisting':
@@ -204,13 +208,13 @@ class Handler(xml.sax.handler.ContentHandler):
 
         elif name == 'para':
             self.collectContent = False
-            if self.hasBlock:   # TODO: Workaround for "tip"
-                self.insertFragment(self.content, ('tip', None, None))
+            if self.specialBlock is not None:   # TODO: Workaround for "tip" and "warning"
+                self.insertFragment(self.content, (self.specialBlock, None, None))
             else:
                 self.insertFragment(self.content, ('para', None, None))
 
-        elif name == 'tip':
-            self.hasBlock = False
+        elif name in ('tip', 'warning'):
+            self.specialBlock = None
 
         elif name == 'blockquote':
             self.collectContent = False

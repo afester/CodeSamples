@@ -45,6 +45,17 @@ tip {
 	font-style: italic;
 }
 
+warning {
+	margin-top: 15px;
+	margin-bottom: 15px;
+	margin-left: 20px;
+	background-color: #ffffff;
+	color: #ff0000;
+	font-family: "Sans";
+	font-size: 12pt;
+	font-style: italic;
+}
+
 blockquote {
 	margin-top: 3px;
 	margin-bottom: 3px;

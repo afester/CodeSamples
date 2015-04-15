@@ -38,10 +38,16 @@
           <para><link xlink:href="http://docbook.org/tdg51/en/html/tip.html">tip</link></para>
         </listitem>
         <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/warning.html">warning</link></para>
+        </listitem>
+        <listitem>
           <para><link xlink:href="http://docbook.org/tdg51/en/html/programlisting.html">programlisting</link></para>
         </listitem>
         <listitem>
-          <para><link xlink:href="http://docbook.org/tdg51/en/html/screen.html34">screen</link></para>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/screen.html">screen</link></para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/informalequation.html">informalequation</link> (Not yet)</para>
         </listitem>
         <listitem>
           <para><link xlink:href="http://docbook.org/tdg51/en/html/mediaobject.html">mediaobject</link></para>
@@ -69,6 +75,9 @@
         </listitem>
         <listitem>
           <para><link xlink:href="http://docbook.org/tdg51/en/html/link.html">link</link></para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/inlineequation.html">inlineequation</link> (Not yet)</para>
         </listitem>
       </itemizedlist>
     </section>

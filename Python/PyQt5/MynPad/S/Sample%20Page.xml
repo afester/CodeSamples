@@ -34,13 +34,18 @@
     </section>
 
     <section>
-      <title>A Tip</title>
+      <title>A tip</title>
       <tip><para>This section shows how a tip looks like.</para></tip>
     </section>
 
     <section>
       <title>A quotation</title>
-      <blockquote>This section shows how a quotation looks like.</blockquote>
+      <blockquote><para>This section shows how a quotation looks like.</para></blockquote>
+    </section>
+
+    <section>
+      <title>A warning</title>
+      <warning><para>This section shows how a warning looks like.</para></warning>
     </section>
 
     <section>

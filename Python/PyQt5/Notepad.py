@@ -10,7 +10,8 @@ from FormatManager import FormatManager
 import os, urllib.parse, uuid
 import dropbox
 from dropbox.rest import ErrorResponse
-from PyQt5.QtGui import QTextDocument, QTextCursor
+
+from TextDocumentTraversal import Frame, Paragraph, Fragment, DocumentFactory
 
 class LocalNotepad:
 
@@ -132,26 +133,17 @@ class LocalPage:
         if not os.path.isfile(pageFullPath):
             print('    Page does not exist, creating empty document ...')
 
-            # Create empty document - TODO: encapsulate
-            self.document = QTextDocument()
-            self.document.setUndoRedoEnabled(False)
-            self.document.setIndentWidth(20)
-            # add title
-            cursor = QTextCursor(self.document)
-            titleStyle = ('title', 'level', '1')
-            titleFmt = self.notepad.formatManager.getFormat(titleStyle)
-            cursor.insertBlock(titleFmt.getBlockFormat(), titleFmt.getCharFormat())
-            cursor.insertText(self.pageId)
-            # add empty paragraph to start with
-            paraStyle = ('para', None, None)
-            paraFmt = self.notepad.formatManager.getFormat(paraStyle)
-            cursor.insertBlock(paraFmt.getBlockFormat(), paraFmt.getCharFormat())
-            cursor.movePosition(QTextCursor.Start)
-            b = cursor.block()
-            if b.length() == 1:
-                cursor = QTextCursor(self.document.findBlockByLineNumber(0))
-                cursor.select(QTextCursor.BlockUnderCursor)
-                cursor.deleteChar()
+            rootFrame = Frame()
+            p1 = Paragraph(0, ('title', 'level', '1'))
+            title = Fragment((None, None, None))
+            title.setText(self.pageId)
+            p1.add(title)
+            p2 = Paragraph(0, ('para', None, None))
+            rootFrame.add(p1)
+            rootFrame.add(p2)
+
+            docFac= DocumentFactory(self.notepad.formatManager)
+            self.document = docFac.createDocument(rootFrame)
 
             self.links = []
         else:

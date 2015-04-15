@@ -4,7 +4,7 @@ Created on 10.03.2015
 @author: afester
 '''
 
-from PyQt5.Qt import QTextTable, QTextFormat
+from PyQt5.Qt import QTextTable, QTextFormat, QTextDocument, QTextCursor
 from xml.sax.saxutils import escape
 import tools
 import urllib
@@ -273,6 +273,8 @@ class HtmlPrinter:
                 self.out('\n\n{}<h{}>'.format(self.prefix(), int(node.style[2])))
             elif node.style[0] == 'tip':
                 self.out('\n{}<table class="tip"><tr><td><img src="icons/tip.png" /></td><td>'.format(self.prefix()))
+            elif node.style[0] == 'warning':
+                self.out('\n{}<table class="warning"><tr><td><img src="icons/warning.png" /></td><td>'.format(self.prefix()))
             elif node.style[0] == 'blockquote':
                 self.out('\n{}<blockquote>'.format(self.prefix()))
             elif node.style[0] == 'para':
@@ -292,7 +294,7 @@ class HtmlPrinter:
                 self.out('</pre>')
             elif node.style[0] == 'title':
                 self.out('</h{}>'.format(int(node.style[2])))
-            elif node.style[0] == 'tip':
+            elif node.style[0] in ('tip', 'warning'):
                 self.out('</td></tr></table>')
             elif node.style[0] == 'blockquote':
                 self.out('</blockquote>')
@@ -405,6 +407,10 @@ class DocbookPrinter:
 
             elif node.style[0] == 'tip':
                 self.out('\n{}<tip><para>'.format(self.prefix()))
+            elif node.style[0] == 'warning':
+                self.out('\n{}<warning><para>'.format(self.prefix()))
+            elif node.style[0] == 'blockquote':
+                self.out('\n{}<blockquote><para>'.format(self.prefix()))
             else:
                 self.out('\n{}<{}>'.format(self.prefix(), node.style[0]))
 
@@ -415,6 +421,10 @@ class DocbookPrinter:
 
             if node.style[0] == 'tip':
                 self.out('</para></tip>'.format())
+            elif node.style[0] == 'warning':
+                self.out('</para></warning>'.format())
+            elif node.style[0] == 'blockquote':
+                self.out('</para></blockquote>'.format())
             else:
                 self.out('</{}>'.format(node.style[0]))
 
@@ -468,3 +478,42 @@ class DocbookPrinter:
 
         if fragment.href is not None:
             self.out('</link>')
+
+
+class DocumentFactory:
+    
+    def __init__(self, formatManager):
+        self.formatManager = formatManager
+
+
+    def createDocument(self, rootFrame):
+        self.document = QTextDocument()
+        self.document.setUndoRedoEnabled(False)
+        self.document.setIndentWidth(20)
+        self.cursor = QTextCursor(self.document)
+
+        for n in rootFrame.children:
+            self.addNode(n)
+
+        self.cursor.movePosition(QTextCursor.Start)
+        b = self.cursor.block()
+        if b.length() == 1:
+            cursor = QTextCursor(self.document.findBlockByLineNumber(0))
+            cursor.select(QTextCursor.BlockUnderCursor)
+            cursor.deleteChar()
+
+        return self.document
+
+
+    def addNode(self, node):
+        if type(node) == Paragraph:
+            styleFormat = self.formatManager.getFormat(node.style)
+            self.cursor.insertBlock(styleFormat.getBlockFormat(), styleFormat.getCharFormat())
+            for n in node.children:
+                self.addNode(n)
+
+        elif type(node) == List:
+            pass
+
+        elif type(node) == Fragment:
+            self.cursor.insertText(node.text)
