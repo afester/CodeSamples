@@ -15,7 +15,7 @@ from PyQt5.QtCore import QUrl, QObject, QThread
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PyQt5 import uic
 
-import sys, os, fnmatch
+import sys, os, fnmatch, platform
 import logging.config
 
 from EditorWidget import EditorWidget
@@ -391,11 +391,13 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle('MynPad')
         app.setWindowIcon(QIcon('icons/mynpad.png'))
-        # On Windows, make sure to use a unique Application User Model Id, otherwise
-        # Windows shows the default python icon in the taskbar
-        # see http://stackoverflow.com/questions/1551605/how-to-set-applications-taskbar-icon-in-windows-7
-        myappid = 'afester.mynpad'
-        import ctypes; ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+
+        if os.name == 'nt':
+            # On Windows, make sure to use a unique Application User Model Id, otherwise
+            # Windows shows the default python icon in the taskbar
+            # see http://stackoverflow.com/questions/1551605/how-to-set-applications-taskbar-icon-in-windows-7
+            myappid = 'afester.mynpad'
+            import ctypes; ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
         self.theApplication = app
         app.aboutToQuit.connect(self.saveState)
@@ -458,13 +460,19 @@ class MainWindow(QMainWindow):
         pyQtVersion = PYQT_VERSION_STR
         pyQtQtVersion = QT_VERSION_STR
         qtRuntimeVersion = qVersion()
+        
+        platformType = os.name
+        platformSystem = platform.system()
+        platformRelease = platform.release()
 
-        QMessageBox.about(self, "About udev Device browser",
+        QMessageBox.about(self, "About MynPad",
+                          "Copyright \u00a9 2015 by Andreas Fester<br/>"+
                           "<table>"+
                           "<tr><th align=\"right\">Application version:</th><td>{}</td></tr>".format(appVersion) +
                           "<tr><th align=\"right\">Python version:</th><td>{}</td></tr>".format(pythonVersion) +
                           "<tr><th align=\"right\">PyQt version:</th><td>{} for Qt {}</td></tr>".format(pyQtVersion, pyQtQtVersion) +
                           "<tr><th align=\"right\">Qt runtime version:</th><td>{}</td></tr>".format(qtRuntimeVersion)+
+                          "<tr><th align=\"right\">Operating System:</th><td>{} {}</td></tr>".format(platformSystem, platformRelease)+
                           "</table>")
 
 

@@ -4,7 +4,7 @@ Created on 10.03.2015
 @author: afester
 '''
 
-from PyQt5.Qt import QTextTable, QTextFormat, QTextDocument, QTextCursor
+from PyQt5.Qt import QTextTable, QTextFormat, QTextDocument, QTextCursor, QTextCharFormat
 from xml.sax.saxutils import escape
 import tools
 import urllib
@@ -66,14 +66,13 @@ class Fragment:
 
     def __init__(self, style):
         self.href = None
-        self.images = []
+
+        self.image = None
         self.text = None
         self.style = style
 
-
-    def addImage(self, img):
-        self.images.append(img)
-
+    def setImage(self, img):
+        self.image = img
 
     def setText(self, text):
         self.text = text
@@ -81,8 +80,35 @@ class Fragment:
     def setHref(self, text):
         self.href = text
 
+    def __repr__(self):
+        return self.__str__()
+
+
+class TextFragment(Fragment):
+
+    def __init__(self, style):
+        Fragment.__init__(self, style)
+
     def __str__(self):
-        return 'Fragment[style={}, text="{}", images={}, href={}]'.format(self.style, self.text, self.images, self.href)
+        return 'TextFragment[style={}, text="{}", href={}]'.format(self.style, self.text, self.image, self.href)
+
+
+class ImageFragment(Fragment):
+
+    def __init__(self):
+        Fragment.__init__(self, (None, None, None))
+
+    def __str__(self):
+        return 'ImageFragment[image={}, href={}]'.format(self.image, self.href)
+
+
+class MathFragment(Fragment):
+
+    def __init__(self):
+        Fragment.__init__(self, (None, None, None))
+
+    def __str__(self):
+        return 'MathFragment[text="{}", image={}, href={}]'.format(self.text, self.image, self.href)
 
 
 
@@ -172,39 +198,52 @@ class TextDocumentTraversal:
         iterator = block.begin()
         while not iterator.atEnd():
             fragment = iterator.fragment()
-            frag = self.getFragment(fragment)
-            result.add(frag)
+
+            for frag in self.getFragments(fragment):   # Fragment could contain more than one image!
+                result.add(frag)
             iterator += 1
 
         return result
 
 
-    def getFragment(self, fragment):
+    def getFragments(self, fragment):
+        result = []
+
         text = fragment.text().replace('\u2028', '\n')
 
         charFormat = fragment.charFormat()
         style = charFormat.property(QTextFormat.UserProperty)
 
-        result = Fragment(style)
+        href = None
         if style and style[0] == 'link':
             href = escape(charFormat.anchorHref())
-            result.setHref(href)
-            result.style = None     # Link implicitly defined by setting href
+            style = None     # Link implicitly defined by setting href
 
         isObject = (text.find('\ufffc') != -1)
-        isImage = isObject and charFormat.isImageFormat()
-
-        if isImage:
-            imgFmt = charFormat.toImageFormat()
-            imgName = tools.os_path_split(imgFmt.name())[-1]
-
-            # If the same image repeats multiple times, it is simply represented by
-            # yet another object replacement character ...
-            for img in range(0, len(text)):
-                result.addImage(imgName)
+        if isObject:
+            if charFormat.isImageFormat():
+                imgFmt = charFormat.toImageFormat()
+                imgName = tools.os_path_split(imgFmt.name())[-1]
+    
+                # If the same image repeats multiple times, it is simply represented by
+                # yet another object replacement character ...
+                for img in range(0, len(text)):
+                    frag = ImageFragment()
+                    frag.image = imgName
+                    frag.setHref(href)
+                    result.append(frag)
+            else:
+                mathFormula = charFormat.property(QTextCharFormat.UserProperty+1)
+                frag = MathFragment()
+                frag.setText(mathFormula.formula)
+                frag.image = mathFormula.image
+                result.append(frag)
         else:
             text = escape(text)
-            result.setText(text)
+            frag = TextFragment(style)
+            frag.setHref(href)
+            frag.setText(text)
+            result.append(frag)
 
         return result
 
@@ -458,10 +497,11 @@ class DocbookPrinter:
         if fragment.href is not None:
             self.out('<link xlink:href="{}">'.format(fragment.href))
 
-        if len(fragment.images) > 0:
-            for imgName in fragment.images:
-                self.out('<mediaobject><imageobject><imagedata fileref="{}"/></imageobject></mediaobject>'.format(imgName))
-        else:
+        if type(fragment) == ImageFragment:
+            self.out('<mediaobject><imageobject><imagedata fileref="{}"/></imageobject></mediaobject>'.format(fragment.image))
+        elif type(fragment) == MathFragment:
+            self.out('<inlineequation><mathphrase>{}</mathphrase></inlineequation>'.format(fragment.text))
+        elif type(fragment) == TextFragment:
 
             if fragment.style is None:
                 self.out(fragment.text)

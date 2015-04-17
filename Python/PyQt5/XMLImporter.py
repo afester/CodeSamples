@@ -3,8 +3,8 @@ import os
 import xml.sax
 
 from PyQt5.QtGui import QTextDocument, QTextDocumentFragment 
-from PyQt5.QtGui import QTextCursor, QTextImageFormat
-
+from PyQt5.QtGui import QTextCursor, QTextImageFormat, QTextCharFormat, QTextFormat
+from EditorWidget import MathFormula
 
 class Handler(xml.sax.handler.ContentHandler):
 
@@ -171,11 +171,17 @@ class Handler(xml.sax.handler.ContentHandler):
             self.content = ""
             self.href = attrs.get('xlink:href', '')
 
-        elif name in ['mediaobject', 'imageobject']:
+        elif name in ['mediaobject', 'imageobject', 'inlineequation']:
             pass
 
         elif name == "imagedata":
             self.insertImage(attrs)
+
+        elif name == "mathphrase":
+            # insert previous fragment
+            self.insertFragment(self.content, ('para', None, None))
+            self.collectContent = True
+            self.content = ""
 
         else:
             print("INVALID TAG:" + name)
@@ -257,8 +263,12 @@ class Handler(xml.sax.handler.ContentHandler):
             if not keyword in self.keywordLinks:
                 self.keywordLinks.add(keyword) 
 
-        elif name in ['mediaobject', 'imageobject', 'imagedata']:
+        elif name in ['mediaobject', 'imageobject', 'imagedata', 'inlineequation']:
             pass
+
+        elif name == 'mathphrase':
+            self.insertMathFragment()
+            self.collectContent = False
 
         else:
             print("INVALID TAG: " + name)
@@ -303,6 +313,17 @@ class Handler(xml.sax.handler.ContentHandler):
         imageFmt.setName(imagePath)
         #self.cursor.insertBlock()
         self.cursor.insertImage(imageFmt)
+
+
+    def insertMathFragment(self):
+        mathFormula = MathFormula()
+        mathFormula.setFormula(self.content)
+        mathFormula.renderFormula()
+
+        svgCharFormat = QTextCharFormat()
+        svgCharFormat.setObjectType(QTextFormat.UserObject + 1)
+        svgCharFormat.setProperty(QTextFormat.UserProperty + 1, mathFormula)
+        self.cursor.insertText('\ufffc', svgCharFormat);
 
 
 class XMLImporter:

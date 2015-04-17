@@ -23,6 +23,9 @@
           <para><olink targetdoc="Encoding%20Test">Encoding Test</olink></para>
         </listitem>
         <listitem>
+          <para><olink targetdoc="Math%20Test">Math Test</olink></para>
+        </listitem>
+        <listitem>
           <para><olink targetdoc="Test2">Test2</olink></para>
         </listitem>
       </itemizedlist>
