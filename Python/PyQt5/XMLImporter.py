@@ -2,6 +2,7 @@
 import os
 import xml.sax
 
+from PyQt5.Qt import Qt 
 from PyQt5.QtGui import QTextDocument, QTextDocumentFragment 
 from PyQt5.QtGui import QTextCursor, QTextImageFormat, QTextCharFormat, QTextFormat
 from EditorWidget import MathFormula
@@ -180,7 +181,7 @@ class Handler(xml.sax.handler.ContentHandler):
         elif name == "mathphrase":
             # insert previous fragment
             self.insertFragment(self.content, ('para', None, None))
-            self.collectContent = True
+            #self.collectContent = True
             self.content = ""
 
         else:
@@ -268,7 +269,7 @@ class Handler(xml.sax.handler.ContentHandler):
 
         elif name == 'mathphrase':
             self.insertMathFragment()
-            self.collectContent = False
+            #self.collectContent = False
 
         else:
             print("INVALID TAG: " + name)
@@ -321,6 +322,7 @@ class Handler(xml.sax.handler.ContentHandler):
         mathFormula.renderFormula()
 
         svgCharFormat = QTextCharFormat()
+        svgCharFormat.setVerticalAlignment(QTextCharFormat.AlignNormal)
         svgCharFormat.setObjectType(QTextFormat.UserObject + 1)
         svgCharFormat.setProperty(QTextFormat.UserProperty + 1, mathFormula)
         self.cursor.insertText('\ufffc', svgCharFormat);

@@ -31,7 +31,7 @@ class MathObjectRenderer(QObject, QTextObjectInterface):
         # print("MathObjectRenderer.intrinsicSize({})".format(mathFormula))
 
         result = mathFormula.image.size()
-        result += QSize(10, 6)
+        result += QSize(10, 0) # 6)
 
         return QSizeF(result)
 
@@ -55,7 +55,7 @@ class MathObjectRenderer(QObject, QTextObjectInterface):
 
     # Paint the object, in the object's coordinate system
     def doDraw(self, painter, rect, mathFormula):
-        painter.drawImage(5, 5, mathFormula.image)
+        painter.drawImage(5, 0, mathFormula.image)
 
         if mathFormula.isSelected:
             painter.setPen(QPen(Qt.lightGray, 1.0, Qt.DashLine))
@@ -84,7 +84,7 @@ class MathFormula:
         # Render the formula into a png image
         import matplotlib.mathtext as mathtext
         parser = mathtext.MathTextParser("Bitmap")
-        parser.to_png('math.png', self.formula, color='black', fontsize=12, dpi=100)
+        parser.to_png('math.png', r'${}$'.format(self.formula), color='black', fontsize=12, dpi=100)
         self.image = QImage('math.png')
 
 
@@ -218,11 +218,39 @@ class FindWidget(QWidget):
             self.textEdit.setTextCursor(crsr)
  
 
+class MathEditWidget(QWidget):
+
+    apply = pyqtSignal()
+
+    def __init__(self, parentWidget):
+        QWidget.__init__(self, parentWidget)
+
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(layout)
+
+        self.formulaEditor = QTextEdit()
+        self.formulaEditor.setAcceptRichText(False)
+
+        self.applyButton = QPushButton('Apply')
+        self.applyButton.clicked.connect(self.apply)
+
+        layout.addWidget(self.formulaEditor)
+        layout.addWidget(self.applyButton)
+
+    def setFormula(self, formula):
+        self.formulaEditor.setText(formula)
+
+    def getFormula(self):
+        return self.formulaEditor.toPlainText()
+
+
 class TextEdit(QTextEdit):
 
     updateBlockFormat = pyqtSignal(object)
     updateCharFormat = pyqtSignal(object)
     navigate = pyqtSignal(str)
+    objectSelectionChanged = pyqtSignal()
  
     def __init__(self, parentWidget):
         QTextEdit.__init__(self, parentWidget)
@@ -445,17 +473,18 @@ class TextEdit(QTextEdit):
 
         if charFmt.objectType() == QTextCharFormat.UserObject+1:
             mathFormula = charFmt.property(QTextCharFormat.UserProperty + 1)
-            print('SELECTED FORMULA "{}"'.format(mathFormula.formula))
             if self.selectedObject is not None:
                 self.selectedObject.setSelected(False)
             self.selectedObject = mathFormula
             self.selectedObject.setSelected(True)
             self.viewport().update()
+            self.objectSelectionChanged.emit()
         else:
             if self.selectedObject is not None:
                 self.selectedObject.setSelected(False)
                 self.selectedObject = None
                 self.viewport().update()
+                self.objectSelectionChanged.emit()
 
             if self.tracking:
                 style = charFmt.property(QTextFormat.UserProperty)
@@ -494,6 +523,25 @@ class TextEdit(QTextEdit):
         # Make sure that the image is also part of the page
         page.save()
 
+    def insertFormula(self):
+        cursor = self.textCursor()
+
+        mathFormula = MathFormula()
+        mathFormula.setFormula('f(x) := ...')
+        mathFormula.renderFormula()
+
+        svgCharFormat = QTextCharFormat()
+        svgCharFormat.setObjectType(QTextFormat.UserObject + 1)
+        svgCharFormat.setProperty(QTextFormat.UserProperty + 1, mathFormula)
+        cursor.insertText('\ufffc', svgCharFormat);
+
+        if self.selectedObject is not None:
+            self.selectedObject.setSelected(False)
+        self.selectedObject = mathFormula
+        self.selectedObject.setSelected(True)
+        self.viewport().update()
+        self.objectSelectionChanged.emit()
+
 
     def insertFromMimeData(self, data):
 
@@ -507,6 +555,10 @@ class TextEdit(QTextEdit):
             for f in data.formats():
                 msg = msg + '\n   ' + f
             QMessageBox.information(self, 'Error', 'Unsupported clipboard content: {}'.format(msg))
+
+
+    def getSelectedObject(self):
+        return self.selectedObject
 
 
 class EditorWidget(QWidget):
@@ -523,6 +575,7 @@ class EditorWidget(QWidget):
 
         self.editView = TextEdit(self)
         self.editView.navigate.connect(self.navigate)
+        self.editView.objectSelectionChanged.connect(self.objectSelectionChanged)
 
         toolbar = QWidget(self)
         layout = QHBoxLayout()
@@ -549,6 +602,10 @@ class EditorWidget(QWidget):
         self.findWidget = FindWidget(self, searchMarker.getCharFormat(), self.editView)
         self.findWidget.hide()
 
+        self.editMathWidget = MathEditWidget(self)
+        self.editMathWidget.apply.connect(self.applyMathFormula)
+        self.editMathWidget.hide()
+
         #horizontalSpacer = QSpacerItem(0, 0) # 40, 20) # , QSizePolicy.Expanding, QSizePolicy.Minimum)
         #layout.addItem(horizontalSpacer)
 
@@ -557,11 +614,13 @@ class EditorWidget(QWidget):
         hLayout.addWidget(toolbar)
         hLayout.addWidget(self.findWidget)
         hLayout.addWidget(self.editView)
+        hLayout.addWidget(self.editMathWidget)
 
         # The toolbar should take the minimum space and the edit view the remaining space
         hLayout.setStretch(0, 0)
         hLayout.setStretch(1, 0)
         hLayout.setStretch(2, 1)
+        hLayout.setStretch(3, 0.1)
 
 
     def load(self, notepad, pageId):
@@ -583,104 +642,6 @@ class EditorWidget(QWidget):
         mo.setParent(self)
         doc.documentLayout().registerHandler(QTextCharFormat.UserObject+1, mo);
 #################################
-
-    #===========================================================================
-    #     # Selection of features following "Writing mathematical expressions" tutorial
-    #     mathtext_titles = {
-    #         0: "Header demo",
-    #         1: "Subscripts and superscripts",
-    #         2: "Fractions, binomials and stacked numbers",
-    #         3: "Radicals",
-    #         4: "Fonts",
-    #         5: "Accents",
-    #         6: "Greek, Hebrew",
-    #         7: "Delimiters, functions and Symbols"}
-    #     n_lines = len(mathtext_titles)
-    #     
-    #     # Randomly picked examples
-    #     mathext_demos = {
-    #         0: r"$W^{3\beta}_{\delta_1 \rho_1 \sigma_2} = "
-    #         r"U^{3\beta}_{\delta_1 \rho_1} + \frac{1}{8 \pi 2} "
-    #         r"\int^{\alpha_2}_{\alpha_2} d \alpha^\prime_2 \left[\frac{ "
-    #         r"U^{2\beta}_{\delta_1 \rho_1} - \alpha^\prime_2U^{1\beta}_"
-    #         r"{\rho_1 \sigma_2} }{U^{0\beta}_{\rho_1 \sigma_2}}\right]$",
-    #     
-    #         1: r"$\alpha_i > \beta_i,\ "
-    #         r"\alpha_{i+1}^j = {\rm sin}(2\pi f_j t_i) e^{-5 t_i/\tau},\ "
-    #         r"\ldots$",
-    #     
-    #         2: r"$\frac{3}{4},\ \binom{3}{4},\ \stackrel{3}{4},\ "
-    #         r"\left(\frac{5 - \frac{1}{x}}{4}\right),\ \ldots$",
-    #     
-    #         3: r"$\sqrt{2},\ \sqrt[3]{x},\ \ldots$",
-    #     
-    #         4: r"$\mathrm{Roman}\ , \ \mathit{Italic}\ , \ \mathtt{Typewriter} \ "
-    #         r"\mathrm{or}\ \mathcal{CALLIGRAPHY}$",
-    #     
-    #         5: r"$\acute a,\ \bar a,\ \breve a,\ \dot a,\ \ddot a, \ \grave a, \ "
-    #         r"\hat a,\ \tilde a,\ \vec a,\ \widehat{xyz},\ \widetilde{xyz},\ "
-    #         r"\ldots$",
-    #     
-    #         6: r"$\alpha,\ \beta,\ \chi,\ \delta,\ \lambda,\ \mu,\ "
-    #         r"\Delta,\ \Gamma,\ \Omega,\ \Phi,\ \Pi,\ \Upsilon,\ \nabla,\ "
-    #         r"\aleph,\ \beth,\ \daleth,\ \gimel,\ \ldots$",
-    #     
-    #         7: r"$\coprod,\ \int,\ \oint,\ \prod,\ \sum,\ "
-    #         r"\log,\ \sin,\ \approx,\ \oplus,\ \star,\ \varpropto,\ "
-    #         r"\infty,\ \partial,\ \Re,\ \leftrightsquigarrow, \ \ldots$"}
-    #     
-    #     
-    #     # Colors used in mpl online documentation.
-    #     mpl_blue_rvb = (191./255., 209./256., 212./255.)
-    #     mpl_orange_rvb = (202/255., 121/256., 0./255.)
-    #     mpl_grey_rvb = (51./255., 51./255., 51./255.)
-    # 
-    #     # Creating figure and axis.
-    #     plt.figure(figsize=(6, 7))
-    #     plt.axes([0.01, 0.01, 0.98, 0.90], axisbg="white", frameon=True)
-    #     plt.gca().set_xlim(0., 1.)
-    #     plt.gca().set_ylim(0., 1.)
-    #     plt.gca().set_title("Matplotlib's math rendering engine",
-    #                         color=mpl_grey_rvb, fontsize=14, weight='bold')
-    #     plt.gca().set_xticklabels("", visible=False)
-    #     plt.gca().set_yticklabels("", visible=False)
-    # 
-    #     # Gap between lines in axes coords
-    #     line_axesfrac = (1. / (n_lines))
-    # 
-    #     # Plotting header demonstration formula
-    #     full_demo = mathext_demos[0]
-    #     plt.annotate(full_demo,
-    #                  xy=(0.5, 1. - 0.59*line_axesfrac),
-    #                  xycoords='data', color=mpl_orange_rvb, ha='center',
-    #                  fontsize=20)
-    # 
-    #     # Plotting features demonstration formulae
-    #     for i_line in range(1, n_lines):
-    #         baseline = 1. - (i_line)*line_axesfrac
-    #         baseline_next = baseline - line_axesfrac*1.
-    #         title = mathtext_titles[i_line] + ":"
-    #         fill_color = ['white', mpl_blue_rvb][i_line % 2]
-    #         plt.fill_between([0., 1.], [baseline, baseline],
-    #                          [baseline_next, baseline_next],
-    #                          color=fill_color, alpha=0.5)
-    #         plt.annotate(title,
-    #                      xy=(0.07, baseline - 0.3*line_axesfrac),
-    #                      xycoords='data', color=mpl_grey_rvb, weight='bold')
-    #         demo = mathext_demos[i_line]
-    #         plt.annotate(demo,
-    #                      xy=(0.05, baseline - 0.75*line_axesfrac),
-    #                      xycoords='data', color=mpl_grey_rvb,
-    #                      fontsize=16)
-    # 
-    #     for i in range(n_lines):
-    #         s = mathext_demos[i]
-    #         print(i, s)
-    #     plt.show()
-    #     
-    #===========================================================================
-
-#######################################################
 
         # Setup modification flag handling
         doc.modificationChanged.connect(self.updateWindowTitle)
@@ -746,6 +707,9 @@ class EditorWidget(QWidget):
             else:
                 self.editView.insertImage(image)
 
+
+    def insertFormula(self):
+        self.editView.insertFormula()
 
 ## Text format
 
@@ -928,3 +892,23 @@ class EditorWidget(QWidget):
 
     def findInPage(self):
         self.findWidget.showWidget()
+
+
+    def objectSelectionChanged(self):
+        obj = self.editView.getSelectedObject()
+        if obj is None:
+            self.editMathWidget.hide()
+        else:
+            self.editMathWidget.setFormula(obj.formula)
+            self.editMathWidget.show()
+            # self.editMathWidget.setFocus()                # TODO - does not work
+
+
+    def applyMathFormula(self):
+        obj = self.editView.getSelectedObject()
+        if obj is not None:         # should always be true!
+            obj.setFormula(self.editMathWidget.getFormula())
+            obj.renderFormula()
+            self.editView.viewport().update()
+            self.editView.document().setModified(True)
+            # self.editMathWidget.setFocus()                # TODO - does not work

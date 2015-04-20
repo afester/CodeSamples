@@ -364,6 +364,10 @@ class ActionSelector(TitledToolbar):
         insertImageAction.triggered.connect(parent.insertImage)
         toolbar.addAction(insertImageAction)
 
+        insertFormulaAction = QAction("f(x)", toolbar)
+        insertFormulaAction.triggered.connect(parent.insertFormula)
+        toolbar.addAction(insertFormulaAction)
+
         findInPageAction = QAction(QIcon("icons/edit-find.png"), "Find in page (CTRL-F)", toolbar)
         findInPageAction.setShortcut(Qt.CTRL + Qt.Key_F);
         findInPageAction.triggered.connect(parent.findInPage)

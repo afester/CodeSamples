@@ -461,7 +461,6 @@ class MainWindow(QMainWindow):
         pyQtQtVersion = QT_VERSION_STR
         qtRuntimeVersion = qVersion()
         
-        platformType = os.name
         platformSystem = platform.system()
         platformRelease = platform.release()
 
