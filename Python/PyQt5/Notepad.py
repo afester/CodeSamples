@@ -11,7 +11,7 @@ import os, urllib.parse, uuid
 import dropbox
 from dropbox.rest import ErrorResponse
 
-from TextDocumentTraversal import Frame, Paragraph, Fragment, DocumentFactory
+from TextDocumentTraversal import Frame, Paragraph, TextFragment, DocumentFactory
 
 class LocalNotepad:
 
@@ -135,7 +135,7 @@ class LocalPage:
 
             rootFrame = Frame()
             p1 = Paragraph(0, ('title', 'level', '1'))
-            title = Fragment((None, None, None))
+            title = TextFragment((None, None, None))
             title.setText(self.pageId)
             p1.add(title)
             p2 = Paragraph(0, ('para', None, None))
@@ -171,7 +171,7 @@ class LocalPage:
 
     def saveImage(self, image):
         fileName = str(uuid.uuid4()).replace('-', '') + '.png'
-        filePath = os.path.join(self.getPagePath(), fileName)
+        filePath = os.path.join(self.getPageDir(), fileName)
         print("Saving image to {}".format(filePath))
         image.save(filePath)
 

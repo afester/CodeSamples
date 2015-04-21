@@ -67,15 +67,7 @@ class Fragment:
     def __init__(self, style):
         self.href = None
 
-        self.image = None
-        self.text = None
         self.style = style
-
-    def setImage(self, img):
-        self.image = img
-
-    def setText(self, text):
-        self.text = text
 
     def setHref(self, text):
         self.href = text
@@ -88,6 +80,10 @@ class TextFragment(Fragment):
 
     def __init__(self, style):
         Fragment.__init__(self, style)
+        self.text = None
+
+    def setText(self, text):
+        self.text = text
 
     def __str__(self):
         return 'TextFragment[style={}, text="{}", href={}]'.format(self.style, self.text, self.image, self.href)
@@ -97,6 +93,10 @@ class ImageFragment(Fragment):
 
     def __init__(self):
         Fragment.__init__(self, (None, None, None))
+        self.image = None
+
+    def setImage(self, img):
+        self.image = img
 
     def __str__(self):
         return 'ImageFragment[image={}, href={}]'.format(self.image, self.href)
@@ -106,6 +106,14 @@ class MathFragment(Fragment):
 
     def __init__(self):
         Fragment.__init__(self, (None, None, None))
+        self.image = None
+        self.text = None
+
+    def setText(self, text):
+        self.text = text
+
+    def setImage(self, img):
+        self.image = img
 
     def __str__(self):
         return 'MathFragment[text="{}", image={}, href={}]'.format(self.text, self.image, self.href)
@@ -361,11 +369,17 @@ class HtmlPrinter:
         if fragment.href is not None:
             self.out('<a href="{}">'.format(fragment.href))
 
-        if len(fragment.images) > 0:
-            for imgName in fragment.images:
-                prefix = "file:///{}/".format(self.baseDir)
-                self.out('<img src="{}"/>'.format(prefix + imgName))
-        else:
+        if type(fragment) == ImageFragment:
+            prefix = "file:///{}/".format(self.baseDir)
+            self.out('<img src="{}"/>'.format(prefix + fragment.image))
+        elif type(fragment) == MathFragment:
+            import tempfile, os, uuid
+            imgPath = tempfile.gettempdir()
+            fileName = str(uuid.uuid4()).replace('-', '') + '.png'
+            filePath = os.path.join(imgPath, fileName)
+            fragment.image.save(filePath)
+            self.out('<img class="math" alt="{}" src="file:///{}"/>'.format(fragment.text, filePath))
+        elif type(fragment) == TextFragment:
             if fragment.style is None:
                 self.out(fragment.text)
             elif fragment.style[0] == 'olink':
@@ -555,5 +569,5 @@ class DocumentFactory:
         elif type(node) == List:
             pass
 
-        elif type(node) == Fragment:
+        elif isinstance(node, Fragment):
             self.cursor.insertText(node.text)

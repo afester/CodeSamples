@@ -51,6 +51,15 @@ table.warning td {
 	color: #ff0000;
 }
 
+img.math {
+	/*background-color: #e4e4e4;*/
+	vertical-align: -8px; /*middle;		/* this is the best we can currently do to somewhat align math images with the text. */
+}
+
+div.mathsection {
+	background-color: red;
+}
+
 blockquote {
   margin-left: 25px;
   padding-left: 5px;
