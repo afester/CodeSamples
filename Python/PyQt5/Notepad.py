@@ -130,29 +130,28 @@ class LocalPage:
         pageFullPath = self.getPagePath()
         print("  Loading page at {} ".format(pageFullPath))
 
+        pageDir = self.getPageDir()
         if not os.path.isfile(pageFullPath):
             print('    Page does not exist, creating empty document ...')
 
             rootFrame = Frame()
             p1 = Paragraph(0, ('title', 'level', '1'))
-            title = TextFragment((None, None, None))
+            title = TextFragment(None)
             title.setText(self.pageId)
             p1.add(title)
             p2 = Paragraph(0, ('para', None, None))
             rootFrame.add(p1)
             rootFrame.add(p2)
 
-            docFac= DocumentFactory(self.notepad.formatManager)
+            docFac= DocumentFactory(pageDir, self.notepad.formatManager)
             self.document = docFac.createDocument(rootFrame)
 
             self.links = []
         else:
-            pageDir = self.getPageDir()
             importer = XMLImporter(pageDir, self.getFilename(), self.notepad.getFormatManager())
             importer.importDocument()
             self.document = importer.getDocument()
             self.links = importer.getLinks()
-
 
     def save(self):
         pagePath = self.getPagePath()

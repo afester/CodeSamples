@@ -53,7 +53,7 @@ table.warning td {
 
 img.math {
 	/*background-color: #e4e4e4;*/
-	vertical-align: -8px; /*middle;		/* this is the best we can currently do to somewhat align math images with the text. */
+	vertical-align: middle;		/* this is the best we can currently do to somewhat align math images with the text. */
 }
 
 div.mathsection {

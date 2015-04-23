@@ -4,11 +4,11 @@ Created on 10.03.2015
 @author: afester
 '''
 
-from PyQt5.Qt import QTextTable, QTextFormat, QTextDocument, QTextCursor, QTextCharFormat
+from PyQt5.Qt import QTextTable, QTextDocument, QTextCursor, QTextFormat, QTextCharFormat, QTextImageFormat
 from xml.sax.saxutils import escape
 import tools
-import urllib
-
+import os, urllib
+from EditorWidget import MathFormula
 
 class Node:
 
@@ -86,7 +86,7 @@ class TextFragment(Fragment):
         self.text = text
 
     def __str__(self):
-        return 'TextFragment[style={}, text="{}", href={}]'.format(self.style, self.text, self.image, self.href)
+        return 'TextFragment[style={}, text="{}", href={}]'.format(self.style, self.text, self.href)
 
 
 class ImageFragment(Fragment):
@@ -224,7 +224,7 @@ class TextDocumentTraversal:
 
         href = None
         if style and style[0] == 'link':
-            href = escape(charFormat.anchorHref())
+            href = charFormat.anchorHref()  #escape(charFormat.anchorHref())
             style = None     # Link implicitly defined by setting href
 
         isObject = (text.find('\ufffc') != -1)
@@ -247,7 +247,7 @@ class TextDocumentTraversal:
                 frag.image = mathFormula.image
                 result.append(frag)
         else:
-            text = escape(text)
+            # text = escape(text)
             frag = TextFragment(style)
             frag.setHref(href)
             frag.setText(text)
@@ -370,34 +370,41 @@ class HtmlPrinter:
             self.out('<a href="{}">'.format(fragment.href))
 
         if type(fragment) == ImageFragment:
+            imageName = escape(fragment.image)
             prefix = "file:///{}/".format(self.baseDir)
-            self.out('<img src="{}"/>'.format(prefix + fragment.image))
+            self.out('<img src="{}"/>'.format(prefix + imageName))
         elif type(fragment) == MathFragment:
+########################### TODO ##################################
             import tempfile, os, uuid
             imgPath = tempfile.gettempdir()
             fileName = str(uuid.uuid4()).replace('-', '') + '.png'
             filePath = os.path.join(imgPath, fileName)
             fragment.image.save(filePath)
-            self.out('<img class="math" alt="{}" src="file:///{}"/>'.format(fragment.text, filePath))
+###################################################################
+
+            imgName = escape(filePath)
+            formula = escape(fragment.text)
+            self.out('<img class="math" alt="{}" src="file:///{}"/>'.format(formula, imgName))
         elif type(fragment) == TextFragment:
+
+            text = escape(fragment.text)
             if fragment.style is None:
-                self.out(fragment.text)
+                self.out(text)
             elif fragment.style[0] == 'olink':
-                linkend = urllib.parse.quote(fragment.text, '')
-                self.out('<a href="{}">{}</a>'.format(linkend, fragment.text))
+                linkend = urllib.parse.quote(text, '')
+                self.out('<a href="{}">{}</a>'.format(linkend, text))
             elif fragment.style[0] == 'emphasis':
                 if fragment.style[2] is not None and fragment.style[2] == 'highlight':
-                    self.out('<em>{}</em>'.format(fragment.text))
+                    self.out('<em>{}</em>'.format(text))
                 else:
-                    self.out('<strong>{}</strong>'.format(fragment.text))
+                    self.out('<strong>{}</strong>'.format(text))
             elif fragment.style[0] == 'code':
-                self.out('<tt>{}</tt>'.format(fragment.text))
+                self.out('<tt>{}</tt>'.format(text))
             else:
-                self.out('<{}>{}</{}>'.format(fragment.style[0], fragment.text, fragment.style[0]))
+                self.out('<{}>{}</{}>'.format(fragment.style[0], text, fragment.style[0]))
 
         if fragment.href is not None:
             self.out('</a>')
-
 
 
 class DocbookPrinter:
@@ -509,26 +516,30 @@ class DocbookPrinter:
     def emitFragment(self, fragment):
 
         if fragment.href is not None:
-            self.out('<link xlink:href="{}">'.format(fragment.href))
+            href = escape(fragment.href) 
+            self.out('<link xlink:href="{}">'.format(href))
 
         if type(fragment) == ImageFragment:
-            self.out('<mediaobject><imageobject><imagedata fileref="{}"/></imageobject></mediaobject>'.format(fragment.image))
+            imageName = escape(fragment.image)
+            self.out('<mediaobject><imageobject><imagedata fileref="{}"/></imageobject></mediaobject>'.format(imageName))
         elif type(fragment) == MathFragment:
-            self.out('<inlineequation><mathphrase>{}</mathphrase></inlineequation>'.format(fragment.text))
+            formula = escape(fragment.text)
+            self.out('<inlineequation><mathphrase>{}</mathphrase></inlineequation>'.format(formula))
         elif type(fragment) == TextFragment:
 
+            text = escape(fragment.text)
             if fragment.style is None:
-                self.out(fragment.text)
+                self.out(text)
             elif fragment.style[0] == 'olink':
                 linkend = urllib.parse.quote(fragment.text, '')
-                self.out('<olink targetdoc="{}">{}</olink>'.format(linkend, fragment.text))
+                self.out('<olink targetdoc="{}">{}</olink>'.format(linkend, text))
             elif fragment.style[0] == 'emphasis':
                 if fragment.style[2] is not None and fragment.style[2] == 'highlight':
-                    self.out('<emphasis role="highlight">{}</emphasis>'.format(fragment.text))
+                    self.out('<emphasis role="highlight">{}</emphasis>'.format(text))
                 else:
-                    self.out('<emphasis>{}</emphasis>'.format(fragment.text))
+                    self.out('<emphasis>{}</emphasis>'.format(text))
             else:
-                self.out('<{}>{}</{}>'.format(fragment.style[0], fragment.text, fragment.style[0]))
+                self.out('<{}>{}</{}>'.format(fragment.style[0], text, fragment.style[0]))
 
         if fragment.href is not None:
             self.out('</link>')
@@ -536,19 +547,26 @@ class DocbookPrinter:
 
 class DocumentFactory:
     
-    def __init__(self, formatManager):
+    def __init__(self, contentPath, formatManager):
         self.formatManager = formatManager
+        self.contentPath = contentPath
 
 
     def createDocument(self, rootFrame):
+        
+        # Create empty document
         self.document = QTextDocument()
         self.document.setUndoRedoEnabled(False)
         self.document.setIndentWidth(20)
         self.cursor = QTextCursor(self.document)
+        self.listLevel = 0
+        self.paraFormat = None
 
+        # add all root paragraphs
         for n in rootFrame.children:
             self.addNode(n)
 
+        # Clean up the first paragraph if document is not empty
         self.cursor.movePosition(QTextCursor.Start)
         b = self.cursor.block()
         if b.length() == 1:
@@ -561,13 +579,59 @@ class DocumentFactory:
 
     def addNode(self, node):
         if type(node) == Paragraph:
-            styleFormat = self.formatManager.getFormat(node.style)
-            self.cursor.insertBlock(styleFormat.getBlockFormat(), styleFormat.getCharFormat())
+            self.paraFormat = self.formatManager.getFormat(node.style)
+
+            # NOTE: "The block char format is the format used when inserting 
+            #        text at the beginning of an empty block."
+            #       See also below.
+            self.cursor.insertBlock(self.paraFormat.getBlockFormat(), self.paraFormat.getCharFormat())
+            # self.cursor.insertFragment(QTextDocumentFragment.fromPlainText(''))
+
+            if self.listLevel > 0:
+                # TODO: use list style from list node - requires a stack, though ...
+                listStyle = ('itemizedlist', 'level', str(self.listLevel))
+                newList = self.cursor.createList(self.formatManager.getFormat(listStyle).getListFormat())
             for n in node.children:
                 self.addNode(n)
 
         elif type(node) == List:
-            pass
+            self.listLevel += 1
+            for n in node.children:
+                self.addNode(n)
+            self.listLevel -= 1
 
-        elif isinstance(node, Fragment):
-            self.cursor.insertText(node.text)
+        elif type(node) is ImageFragment:
+            imageFmt = QTextImageFormat()
+            imagePath = os.path.join(self.contentPath, node.image)
+            imageFmt.setName(imagePath)
+            self.cursor.insertImage(imageFmt)
+        elif type(node) is MathFragment:
+            mathFormula = MathFormula()
+            mathFormula.setFormula(node.text)
+            mathFormula.image = node.image #  renderFormula()
+
+            mathObjectFormat = QTextCharFormat()
+            mathObjectFormat.setVerticalAlignment(QTextCharFormat.AlignNormal)
+            mathObjectFormat.setObjectType(QTextFormat.UserObject + 1)
+            mathObjectFormat.setProperty(QTextFormat.UserProperty + 1, mathFormula)
+            self.cursor.insertText('\ufffc', mathObjectFormat);
+        elif type(node) is TextFragment:
+            text = node.text.replace('\n', '\u2028')
+            if node.href is not None:
+                fmt = self.formatManager.getFormat(('link', None, None))   # TODO!
+                charFmt = fmt.getCharFormat()
+                charFmt.setAnchorHref(node.href)
+                self.cursor.insertText(text, charFmt)
+            else:
+                # "The block char format is the format used when inserting text at the beginning of an empty block.
+                # Hence, the block char format is only useful for the first fragment -
+                # once a fragment is inserted with a different style, and afterwards
+                # another fragment is inserted with no specific style, we need to reset
+                # the char format to the block's char format explicitly!
+    
+                if node.style is not None:
+                    fmt = self.formatManager.getFormat(node.style)
+                else:
+                    fmt = self.paraFormat
+
+                self.cursor.insertText(text, fmt.getCharFormat())

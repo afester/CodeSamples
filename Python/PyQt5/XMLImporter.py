@@ -2,331 +2,288 @@
 import os
 import xml.sax
 
-from PyQt5.Qt import Qt 
-from PyQt5.QtGui import QTextDocument, QTextDocumentFragment 
-from PyQt5.QtGui import QTextCursor, QTextImageFormat, QTextCharFormat, QTextFormat
+from TextDocumentTraversal import Frame, List, Paragraph, TextFragment, ImageFragment, MathFragment, DocumentFactory
 from EditorWidget import MathFormula
 
 class Handler(xml.sax.handler.ContentHandler):
 
-    def __init__(self, contentPath, formatManager):
-        self.collectContent = False
-        self.content = ""
+    def __init__(self, contentPath):
         self.contentPath = contentPath
-        self.href = ""
-        self.formatManager = formatManager
-        self.keywordLinks = set()
-        self.listLevel = 0
+
         self.sectionLevel = 0
-        self.specialBlock = None
-
-        # Note: an empty, newly created QTextDocument() always contains one 
-        # initial block. Furthermore, this initial block can not be
-        # removed when the next document element is a Frame - additionally,
-        # it seems that there is *always* a block before each frame!
-        # Hence, for now, we are inserting code with a normal block element.
-        self.result = QTextDocument()
-        self.result.setUndoRedoEnabled(False)
-        self.result.setIndentWidth(20)
-        self.cursor = QTextCursor(self.result)
-
-        # Sample / test
-        #self.cursor.insertBlock(self.pCodeBlockFmt, self.pCodeCharFmt)
-        #self.cursor.insertText("Frame 1")
-        #self.cursor.insertBlock(self.pCodeBlockFmt, self.pCodeCharFmt)
-        #self.cursor.insertText("Frame 2")
-
-        # First block
-        #self.cursor.movePosition(QTextCursor.Start)
-
-        #self.cursor.insertBlock(self.h1BlockFmt, self.h1CharFmt)
-        #self.cursor.insertText("Header")
-        #self.cursor.setBlockCharFormat(self.h1CharFmt)
-        #self.cursor.setBlockFormat(self.h1BlockFmt)
-        #self.cursor.insertText("Header")
-
-        # Next block
-        #self.cursor.insertBlock(self.pBlockFmt, self.pCharFmt)
-        #self.cursor.setBlockCharFormat(self.pCharFmt)
-        #self.cursor.setBlockFormat(self.pBlockFmt)
-        #self.cursor.insertText("Para 1")
-        #self.cursor.insertText("Para 2")
-        #self.cursor.insertText("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy ei\n")
-
-        #self.cursor.insertBlock(self.h1BlockFmt, self.h1CharFmt)
-        #self.cursor.setBlockCharFormat(self.h1CharFmt)
-        #self.cursor.setBlockFormat(self.h1BlockFmt)
-        #self.cursor.insertText("Header 2\n")
-
-        # List test
-#===============================================================================
-#         self.cursor.insertText("Before List")
-# 
-#         self.cursor.insertList(self.formatManager.getFormat("ul1").getListFormat())
-#         self.cursor.insertText("Item1")
-#         self.cursor.insertBlock()
-#         self.cursor.insertText("Item2")
-# 
-#         self.cursor.insertList(self.formatManager.getFormat("ul2").getListFormat())
-#         self.cursor.insertText("Item1")
-#         self.cursor.insertBlock()
-#         self.cursor.insertText("Item2")
-# 
-#         self.cursor.insertBlock(self.formatManager.getFormat("p").getBlockFormat(), self.formatManager.getFormat("p").getCharFormat())
-#         self.cursor.insertText("After List")
-#===============================================================================
-
-        # Clean up document
-        #self.cursor.movePosition(QTextCursor.Start)
-        #self.cursor.select(QTextCursor.BlockUnderCursor)
-        #self.cursor.deleteChar()
-
-        self.firstLi = False
+        self.listLevel = 0
+        self.nodeStack = []
+        self.keywordLinks = set()
+        self.currentStyle = None
+        self.paraStyle = None
+        self.content = None
+        self.href = None
+        self.result = None
 
     def startElement(self, name, attrs):
-        if name == "article":
-            pass
-
-        # blocks
+        # structural tags
+        if name == 'article':
+            self.nodeStack = [Frame()]
         elif name == 'section':
             self.sectionLevel += 1
-
-        elif name == 'title':
-            if self.sectionLevel > 0:   # ignore article title
-                style = ('title', 'level', str(self.sectionLevel))
-                self.collectContent = True
-                self.insertBlock('', style)
-
-        elif name == 'tip':
-            self.insertBlock('', ('tip', None, None))
-            self.specialBlock = 'tip'
-
-        elif name == 'warning':
-            self.insertBlock('', ('warning', None, None))
-            self.specialBlock = 'warning'
-
-        elif name == 'blockquote':
-            self.insertBlock('', ('blockquote', None, None))
-            self.specialBlock = 'blockquote'
-
-        elif name == 'para':
-            self.collectContent = True
-            if self.listLevel == 0 and self.specialBlock is None:
-                self.insertBlock('', ('para', None, None))
-
-        elif name == 'programlisting':
-            self.codeFormat =  ('programlisting', 'language', attrs.getValue('language')) 
-            self.collectContent = True
-            self.insertBlock('', self.codeFormat)
-
-        elif name == 'screen':
-            self.collectContent = True
-            self.insertBlock('', ('screen', None, None))
-
-        elif name == "itemizedlist":
+        elif name == 'itemizedlist':    # create a List node and set it as current parent
             self.listLevel += 1
-#===============================================================================
-#             self.firstLi = True
-# 
-#             listFormat = ('itemizedlist', 'level', str(len(self.lists) + 1))
-#             self.cursor.insertBlock(self.formatManager.getFormat( ('para', None, None) ).getBlockFormat(), self.formatManager.getFormat( ('para', None, None) ).getCharFormat())
-#             newList = self.cursor.createList(self.formatManager.getFormat(listFormat).getListFormat())
-#             self.lists.append(newList)
-#===============================================================================
-
-        elif name == "listitem":
-            listFormat = ('itemizedlist', 'level', str(self.listLevel))
-            self.cursor.insertBlock(self.formatManager.getFormat( ('para', None, None) ).getBlockFormat(), self.formatManager.getFormat( ('para', None, None) ).getCharFormat())
-            newList = self.cursor.createList(self.formatManager.getFormat(listFormat).getListFormat())
-
-            #===================================================================
-            # self.collectContent = True
-            # if self.firstLi:
-            #     self.firstLi = False
-            # else:
-            #     fmt = self.formatManager.getFormat( ('para', None, None) )
-            #     self.cursor.insertBlock()
-            #     self.lists[-1].add(self.cursor.block())
-            #     self.cursor.setCharFormat(fmt.getCharFormat())
-            #===================================================================
-
-        # Fragments
-        elif name == 'emphasis':
-            # insert previous fragment
-            self.emphasizeRole = attrs.get('role', '')
-            self.insertFragment(self.content, ('para', None, None))
-            self.content = ""
-
-        elif name == 'code':
-            # insert previous fragment
-            self.insertFragment(self.content, ('para', None, None))
-            self.content = ""
-
-        elif name == 'olink':    # internal link / keyword
-            self.insertFragment(self.content, ('para', None, None))
-            self.content = ""
-
-        elif name == 'link':   # external link / URL
-            # insert previous fragment
-            self.insertFragment(self.content, ('para', None, None))
-            self.content = ""
-            self.href = attrs.get('xlink:href', '')
-
-        elif name in ['mediaobject', 'imageobject', 'inlineequation']:
+            curList = List(('itemizedlist', 'level', str(self.listLevel)))
+            parent = self.nodeStack[-1]
+            parent.add(curList)
+            self.nodeStack.append(curList)              # push
+        elif name == 'mediaobject':
+            pass
+        elif name == 'imageobject':
+            pass
+        elif name == 'inlineequation':
             pass
 
-        elif name == "imagedata":
-            self.insertImage(attrs)
+        elif name == 'listitem':
+            pass
 
-        elif name == "mathphrase":
-            # insert previous fragment
-            self.insertFragment(self.content, ('para', None, None))
-            #self.collectContent = True
-            self.content = ""
+        # These contain <para> elements, but already define the paragraph style:
+        elif name == 'blockquote':
+            self.paraStyle = ('blockquote', None, None)
+        elif name == 'tip':
+            self.paraStyle = ('tip', None, None)
+        elif name == 'warning':
+            self.paraStyle = ('warning', None, None)
 
-        else:
-            print("INVALID TAG:" + name)
+        elif name == 'title':           # create a title paragraph and set it as current parent
+            if self.sectionLevel > 0:   # no title for <article>
+                para = Paragraph(0, ('title', 'level', str(self.sectionLevel)))
+                parent = self.nodeStack[-1]                    # top()
+                self.nodeStack.append(para)   # push()
+                parent.add(para)
+                self.content = ''
+        elif name == 'para':            # a paragraph contains only fragments
+            if self.paraStyle is None:
+                self.paraStyle = ('para', None, None)
+            para = Paragraph(0, self.paraStyle)
 
+            parent = self.nodeStack[-1]                    # top()
+            self.nodeStack.append(para)   # push()
+            parent.add(para)
+            self.content = ''           # start collecting content
+            self.currentStyle = None    # no specific style currently
+        elif name == 'programlisting':  # a program listing contains verbatim text only
+            language = attrs.getValue('language')
+            para = Paragraph(0, ('programlisting', 'language', language))
+            parent = self.nodeStack[-1]                    # top()
+            self.nodeStack.append(para)   # push()
+            parent.add(para)
+            self.content = ''           # start collecting content
+            self.currentStyle = None    # no specific style currently
+
+        elif name == 'screen':          # a screen contains verbatim text only
+            para = Paragraph(0, ('screen', None, None))
+            parent = self.nodeStack[-1]                    # top()
+            self.nodeStack.append(para)   # push()
+            parent.add(para)
+            self.content = ''           # start collecting content
+            self.currentStyle = None    # no specific style currently
+
+        # These are the fragments which are added to the current paragraph
+        elif name == 'emphasis':
+            # Add content so far to the current paragraph
+            if len(self.content) > 0:
+                parent = self.nodeStack[-1]
+    
+                frag = TextFragment(self.currentStyle)
+                frag.setText(self.content)
+                self.content = ''
+                parent.add(frag)
+
+            emphasizeRole = attrs.get('role', '')
+            if emphasizeRole == '':
+                self.currentStyle = ('emphasis', None, None)    # todo: nested styles support (needs yet another stack ...)
+            else:
+                self.currentStyle = ('emphasis', 'role', emphasizeRole)    # todo: nested styles support (needs yet another stack ...)
+        elif name == 'code':
+            # Add content so far to the current paragraph
+            if len(self.content) > 0:
+                parent = self.nodeStack[-1]
+    
+                frag = TextFragment(self.currentStyle)
+                frag.setText(self.content)
+                self.content = ''
+                parent.add(frag)
+
+            self.currentStyle = ('code', None, None)    # todo: nested styles support (needs yet another stack ...)
+        elif name == 'link':
+            # Add content so far to the current paragraph
+            if len(self.content) > 0:
+                parent = self.nodeStack[-1]
+                frag = TextFragment(self.currentStyle)
+                frag.setText(self.content)
+                self.content = ''
+                parent.add(frag)
+
+            self.href = attrs.get('xlink:href', '')
+            self.currentStyle = None            # todo: nested styles support (needs yet another stack ...)
+        elif name == 'olink':
+            # Add content so far to the current paragraph
+            if len(self.content) > 0:
+                parent = self.nodeStack[-1]
+                frag = TextFragment(self.currentStyle)
+                frag.setText(self.content)
+                self.content = ''
+                parent.add(frag)
+
+            self.currentStyle = ('olink', None, None)    # todo: nested styles support (needs yet another stack ...)
+        elif name == 'imagedata':
+            parent = self.nodeStack[-1]
+
+            # Add content so far to the current paragraph
+            if len(self.content) > 0:
+                frag = TextFragment(self.currentStyle)
+                frag.setText(self.content)
+                self.content = ''
+                parent.add(frag)
+
+            imageFile = attrs.getValue('fileref')
+            frag = ImageFragment()
+            frag.setImage(imageFile)
+            parent.add(frag)
+        elif name == 'mathphrase':
+            parent = self.nodeStack[-1]
+
+            # Add content so far to the current paragraph
+            if len(self.content) > 0:
+                frag = TextFragment(self.currentStyle)
+                frag.setText(self.content)
+                parent.add(frag)
+
+            self.content = ''
 
     def characters(self, data):
-        if self.collectContent:
-            self.content = self.content + data 
-
+        if self.content is not None:
+            self.content = self.content + data
 
     def endElement(self, name):
-        if name == "article":
-            if not self.result.isEmpty():
-                self.cursor.movePosition(QTextCursor.Start)
-                b = self.cursor.block()
-                if b.length() == 1:
-                    cursor = QTextCursor(self.result.findBlockByLineNumber(0))
-                    cursor.select(QTextCursor.BlockUnderCursor)
-                    cursor.deleteChar()
-
-        # Blocks
+        # structural tags
+        if name == 'article':
+            self.result = self.nodeStack[0]
         elif name == 'section':
             self.sectionLevel -= 1
+        elif name == 'itemizedlist':
+            self.nodeStack = self.nodeStack[0:-1]     # pop()
+            self.content = None
+            self.currentStyle = None
+            self.listLevel -= 1
+        elif name == 'mediaobject':
+            pass
+        elif name == 'imageobject':
+            pass
+        elif name == 'inlineequation':
+            pass
+
+        # These contain <para> elements:
+        elif name == 'listitem':
+            pass
+        elif name == 'blockquote':
+            pass
+        elif name == 'tip':
+            pass
+        elif name == 'warning':
+            pass
 
         elif name == 'title':
-            if self.sectionLevel > 0:   # ignore article title
-                style = ('title', 'level', str(self.sectionLevel))
-                self.collectContent = False
-                self.insertFragment(self.content, style)
-
+            if self.sectionLevel > 0:
+                parent = self.nodeStack[-1]
+                self.nodeStack = self.nodeStack[0:-1]     # pop()
+                frag = TextFragment(None)
+                frag.setText(self.content)
+                parent.add(frag)
+                self.content = None
         elif name == 'para':
-            self.collectContent = False
-            if self.specialBlock is not None:   # TODO: Workaround for "tip" and "warning"
-                self.insertFragment(self.content, (self.specialBlock, None, None))
-            else:
-                self.insertFragment(self.content, ('para', None, None))
+            if self.content != '':
+                parent = self.nodeStack[-1]
 
-        elif name in ('tip', 'warning'):
-            self.specialBlock = None
+                frag = TextFragment(self.currentStyle)
+                frag.setText(self.content)
+                self.content = None
+                parent.add(frag)
+                self.currentStyle = None            # todo: nested styles support (needs yet another stack ...)
+                self.paraStyle = None
 
-        elif name == 'blockquote':
-            self.collectContent = False
-            self.insertFragment(self.content, ('blockquote', None, None))
-
-        elif name == 'screen':
-            self.collectContent = False
-            self.insertFragment(self.content, ('screen', None, None))
-
+            self.nodeStack = self.nodeStack[0:-1]     # pop()
         elif name == 'programlisting':
-            self.collectContent = False
-            self.insertFragment(self.content, self.codeFormat)
+            if self.content != '':
+                parent = self.nodeStack[-1]
 
-        elif name == "itemizedlist":
-            self.listLevel -= 1
-            #self.collectContent = False
-            #self.lists.pop()
+                frag = TextFragment(self.currentStyle)
+                frag.setText(self.content)
+                self.content = None
+                parent.add(frag)
+                self.currentStyle = None            # todo: nested styles support (needs yet another stack ...)
 
-        elif name == "listitem":
-            pass
+            self.nodeStack = self.nodeStack[0:-1]     # pop()
+        elif name == 'screen':
+            if self.content != '':
+                parent = self.nodeStack[-1]
 
-        # Fragments
-        elif name == 'code':
-            self.insertFragment(self.content, ('code', None, None))
+                frag = TextFragment(self.currentStyle)
+                frag.setText(self.content)
+                self.content = None
+                parent.add(frag)
+                self.currentStyle = None            # todo: nested styles support (needs yet another stack ...)
+
+            self.nodeStack = self.nodeStack[0:-1]     # pop()
 
         elif name == 'emphasis':
-            if self.emphasizeRole == 'highlight':
-                self.insertFragment(self.content, ('emphasis', 'role', 'highlight'))
-            else:
-                self.insertFragment(self.content, ('emphasis', None, None))
+            parent = self.nodeStack[-1]
 
+            frag = TextFragment(self.currentStyle)
+            frag.setText(self.content)
+            self.content = ''
+            parent.add(frag)
+            self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
+        elif name == 'code':
+            parent = self.nodeStack[-1]
+
+            frag = TextFragment(self.currentStyle)
+            frag.setText(self.content)
+            self.content = ''
+            parent.add(frag)
+            self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
         elif name == 'link':
-            # Insert the link text
-            self.insertAnchor(self.content, ('link', None, None), self.href)
+            parent = self.nodeStack[-1]
 
+            frag = TextFragment(self.currentStyle)
+            frag.setText(self.content)
+            frag.setHref(self.href)
+            self.href = None
+            self.content = ''
+            parent.add(frag)
+            self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
         elif name == 'olink':
-            self.insertAnchor(self.content, ('olink', None, None), self.content)
+            parent = self.nodeStack[-1]
 
-            keyword = self.content
-            if not keyword in self.keywordLinks:
-                self.keywordLinks.add(keyword) 
+            frag = TextFragment(self.currentStyle)
+            frag.setText(self.content)
+            parent.add(frag)
 
-        elif name in ['mediaobject', 'imageobject', 'imagedata', 'inlineequation']:
+            self.keywordLinks.add(self.content) 
+
+            self.content = ''
+            self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
+        elif name == 'imagedata':
             pass
-
         elif name == 'mathphrase':
-            self.insertMathFragment()
-            #self.collectContent = False
+            mathFormula = MathFormula()
+            mathFormula.setFormula(self.content)
+            mathFormula.renderFormula()             # generate image - TODO: is there a better approach?
+                                                    # Do we need the image as part of the fragment?
+            parent = self.nodeStack[-1]
+            frag = MathFragment()
+            frag.setText(mathFormula.formula)
+            frag.setImage(mathFormula.image)
+            parent.add(frag)
 
-        else:
-            print("INVALID TAG: " + name)
-        self.content = ""
-
-    #def insertFrame(self, content, frameFmt):
-    #    self.cursor.movePosition(QTextCursor.Start)
-    #    self.cursor.movePosition(QTextCursor.StartOfBlock)
-    #    self.cursor.select(QTextCursor.BlockUnderCursor)
-    #    self.cursor.insertFrame(frameFmt)
-    #    self.cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
-
-
-    def insertBlock(self, content, selector):
-        fmt = self.formatManager.getFormat(selector)
-        self.cursor.insertBlock(fmt.getBlockFormat(), fmt.getCharFormat())
-        self.cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
-
-
-    def insertFragment(self, content, className):
-        fmt = self.formatManager.getFormat(className)
-        #self.cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
-        
-        content = content.replace('\n', '\u2028')
-        
-        self.cursor.insertText(content, fmt.getCharFormat())
-
-
-    def insertAnchor(self, content, className, href):
-        fmt = self.formatManager.getFormat(className)
-        charFmt = fmt.getCharFormat()
-        charFmt.setAnchorHref(href)
-
-        #self.cursor.insertFragment(QTextDocumentFragment.fromPlainText(content))
-        self.cursor.insertText(content, charFmt)
-
-                                  
-    def insertImage(self, attrs):
-        imageFile = attrs.getValue("fileref")
-        imagePath = os.path.join(self.contentPath, imageFile)
-        imageFmt = QTextImageFormat()
-        imageFmt.setName(imagePath)
-        #self.cursor.insertBlock()
-        self.cursor.insertImage(imageFmt)
-
-
-    def insertMathFragment(self):
-        mathFormula = MathFormula()
-        mathFormula.setFormula(self.content)
-        mathFormula.renderFormula()
-
-        svgCharFormat = QTextCharFormat()
-        svgCharFormat.setVerticalAlignment(QTextCharFormat.AlignNormal)
-        svgCharFormat.setObjectType(QTextFormat.UserObject + 1)
-        svgCharFormat.setProperty(QTextFormat.UserProperty + 1, mathFormula)
-        self.cursor.insertText('\ufffc', svgCharFormat);
-
+            self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
+            self.content = ''
 
 class XMLImporter:
 
@@ -343,12 +300,16 @@ class XMLImporter:
 
 
     def importFromFile(self, fileDesc):
+        # Step 1: read the XML file and create the document structure with the 
+        # corresponding styles
         parser = xml.sax.make_parser()
-        handler = Handler(self.contentPath, self.formatManager)
+        handler = Handler(self.contentPath)
         parser.setContentHandler(handler)
         parser.parse(fileDesc)
 
-        self.document = handler.result
+        # Step 2: load the styled document into the rich text editor 
+        df = DocumentFactory(self.contentPath, self.formatManager)
+        self.document = df.createDocument(handler.result)
         self.links = sorted(handler.keywordLinks)
 
 
