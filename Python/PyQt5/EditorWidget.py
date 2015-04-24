@@ -18,67 +18,98 @@ from Toolbars import ActionSelector, TextStyleSelector, BlockStyleSelector
 
 
 
-class MathObjectRenderer(QObject, QTextObjectInterface):
+class CustomObjectRenderer(QObject, QTextObjectInterface):
     
     def __init__(self):
         QObject.__init__(self)
         QTextObjectInterface.__init__(self)
 
-        # self.image = QImage('math.png')
 
-    def intrinsicSize(self, doc, posInDocument, format):
-        mathFormula = format.property(QTextFormat.UserProperty+1)
-        # print("MathObjectRenderer.intrinsicSize({})".format(mathFormula))
-
-        result = mathFormula.image.size()
-        result += QSize(10, 0) # 6)
-
-        return QSizeF(result)
+    # @Override
+    def intrinsicSize(self, doc, posInDocument, fmt):
+        customObject = fmt.property(QTextFormat.UserProperty+1)
+        return customObject.getSize()
 
 
     # @Override
-    def drawObject(self, painter, rect, doc, posInDocument, format):
-        mathFormula = format.property(QTextFormat.UserProperty+1)
+    def drawObject(self, painter, rect, doc, posInDocument, fmt):
+        customObject = fmt.property(QTextFormat.UserProperty+1)
 
         # rect is the rectangle to redraw, in document contents coordinates
 
         painter.save()
         # painter.fillRect(rect, Qt.red)
         painter.translate(rect.topLeft())
-        self.doDraw(painter, rect, mathFormula)
+        customObject.doDraw(painter, rect)
         painter.restore()
 
         # Draw the bounding box of the redraw rectangle (DEBUG)
         #painter.setPen(Qt.DashLine)
         #painter.drawRect(rect)
 
-
-    # Paint the object, in the object's coordinate system
-    def doDraw(self, painter, rect, mathFormula):
-        painter.drawImage(5, 0, mathFormula.image)
-
-        if mathFormula.isSelected:
-            painter.setPen(QPen(Qt.lightGray, 1.0, Qt.DashLine))
-            painter.drawRect(2, 0, rect.width() - 4, rect.height())
-
-
-
-class MathFormula:
-    '''A container for a mathematical formula and its rendered .png equivalent'''
+class CustomTextObject:
 
     def __init__(self):
-        self.image = None
-        self.formula = ''
         self.isSelected = False
-
 
     def setSelected(self, flag):
         self.isSelected = flag
 
 
+class ImageObject(CustomTextObject):
+
+    def __init__(self):
+        CustomTextObject.__init__(self)
+        self.imagName= None
+        self.bufferedImage = QImage('icons/emptyimage.png')
+
+    def getSize(self):
+        result = self.bufferedImage.size()
+        return QSizeF(result)
+
+    # Paint the object, in the object's coordinate system
+    def doDraw(self, painter, rect):
+        painter.drawImage(0, 0, self.bufferedImage)
+
+        if self.isSelected:
+            painter.setPen(QPen(Qt.red, 1.0, Qt.DashLine))
+            painter.drawRect(0, 0, rect.width()-1, rect.height()-1)
+            painter.fillRect(0, 0, 7, 7, Qt.red)
+            painter.fillRect(rect.width() - 7, 0, 7, 7, Qt.red)
+            painter.fillRect(0, rect.height() - 7, 7, 7, Qt.red)
+            painter.fillRect(rect.width() - 7, rect.height() - 7, 7, 7, Qt.red)
+
+    def setName(self, imageName):
+        self.imageName = imageName
+        img = QImage(imageName)
+        if not img.isNull():
+            self.bufferedImage = img
+
+
+class MathFormulaObject(CustomTextObject):
+    '''A container for a mathematical formula and its rendered .png equivalent'''
+
+    def __init__(self):
+        CustomTextObject.__init__(self)
+
+        self.image = None
+        self.formula = ''
+
+    def getSize(self):
+        result = self.image.size()
+        result += QSize(4, 4)
+        return QSizeF(result)
+
+    # Paint the object, in the object's coordinate system
+    def doDraw(self, painter, rect):
+        painter.drawImage(2, 0, self.image)
+
+        if self.isSelected:
+            painter.setPen(QPen(Qt.lightGray, 1.0, Qt.DashLine))
+            painter.drawRect(1, 0, rect.width() - 2, rect.height() - 2)
+
     def setFormula(self, formula):
         self.formula= formula
-    
 
     def renderFormula(self):
         # Render the formula into a png image
@@ -89,7 +120,7 @@ class MathFormula:
         baseline = parser.to_png('math.png', r'${}$'.format(self.formula), color='black', fontsize=12, dpi=100)
         self.image = QImage('math.png')
         percent = baseline / self.image.height()
-        print("Image: w={}, h={}, baseline={} ({}%)".format(self.image.width(), self.image.height(), baseline, percent))
+        # print("Image: w={}, h={}, baseline={} ({}%)".format(self.image.width(), self.image.height(), baseline, percent))
 
     def __str__(self):
         return self.formula
@@ -241,6 +272,13 @@ class MathEditWidget(QWidget):
         layout.addWidget(self.formulaEditor)
         layout.addWidget(self.applyButton)
 
+    def hideWidget(self):
+        self.hide()
+
+    def showWidget(self):
+        self.show()
+        self.formulaEditor.setFocus()
+
     def setFormula(self, formula):
         self.formulaEditor.setText(formula)
 
@@ -259,6 +297,7 @@ class TextEdit(QTextEdit):
         QTextEdit.__init__(self, parentWidget)
         self.tracking = False
         self.selectedObject = None
+        self.orgCursorWidth = self.cursorWidth()
 
         self.l = UrlEditor(self)
         self.l.applyUrl.connect(self.setCurrentUrl)
@@ -475,17 +514,19 @@ class TextEdit(QTextEdit):
         charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
 
         if charFmt.objectType() == QTextCharFormat.UserObject+1:
-            mathFormula = charFmt.property(QTextCharFormat.UserProperty + 1)
             if self.selectedObject is not None:
                 self.selectedObject.setSelected(False)
-            self.selectedObject = mathFormula
+
+            self.selectedObject = charFmt.property(QTextCharFormat.UserProperty + 1)
             self.selectedObject.setSelected(True)
+            self.setCursorWidth(0)
             self.viewport().update()
             self.objectSelectionChanged.emit()
         else:
             if self.selectedObject is not None:
                 self.selectedObject.setSelected(False)
                 self.selectedObject = None
+                self.setCursorWidth(self.orgCursorWidth)
                 self.viewport().update()
                 self.objectSelectionChanged.emit()
 
@@ -520,8 +561,16 @@ class TextEdit(QTextEdit):
 
         page = self.parent().page
         fileName = page.saveImage(image)
-        
+        print("FILENAME:{}".format(fileName))
         cursor.insertImage(image, fileName)
+
+        #imageObject = ImageObject()
+        #imageObject.setName(fileName)
+
+        #imageObjectFormat = QTextCharFormat()
+        #imageObjectFormat.setObjectType(QTextFormat.UserObject + 1)
+        #imageObjectFormat.setProperty(QTextFormat.UserProperty + 1, imageObject)
+        #cursor.insertText('\ufffc', imageObjectFormat);
 
         # Make sure that the image is also part of the page
         page.save()
@@ -529,14 +578,15 @@ class TextEdit(QTextEdit):
     def insertFormula(self):
         cursor = self.textCursor()
 
-        mathFormula = MathFormula()
+        mathFormula = MathFormulaObject()
         mathFormula.setFormula('f(x) := ...')
         mathFormula.renderFormula()
 
-        svgCharFormat = QTextCharFormat()
-        svgCharFormat.setObjectType(QTextFormat.UserObject + 1)
-        svgCharFormat.setProperty(QTextFormat.UserProperty + 1, mathFormula)
-        cursor.insertText('\ufffc', svgCharFormat);
+        mathObjectFormat = QTextCharFormat()
+        mathObjectFormat.setObjectType(QTextFormat.UserObject + 1)
+        mathObjectFormat.setVerticalAlignment(QTextCharFormat.AlignMiddle)
+        mathObjectFormat.setProperty(QTextFormat.UserProperty + 1, mathFormula)
+        cursor.insertText('\ufffc', mathObjectFormat);
 
         if self.selectedObject is not None:
             self.selectedObject.setSelected(False)
@@ -639,12 +689,6 @@ class EditorWidget(QWidget):
         # TODO: review
         doc.undoAvailable.connect(self.actionsSelector.undoAction.setEnabled)
         doc.redoAvailable.connect(self.actionsSelector.redoAction.setEnabled)
-
-########################################################################################                
-        mo = MathObjectRenderer()
-        mo.setParent(self)
-        doc.documentLayout().registerHandler(QTextCharFormat.UserObject+1, mo);
-#################################
 
         # Setup modification flag handling
         doc.modificationChanged.connect(self.updateWindowTitle)
@@ -900,11 +944,10 @@ class EditorWidget(QWidget):
     def objectSelectionChanged(self):
         obj = self.editView.getSelectedObject()
         if obj is None:
-            self.editMathWidget.hide()
-        else:
+            self.editMathWidget.hideWidget()
+        elif type(obj) is MathFormulaObject:
             self.editMathWidget.setFormula(obj.formula)
-            self.editMathWidget.show()
-            # self.editMathWidget.setFocus()                # TODO - does not work
+            self.editMathWidget.showWidget()
 
 
     def applyMathFormula(self):

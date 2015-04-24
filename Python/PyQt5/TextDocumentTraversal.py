@@ -4,11 +4,11 @@ Created on 10.03.2015
 @author: afester
 '''
 
-from PyQt5.Qt import QTextTable, QTextDocument, QTextCursor, QTextFormat, QTextCharFormat, QTextImageFormat
+from PyQt5.Qt import QTextTable, QTextDocument, QTextCursor, QTextFormat, QTextCharFormat
 from xml.sax.saxutils import escape
 import tools
 import os, urllib
-from EditorWidget import MathFormula
+from EditorWidget import ImageObject, MathFormulaObject, CustomObjectRenderer
 
 class Node:
 
@@ -230,22 +230,32 @@ class TextDocumentTraversal:
         isObject = (text.find('\ufffc') != -1)
         if isObject:
             if charFormat.isImageFormat():
-                imgFmt = charFormat.toImageFormat()
-                imgName = tools.os_path_split(imgFmt.name())[-1]
-    
-                # If the same image repeats multiple times, it is simply represented by
-                # yet another object replacement character ...
-                for img in range(0, len(text)):
+                assert(False)   # This condition should never be true anymore - we are reendering images as custom objects
+
+    #===========================================================================
+    #             imgFmt = charFormat.toImageFormat()
+    #             imgName = tools.os_path_split(imgFmt.name())[-1]
+    # 
+    #             # If the same image repeats multiple times, it is simply represented by
+    #             # yet another object replacement character ...
+    #             for img in range(0, len(text)):
+    #                 frag = ImageFragment()
+    #                 frag.image = imgName
+    #                 frag.setHref(href)
+    #                 result.append(frag)
+    #===========================================================================
+            else:
+                customObject = charFormat.property(QTextCharFormat.UserProperty+1)
+                if type(customObject) is ImageObject:
                     frag = ImageFragment()
-                    frag.image = imgName
+                    frag.image = tools.os_path_split(customObject.imageName)[-1]
                     frag.setHref(href)
                     result.append(frag)
-            else:
-                mathFormula = charFormat.property(QTextCharFormat.UserProperty+1)
-                frag = MathFragment()
-                frag.setText(mathFormula.formula)
-                frag.image = mathFormula.image
-                result.append(frag)
+                elif type(customObject) is MathFormulaObject:
+                    frag = MathFragment()
+                    frag.setText(customObject.formula)
+                    frag.image = customObject.image
+                    result.append(frag)
         else:
             # text = escape(text)
             frag = TextFragment(style)
@@ -375,7 +385,7 @@ class HtmlPrinter:
             self.out('<img src="{}"/>'.format(prefix + imageName))
         elif type(fragment) == MathFragment:
 ########################### TODO ##################################
-            import tempfile, os, uuid
+            import tempfile, uuid
             imgPath = tempfile.gettempdir()
             fileName = str(uuid.uuid4()).replace('-', '') + '.png'
             filePath = os.path.join(imgPath, fileName)
@@ -553,11 +563,17 @@ class DocumentFactory:
 
 
     def createDocument(self, rootFrame):
-        
+
         # Create empty document
         self.document = QTextDocument()
         self.document.setUndoRedoEnabled(False)
         self.document.setIndentWidth(20)
+
+        # Register a renderer for custom text objects
+        mo = CustomObjectRenderer()
+        mo.setParent(self.document)
+        self.document.documentLayout().registerHandler(QTextCharFormat.UserObject+1, mo);
+
         self.cursor = QTextCursor(self.document)
         self.listLevel = 0
         self.paraFormat = None
@@ -601,18 +617,28 @@ class DocumentFactory:
             self.listLevel -= 1
 
         elif type(node) is ImageFragment:
-            imageFmt = QTextImageFormat()
+
+#            imageFmt = QTextImageFormat()
+#            imagePath = os.path.join(self.contentPath, node.image)
+#            imageFmt.setName(imagePath)
+#            self.cursor.insertImage(imageFmt)
+            imageObject = ImageObject()
             imagePath = os.path.join(self.contentPath, node.image)
-            imageFmt.setName(imagePath)
-            self.cursor.insertImage(imageFmt)
+            imageObject.setName(imagePath)
+
+            imageObjectFormat = QTextCharFormat()
+            imageObjectFormat.setObjectType(QTextFormat.UserObject + 1)
+            imageObjectFormat.setProperty(QTextFormat.UserProperty + 1, imageObject)
+            self.cursor.insertText('\ufffc', imageObjectFormat);
+
         elif type(node) is MathFragment:
-            mathFormula = MathFormula()
+            mathFormula = MathFormulaObject()
             mathFormula.setFormula(node.text)
             mathFormula.image = node.image #  renderFormula()
 
             mathObjectFormat = QTextCharFormat()
-            mathObjectFormat.setVerticalAlignment(QTextCharFormat.AlignNormal)
             mathObjectFormat.setObjectType(QTextFormat.UserObject + 1)
+            mathObjectFormat.setVerticalAlignment(QTextCharFormat.AlignMiddle)
             mathObjectFormat.setProperty(QTextFormat.UserProperty + 1, mathFormula)
             self.cursor.insertText('\ufffc', mathObjectFormat);
         elif type(node) is TextFragment:

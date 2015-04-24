@@ -3,7 +3,7 @@ import os
 import xml.sax
 
 from TextDocumentTraversal import Frame, List, Paragraph, TextFragment, ImageFragment, MathFragment, DocumentFactory
-from EditorWidget import MathFormula
+from EditorWidget import MathFormulaObject
 
 class Handler(xml.sax.handler.ContentHandler):
 
@@ -272,7 +272,7 @@ class Handler(xml.sax.handler.ContentHandler):
         elif name == 'imagedata':
             pass
         elif name == 'mathphrase':
-            mathFormula = MathFormula()
+            mathFormula = MathFormulaObject()
             mathFormula.setFormula(self.content)
             mathFormula.renderFormula()             # generate image - TODO: is there a better approach?
                                                     # Do we need the image as part of the fragment?
@@ -307,7 +307,7 @@ class XMLImporter:
         parser.setContentHandler(handler)
         parser.parse(fileDesc)
 
-        # Step 2: load the styled document into the rich text editor 
+        # Step 2: Create a QTextDocument from the document tree 
         df = DocumentFactory(self.contentPath, self.formatManager)
         self.document = df.createDocument(handler.result)
         self.links = sorted(handler.keywordLinks)

@@ -54,6 +54,7 @@
     <section>
       <title>A  mathematical expression</title>
       <para><inlineequation><mathphrase>\mathcal{R}\prod_{i=\alpha_{i+1}}^\infty a_i\sin(2 \pi f x_i)</mathphrase></inlineequation></para>
+      <para><inlineequation><mathphrase>x_{1,2} = - \frac{p}{2} \pm \sqrt{(\frac{p}{2})^2 - q}</mathphrase></inlineequation></para>
     </section>
 
     <section>
