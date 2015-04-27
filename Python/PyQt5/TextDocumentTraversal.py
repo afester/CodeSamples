@@ -617,11 +617,6 @@ class DocumentFactory:
             self.listLevel -= 1
 
         elif type(node) is ImageFragment:
-
-#            imageFmt = QTextImageFormat()
-#            imagePath = os.path.join(self.contentPath, node.image)
-#            imageFmt.setName(imagePath)
-#            self.cursor.insertImage(imageFmt)
             imageObject = ImageObject()
             imagePath = os.path.join(self.contentPath, node.image)
             imageObject.setName(imagePath)

@@ -80,6 +80,9 @@ class ImageObject(CustomTextObject):
             painter.fillRect(rect.width() - 7, rect.height() - 7, 7, 7, Qt.red)
 
     def setName(self, imageName):
+        '''Sets the file name of the image. Either an absolute path name or 
+           a path relative to the current working directory.'''
+
         self.imageName = imageName
         img = QImage(imageName)
         if not img.isNull():
@@ -117,9 +120,10 @@ class MathFormulaObject(CustomTextObject):
         parser = mathtext.MathTextParser("Bitmap")
         
         # Note: the baseline returned by to_png() is not completely accurate!
-        baseline = parser.to_png('math.png', r'${}$'.format(self.formula), color='black', fontsize=12, dpi=100)
+        # baseline =
+        parser.to_png('math.png', r'${}$'.format(self.formula), color='black', fontsize=12, dpi=100)
         self.image = QImage('math.png')
-        percent = baseline / self.image.height()
+        # percent = baseline / self.image.height()
         # print("Image: w={}, h={}, baseline={} ({}%)".format(self.image.width(), self.image.height(), baseline, percent))
 
     def __str__(self):
@@ -560,17 +564,16 @@ class TextEdit(QTextEdit):
         cursor = self.textCursor()
 
         page = self.parent().page
-        fileName = page.saveImage(image)
-        print("FILENAME:{}".format(fileName))
-        cursor.insertImage(image, fileName)
+        fileName = page.saveImage(image)        # returns the file name inside the page's directory
+        
+        imageObject = ImageObject()
+        imagePath = os.path.join(page.getPageDir(), fileName)
+        imageObject.setName(imagePath)
 
-        #imageObject = ImageObject()
-        #imageObject.setName(fileName)
-
-        #imageObjectFormat = QTextCharFormat()
-        #imageObjectFormat.setObjectType(QTextFormat.UserObject + 1)
-        #imageObjectFormat.setProperty(QTextFormat.UserProperty + 1, imageObject)
-        #cursor.insertText('\ufffc', imageObjectFormat);
+        imageObjectFormat = QTextCharFormat()
+        imageObjectFormat.setObjectType(QTextFormat.UserObject + 1)
+        imageObjectFormat.setProperty(QTextFormat.UserProperty + 1, imageObject)
+        cursor.insertText('\ufffc', imageObjectFormat);
 
         # Make sure that the image is also part of the page
         page.save()
