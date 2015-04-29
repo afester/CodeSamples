@@ -110,7 +110,8 @@ FormatManager.py:                         'pre' : 'pre'}</screen>
 An item with a second line</para>
           <itemizedlist>
             <listitem>
-              <para>An item on the next level</para>
+              <para>An item on the next level, and an image on a new line, as part of the list item:
+<mediaobject><imageobject><imagedata fileref="8734434072b647df985d106d4a688aeb.png"/></imageobject></mediaobject></para>
             </listitem>
           </itemizedlist>
         </listitem>

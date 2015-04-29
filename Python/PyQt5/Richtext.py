@@ -21,9 +21,11 @@ import logging.config
 from EditorWidget import EditorWidget
 from BrowserWidget import BrowserWidget
 from Settings import Settings
-from TextDocumentTraversal import TextDocumentTraversal, StructurePrinter, DocbookPrinter, HtmlPrinter
+from StylableTextEdit.StylableTextModel import TextDocumentTraversal, StructurePrinter
 
 import urllib, re
+from XMLExporter import XMLExporter
+from HTMLExporter import HTMLExporter
 
 class SearchWorker(QObject):
     
@@ -315,14 +317,8 @@ class MynPad(QWidget):
 
     def tabSelected(self, index):
         if index == 1:        # Web View
-            self.htmlView.clear()
-
-            doc = self.editorWidget.editView.document()
-            traversal = TextDocumentTraversal()
-            tree = traversal.traverse(doc)
-
-            hp = HtmlPrinter(tree, self.htmlView.insertPlainText, self.editorWidget.page.getPageDir())
-            hp.traverse()
+            exporter = HTMLExporter(self.editorWidget.page.getPageDir())
+            self.htmlView.setPlainText(exporter.getHtmlString(self.editorWidget.editView.document()))
 
             ########### get URL for the stylesheet and for the base URL
             mypath = os.getcwd()
@@ -341,24 +337,12 @@ class MynPad(QWidget):
             self.dumpTextStructure()
 
         elif index == 4:
-            self.customView.clear()
-
-            doc = self.editorWidget.editView.document()
-            traversal = TextDocumentTraversal()
-            tree = traversal.traverse(doc)
-
-            dp = DocbookPrinter(tree, self.customView.insertPlainText)
-            dp.traverse()
+            exporter = XMLExporter(self.editorWidget.page.getPageDir(), None)
+            self.customView.setPlainText(exporter.getXmlString(self.editorWidget.editView.document()))
 
         elif index == 5:
-            self.htmlView.clear()
-
-            doc = self.editorWidget.editView.document()
-            traversal = TextDocumentTraversal()
-            tree = traversal.traverse(doc)
-
-            hp = HtmlPrinter(tree, self.htmlView.insertPlainText, self.editorWidget.page.getPageDir())
-            hp.traverse()
+            exporter = HTMLExporter(self.editorWidget.page.getPageDir())
+            self.htmlView.setPlainText(exporter.getHtmlString(self.editorWidget.editView.document()))
 
 
     def blocks(self, frame):

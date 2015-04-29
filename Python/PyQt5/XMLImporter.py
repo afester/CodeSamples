@@ -2,7 +2,7 @@
 import os
 import xml.sax
 
-from TextDocumentTraversal import Frame, List, Paragraph, TextFragment, ImageFragment, MathFragment, DocumentFactory
+from StylableTextEdit.StylableTextModel import Frame, List, Paragraph, TextFragment, ImageFragment, MathFragment, DocumentFactory
 from EditorWidget import MathFormulaObject
 
 class Handler(xml.sax.handler.ContentHandler):
@@ -307,10 +307,12 @@ class XMLImporter:
         parser.setContentHandler(handler)
         parser.parse(fileDesc)
 
+        self.links = sorted(handler.keywordLinks)
+        documentModel = handler.result
+
         # Step 2: Create a QTextDocument from the document tree 
         df = DocumentFactory(self.contentPath, self.formatManager)
-        self.document = df.createDocument(handler.result)
-        self.links = sorted(handler.keywordLinks)
+        self.document = df.createDocument(documentModel)
 
 
     def getDocument(self):

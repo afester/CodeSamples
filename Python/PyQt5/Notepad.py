@@ -6,12 +6,12 @@ Created on 24.02.2015
 
 from XMLImporter import XMLImporter
 from XMLExporter import XMLExporter
-from FormatManager import FormatManager
 import os, urllib.parse, uuid
 import dropbox
 from dropbox.rest import ErrorResponse
 
-from TextDocumentTraversal import Frame, Paragraph, TextFragment, DocumentFactory
+from StylableTextEdit.StylableTextModel import Frame, Paragraph, TextFragment, DocumentFactory
+from StylableTextEdit.FormatManager import FormatManager 
 
 class LocalNotepad:
 
