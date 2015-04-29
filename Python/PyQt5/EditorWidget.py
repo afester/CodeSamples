@@ -338,11 +338,11 @@ class EditorWidget(QWidget):
 
     def objectSelectionChanged(self):
         obj = self.editView.getSelectedObject()
-        if obj is None:
-            self.editMathWidget.hideWidget()
-        elif type(obj) is MathFormulaObject:
+        if type(obj) is MathFormulaObject:              # type(None) is also NOT MathFormulaObject
             self.editMathWidget.setFormula(obj.formula)
             self.editMathWidget.showWidget()
+        else:
+            self.editMathWidget.hideWidget()
 
 
     def applyMathFormula(self):

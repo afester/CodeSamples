@@ -68,6 +68,8 @@ blockquote {
 }
 
 programlisting[language="java"] {
+	white-space: pre;
+
 	margin-top: 5px;
 	margin-right: 5px;
 	margin-bottom: 5px;
@@ -81,6 +83,8 @@ programlisting[language="java"] {
 }
 
 programlisting[language="cpp"] {
+	white-space: pre;
+
 	margin-top: 5px;
 	margin-right: 5px;
 	margin-bottom: 5px;
@@ -94,6 +98,8 @@ programlisting[language="cpp"] {
 }
 
 programlisting[language="xml"] {
+	white-space: pre;
+	
 	margin-top: 5px;
 	margin-right: 5px;
 	margin-bottom: 5px;
@@ -106,6 +112,8 @@ programlisting[language="xml"] {
 }
 
 programlisting[language="sql"] {
+	white-space: pre;
+	
 	margin-top: 5px;
 	margin-right: 5px;
 	margin-bottom: 5px;
@@ -118,6 +126,8 @@ programlisting[language="sql"] {
 }
 
 programlisting[language="python"] {
+	white-space: pre;
+	
 	margin-top: 5px;
 	margin-right: 5px;
 	margin-bottom: 5px;
@@ -130,6 +140,8 @@ programlisting[language="python"] {
 }
 
 programlisting[language="bash"] {
+	white-space: pre;
+	
 	margin-top: 5px;
 	margin-right: 5px;
 	margin-bottom: 5px;
@@ -142,6 +154,8 @@ programlisting[language="bash"] {
 }
 
 screen {
+	white-space: pre;
+	
 	margin-top: 5px;
 	margin-right: 5px;
 	margin-bottom: 5px;

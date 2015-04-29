@@ -66,21 +66,20 @@ class StylableTextEdit(QTextEdit):
     def applyBlockStyle(self, style):
         pos = self.textCursor().position()
 
-        if style[0] in ['programlisting', 'screen']:
-            self.textCode(style)
+        fmt = self.formatManager.getFormat(style)
+        if fmt.isPre:
+            self.textCode(fmt)
         else:
             self.reformatBlock(style)
 
         self.textCursor().setPosition(pos)
 
 
-    def textCode(self, style):
+    def textCode(self, fmt):
         '''Format the currently selected blocks (or the block where the cursor
            is located) with the given style. All existing styles will be removed,
            and if more than one block is selected all the blocks are merged into one
            block with the block separators replaced by Unicode line separators'''
-
-        fmt = self.formatManager.getFormat(style)
 
         cursor = self.textCursor()
         cursor.beginEditBlock()
@@ -116,8 +115,9 @@ class StylableTextEdit(QTextEdit):
             cursor.removeSelectedText()
             cursor.setBlockFormat(fmt.getBlockFormat())
             cursor.setCharFormat(fmt.getCharFormat())
+            cursor.setBlockCharFormat(fmt.getCharFormat())  # required for the initial fragment of an empty block 
             cursor.insertText(content)
-    
+
             cursor.endEditBlock()
             self.setFocus()
 
@@ -133,7 +133,6 @@ class StylableTextEdit(QTextEdit):
         self.setFocus()
 
 
-
     # Selects all blocks which are part of the current selection.
     def selectWholeBlocks(self, cursor):
         start = cursor.anchor()
@@ -147,6 +146,7 @@ class StylableTextEdit(QTextEdit):
         cursor.movePosition(QTextCursor.StartOfBlock)
         cursor.setPosition(end, QTextCursor.KeepAnchor)
         cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+
 ###############################################################################
 
     # @SLOT
@@ -162,6 +162,7 @@ class StylableTextEdit(QTextEdit):
 
 
     def setTextFormat(self, style):
+        # TODO: support nested fragment formats (e.g. bold>highlight>/highlight/bold)
         fmt = self.formatManager.getFormat(style).getCharFormat()
 
         cursor = self.textCursor()
@@ -172,12 +173,11 @@ class StylableTextEdit(QTextEdit):
 
 
     def removeTextFormat(self):
+        # TODO: Take block char format or char format from previous fragment
         fmt = self.formatManager.getFormat( ('para', None, None) ).getCharFormat()
         cursor = self.textCursor()
         self.selectCurrentFragment(cursor)
         cursor.setCharFormat(fmt)
-
-
 
 
     def handleCharFormatChanged(self):
@@ -373,8 +373,6 @@ class StylableTextEdit(QTextEdit):
         return cursor
 
 
-
-
     def mousePressEvent(self, event):
         #=======================================================================
         # cursor = self.cursorForPosition(event.pos())
@@ -384,7 +382,7 @@ class StylableTextEdit(QTextEdit):
         #     print("IMAGE {}: {} x {}".format(imgFmt.name(), imgFmt.width(), imgFmt.height()))
         #=======================================================================
 
-        cursor= self.exactCursorForPosition(event.pos())
+        cursor = self.exactCursorForPosition(event.pos())
         charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
 
         if charFmt.objectType() == QTextCharFormat.UserObject+1:
@@ -448,6 +446,7 @@ class StylableTextEdit(QTextEdit):
         # Make sure that the image is also part of the page
         page.save()
 
+
     def insertFormula(self):
         cursor = self.textCursor()
 
@@ -486,6 +485,7 @@ class StylableTextEdit(QTextEdit):
     def getSelectedObject(self):
         return self.selectedObject
 
+
     # @SLOT
     def indentLess(self):
         cursor = self.textCursor()
@@ -502,6 +502,7 @@ class StylableTextEdit(QTextEdit):
                 if style:
                     listFormat = style.getListFormat()
                     cursor.createList(listFormat)
+
 
     # @SLOT
     def indentMore(self):

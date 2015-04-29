@@ -15,6 +15,7 @@ class Format:
         self.blockFormat = blockFormat
         self.charFormat = charFormat
         self.listFormat = listFormat
+        self.isPre = False
 
     
     def getBlockFormat(self):
@@ -216,7 +217,11 @@ class FormatManager:
             charFmt = QTextCharFormat()
             self.setCharFormatAttributes(cssRule, charFmt)
 
-            self.formats[selector] = Format(blockFmt, charFmt)
+            fmt = Format(blockFmt, charFmt)
+            value = self.getStringValue(cssRule, 'white-space')
+            if value and value == 'pre':
+                fmt.isPre = True
+            self.formats[selector] = fmt
 
 ### List formats
 
