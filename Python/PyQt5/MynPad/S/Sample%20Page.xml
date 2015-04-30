@@ -115,6 +115,16 @@ An item with a second line</para>
             </listitem>
           </itemizedlist>
         </listitem>
+        <listitem>
+          <para>Code Section - a complete code section as a list item</para>
+          <itemizedlist>
+            <listitem>
+              <programlisting language="cpp">int main() {
+   printf("Hello World")
+}</programlisting>
+            </listitem>
+          </itemizedlist>
+        </listitem>
       </itemizedlist>
     </section>
 

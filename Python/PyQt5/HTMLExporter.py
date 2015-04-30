@@ -16,6 +16,7 @@ class HtmlPrinter:
         self.out = out
         self.listLevel = 0
         self.baseDir= baseDir
+        self.isPre = False
 
     def prefix(self):
         return '\u00a0' * self.indent * 2
@@ -47,8 +48,11 @@ class HtmlPrinter:
         if type(node) == Paragraph:
             if node.style[0] == 'programlisting':
                 self.out('\n{}<pre class="code"><code class="{}">'.format(self.prefix(), node.style[2]))
+                self.isPre = True
             elif node.style[0] == 'screen':
                 self.out('\n{}<pre>'.format(self.prefix()))
+                self.isPre = True
+
             elif node.style[0] == 'title':
                 self.out('\n\n{}<h{}>'.format(self.prefix(), int(node.style[2])))
             elif node.style[0] == 'tip':
@@ -68,6 +72,7 @@ class HtmlPrinter:
                 self.emitFragment(c)
             self.indent -= 1
 
+            self.isPre = False
             if node.style[0] == 'programlisting':
                 self.out('</code></pre>')
             elif node.style[0] == 'screen':
@@ -121,6 +126,9 @@ class HtmlPrinter:
         elif type(fragment) == TextFragment:
 
             text = escape(fragment.text)
+            if not self.isPre:
+                text = text.replace('\n', '<br/>')
+
             if fragment.style is None:
                 self.out(text)
             elif fragment.style[0] == 'olink':
