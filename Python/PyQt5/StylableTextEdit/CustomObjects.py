@@ -37,6 +37,7 @@ class CustomObjectRenderer(QObject, QTextObjectInterface):
         #painter.setPen(Qt.DashLine)
         #painter.drawRect(rect)
 
+
 class CustomTextObject:
 
     def __init__(self):
@@ -77,7 +78,6 @@ class ImageObject(CustomTextObject):
         img = QImage(imageName)
         if not img.isNull():
             self.bufferedImage = img
-
 
 
 
