@@ -15,15 +15,13 @@ from PyQt5.QtCore import QUrl, QObject, QThread
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PyQt5 import uic
 
-import sys, os, fnmatch, platform
+import sys, os, fnmatch, platform, urllib, re, sqlite3
 import logging.config
 
 from EditorWidget import EditorWidget
 from BrowserWidget import BrowserWidget
 from Settings import Settings
 from StylableTextEdit.StylableTextModel import TextDocumentTraversal, StructurePrinter
-
-import urllib, re
 from XMLExporter import XMLExporter
 from HTMLExporter import HTMLExporter
 
@@ -456,6 +454,8 @@ class MainWindow(QMainWindow):
                           "<tr><th align=\"right\">PyQt version:</th><td>{} for Qt {}</td></tr>".format(pyQtVersion, pyQtQtVersion) +
                           "<tr><th align=\"right\">Qt runtime version:</th><td>{}</td></tr>".format(qtRuntimeVersion)+
                           "<tr><th align=\"right\">Operating System:</th><td>{} {}</td></tr>".format(platformSystem, platformRelease)+
+                          "<tr><th align=\"right\">sqlite version:</th><td>{}</td></tr>".format(sqlite3.version) +
+                          "<tr><th align=\"right\">sqlite runtime version:</th><td>{}</td></tr>".format(sqlite3.sqlite_version)+
                           "</table>")
 
 
@@ -467,6 +467,13 @@ def main():
 
     # Create the main window
     mainWindow = MainWindow(app)
+
+
+    from NotepadDB import NotepadDB
+    db = NotepadDB('MynPad')
+    db.openDatabase();
+    db.closeDatabase();
+
 
     # Show and run the application
     mainWindow.show()
