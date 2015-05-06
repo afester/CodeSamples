@@ -298,8 +298,9 @@ class MynPad(QWidget):
         print("Selected tree node: {}".format(treeNode))
 
         # get page id (None = title page)
-        pageId = None
-        if treeNode.parent() is not None:
+        if treeNode.parent() is None:
+            pageId = "Title page"
+        else:
             pageId = treeNode.getLabel()
 
         self.editorWidget.setEnabled(True)

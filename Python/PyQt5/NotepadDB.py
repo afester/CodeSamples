@@ -17,8 +17,6 @@ class NotepadDB:
     def openDatabase(self):
         # Create the database file if it does not exist yet and open the database 
         self.conn = sqlite3.connect(self.dbFile)
-        self.sqliteBug()
-        return
 
         self.createDatabase()
 
@@ -46,10 +44,20 @@ WHERE type='table' and name='{}'
         if result.fetchone() is None:
             print('Creating database schema ...')
             self.conn.execute('''
+CREATE TABLE page  (
+    pageId TEXT
+)''')
+            self.conn.execute('''
 CREATE TABLE pageref  (
     parentId TEXT, 
     childId TEXT 
 )''')
+            self.conn.execute('''
+CREATE INDEX parentIdx ON pageref(parentId)
+''')
+            self.conn.execute('''
+CREATE INDEX childIdx ON pageref(childId)
+''')
 
 
 
@@ -59,6 +67,8 @@ CREATE TABLE pageref  (
 
         self.conn.execute('''
 DELETE FROM {}'''.format('pageref'))
+        self.conn.execute('''
+DELETE FROM {}'''.format('page'))
 
         # TODO: We need a Notepad instance here.
         # Then the following code to search through a notepad can be moved into the Notepad class:
@@ -71,6 +81,10 @@ DELETE FROM {}'''.format('pageref'))
                 else:
                     pageId = urllib.parse.unquote(filename)[:-4]
 
+                    stmt = '''
+INSERT INTO {} VALUES('{}')'''.format('page', pageId)
+                    self.conn.execute(stmt)
+
                 page = LocalPage(notepad, pageId)
                 page.load()
 
@@ -79,8 +93,6 @@ DELETE FROM {}'''.format('pageref'))
                     # print('   => "{}"'.format(childLink))
                     stmt = '''
 INSERT INTO {} VALUES('{}', '{}')'''.format('pageref', pageId, childLink)
-                    print("  SQL: {}".format(stmt))
-
                     self.conn.execute(stmt)
                 print()
 
@@ -90,17 +102,64 @@ INSERT INTO {} VALUES('{}', '{}')'''.format('pageref', pageId, childLink)
 
         resCursor = self.conn.execute('''
 SELECT childId 
-FROM {} 
-WHERE parentId = '{}' '''.format('pageref', pageId))
+FROM pageref
+WHERE parentId = '{}' 
+ORDER BY childId'''.format(pageId))
         for row in resCursor:
             result.append(row[0])
 
         return result
 
 
+    def getChildCount(self, pageId):
+        resCursor = self.conn.execute('''
+SELECT COUNT(*) 
+FROM pageref 
+WHERE parentId = '{}' '''.format(pageId))   # TODO: SQL INJECTION!!!!
+        row = resCursor.fetchone()
+        return row[0]
+
+
+    def getChildPagesWithHandle(self, pageId):
+        result = []
+
+        resCursor = self.conn.execute('''
+SELECT childId 
+FROM pageref 
+WHERE parentId = '{}' 
+ORDER BY childId'''.format(pageId))   # TODO: SQL INJECTION!!!!
+        for row in resCursor:
+            pageId = row[0]
+            childCount = self.getChildCount(pageId) 
+            result.append( (pageId, childCount) )
+
+        return result
+
+
+    def getOrphanedPages(self):
+        result = []
+        rows = self.conn.execute('''
+SELECT pageId 
+FROM page 
+WHERE pageId NOT IN (SELECT DISTINCT childId FROM pageref) 
+ORDER BY pageId''')
+        for row in rows:
+            result.append(row[0])
+        return result
+
+
+##############################################################################
 
     def printData(self, tableName, selection, rowset):
+        # We first need to iterate the rowset and retrieve the rows into
+        # a temporary data structure. Otherwise, when executing the PRAGMA table_info
+        # statement below, the rowset is messed up
+        allRows = []
+        for row in rowset:
+            allRows.append(row)
 
+        # NOTE: The following statement messes up the rowset passed as parameter,
+        # Probably a SQLite bug (or a bug in the python binding)
         desc = self.conn.execute('''PRAGMA table_info({})'''.format(tableName))
         for row in rowset:
             print("==>" + str(row))         
@@ -136,28 +195,45 @@ WHERE parentId = '{}' '''.format('pageref', pageId))
         print()
 
         # Dump the rows.
-        for row in rowset:
-            print(row)
-            #===================================================================
-            # idx = 0
-            # for col in row:
-            #     coldesc = result[idx]
-            #     contents = '{:{n}s}|'.format(str(col), n=coldesc[2]) 
-            #     print(contents, end='')
-            #     idx += 1
-            # print()
-            #===================================================================
+        for row in allRows:
+            #print(row)
+
+            idx = 0
+            for col in row:
+                coldesc = result[idx]
+                contents = '{:{n}s}|'.format(str(col), n=coldesc[2]) 
+                print(contents, end='')
+                idx += 1
+            print()
 
 
     def selectAll(self, selection, tableName):
         stmt = '''SELECT {} FROM {}'''.format(selection, tableName)
-        print("SQL: {}".format(stmt))
         rows = self.conn.execute(stmt)
         self.printData(tableName, selection, rows)
 
 
     def dumpDatabase(self):
+        print('All pages\n==================================================')
+        self.selectAll('*', 'page')
+        print()
+
+        print('Page relationships\n==================================================')
         self.selectAll('*', 'pageref')
-        #rows = self.conn.execute("SELECT * FROM pageref")
-        #for row in rows:
-        #    print("==>" + str(row))         
+        print()
+
+        print('Orphaned pages\n==================================================')
+        orphaned = self.getOrphanedPages()
+        print(orphaned)
+
+        print('\nChild pages of "Title page"\n==================================================')
+        children = self.getChildPages('Title page')
+        print(children)
+
+        print('\nNumber of child pages of "Title page"\n==================================================')
+        children = self.getChildCount('Title page')
+        print(children)
+
+        print('\nChild pages of "Title page", including a child indicator flag\n==================================================')
+        children = self.getChildPagesWithHandle('Sample Page')
+        print(children)

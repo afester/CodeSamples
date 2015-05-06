@@ -217,7 +217,7 @@ class EditorWidget(QWidget):
 
 
     def load(self, notepad, pageId):
-        print('Loading page "{}" from notepad "{}"'.format(pageId if pageId is not None else 'titlePage', notepad.getName()))
+        print('Loading page "{}" from notepad "{}"'.format(pageId, notepad.getName()))
         self.page = notepad.getPage(pageId)
 
         doc = self.page.getDocument()

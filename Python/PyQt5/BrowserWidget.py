@@ -138,7 +138,7 @@ class TreeWidget(QTreeWidget):
             notepad = item.getNotepad()
             
             if item.parent() is None:
-                page = notepad.getPage(None)
+                page = notepad.getPage("Title page")
             else:
                 page = notepad.getPage(item.getLabel())
     
@@ -156,7 +156,7 @@ class TreeWidget(QTreeWidget):
     # As soon as one of them is expanded (either by the user or programmatically),
     # the expandHandler method takes care of adding the childs as required
     def refresh(self, notepad):
-        rootPage = notepad.getPage(None)
+        rootPage = notepad.getPage("Title page")
 
         rootItem = TreeNode(notepad, notepad.getName())
         self.addTopLevelItem(rootItem)

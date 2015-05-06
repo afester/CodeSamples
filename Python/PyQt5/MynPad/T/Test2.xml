@@ -16,5 +16,7 @@
         <para>Item 2</para>
       </listitem>
     </itemizedlist>
+    <para></para>
+    <para><olink targetdoc="Title%20page">Title page</olink></para>
   </section>
 </article>
