@@ -5,7 +5,9 @@ Created on 04.05.2015
 '''
 
 import sqlite3, os, urllib, fnmatch
-from Notepad import LocalPage, LocalNotepad
+# from Notepad import LocalPage, LocalNotepad
+from Page import LocalPage
+
 
 class NotepadDB:
     
@@ -15,20 +17,21 @@ class NotepadDB:
 
 
     def openDatabase(self):
-        # Create the database file if it does not exist yet and open the database 
+        # Create the database file if it does not exist yet and open the database
+        print('Opening {}'.format(self.dbFile)) 
         self.conn = sqlite3.connect(self.dbFile)
 
         self.createDatabase()
 
         #=======================================================================
-        npDef = {'name' : 'MynPad',     # TODO
-                 'type'  : 'local',
-                 'path'   : self.rootDir }
-        notepad = LocalNotepad(npDef)
-        self.refreshDatabase(notepad)
+#        npDef = {'name' : 'MynPad',     # TODO
+#                 'type'  : 'local',
+#                 'path'   : self.rootDir }
+#        notepad = LocalNotepad(npDef)
+#        self.refreshDatabase(notepad)
         #=======================================================================
 
-        self.dumpDatabase()
+        # self.dumpDatabase()
 
 
     def closeDatabase(self):
@@ -148,7 +151,7 @@ ORDER BY pageId''')
         return result
 
 
-##############################################################################
+# TODO: move to unit tests #####################################################
 
     def printData(self, tableName, selection, rowset):
         # We first need to iterate the rowset and retrieve the rows into

@@ -416,8 +416,8 @@ class MainWindow(QMainWindow):
         size = self.settings.getMainWindowSize()
         self.resize(size)
 
-        # refresh the browser tree 
-        self.mainWidget.browserWidget.refresh()
+        # initialize the browser tree (add the top nodes and expand the saved path)
+        self.mainWidget.browserWidget.initialize()
 
 
     def updateWindowTitle(self, title):
@@ -435,6 +435,11 @@ class MainWindow(QMainWindow):
         self.settings.setMainWindowPos(self.pos())
         self.settings.setMainWindowSize(self.size())
         self.settings.save()
+
+        # Close all notepads - TODO (HACK)
+        for x in range (0, self.mainWidget.browserWidget.browserView.topLevelItemCount()):
+            notepad = self.mainWidget.browserWidget.browserView.topLevelItem(x).getNotepad()
+            notepad.close()
 
 
     def handleAbout(self):
@@ -470,10 +475,10 @@ def main():
     mainWindow = MainWindow(app)
 
 
-    from NotepadDB import NotepadDB
-    db = NotepadDB('MynPad')
-    db.openDatabase();
-    db.closeDatabase();
+#    from NotepadDB import NotepadDB
+#    db = NotepadDB('MynPad')
+#    db.openDatabase();
+#    db.closeDatabase();
 
 
     # Show and run the application

@@ -136,38 +136,38 @@ class TreeWidget(QTreeWidget):
 
         if not item.isWasExpanded():
             notepad = item.getNotepad()
-            
+
             if item.parent() is None:
-                page = notepad.getPage("Title page")
+                pageId = 'Title page'
             else:
-                page = notepad.getPage(item.getLabel())
-    
-            for keyword in page.getLinks():
+                pageId = item.getLabel()
+
+            subPages = notepad.getChildPages(pageId)
+            for keyword in subPages: # page.getLinks():
                 linkItem = TreeNode(notepad, keyword)
     
-                page = notepad.getPage(keyword)
-                if len(page.getLinks()) > 0:
+                if notepad.getChildCount(keyword) > 0:
                     linkItem.setChildIndicatorPolicy(QTreeWidgetItem.ShowIndicator)
+
                 item.addChild(linkItem)
             item.setWasExpanded(True)
 
 
-    # Add all top level items (Notepads).
-    # As soon as one of them is expanded (either by the user or programmatically),
-    # the expandHandler method takes care of adding the childs as required
+    # Adds a Notepad as top level item.
     def refresh(self, notepad):
-        rootPage = notepad.getPage("Title page")
-
+        # Add the root node
         rootItem = TreeNode(notepad, notepad.getName())
         self.addTopLevelItem(rootItem)
 
-        if len(rootPage.getLinks()) > 0:
+        # set the child indicator
+        if notepad.getChildCount('Title page') > 0:
             rootItem.setChildIndicatorPolicy(QTreeWidgetItem.ShowIndicator)
 
 
     def addNotepad(self, notepad):
         rootItem = TreeNode(notepad, notepad.getName())
         self.addTopLevelItem(rootItem)
+
         self.setCurrentItem(rootItem)
         rootItem.setExpanded(True)
 
@@ -327,10 +327,10 @@ class BrowserWidget(QWidget):
         pass
 
 
-    def refresh(self):
+    def initialize(self):
         # Reload all notepads
-        self.l.debug("Refreshing browser ...")
-        
+        self.l.debug("Adding top nodes in browser...")
+
         # Add notepads to the browser tree
         notepads = self.settings.getNotepads()
         for np in notepads:
@@ -341,6 +341,7 @@ class BrowserWidget(QWidget):
             self.browserView.refresh(notepad)
 
         # Expand to and select the previous item
+        self.l.debug("Expanding saved path in browser ...")
         path = self.settings.getBrowserPath()
         self.browserView.expandPath(path)
 
