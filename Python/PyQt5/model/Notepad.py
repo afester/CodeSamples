@@ -20,8 +20,8 @@ class LocalNotepad:
         self.formatManager = FormatManager()
         self.formatManager.loadFormats()    # TODO: Only required once
 
-        self.db = NotepadDB(self.rootPath)
-        self.db.openDatabase()
+        self.db = NotepadDB()
+        self.db.openDatabase(self)
 
 
     def close(self):

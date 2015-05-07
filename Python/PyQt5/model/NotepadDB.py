@@ -4,39 +4,37 @@ Created on 04.05.2015
 @author: afester
 '''
 
-import sqlite3, os, urllib, fnmatch
+import sqlite3, os, urllib, fnmatch, logging
 from model.Page import LocalPage
 
 
 class NotepadDB:
     
-    def __init__(self, rootDir):
-        self.rootDir = rootDir
-        self.dbFile = os.path.join(rootDir, 'mynpad.dbf')
+    l = logging.getLogger('NotepadDB')
+
+    def __init__(self):
+        self.conn = None
 
 
-    def openDatabase(self):
+    def openDatabase(self, notepad):
+        self.rootDir = notepad.getRootpath()
+        self.dbFile = os.path.join(self.rootDir, 'mynpad.dbf')
+
+        
         # Create the database file if it does not exist yet and open the database
-        print('Opening {}'.format(self.dbFile)) 
+        self.l.debug('Opening {}'.format(self.dbFile)) 
         self.conn = sqlite3.connect(self.dbFile)
 
-        self.createDatabase()
+        self.createDatabase(notepad)
 
-        #=======================================================================
-#        npDef = {'name' : 'MynPad',     # TODO
-#                 'type'  : 'local',
-#                 'path'   : self.rootDir }
-#        notepad = LocalNotepad(npDef)
-#        self.refreshDatabase(notepad)
-        #=======================================================================
-
-        # self.dumpDatabase()
+        self.dumpDatabase()
 
 
     def closeDatabase(self):
         self.conn.close()
 
-    def createDatabase(self):
+
+    def createDatabase(self, notepad):
         result = self.conn.execute('''
 SELECT * 
 FROM sqlite_master 
@@ -60,12 +58,13 @@ CREATE INDEX parentIdx ON pageref(parentId)
             self.conn.execute('''
 CREATE INDEX childIdx ON pageref(childId)
 ''')
+            self.refreshDatabase(notepad)
 
 
 
     def refreshDatabase(self, notepad):
         
-        print("REFRESHING DATABASE")
+        self.l.debug('Refreshing database {}'.format(self.dbFile)) 
 
         self.conn.execute('''
 DELETE FROM {}'''.format('pageref'))
@@ -90,13 +89,13 @@ INSERT INTO {} VALUES('{}')'''.format('page', pageId)
                 page = LocalPage(notepad, pageId)
                 page.load()
 
-                print('\n"{}"'.format(pageId))
+                # print('\n"{}"'.format(pageId))
                 for childLink in page.getLinks():
                     # print('   => "{}"'.format(childLink))
                     stmt = '''
 INSERT INTO {} VALUES('{}', '{}')'''.format('pageref', pageId, childLink)
                     self.conn.execute(stmt)
-                print()
+                # print()
 
 
     def getChildPages(self, pageId):

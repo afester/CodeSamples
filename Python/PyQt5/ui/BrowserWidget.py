@@ -255,7 +255,7 @@ class TreeWidget(QTreeWidget):
 class BrowserWidget(QWidget):
     ''' Tree widget and button bar above '''
 
-    l = logging.getLogger('Browser')
+    l = logging.getLogger('BrowserWidget')
 
     itemSelected = pyqtSignal()
 

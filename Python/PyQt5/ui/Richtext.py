@@ -9,14 +9,13 @@ Created on Feb 13, 2015
 from PyQt5.QtCore import PYQT_VERSION_STR, QT_VERSION_STR, qVersion, pyqtSignal, Qt
 from PyQt5.QtWidgets import QWidget, QTabWidget
 from PyQt5.QtWidgets import QTextEdit, QSplitter, QHBoxLayout, QVBoxLayout, QMainWindow
-from PyQt5.QtWidgets import QAction, QStatusBar, QMenuBar, QApplication, QMessageBox, QListView
+from PyQt5.QtWidgets import QAction, QStatusBar, QMenuBar, QMessageBox, QListView
 from PyQt5.QtWebKitWidgets import QWebView, QWebPage
 from PyQt5.QtCore import QUrl, QObject, QThread 
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PyQt5 import uic
 
-import sys, os, fnmatch, platform, urllib, re, sqlite3
-import logging.config
+import sys, os, fnmatch, platform, urllib, re, sqlite3, logging
 
 from ui.EditorWidget import EditorWidget
 from ui.BrowserWidget import BrowserWidget
