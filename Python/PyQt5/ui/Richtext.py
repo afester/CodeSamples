@@ -171,8 +171,10 @@ class LinklistWidget(QListView):
             self.resultListModel.appendRow(resultItem)
 
 
-
+# The central widget for the MainWindow.
 class MynPad(QWidget):
+
+    l = logging.getLogger('MynPad')
 
     updateWindowTitle = pyqtSignal(str)
 
@@ -236,11 +238,12 @@ class MynPad(QWidget):
         self.searchWidget.resultSelected.connect(self.navigateDirect)
 
         self.toLinksWidget = LinklistWidget(self)
+        self.fromLinksWidget = LinklistWidget(self)
 
         self.listsWidget = QTabWidget(self)
         self.listsWidget.addTab(self.searchWidget, 'Search')
         self.listsWidget.addTab(self.toLinksWidget, 'Links to')
-        self.listsWidget.addTab(QWidget(), 'Links from')
+        self.listsWidget.addTab(self.fromLinksWidget, 'Links from')
 
         leftWidget = QSplitter(Qt.Vertical, self)
         leftWidget.addWidget(self.browserWidget)
@@ -275,7 +278,7 @@ class MynPad(QWidget):
 
         self.editorWidget.save()
         self.editorWidget.load(self.editorWidget.page.notepad, pageId)
-        self.updateLinktoList()
+        self.updateLinkLists(self.editorWidget.page.notepad, pageId)
 
         self.browserWidget.navigate(pageId)
 
@@ -287,30 +290,35 @@ class MynPad(QWidget):
 
         self.editorWidget.save()
         self.editorWidget.load(self.editorWidget.page.notepad, pageId)
-        self.updateLinktoList()
+        self.updateLinkLists(self.editorWidget.page.notepad, pageId)
 
         self.browserWidget.navigateDirect(pageId)
 
 
     def itemSelected(self):
         treeNode = self.browserWidget.currentItem
-        print("Selected tree node: {}".format(treeNode))
+        self.l.debug('Selected tree node: {}'.format(treeNode))
 
-        # get page id (None = title page)
-        if treeNode.parent() is None:
-            pageId = "Title page"
-        else:
-            pageId = treeNode.getLabel()
+        pageId = treeNode.getPageId()
+        notepad = treeNode.getNotepad()
 
         self.editorWidget.setEnabled(True)
         self.editorWidget.save()
-        self.editorWidget.load(treeNode.getNotepad(), pageId)
-        self.updateLinktoList()
+        self.editorWidget.load(notepad, pageId)
+
+        self.updateLinkLists(notepad, pageId)
 
 
-    def updateLinktoList(self):
-        print('{}'.format(self.editorWidget.page.getLinks()))
-        self.toLinksWidget.setContents(self.editorWidget.page.getLinks())
+    def updateLinkLists(self, notepad, pageId):
+        
+        linksTo = notepad.getChildPages(pageId)
+        linksFrom = notepad.getParentPages(pageId)
+
+        print('Links to: {}'.format(linksTo))
+        print('Links from: {}'.format(linksFrom))
+
+        self.toLinksWidget.setContents(linksTo)
+        self.fromLinksWidget.setContents(linksFrom)
 
 
     def tabSelected(self, index):

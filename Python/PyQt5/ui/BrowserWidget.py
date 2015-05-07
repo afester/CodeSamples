@@ -88,6 +88,13 @@ class TreeNode(QTreeWidgetItem):
         return self.text(0)
 
 
+    def getPageId(self):
+        if self.parent() is None:
+            return "Title page"
+        else:
+            return self.getLabel()
+
+
     def getNotepad(self):
         return self.notepad
 
@@ -100,7 +107,7 @@ class TreeNode(QTreeWidgetItem):
         return self.wasExpanded
 
     def __repr__(self, *args, **kwargs):
-        return 'TreeNode[label={}, notepad={}]'.format(self.text(0), self.notepad.getName())
+        return 'TreeNode[label="{}", notepad="{}"]'.format(self.text(0), self.notepad.getName())
 
 
 class TreeWidget(QTreeWidget):
@@ -142,11 +149,11 @@ class TreeWidget(QTreeWidget):
             else:
                 pageId = item.getLabel()
 
-            subPages = notepad.getChildPages(pageId)
-            for keyword in subPages: # page.getLinks():
+            subPages = notepad.getChildPagesWithHandle(pageId)
+            for keyword, childCount in subPages:
                 linkItem = TreeNode(notepad, keyword)
     
-                if notepad.getChildCount(keyword) > 0:
+                if childCount > 0:
                     linkItem.setChildIndicatorPolicy(QTreeWidgetItem.ShowIndicator)
 
                 item.addChild(linkItem)
@@ -181,6 +188,9 @@ class TreeWidget(QTreeWidget):
           path ([str, str, ...]): The path to expand - a list of node labels
 """
         item.setExpanded(True)
+        
+        # If the leaf item is reached, then set it as the current item.
+        # This will also load the corresponding page into the editor.
         if len(path) == 0:
             self.setCurrentItem(item)
             return

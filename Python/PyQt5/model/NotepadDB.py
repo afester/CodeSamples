@@ -27,7 +27,7 @@ class NotepadDB:
 
         self.createDatabase(notepad)
 
-        self.dumpDatabase()
+        # self.dumpDatabase()
 
 
     def closeDatabase(self):
@@ -112,6 +112,20 @@ ORDER BY childId'''.format(pageId))
         return result
 
 
+    def getParentPages(self, pageId):
+        result = []
+
+        resCursor = self.conn.execute('''
+SELECT parentId 
+FROM pageref
+WHERE childId = '{}' 
+ORDER BY parentId'''.format(pageId))
+        for row in resCursor:
+            result.append(row[0])
+
+        return result
+
+
     def getChildCount(self, pageId):
         resCursor = self.conn.execute('''
 SELECT COUNT(*) 
@@ -134,6 +148,7 @@ ORDER BY childId'''.format(pageId))   # TODO: SQL INJECTION!!!!
             childCount = self.getChildCount(pageId) 
             result.append( (pageId, childCount) )
 
+        # print('{}'.format(result))
         return result
 
 

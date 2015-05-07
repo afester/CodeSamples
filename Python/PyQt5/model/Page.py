@@ -6,21 +6,21 @@ Created on 24.02.2015
 
 from model.XMLImporter import XMLImporter
 from model.XMLExporter import XMLExporter
-import os, urllib.parse, uuid
+import os, urllib.parse, uuid, logging
 from dropbox.rest import ErrorResponse
 
 from StylableTextEdit.StylableTextModel import Frame, Paragraph, TextFragment, DocumentFactory
 
 
-
-
 class LocalPage:
+
+    l = logging.getLogger('LocalPage')
 
     def __init__(self, notepad, pageId):
         '''@param notepad  The Notepad instance for this page
            @param pageId   The page name / page id for this page
 '''
-        assert pageId is None or type(pageId) is str
+        assert type(pageId) is str
 
         self.notepad = notepad
         self.pageId = pageId
@@ -31,10 +31,7 @@ class LocalPage:
     def getName(self):
         '''@return The page id (page name) of this page
         '''
-        if self.pageId is None:
-            return "Title page"
-        else:
-            return self.pageId
+        return self.pageId
 
 
     def getFilename(self):
@@ -63,11 +60,11 @@ class LocalPage:
 
     def load(self):
         pageFullPath = self.getPagePath()
-        print("  Loading page at {} ".format(pageFullPath))
+        self.l.debug('Loading page at {} '.format(pageFullPath))
 
         pageDir = self.getPageDir()
         if not os.path.isfile(pageFullPath):
-            print('    Page does not exist, creating empty document ...')
+            self.l.debug('Page does not exist, creating empty document ...')
 
             rootFrame = Frame()
             p1 = Paragraph(0, ('title', 'level', '1'))

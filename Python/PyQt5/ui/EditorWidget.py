@@ -10,7 +10,7 @@ from PyQt5.QtGui import QTextOption, QImage, QTextDocument
 from PyQt5.QtWidgets import QWidget, QMessageBox, QPushButton, QAction
 from PyQt5.QtWidgets import QTextEdit, QVBoxLayout, QLineEdit, QHBoxLayout, QFileDialog, QToolButton
 
-import os
+import os, logging
 
 from ui.Toolbars import ActionSelector, TextStyleSelector, BlockStyleSelector
 
@@ -155,6 +155,9 @@ class MathEditWidget(QWidget):
 
 
 class EditorWidget(QWidget):
+    
+    l = logging.getLogger('EditorWidget')
+
     message = pyqtSignal(str)
     titleChanged = pyqtSignal(str)
     navigate = pyqtSignal(str)
@@ -217,9 +220,9 @@ class EditorWidget(QWidget):
 
 
     def load(self, notepad, pageId):
-        print('Loading page "{}" from notepad "{}"'.format(pageId, notepad.getName()))
-        self.page = notepad.getPage(pageId)
+        self.l.debug('Loading page "{}" from notepad "{}"'.format(pageId, notepad.getName()))
 
+        self.page = notepad.getPage(pageId)
         doc = self.page.getDocument()
 
         self.editView.blockSignals(True)
