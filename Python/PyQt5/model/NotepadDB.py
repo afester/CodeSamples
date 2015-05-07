@@ -76,12 +76,11 @@ DELETE FROM {}'''.format('page'))
 
         for root, dirnames, filenames in os.walk(self.rootDir):
             for filename in fnmatch.filter(filenames, '*.xml'):
-                # TODO: Proper handling of notepad's root page!!!!
-                if root == self.rootDir and filename == 'Title%20page.xml':
-                    pageId = None
-                else:
-                    pageId = urllib.parse.unquote(filename)[:-4]
+                pageId = urllib.parse.unquote(filename)[:-4]
 
+		# Dont store the title page in the pages table - otherwise we would get
+		# the title page as orphaned page
+                if pageId != 'Title page':
                     stmt = '''
 INSERT INTO {} VALUES('{}')'''.format('page', pageId)
                     self.conn.execute(stmt)

@@ -46,7 +46,7 @@ class LocalPage:
         pagePath = self.notepad.getRootpath()
 
         if self.pageId is not None:     # not the root page
-            pageIdx = self.pageId[0]
+            pageIdx = self.pageId[0].upper()
             pagePath = pagePath + "/" + pageIdx # os.path.join(pagePath, pageIdx)
         return pagePath
 

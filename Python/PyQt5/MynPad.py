@@ -6,9 +6,12 @@ Created on Feb 13, 2015
 @author: andreas
 '''
 
-from PyQt5.QtWidgets import QApplication
 
 import sys
+sys.path.insert(0, '/opt/pyqt53/site-packages')
+
+from PyQt5.QtWidgets import QApplication
+
 import logging.config
 
 from ui.Richtext import MainWindow
@@ -22,13 +25,6 @@ def main():
 
     # Create the main window
     mainWindow = MainWindow(app)
-
-
-#    from NotepadDB import NotepadDB
-#    db = NotepadDB('MynPad')
-#    db.openDatabase();
-#    db.closeDatabase();
-
 
     # Show and run the application
     mainWindow.show()
