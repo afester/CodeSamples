@@ -3,7 +3,6 @@ bin
 Servers
 glassfish31eclipsedefaultdomain
 RemoteSystemsTempFiles
-nodistrib
 Debug
 *.depend
 *.layout
