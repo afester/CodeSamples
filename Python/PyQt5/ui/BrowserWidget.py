@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QDialog, QFileDialog, QDialogButtonBox
 from PyQt5 import uic
 
 import os, logging
-from Notepad import LocalNotepad, DropboxNotepad
+from model.Notepad import LocalNotepad, DropboxNotepad
 import dropbox
 from dropbox.rest import ErrorResponse
 
@@ -21,7 +21,7 @@ class AddNotepadDlg(QDialog):
         QDialog.__init__(self, parentWidget)
         self.settings = settings
 
-        self.ui = uic.loadUi('AddNotepadDlg.ui', self)
+        self.ui = uic.loadUi('ui/AddNotepadDlg.ui', self)
 
         self.ui.buttonBox.clicked.connect(self.applyAuth)   # TODO
  

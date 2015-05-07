@@ -7,8 +7,8 @@ Created on 24.02.2015
 import dropbox
 
 from StylableTextEdit.FormatManager import FormatManager 
-from NotepadDB import NotepadDB
-from Page import LocalPage, DropboxPage
+from model.NotepadDB import NotepadDB
+from model.Page import LocalPage, DropboxPage
 
 class LocalNotepad:
 

@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import QTextEdit, QVBoxLayout, QLineEdit, QHBoxLayout, QFil
 
 import os
 
-from Toolbars import ActionSelector, TextStyleSelector, BlockStyleSelector
+from ui.Toolbars import ActionSelector, TextStyleSelector, BlockStyleSelector
 
 from StylableTextEdit.StylableTextEdit import StylableTextEdit, MathFormulaObject
 from StylableTextEdit.FormatManager import FormatManager

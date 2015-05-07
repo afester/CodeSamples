@@ -5,8 +5,7 @@ Created on 04.05.2015
 '''
 
 import sqlite3, os, urllib, fnmatch
-# from Notepad import LocalPage, LocalNotepad
-from Page import LocalPage
+from model.Page import LocalPage
 
 
 class NotepadDB:

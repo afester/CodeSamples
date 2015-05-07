@@ -18,11 +18,11 @@ from PyQt5 import uic
 import sys, os, fnmatch, platform, urllib, re, sqlite3
 import logging.config
 
-from EditorWidget import EditorWidget
-from BrowserWidget import BrowserWidget
+from ui.EditorWidget import EditorWidget
+from ui.BrowserWidget import BrowserWidget
 from Settings import Settings
 from StylableTextEdit.StylableTextModel import TextDocumentTraversal, StructurePrinter
-from XMLExporter import XMLExporter
+from model.XMLExporter import XMLExporter
 from HTMLExporter import HTMLExporter
 
 class SearchWorker(QObject):
@@ -78,7 +78,7 @@ class SearchWidget(QWidget):
         self.editorWidget = parentWidget.editorWidget   # TODO: Review class structure
 
         self.searching = False
-        self.ui = uic.loadUi('SearchWidget.ui', self)
+        self.ui = uic.loadUi('ui/SearchWidget.ui', self)
         self.resultListModel = QStandardItemModel(self.ui.resultList)
         self.ui.resultWidget.setCurrentIndex(0) # show (empty) result list by default
         self.ui.resultList.setModel(self.resultListModel)
@@ -463,29 +463,3 @@ class MainWindow(QMainWindow):
                           "<tr><th align=\"right\">sqlite version:</th><td>{}</td></tr>".format(sqlite3.version) +
                           "<tr><th align=\"right\">sqlite runtime version:</th><td>{}</td></tr>".format(sqlite3.sqlite_version)+
                           "</table>")
-
-
-def main():
-    logging.config.fileConfig('logging.ini')
-
-    # Create the application object
-    app = QApplication(sys.argv)
-
-    # Create the main window
-    mainWindow = MainWindow(app)
-
-
-#    from NotepadDB import NotepadDB
-#    db = NotepadDB('MynPad')
-#    db.openDatabase();
-#    db.closeDatabase();
-
-
-    # Show and run the application
-    mainWindow.show()
-    app.exec()
-
-
-
-if __name__ == '__main__':
-    main()

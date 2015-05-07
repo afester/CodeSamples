@@ -4,8 +4,8 @@ Created on 24.02.2015
 @author: afester
 '''
 
-from XMLImporter import XMLImporter
-from XMLExporter import XMLExporter
+from model.XMLImporter import XMLImporter
+from model.XMLExporter import XMLExporter
 import os, urllib.parse, uuid
 from dropbox.rest import ErrorResponse
 
