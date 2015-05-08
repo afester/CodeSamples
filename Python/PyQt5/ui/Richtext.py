@@ -9,20 +9,19 @@ Created on Feb 13, 2015
 from PyQt5.QtCore import PYQT_VERSION_STR, QT_VERSION_STR, qVersion, pyqtSignal, Qt
 from PyQt5.QtWidgets import QWidget, QTabWidget
 from PyQt5.QtWidgets import QTextEdit, QSplitter, QHBoxLayout, QVBoxLayout, QMainWindow
-from PyQt5.QtWidgets import QAction, QStatusBar, QMenuBar, QApplication, QMessageBox, QListView
+from PyQt5.QtWidgets import QAction, QStatusBar, QMenuBar, QMessageBox, QListView
 from PyQt5.QtWebKitWidgets import QWebView, QWebPage
 from PyQt5.QtCore import QUrl, QObject, QThread 
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PyQt5 import uic
 
-import sys, os, fnmatch, platform, urllib, re, sqlite3
-import logging.config
+import sys, os, fnmatch, platform, urllib, re, sqlite3, logging
 
-from EditorWidget import EditorWidget
-from BrowserWidget import BrowserWidget
+from ui.EditorWidget import EditorWidget
+from ui.BrowserWidget import BrowserWidget
 from Settings import Settings
 from StylableTextEdit.StylableTextModel import TextDocumentTraversal, StructurePrinter
-from XMLExporter import XMLExporter
+from model.XMLExporter import XMLExporter
 from HTMLExporter import HTMLExporter
 
 class SearchWorker(QObject):
@@ -78,7 +77,7 @@ class SearchWidget(QWidget):
         self.editorWidget = parentWidget.editorWidget   # TODO: Review class structure
 
         self.searching = False
-        self.ui = uic.loadUi('SearchWidget.ui', self)
+        self.ui = uic.loadUi('ui/SearchWidget.ui', self)
         self.resultListModel = QStandardItemModel(self.ui.resultList)
         self.ui.resultWidget.setCurrentIndex(0) # show (empty) result list by default
         self.ui.resultList.setModel(self.resultListModel)
@@ -172,8 +171,10 @@ class LinklistWidget(QListView):
             self.resultListModel.appendRow(resultItem)
 
 
-
+# The central widget for the MainWindow.
 class MynPad(QWidget):
+
+    l = logging.getLogger('MynPad')
 
     updateWindowTitle = pyqtSignal(str)
 
@@ -237,11 +238,12 @@ class MynPad(QWidget):
         self.searchWidget.resultSelected.connect(self.navigateDirect)
 
         self.toLinksWidget = LinklistWidget(self)
+        self.fromLinksWidget = LinklistWidget(self)
 
         self.listsWidget = QTabWidget(self)
         self.listsWidget.addTab(self.searchWidget, 'Search')
         self.listsWidget.addTab(self.toLinksWidget, 'Links to')
-        self.listsWidget.addTab(QWidget(), 'Links from')
+        self.listsWidget.addTab(self.fromLinksWidget, 'Links from')
 
         leftWidget = QSplitter(Qt.Vertical, self)
         leftWidget.addWidget(self.browserWidget)
@@ -276,7 +278,7 @@ class MynPad(QWidget):
 
         self.editorWidget.save()
         self.editorWidget.load(self.editorWidget.page.notepad, pageId)
-        self.updateLinktoList()
+        self.updateLinkLists(self.editorWidget.page.notepad, pageId)
 
         self.browserWidget.navigate(pageId)
 
@@ -288,29 +290,35 @@ class MynPad(QWidget):
 
         self.editorWidget.save()
         self.editorWidget.load(self.editorWidget.page.notepad, pageId)
-        self.updateLinktoList()
+        self.updateLinkLists(self.editorWidget.page.notepad, pageId)
 
         self.browserWidget.navigateDirect(pageId)
 
 
     def itemSelected(self):
         treeNode = self.browserWidget.currentItem
-        print("Selected tree node: {}".format(treeNode))
+        self.l.debug('Selected tree node: {}'.format(treeNode))
 
-        # get page id (None = title page)
-        pageId = None
-        if treeNode.parent() is not None:
-            pageId = treeNode.getLabel()
+        pageId = treeNode.getPageId()
+        notepad = treeNode.getNotepad()
 
         self.editorWidget.setEnabled(True)
         self.editorWidget.save()
-        self.editorWidget.load(treeNode.getNotepad(), pageId)
-        self.updateLinktoList()
+        self.editorWidget.load(notepad, pageId)
+
+        self.updateLinkLists(notepad, pageId)
 
 
-    def updateLinktoList(self):
-        print('{}'.format(self.editorWidget.page.getLinks()))
-        self.toLinksWidget.setContents(self.editorWidget.page.getLinks())
+    def updateLinkLists(self, notepad, pageId):
+        
+        linksTo = notepad.getChildPages(pageId)
+        linksFrom = notepad.getParentPages(pageId)
+
+        print('Links to: {}'.format(linksTo))
+        print('Links from: {}'.format(linksFrom))
+
+        self.toLinksWidget.setContents(linksTo)
+        self.fromLinksWidget.setContents(linksFrom)
 
 
     def tabSelected(self, index):
@@ -415,8 +423,8 @@ class MainWindow(QMainWindow):
         size = self.settings.getMainWindowSize()
         self.resize(size)
 
-        # refresh the browser tree 
-        self.mainWidget.browserWidget.refresh()
+        # initialize the browser tree (add the top nodes and expand the saved path)
+        self.mainWidget.browserWidget.initialize()
 
 
     def updateWindowTitle(self, title):
@@ -434,6 +442,11 @@ class MainWindow(QMainWindow):
         self.settings.setMainWindowPos(self.pos())
         self.settings.setMainWindowSize(self.size())
         self.settings.save()
+
+        # Close all notepads - TODO (HACK)
+        for x in range (0, self.mainWidget.browserWidget.browserView.topLevelItemCount()):
+            notepad = self.mainWidget.browserWidget.browserView.topLevelItem(x).getNotepad()
+            notepad.close()
 
 
     def handleAbout(self):
@@ -457,29 +470,3 @@ class MainWindow(QMainWindow):
                           "<tr><th align=\"right\">sqlite version:</th><td>{}</td></tr>".format(sqlite3.version) +
                           "<tr><th align=\"right\">sqlite runtime version:</th><td>{}</td></tr>".format(sqlite3.sqlite_version)+
                           "</table>")
-
-
-def main():
-    logging.config.fileConfig('logging.ini')
-
-    # Create the application object
-    app = QApplication(sys.argv)
-
-    # Create the main window
-    mainWindow = MainWindow(app)
-
-
-    from NotepadDB import NotepadDB
-    db = NotepadDB('MynPad')
-    db.openDatabase();
-    db.closeDatabase();
-
-
-    # Show and run the application
-    mainWindow.show()
-    app.exec()
-
-
-
-if __name__ == '__main__':
-    main()

@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QDialog, QFileDialog, QDialogButtonBox
 from PyQt5 import uic
 
 import os, logging
-from Notepad import LocalNotepad, DropboxNotepad
+from model.Notepad import LocalNotepad, DropboxNotepad
 import dropbox
 from dropbox.rest import ErrorResponse
 
@@ -21,7 +21,7 @@ class AddNotepadDlg(QDialog):
         QDialog.__init__(self, parentWidget)
         self.settings = settings
 
-        self.ui = uic.loadUi('AddNotepadDlg.ui', self)
+        self.ui = uic.loadUi('ui/AddNotepadDlg.ui', self)
 
         self.ui.buttonBox.clicked.connect(self.applyAuth)   # TODO
  
@@ -88,6 +88,13 @@ class TreeNode(QTreeWidgetItem):
         return self.text(0)
 
 
+    def getPageId(self):
+        if self.parent() is None:
+            return "Title page"
+        else:
+            return self.getLabel()
+
+
     def getNotepad(self):
         return self.notepad
 
@@ -100,7 +107,7 @@ class TreeNode(QTreeWidgetItem):
         return self.wasExpanded
 
     def __repr__(self, *args, **kwargs):
-        return 'TreeNode[label={}, notepad={}]'.format(self.text(0), self.notepad.getName())
+        return 'TreeNode[label="{}", notepad="{}"]'.format(self.text(0), self.notepad.getName())
 
 
 class TreeWidget(QTreeWidget):
@@ -136,38 +143,38 @@ class TreeWidget(QTreeWidget):
 
         if not item.isWasExpanded():
             notepad = item.getNotepad()
-            
+
             if item.parent() is None:
-                page = notepad.getPage(None)
+                pageId = 'Title page'
             else:
-                page = notepad.getPage(item.getLabel())
-    
-            for keyword in page.getLinks():
+                pageId = item.getLabel()
+
+            subPages = notepad.getChildPagesWithHandle(pageId)
+            for keyword, childCount in subPages:
                 linkItem = TreeNode(notepad, keyword)
     
-                page = notepad.getPage(keyword)
-                if len(page.getLinks()) > 0:
+                if childCount > 0:
                     linkItem.setChildIndicatorPolicy(QTreeWidgetItem.ShowIndicator)
+
                 item.addChild(linkItem)
             item.setWasExpanded(True)
 
 
-    # Add all top level items (Notepads).
-    # As soon as one of them is expanded (either by the user or programmatically),
-    # the expandHandler method takes care of adding the childs as required
+    # Adds a Notepad as top level item.
     def refresh(self, notepad):
-        rootPage = notepad.getPage(None)
-
+        # Add the root node
         rootItem = TreeNode(notepad, notepad.getName())
         self.addTopLevelItem(rootItem)
 
-        if len(rootPage.getLinks()) > 0:
+        # set the child indicator
+        if notepad.getChildCount('Title page') > 0:
             rootItem.setChildIndicatorPolicy(QTreeWidgetItem.ShowIndicator)
 
 
     def addNotepad(self, notepad):
         rootItem = TreeNode(notepad, notepad.getName())
         self.addTopLevelItem(rootItem)
+
         self.setCurrentItem(rootItem)
         rootItem.setExpanded(True)
 
@@ -181,6 +188,9 @@ class TreeWidget(QTreeWidget):
           path ([str, str, ...]): The path to expand - a list of node labels
 """
         item.setExpanded(True)
+        
+        # If the leaf item is reached, then set it as the current item.
+        # This will also load the corresponding page into the editor.
         if len(path) == 0:
             self.setCurrentItem(item)
             return
@@ -255,7 +265,7 @@ class TreeWidget(QTreeWidget):
 class BrowserWidget(QWidget):
     ''' Tree widget and button bar above '''
 
-    l = logging.getLogger('Browser')
+    l = logging.getLogger('BrowserWidget')
 
     itemSelected = pyqtSignal()
 
@@ -327,10 +337,10 @@ class BrowserWidget(QWidget):
         pass
 
 
-    def refresh(self):
+    def initialize(self):
         # Reload all notepads
-        self.l.debug("Refreshing browser ...")
-        
+        self.l.debug("Adding top nodes in browser...")
+
         # Add notepads to the browser tree
         notepads = self.settings.getNotepads()
         for np in notepads:
@@ -341,6 +351,7 @@ class BrowserWidget(QWidget):
             self.browserView.refresh(notepad)
 
         # Expand to and select the previous item
+        self.l.debug("Expanding saved path in browser ...")
         path = self.settings.getBrowserPath()
         self.browserView.expandPath(path)
 

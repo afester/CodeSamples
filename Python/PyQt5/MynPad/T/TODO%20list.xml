@@ -11,6 +11,12 @@
       <title>Next steps</title>
       <itemizedlist>
         <listitem>
+          <para><emphasis role="highlight">The database needs to be updated when a page is saved (we have a current list of linked pages there).</emphasis></para>
+        </listitem>
+        <listitem>
+          <para><emphasis role="highlight">Navigating from the links to and links from lists</emphasis></para>
+        </listitem>
+        <listitem>
           <para>External URL handling</para>
           <itemizedlist>
             <listitem>
@@ -74,7 +80,7 @@
       <title>Important topics</title>
       <itemizedlist>
         <listitem>
-          <para>How to delete / rename pages? Should we maintain a global "database" of pages and their links?<emphasis> Would allow to query the database to build the browser tree</emphasis> instead of loading the page to get its links. The database needs to be updated when a page is saved (we have a current list of linked pages there). Would also allow to add features like "what links here" and "where does this page link"</para>
+          <para>How to delete / rename pages?</para>
         </listitem>
         <listitem>
           <para>Copy&amp;Paste should support format - currently only plain text is copied into the clipboard</para>

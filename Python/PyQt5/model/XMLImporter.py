@@ -3,7 +3,7 @@ import os
 import xml.sax
 
 from StylableTextEdit.StylableTextModel import Frame, List, Paragraph, TextFragment, ImageFragment, MathFragment, DocumentFactory
-from EditorWidget import MathFormulaObject
+from ui.EditorWidget import MathFormulaObject   # TODO: model should not reference UI
 
 class Handler(xml.sax.handler.ContentHandler):
 

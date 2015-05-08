@@ -4,88 +4,23 @@ Created on 24.02.2015
 @author: afester
 '''
 
-from XMLImporter import XMLImporter
-from XMLExporter import XMLExporter
-import os, urllib.parse, uuid
-import dropbox
+from model.XMLImporter import XMLImporter
+from model.XMLExporter import XMLExporter
+import os, urllib.parse, uuid, logging
 from dropbox.rest import ErrorResponse
 
 from StylableTextEdit.StylableTextModel import Frame, Paragraph, TextFragment, DocumentFactory
-from StylableTextEdit.FormatManager import FormatManager 
-
-class LocalNotepad:
-
-    def __init__(self, npDef):
-        self.type = npDef['type']
-        self.name = npDef['name']
-        self.rootPath = npDef['path']
-
-        self.formatManager = FormatManager()
-        self.formatManager.loadFormats()    # TODO: Only required once
-
-
-    def getPage(self, pageId):
-        result = LocalPage(self, pageId)
-        result.load()
-        return result
-
-
-    def getName(self):
-        return self.name
-
-
-    def getType(self):
-        return self.type
-
-
-    def getFormatManager(self):
-        return self.formatManager
-
-
-    def getRootpath(self):
-        return self.rootPath
-
-
-    def recFind(self, parentId, pageId):
-        page = LocalPage(self, parentId)
-        page.load()
-
-        for link in page.getLinks():
-            self.path.append(link)
-
-            if link == pageId:
-                self.found = True
-                return
-
-            self.recFind(link, pageId)
-            if self.found:
-                break
-
-            self.path = self.path[:-1]
-
-
-    def findPathToPage(self, pageId):
-        '''Find the first path to a given page id.
-
-        NOTE: This is currently an expensive operation since it requires to load
-        many pages to get their links!
-'''
-
-        self.path = [self.getName()]
-        self.found = False
-
-        self.recFind(None, pageId)
-
-        return self.path
 
 
 class LocalPage:
+
+    l = logging.getLogger('LocalPage')
 
     def __init__(self, notepad, pageId):
         '''@param notepad  The Notepad instance for this page
            @param pageId   The page name / page id for this page
 '''
-        assert pageId is None or type(pageId) is str
+        assert type(pageId) is str
 
         self.notepad = notepad
         self.pageId = pageId
@@ -96,10 +31,7 @@ class LocalPage:
     def getName(self):
         '''@return The page id (page name) of this page
         '''
-        if self.pageId is None:
-            return "Title page"
-        else:
-            return self.pageId
+        return self.pageId
 
 
     def getFilename(self):
@@ -114,7 +46,7 @@ class LocalPage:
         pagePath = self.notepad.getRootpath()
 
         if self.pageId is not None:     # not the root page
-            pageIdx = self.pageId[0]
+            pageIdx = self.pageId[0].upper()
             pagePath = pagePath + "/" + pageIdx # os.path.join(pagePath, pageIdx)
         return pagePath
 
@@ -128,11 +60,11 @@ class LocalPage:
 
     def load(self):
         pageFullPath = self.getPagePath()
-        print("  Loading page at {} ".format(pageFullPath))
+        self.l.debug('Loading page at {} '.format(pageFullPath))
 
         pageDir = self.getPageDir()
         if not os.path.isfile(pageFullPath):
-            print('    Page does not exist, creating empty document ...')
+            self.l.debug('Page does not exist, creating empty document ...')
 
             rootFrame = Frame()
             p1 = Paragraph(0, ('title', 'level', '1'))
@@ -183,25 +115,6 @@ class LocalPage:
 
     def getDocument(self):
         return self.document
-
-
-
-class DropboxNotepad(LocalNotepad):
-
-    def __init__(self, npDef, settings):
-        self.type = npDef['type']
-        self.name = npDef['name']
-        self.rootPath = self.name
-        self.client = dropbox.client.DropboxClient(settings.getDropboxToken())
-
-        self.formatManager = FormatManager()
-        self.formatManager.loadFormats()    # TODO: Only required once
-
-
-    def getPage(self, pageId):
-        result = DropboxPage(self, pageId)
-        result.load()
-        return result
 
 
 class DropboxPage(LocalPage):
