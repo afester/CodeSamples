@@ -5,7 +5,12 @@ SECTION		.bss
 
 SECTION		.text
 
+;                extern  main
+
 		org	0x7c00
+;                global  _start
+;_start:
+
 
 		cli
 		call	getIp			; push  eip
@@ -52,6 +57,8 @@ getIp:		push	cs
 		mov	bx,640			; Line 5
 		call	printReg
 
+;		call	main
+
 		hlt
 
 printReg:
@@ -82,7 +89,7 @@ printString:
 		mov	bx, 0xb800
 		mov	es, bx
 
-		mov	ah, 0x51	; attribute
+		mov	ah, 0x61	; attribute
 		mov	cx, word [si]	; string length
 		add	si, 2
 
