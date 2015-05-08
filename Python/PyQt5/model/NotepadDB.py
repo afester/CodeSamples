@@ -18,7 +18,7 @@ class NotepadDB:
 
     def openDatabase(self, notepad):
         self.rootDir = notepad.getRootpath()
-        self.dbFile = os.path.join(self.rootDir, 'mynpad.dbf')
+        self.dbFile = self.rootDir + '/mynpad.dbf'
 
         
         # Create the database file if it does not exist yet and open the database
@@ -161,6 +161,23 @@ ORDER BY pageId''')
         for row in rows:
             result.append(row[0])
         return result
+
+
+    def updateLinks(self, pageId, linksTo):
+        self.l.debug('Updating links for "{}": {}'.format(pageId, linksTo))
+
+        stmt = '''
+DELETE FROM pageref 
+WHERE parentId=?'''
+        self.conn.execute(stmt, (pageId, ) )
+
+        for childLink in linksTo:
+            stmt = '''
+INSERT INTO pageref VALUES(?, ?)'''
+            self.conn.execute(stmt, (pageId, childLink) )
+        self.conn.commit()
+
+
 
 
 # TODO: move to unit tests #####################################################

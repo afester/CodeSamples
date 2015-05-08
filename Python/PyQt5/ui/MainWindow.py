@@ -172,9 +172,9 @@ class LinklistWidget(QListView):
 
 
 # The central widget for the MainWindow.
-class MynPad(QWidget):
+class CentralWidget(QWidget):
 
-    l = logging.getLogger('MynPad')
+    l = logging.getLogger('CentralWidget')
 
     updateWindowTitle = pyqtSignal(str)
 
@@ -204,33 +204,33 @@ class MynPad(QWidget):
         self.editorWidget.navigate.connect(self.navigate)
 
         tabLayout.addWidget(self.editorWidget)
-        self.tabWidget.addTab(tab, "Edit")
+        self.editTabIdx = self.tabWidget.addTab(tab, "Edit")
 #############################
 
         self.browser = QWebView(self.tabWidget)
         self.browser.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
         self.browser.linkClicked.connect(self.navigateWeb)
-        self.tabWidget.addTab(self.browser, "View web")
+        self.webTabIdx = self.tabWidget.addTab(self.browser, "View web")
 
-        self.tabWidget.addTab(QWidget(self.tabWidget), "View pdf")
+        self.pdfTabIdx = self.tabWidget.addTab(QWidget(self.tabWidget), "View pdf")
 
         self.textView = QTextEdit(self.tabWidget)
         self.textView.setReadOnly(True)
         self.textView.setFontFamily('Courier')
         self.textView.setFontPointSize(8)
-        self.tabWidget.addTab(self.textView, "View document structure")
+        self.structureTabIdx = self.tabWidget.addTab(self.textView, "View document structure")
 
         self.customView = QTextEdit(self.tabWidget)
         self.customView.setReadOnly(True)
         self.customView.setFontFamily('Courier')
         self.customView.setFontPointSize(10)
-        self.tabWidget.addTab(self.customView, "View XML")
+        self.xmlTabIdx = self.tabWidget.addTab(self.customView, "View XML")
 
         self.htmlView = QTextEdit(self.tabWidget)
         self.htmlView.setReadOnly(True)
         self.htmlView.setFontFamily('Courier')
         self.htmlView.setFontPointSize(10)
-        self.tabWidget.addTab(self.htmlView, "View Html")
+        self.htmlTabIdx = self.tabWidget.addTab(self.htmlView, "View Html")
 
         self.tabWidget.currentChanged.connect(self.tabSelected)
 
@@ -274,7 +274,7 @@ class MynPad(QWidget):
 
     def navigate(self, pageId):
         """Assumption: pageId is sub page of current page"""
-        print('Navigating to sub page "{}"'.format(pageId))
+        self.l.debug('Navigating to sub page "{}"'.format(pageId))
 
         self.editorWidget.save()
         self.editorWidget.load(self.editorWidget.page.notepad, pageId)
@@ -286,7 +286,7 @@ class MynPad(QWidget):
     def navigateDirect(self, pageId):
         """Assumption: pageId is NOT sub page of current page. 
         Hence we need to let the browser point to the first occurrence of the page."""
-        print('Navigating directly to "{}"'.format(pageId))
+        self.l.debug('Navigating directly to "{}"'.format(pageId))
 
         self.editorWidget.save()
         self.editorWidget.load(self.editorWidget.page.notepad, pageId)
@@ -314,52 +314,41 @@ class MynPad(QWidget):
         linksTo = notepad.getChildPages(pageId)
         linksFrom = notepad.getParentPages(pageId)
 
-        print('Links to: {}'.format(linksTo))
-        print('Links from: {}'.format(linksFrom))
-
         self.toLinksWidget.setContents(linksTo)
         self.fromLinksWidget.setContents(linksFrom)
 
 
     def tabSelected(self, index):
-        if index == 1:        # Web View
-            exporter = HTMLExporter(self.editorWidget.page.getPageDir())
-            self.htmlView.setPlainText(exporter.getHtmlString(self.editorWidget.editView.document()))
-
-            ########### get URL for the stylesheet and for the base URL
-            mypath = os.getcwd()
-            mypath = mypath.replace('\\', '/')
-            stylesheetURL = QUrl('file:///{}/webpage.css'.format(mypath))
-            baseURL = QUrl('file:///{}/'.format(mypath))
-            ###########
-
-            self.browser.settings().setUserStyleSheetUrl(stylesheetURL)
-            self.browser.setHtml(self.htmlView.toPlainText(), baseURL)
-
-        elif index == 2:      # PDF
+        if index == self.editTabIdx:
             pass
-
-        elif index == 3:
-            self.dumpTextStructure()
-
-        elif index == 4:
-            exporter = XMLExporter(self.editorWidget.page.getPageDir(), None)
-            self.customView.setPlainText(exporter.getXmlString(self.editorWidget.editView.document()))
-
-        elif index == 5:
-            exporter = HTMLExporter(self.editorWidget.page.getPageDir())
-            self.htmlView.setPlainText(exporter.getHtmlString(self.editorWidget.editView.document()))
-
-
-    def blocks(self, frame):
-        blocks = frame.begin()
-        while not blocks.atEnd():
-            block = blocks.currentBlock()
-            yield block
-            blocks += 1
+        elif index == self.webTabIdx:
+            self.activateWebView()
+        elif index == self.pdfTabIdx:
+            pass
+        elif index == self.structureTabIdx:
+            self.activateStructureView()
+        elif index == self.xmlTabIdx:
+            self.activateXMLView()
+        elif index == self.htmlTabIdx:
+            self.activateHTMLView()
 
 
-    def dumpTextStructure(self):
+    def activateWebView(self):
+        exporter = HTMLExporter(self.editorWidget.page.getPageDir())
+        self.htmlView.setPlainText(exporter.getHtmlString(self.editorWidget.editView.document()))
+
+        ########### get URL for the stylesheet and for the base URL
+        mypath = os.getcwd()
+        mypath = mypath.replace('\\', '/')
+        stylesheetURL = QUrl('file:///{}/webpage.css'.format(mypath))
+        baseURL = QUrl('file:///{}/'.format(mypath))
+        ###########
+
+        self.browser.settings().setUserStyleSheetUrl(stylesheetURL)
+        self.browser.setHtml(self.htmlView.toPlainText(), baseURL)
+
+
+    def activateStructureView(self):
         self.textView.clear()
 
         doc = self.editorWidget.editView.document()
@@ -369,6 +358,15 @@ class MynPad(QWidget):
         sp = StructurePrinter(tree, self.textView.insertPlainText)
         sp.traverse()
 
+
+    def activateXMLView(self):
+        exporter = XMLExporter(self.editorWidget.page.getPageDir(), None)
+        self.customView.setPlainText(exporter.getXmlString(self.editorWidget.editView.document()))
+
+
+    def activateHTMLView(self):
+        exporter = HTMLExporter(self.editorWidget.page.getPageDir())
+        self.htmlView.setPlainText(exporter.getHtmlString(self.editorWidget.editView.document()))
 
 
 class MainWindow(QMainWindow):
@@ -413,7 +411,7 @@ class MainWindow(QMainWindow):
         self.statusBar = QStatusBar()
         self.statusBar.showMessage("Ready.")
         self.setStatusBar(self.statusBar)
-        self.mainWidget = MynPad(self, self.settings)
+        self.mainWidget = CentralWidget(self, self.settings)
         self.mainWidget.updateWindowTitle.connect(self.updateWindowTitle)
         self.setCentralWidget(self.mainWidget)
 

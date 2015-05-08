@@ -44,10 +44,8 @@ class LocalPage:
         '''@return The directory for this page, like "c:\temp\testpad\T" 
         '''
         pagePath = self.notepad.getRootpath()
-
-        if self.pageId is not None:     # not the root page
-            pageIdx = self.pageId[0].upper()
-            pagePath = pagePath + "/" + pageIdx # os.path.join(pagePath, pageIdx)
+        pageIdx = self.pageId[0].upper()
+        pagePath = pagePath + '/' + pageIdx
         return pagePath
 
 
@@ -55,7 +53,7 @@ class LocalPage:
         '''@return The absolute path name to the page.xml file,
                    like "c:\temp\testpad\T\Todo%20List.xml" 
         '''
-        return os.path.join(self.getPageDir(), self.getFilename())
+        return self.getPageDir() + '/' + self.getFilename()
 
 
     def load(self):
@@ -87,16 +85,17 @@ class LocalPage:
 
     def save(self):
         pagePath = self.getPagePath()
-        print("  Saving page to {} ".format(pagePath))
+        self.l.debug('Saving page to {}'.format(pagePath))
 
         pageDir = self.getPageDir()
         if not os.path.isdir(pageDir):
-            print('    {} does not exist, creating directory ...'.format(pageDir))
+            self.l.debug('{} does not exist, creating directory ...'.format(pageDir))
             os.makedirs(pageDir)
 
         exporter = XMLExporter(self.getPageDir(), self.getFilename())
         exporter.exportDocument(self.document)
 
+        self.notepad.updateLinks(self.getName(), exporter.getLinks())
         self.document.setModified(False)
 
 

@@ -47,6 +47,8 @@ class LocalNotepad:
     def getChildPagesWithHandle(self, pageId):
         return self.db.getChildPagesWithHandle(pageId)
 
+    def updateLinks(self, pageId, linksTo):
+        self.db.updateLinks(pageId, linksTo)
 
     def getName(self):
         return self.name

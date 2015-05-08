@@ -16,6 +16,7 @@ class DocbookPrinter:
         self.indent = 0
         self.out = out
         self.sectionLevel = 0
+        self.keywordLinks = set()
 
     def prefix(self):
         return ' ' * self.indent * 2
@@ -136,8 +137,9 @@ class DocbookPrinter:
             if fragment.style is None:
                 self.out(text)
             elif fragment.style[0] == 'olink':
-                linkend = urllib.parse.quote(fragment.text, '')
-                self.out('<olink targetdoc="{}">{}</olink>'.format(linkend, text))
+                keyword = urllib.parse.quote(fragment.text, '')
+                self.out('<olink targetdoc="{}">{}</olink>'.format(keyword, text))
+                self.keywordLinks.add(text) 
             elif fragment.style[0] == 'emphasis':
                 if fragment.style[2] is not None and fragment.style[2] == 'highlight':
                     self.out('<emphasis role="highlight">{}</emphasis>'.format(text))
@@ -148,7 +150,7 @@ class DocbookPrinter:
 
         if fragment.href is not None:
             self.out('</link>')
-            
+
 
 class XMLExporter:
     def __init__(self, contentPath, contentFile):
@@ -170,8 +172,13 @@ class XMLExporter:
 
         dp = DocbookPrinter(documentModel, self.collect)
         dp.traverse()
+        self.links = sorted(dp.keywordLinks)
 
         return self.contents
+
+
+    def getLinks(self):
+        return self.links
 
 
     def collect(self, data):
