@@ -35,6 +35,9 @@ class LocalNotepad:
         return result
 
 
+    def getAllPages(self):
+        return self.db.getAllPages()
+
     def getChildCount(self, pageId):
         return self.db.getChildCount(pageId)
 

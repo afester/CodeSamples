@@ -31,28 +31,38 @@ class SearchWorker(QObject):
 
     def __init__(self):
         QObject.__init__(self)
+        self.notepad = None
 
-    def startSearch(self, rootPath, searchText):
+    def startSearch(self, searchText):
         self.aborted = False
-        print('Starting search operation "{}" on {} ...'.format(searchText, rootPath))
+        print('Starting search operation "{}" on {} ...'.format(searchText, self.notepad.getName()))
 
         # TODO: We need a Notepad instance here.
         # Then the following code to search through a notepad can be moved into the Notepad class:
 
-        for root, dirnames, filenames in os.walk(rootPath):
-            for filename in fnmatch.filter(filenames, '*.xml'):
-                if self.aborted:
-                    return
+        rootPath = self.notepad.getRootpath()
+        for pageId in self.notepad.getAllPages():
+            if self.aborted:
+                return
 
-                pageId = urllib.parse.unquote(filename)[:-4]
+            page = Page(notepad, pageId)
+            filename = page.getPagePath()
+            print("==> {}".format(filename))
 
-                filename = os.path.join(root, filename)
-                with open(filename, 'r', encoding='utf-8') as f:
-                    contents = f.read()
-                    
-                    if re.search(searchText, contents, re.IGNORECASE):
-                    # if contents.find(searchText) != -1:
-                        self.addMatch.emit(pageId)
+#        for root, dirnames, filenames in os.walk(rootPath):
+#            for filename in fnmatch.filter(filenames, '*.xml'):
+#                if self.aborted:
+#                    return
+#
+#                pageId = urllib.parse.unquote(filename)[:-4]
+#
+#                filename = os.path.join(root, filename)
+#                with open(filename, 'r', encoding='utf-8') as f:
+#                    contents = f.read()
+#                    
+#                    if re.search(searchText, contents, re.IGNORECASE):
+#                    # if contents.find(searchText) != -1:
+#                        self.addMatch.emit(pageId)
         self.searchDone.emit()
 
 
@@ -67,7 +77,7 @@ class SearchWorker(QObject):
 
 class SearchWidget(QWidget):
 
-    startWork = pyqtSignal(str, str)
+    startWork = pyqtSignal(str)
     resultSelected = pyqtSignal(str)
     # stopWork = pyqtSignal()
 
@@ -119,8 +129,9 @@ class SearchWidget(QWidget):
         self.ui.startStopButton.setIcon(self.stopIcon)
         self.resultListModel.clear()
         queryText = self.ui.searchInput.text()
-        rootPath = self.editorWidget.page.notepad.getRootpath()
-        self.startWork.emit(rootPath, queryText)
+        # rootPath = self.editorWidget.page.notepad.getRootpath()
+        self.worker.notepad = self.editorWidget.page.notepad
+        self.startWork.emit(queryText)
 
 
     def searchDone(self):

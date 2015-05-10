@@ -27,7 +27,7 @@ class NotepadDB:
 
         self.createDatabase(notepad)
 
-        # self.dumpDatabase()
+        self.dumpDatabase()
 
 
     def closeDatabase(self):
@@ -80,10 +80,10 @@ DELETE FROM {}'''.format('page'))
 
 		# Dont store the title page in the pages table - otherwise we would get
 		# the title page as orphaned page
-                if pageId != 'Title page':
-                    stmt = '''
+                # if pageId != 'Title page':
+                stmt = '''
 INSERT INTO {} VALUES('{}')'''.format('page', pageId)
-                    self.conn.execute(stmt)
+                self.conn.execute(stmt)
 
                 page = LocalPage(notepad, pageId)
                 page.load()
@@ -95,6 +95,19 @@ INSERT INTO {} VALUES('{}')'''.format('page', pageId)
 INSERT INTO {} VALUES('{}', '{}')'''.format('pageref', pageId, childLink)
                     self.conn.execute(stmt)
                 # print()
+
+
+    def getAllPages(self):
+        result = []
+
+        rows = self.conn.execute('''
+SELECT pageId 
+FROM page 
+ORDER BY pageId''')
+        for row in rows:
+            result.append(row[0])
+
+        return result
 
 
     def getChildPages(self, pageId):
@@ -156,7 +169,7 @@ ORDER BY childId'''.format(pageId))   # TODO: SQL INJECTION!!!!
         rows = self.conn.execute('''
 SELECT pageId 
 FROM page 
-WHERE pageId NOT IN (SELECT DISTINCT childId FROM pageref) 
+WHERE pageId <> 'Title page' AND pageId NOT IN (SELECT DISTINCT childId FROM pageref) 
 ORDER BY pageId''')
         for row in rows:
             result.append(row[0])
@@ -247,7 +260,9 @@ INSERT INTO pageref VALUES(?, ?)'''
 
     def dumpDatabase(self):
         print('All pages\n==================================================')
-        self.selectAll('*', 'page')
+        allPages = self.getAllPages()
+        for pageId in allPages:
+            print(pageId)
         print()
 
         print('Page relationships\n==================================================')
