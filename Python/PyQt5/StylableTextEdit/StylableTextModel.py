@@ -29,6 +29,10 @@ class Frame(Node):
     def __init__(self):
         Node.__init__(self)
 
+    def getPlainText(self):
+        fac = PlainTextFactory()
+        return fac.getPlainText(self)
+
     def __str__(self):
         return 'Frame'
 
@@ -391,3 +395,40 @@ class DocumentFactory:
                     fmt = self.paraFormat
 
                 self.cursor.insertText(text, fmt.getCharFormat())
+
+
+
+class PlainTextFactory:
+    
+    def __init__(self):
+        pass
+
+
+    def getPlainText(self, rootFrame):
+        self.result = ""
+
+        # add all root paragraphs
+        for n in rootFrame.children:
+            self.processNode(n)
+
+        return self.result
+
+
+    def processNode(self, node):
+        if type(node) == Paragraph:
+            for n in node.children:
+                self.processNode(n)
+            self.result = self.result + '\n'
+
+        elif type(node) == List:
+            for n in node.children:
+                self.processNode(n)
+
+        elif type(node) is ImageFragment:
+            pass
+
+        elif type(node) is MathFragment:
+            pass    # TODO: Probably add LaTex expression
+
+        elif type(node) is TextFragment:
+            self.result = self.result + node.text

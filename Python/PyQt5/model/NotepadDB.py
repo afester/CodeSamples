@@ -103,7 +103,8 @@ INSERT INTO {} VALUES('{}', '{}')'''.format('pageref', pageId, childLink)
         rows = self.conn.execute('''
 SELECT pageId 
 FROM page 
-ORDER BY pageId''')
+ORDER BY pageId 
+COLLATE NOCASE''')
         for row in rows:
             result.append(row[0])
 

@@ -19,10 +19,13 @@ import sys, os, fnmatch, platform, urllib, re, sqlite3, logging
 
 from ui.EditorWidget import EditorWidget
 from ui.BrowserWidget import BrowserWidget
+from model.Page import LocalPage
+
 from Settings import Settings
 from StylableTextEdit.StylableTextModel import TextDocumentTraversal, StructurePrinter
 from model.XMLExporter import XMLExporter
 from HTMLExporter import HTMLExporter
+from model.XMLImporter import XMLImporter
 
 class SearchWorker(QObject):
     
@@ -32,37 +35,25 @@ class SearchWorker(QObject):
     def __init__(self):
         QObject.__init__(self)
         self.notepad = None
+        self.pageList = []
 
     def startSearch(self, searchText):
         self.aborted = False
         print('Starting search operation "{}" on {} ...'.format(searchText, self.notepad.getName()))
 
-        # TODO: We need a Notepad instance here.
-        # Then the following code to search through a notepad can be moved into the Notepad class:
-
-        rootPath = self.notepad.getRootpath()
-        for pageId in self.notepad.getAllPages():
+        for pageId in self.pageList:
             if self.aborted:
                 return
 
-            page = Page(notepad, pageId)
-            filename = page.getPagePath()
-            print("==> {}".format(filename))
+            page = LocalPage(self.notepad, pageId)
 
-#        for root, dirnames, filenames in os.walk(rootPath):
-#            for filename in fnmatch.filter(filenames, '*.xml'):
-#                if self.aborted:
-#                    return
-#
-#                pageId = urllib.parse.unquote(filename)[:-4]
-#
-#                filename = os.path.join(root, filename)
-#                with open(filename, 'r', encoding='utf-8') as f:
-#                    contents = f.read()
-#                    
-#                    if re.search(searchText, contents, re.IGNORECASE):
-#                    # if contents.find(searchText) != -1:
-#                        self.addMatch.emit(pageId)
+            imp = XMLImporter(page.getPageDir(), page.getFilename(), None)
+            topFrame = imp.importModel()
+            contents = topFrame.getPlainText()
+
+            if re.search(searchText, contents, re.IGNORECASE):
+                self.addMatch.emit(pageId)
+
         self.searchDone.emit()
 
 
@@ -130,7 +121,12 @@ class SearchWidget(QWidget):
         self.resultListModel.clear()
         queryText = self.ui.searchInput.text()
         # rootPath = self.editorWidget.page.notepad.getRootpath()
+
+        # Setup worker with required data
         self.worker.notepad = self.editorWidget.page.notepad
+        # NOTE: we are querying the page list in this thread,
+        # to avoid concurrency issues with SQLite.
+        self.worker.pageList = self.editorWidget.page.notepad.getAllPages()
         self.startWork.emit(queryText)
 
 
@@ -142,7 +138,7 @@ class SearchWidget(QWidget):
         self.ui.startStopButton.setIcon(self.startIcon)
 
     def addMatch(self, pageId):
-        print("    Adding: {}".format(pageId))
+        # print("    Adding: {}".format(pageId))
         self.ui.resultWidget.setCurrentIndex(0)     # make sure to show the list
         resultItem = QStandardItem(pageId)
         resultItem.setEditable(False)
