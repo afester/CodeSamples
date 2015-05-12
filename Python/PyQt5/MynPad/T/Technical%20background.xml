@@ -11,6 +11,7 @@
     <para>When a new keyword is created on a page (by selecting text and applying the "keyword" style), the corresponding page is still non-existent.</para>
     <para>Even when navigating to the new page (which creates an empty document with a page title only), the new page does not "exist" yet.</para>
     <para>Only when the new page is edited and saved, it is made sure that the page exists in the <code>page</code> table, and that the <code>pageRef</code> table contains all linked pages.</para>
+    <para>The database is the driver - there is only one location where the xml files within a notebook are traversed on the filesystem, and that is when the database is recreated. Otherwise, the assumption is that the database is the authority which knows what pages exist and which child pages a page links to.</para>
     <para></para>
   </section>
 </article>
