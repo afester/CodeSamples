@@ -20,7 +20,6 @@ class NotepadDB:
         self.rootDir = notepad.getRootpath()
         self.dbFile = self.rootDir + '/mynpad.dbf'
 
-        
         # Create the database file if it does not exist yet and open the database
         self.l.debug('Opening {}'.format(self.dbFile)) 
         self.conn = sqlite3.connect(self.dbFile)
@@ -47,6 +46,10 @@ WHERE type='table' and name='{}'
 CREATE TABLE page  (
     pageId TEXT
 )''')
+            self.conn.execute('''
+CREATE UNIQUE INDEX pageIdx ON page(pageId)
+''')
+
             self.conn.execute('''
 CREATE TABLE pageref  (
     parentId TEXT, 
@@ -180,6 +183,14 @@ ORDER BY pageId''')
     def updateLinks(self, pageId, linksTo):
         self.l.debug('Updating links for "{}": {}'.format(pageId, linksTo))
 
+        # Make sure that the page exists in the pages table
+        try:
+            stmt = '''
+INSERT INTO page VALUES(?)'''
+            self.conn.execute(stmt, (pageId, ) )
+        except sqlite3.IntegrityError:      # Ignore unique constraint violation
+            pass
+
         stmt = '''
 DELETE FROM pageref 
 WHERE parentId=?'''
@@ -192,6 +203,32 @@ INSERT INTO pageref VALUES(?, ?)'''
         self.conn.commit()
 
 
+    def _recFind(self, parentId, pageId):
+        childLinks = self.getChildPages(parentId)
+        for link in childLinks:
+            self.path.append(link)
+
+            if link == pageId:
+                self.found = True
+                return
+
+            self._recFind(link, pageId)
+            if self.found:
+                break
+
+            self.path = self.path[:-1]
+
+
+    def getPathToPage(self, pageId):
+        # print('getPathToPage({})'.format(pageId))
+
+        self.path = []
+        if pageId != 'Title page':
+            self.found = False
+            self._recFind('Title page', pageId)
+
+        # print('  => {}'.format(self.path))
+        return self.path
 
 
 # TODO: move to unit tests #####################################################

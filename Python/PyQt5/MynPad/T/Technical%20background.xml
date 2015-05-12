@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article version="5.0" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title></title>
+
+  <section>
+    <title>Technical background</title>
+    <para>There are two tables in the SQLite database: <code>page</code> and <code>pageRef</code>.</para>
+    <para>The <code>page</code> table contains a list of all existing pages. The <code>pageRef</code> table contains all child pages for a given page. A page must not appear as parent page in the <code>pageRef</code> table. Any page which is listed in the <code>page</code> table, but not as a child page in the <code>pageRef</code> table (means, it does not have a parent page), is considered an orphaned page.</para>
+    <para>When a new keyword is created on a page (by selecting text and applying the "keyword" style), the corresponding page is still non-existent.</para>
+    <para>Even when navigating to the new page (which creates an empty document with a page title only), the new page does not "exist" yet.</para>
+    <para>Only when the new page is edited and saved, it is made sure that the page exists in the <code>page</code> table, and that the <code>pageRef</code> table contains all linked pages.</para>
+    <para></para>
+  </section>
+</article>

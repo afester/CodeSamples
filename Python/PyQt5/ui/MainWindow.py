@@ -15,7 +15,7 @@ from PyQt5.QtCore import QUrl, QObject, QThread
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PyQt5 import uic
 
-import sys, os, fnmatch, platform, urllib, re, sqlite3, logging
+import sys, os, platform, re, sqlite3, logging
 
 from ui.EditorWidget import EditorWidget
 from ui.BrowserWidget import BrowserWidget
@@ -70,7 +70,6 @@ class SearchWidget(QWidget):
 
     startWork = pyqtSignal(str)
     resultSelected = pyqtSignal(str)
-    # stopWork = pyqtSignal()
 
     def __init__(self, parentWidget):
         QWidget.__init__(self, parentWidget)
@@ -155,6 +154,8 @@ class SearchWidget(QWidget):
 
 class LinklistWidget(QListView):
     
+    resultSelected = pyqtSignal(str)
+
     def __init__(self, parent):
         QListView.__init__(self, parent)
 
@@ -167,8 +168,7 @@ class LinklistWidget(QListView):
         if len(indexes) == 1:
             item = self.resultListModel.itemFromIndex(indexes[0])
             pageId = item.text()
-            # self.resultSelected.emit(pageId)
-            print("ITEM SELECTED {}".format(pageId))
+            self.resultSelected.emit(pageId)
 
     def setContents(self, linkList):
         self.resultListModel.clear()
@@ -241,16 +241,21 @@ class CentralWidget(QWidget):
 
         self.tabWidget.currentChanged.connect(self.tabSelected)
 
+# Search/Links widget in lower left corner ####################################
         self.searchWidget = SearchWidget(self)
         self.searchWidget.resultSelected.connect(self.navigateDirect)
 
         self.toLinksWidget = LinklistWidget(self)
+        self.toLinksWidget.resultSelected.connect(self.navigateDirect)
+
         self.fromLinksWidget = LinklistWidget(self)
+        self.fromLinksWidget.resultSelected.connect(self.navigateDirect)
 
         self.listsWidget = QTabWidget(self)
         self.listsWidget.addTab(self.searchWidget, 'Search')
         self.listsWidget.addTab(self.toLinksWidget, 'Links to')
         self.listsWidget.addTab(self.fromLinksWidget, 'Links from')
+###############################################################################
 
         leftWidget = QSplitter(Qt.Vertical, self)
         leftWidget.addWidget(self.browserWidget)
@@ -284,10 +289,7 @@ class CentralWidget(QWidget):
         self.l.debug('Navigating to sub page "{}"'.format(pageId))
 
         self.editorWidget.save()
-        self.editorWidget.load(self.editorWidget.page.notepad, pageId)
-        self.updateLinkLists(self.editorWidget.page.notepad, pageId)
-
-        self.browserWidget.navigate(pageId)
+        self.browserWidget.navigate(pageId)        # Will implicitly load the page
 
 
     def navigateDirect(self, pageId):
@@ -296,10 +298,7 @@ class CentralWidget(QWidget):
         self.l.debug('Navigating directly to "{}"'.format(pageId))
 
         self.editorWidget.save()
-        self.editorWidget.load(self.editorWidget.page.notepad, pageId)
-        self.updateLinkLists(self.editorWidget.page.notepad, pageId)
-
-        self.browserWidget.navigateDirect(pageId)
+        self.browserWidget.navigateDirect(pageId)   # Will implicitly load the page
 
 
     def itemSelected(self):
