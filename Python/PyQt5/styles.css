@@ -21,10 +21,12 @@ title[level="2"] {
 }
 
 title[level="3"] {
+	color: #5f5f5f;
 	margin-top: 10px;
 	margin-bottom: 3px;
 	font-family: "Arial";
-	font-size: 14pt;
+	font-size: 12pt;
+	font-weight: bold;
 }
 
 para {

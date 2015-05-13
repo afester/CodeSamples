@@ -257,6 +257,7 @@ class EditorWidget(QWidget):
 
     def save(self):
         if self.editView.document().isModified():
+            self.l.debug('Page "{}" from notepad "{}" has been modified, saving page'.format(self.page.getName(), self.page.notepad.getName()))
             self.page.save()
             self.message.emit('Saved {}: {}'.format(self.page.notepad.getName(), self.page.getName()))
 

@@ -209,6 +209,7 @@ class TreeWidget(QTreeWidget):
           path ([str, str, ...]): The path to expand - a list of node labels.
             The first element is the root node.
 """
+        # print('Expanding: {}'.format(path))
         if len(path) == 0:
             return
 
@@ -256,8 +257,11 @@ class TreeWidget(QTreeWidget):
         Args:
           pageId (str): The label of the item to activate.
 """
+        # print("  => {}".format(pageId))
+
         notepad = self.currentItem().getNotepad()
         path = notepad.findPathToPage(pageId)
+
         self.expandPath(path)
 
 

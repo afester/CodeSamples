@@ -285,6 +285,8 @@ class Handler(xml.sax.handler.ContentHandler):
             self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
             self.content = ''
 
+
+# TODO: Cleanup API
 class XMLImporter:
 
     def __init__(self, contentPath, contentFile, formatManager):
@@ -297,6 +299,18 @@ class XMLImporter:
         contentFilePath = os.path.join(self.contentPath, self.contentFile)
         with open(contentFilePath, 'r', encoding='utf-8') as content_file:
             self.importFromFile(content_file)
+
+    # TODO: Cleanup API
+    def importModel(self):
+        contentFilePath = os.path.join(self.contentPath, self.contentFile)
+        with open(contentFilePath, 'r', encoding='utf-8') as content_file:
+            parser = xml.sax.make_parser()
+            handler = Handler(self.contentPath)
+            parser.setContentHandler(handler)
+            parser.parse(content_file)
+    
+            self.links = sorted(handler.keywordLinks)
+            return handler.result
 
 
     def importFromFile(self, fileDesc):

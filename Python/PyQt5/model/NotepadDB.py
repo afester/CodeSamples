@@ -18,9 +18,8 @@ class NotepadDB:
 
     def openDatabase(self, notepad):
         self.rootDir = notepad.getRootpath()
-        self.dbFile = os.path.join(self.rootDir, 'mynpad.dbf')
+        self.dbFile = self.rootDir + '/mynpad.dbf'
 
-        
         # Create the database file if it does not exist yet and open the database
         self.l.debug('Opening {}'.format(self.dbFile)) 
         self.conn = sqlite3.connect(self.dbFile)
@@ -38,8 +37,8 @@ class NotepadDB:
         result = self.conn.execute('''
 SELECT * 
 FROM sqlite_master 
-WHERE type='table' and name='{}'
-'''.format('pageref'))
+WHERE type='table' AND name='pageref'
+''')
 
         if result.fetchone() is None:
             print('Creating database schema ...')
@@ -47,6 +46,10 @@ WHERE type='table' and name='{}'
 CREATE TABLE page  (
     pageId TEXT
 )''')
+            self.conn.execute('''
+CREATE UNIQUE INDEX pageIdx ON page(pageId)
+''')
+
             self.conn.execute('''
 CREATE TABLE pageref  (
     parentId TEXT, 
@@ -58,8 +61,8 @@ CREATE INDEX parentIdx ON pageref(parentId)
             self.conn.execute('''
 CREATE INDEX childIdx ON pageref(childId)
 ''')
-            self.refreshDatabase(notepad)
 
+            self.refreshDatabase(notepad)
 
 
     def refreshDatabase(self, notepad):
@@ -67,9 +70,9 @@ CREATE INDEX childIdx ON pageref(childId)
         self.l.debug('Refreshing database {}'.format(self.dbFile)) 
 
         self.conn.execute('''
-DELETE FROM {}'''.format('pageref'))
+DELETE FROM pageref''')
         self.conn.execute('''
-DELETE FROM {}'''.format('page'))
+DELETE FROM page''')
 
         # TODO: We need a Notepad instance here.
         # Then the following code to search through a notepad can be moved into the Notepad class:
@@ -78,12 +81,9 @@ DELETE FROM {}'''.format('page'))
             for filename in fnmatch.filter(filenames, '*.xml'):
                 pageId = urllib.parse.unquote(filename)[:-4]
 
-		# Dont store the title page in the pages table - otherwise we would get
-		# the title page as orphaned page
-                if pageId != 'Title page':
-                    stmt = '''
-INSERT INTO {} VALUES('{}')'''.format('page', pageId)
-                    self.conn.execute(stmt)
+                stmt = '''
+INSERT INTO page VALUES(?)'''
+                self.conn.execute(stmt, (pageId, ) )
 
                 page = LocalPage(notepad, pageId)
                 page.load()
@@ -92,9 +92,25 @@ INSERT INTO {} VALUES('{}')'''.format('page', pageId)
                 for childLink in page.getLinks():
                     # print('   => "{}"'.format(childLink))
                     stmt = '''
-INSERT INTO {} VALUES('{}', '{}')'''.format('pageref', pageId, childLink)
-                    self.conn.execute(stmt)
+INSERT INTO pageref VALUES(?, ?)'''
+                    self.conn.execute(stmt, (pageId, childLink))
                 # print()
+
+        self.conn.commit()
+
+
+    def getAllPages(self):
+        result = []
+
+        rows = self.conn.execute('''
+SELECT pageId 
+FROM page 
+ORDER BY pageId 
+COLLATE NOCASE''')
+        for row in rows:
+            result.append(row[0])
+
+        return result
 
 
     def getChildPages(self, pageId):
@@ -103,8 +119,8 @@ INSERT INTO {} VALUES('{}', '{}')'''.format('pageref', pageId, childLink)
         resCursor = self.conn.execute('''
 SELECT childId 
 FROM pageref
-WHERE parentId = '{}' 
-ORDER BY childId'''.format(pageId))
+WHERE parentId = ? 
+ORDER BY childId''', (pageId, ) )
         for row in resCursor:
             result.append(row[0])
 
@@ -117,8 +133,8 @@ ORDER BY childId'''.format(pageId))
         resCursor = self.conn.execute('''
 SELECT parentId 
 FROM pageref
-WHERE childId = '{}' 
-ORDER BY parentId'''.format(pageId))
+WHERE childId = ? 
+ORDER BY parentId''', (pageId, ) )
         for row in resCursor:
             result.append(row[0])
 
@@ -129,7 +145,7 @@ ORDER BY parentId'''.format(pageId))
         resCursor = self.conn.execute('''
 SELECT COUNT(*) 
 FROM pageref 
-WHERE parentId = '{}' '''.format(pageId))   # TODO: SQL INJECTION!!!!
+WHERE parentId = ? ''', (pageId, ) )
         row = resCursor.fetchone()
         return row[0]
 
@@ -140,8 +156,8 @@ WHERE parentId = '{}' '''.format(pageId))   # TODO: SQL INJECTION!!!!
         resCursor = self.conn.execute('''
 SELECT childId 
 FROM pageref 
-WHERE parentId = '{}' 
-ORDER BY childId'''.format(pageId))   # TODO: SQL INJECTION!!!!
+WHERE parentId = ? 
+ORDER BY childId''', (pageId, ))
         for row in resCursor:
             pageId = row[0]
             childCount = self.getChildCount(pageId) 
@@ -156,11 +172,63 @@ ORDER BY childId'''.format(pageId))   # TODO: SQL INJECTION!!!!
         rows = self.conn.execute('''
 SELECT pageId 
 FROM page 
-WHERE pageId NOT IN (SELECT DISTINCT childId FROM pageref) 
+WHERE pageId <> 'Title page' AND pageId NOT IN (SELECT DISTINCT childId FROM pageref) 
 ORDER BY pageId''')
         for row in rows:
             result.append(row[0])
         return result
+
+
+    def updateLinks(self, pageId, linksTo):
+        self.l.debug('Updating links for "{}": {}'.format(pageId, linksTo))
+
+        # Make sure that the page exists in the pages table
+        try:
+            stmt = '''
+INSERT INTO page VALUES(?)'''
+            self.conn.execute(stmt, (pageId, ) )
+        except sqlite3.IntegrityError:      # Ignore unique constraint violation
+            pass
+
+        stmt = '''
+DELETE FROM pageref 
+WHERE parentId=?'''
+        self.conn.execute(stmt, (pageId, ) )
+
+        for childLink in linksTo:
+            stmt = '''
+INSERT INTO pageref VALUES(?, ?)'''
+            self.conn.execute(stmt, (pageId, childLink) )
+
+        self.conn.commit()
+
+
+    def _recFind(self, parentId, pageId):
+        childLinks = self.getChildPages(parentId)
+        for link in childLinks:
+            self.path.append(link)
+
+            if link == pageId:
+                self.found = True
+                return
+
+            self._recFind(link, pageId)
+            if self.found:
+                break
+
+            self.path = self.path[:-1]
+
+
+    def getPathToPage(self, pageId):
+        # print('getPathToPage({})'.format(pageId))
+
+        self.path = []
+        if pageId != 'Title page':
+            self.found = False
+            self._recFind('Title page', pageId)
+
+        # print('  => {}'.format(self.path))
+        return self.path
 
 
 # TODO: move to unit tests #####################################################
@@ -230,7 +298,9 @@ ORDER BY pageId''')
 
     def dumpDatabase(self):
         print('All pages\n==================================================')
-        self.selectAll('*', 'page')
+        allPages = self.getAllPages()
+        for pageId in allPages:
+            print(pageId)
         print()
 
         print('Page relationships\n==================================================')

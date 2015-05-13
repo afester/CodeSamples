@@ -35,6 +35,9 @@ class LocalNotepad:
         return result
 
 
+    def getAllPages(self):
+        return self.db.getAllPages()
+
     def getChildCount(self, pageId):
         return self.db.getChildCount(pageId)
 
@@ -47,6 +50,8 @@ class LocalNotepad:
     def getChildPagesWithHandle(self, pageId):
         return self.db.getChildPagesWithHandle(pageId)
 
+    def updateLinks(self, pageId, linksTo):
+        self.db.updateLinks(pageId, linksTo)
 
     def getName(self):
         return self.name
@@ -64,37 +69,12 @@ class LocalNotepad:
         return self.rootPath
 
 
-    def recFind(self, parentId, pageId):
-        page = LocalPage(self, parentId)
-        page.load()
-
-        for link in page.getLinks():
-            self.path.append(link)
-
-            if link == pageId:
-                self.found = True
-                return
-
-            self.recFind(link, pageId)
-            if self.found:
-                break
-
-            self.path = self.path[:-1]
-
-
     def findPathToPage(self, pageId):
         '''Find the first path to a given page id.
-
-        NOTE: This is currently an expensive operation since it requires to load
-        many pages to get their links!
 '''
-
-        self.path = [self.getName()]
-        self.found = False
-
-        self.recFind(None, pageId)
-
-        return self.path
+        path = self.db.getPathToPage(pageId)
+        path.insert(0, self.getName())
+        return path
 
 
 

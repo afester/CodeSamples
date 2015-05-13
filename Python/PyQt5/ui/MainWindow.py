@@ -15,14 +15,17 @@ from PyQt5.QtCore import QUrl, QObject, QThread
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PyQt5 import uic
 
-import sys, os, fnmatch, platform, urllib, re, sqlite3, logging
+import sys, os, platform, re, sqlite3, logging
 
 from ui.EditorWidget import EditorWidget
 from ui.BrowserWidget import BrowserWidget
+from model.Page import LocalPage
+
 from Settings import Settings
 from StylableTextEdit.StylableTextModel import TextDocumentTraversal, StructurePrinter
 from model.XMLExporter import XMLExporter
 from HTMLExporter import HTMLExporter
+from model.XMLImporter import XMLImporter
 
 class SearchWorker(QObject):
     
@@ -31,28 +34,26 @@ class SearchWorker(QObject):
 
     def __init__(self):
         QObject.__init__(self)
+        self.notepad = None
+        self.pageList = []
 
-    def startSearch(self, rootPath, searchText):
+    def startSearch(self, searchText):
         self.aborted = False
-        print('Starting search operation "{}" on {} ...'.format(searchText, rootPath))
+        print('Starting search operation "{}" on {} ...'.format(searchText, self.notepad.getName()))
 
-        # TODO: We need a Notepad instance here.
-        # Then the following code to search through a notepad can be moved into the Notepad class:
+        for pageId in self.pageList:
+            if self.aborted:
+                return
 
-        for root, dirnames, filenames in os.walk(rootPath):
-            for filename in fnmatch.filter(filenames, '*.xml'):
-                if self.aborted:
-                    return
+            page = LocalPage(self.notepad, pageId)
 
-                pageId = urllib.parse.unquote(filename)[:-4]
+            imp = XMLImporter(page.getPageDir(), page.getFilename(), None)
+            topFrame = imp.importModel()
+            contents = topFrame.getPlainText()
 
-                filename = os.path.join(root, filename)
-                with open(filename, 'r', encoding='utf-8') as f:
-                    contents = f.read()
-                    
-                    if re.search(searchText, contents, re.IGNORECASE):
-                    # if contents.find(searchText) != -1:
-                        self.addMatch.emit(pageId)
+            if re.search(searchText, contents, re.IGNORECASE):
+                self.addMatch.emit(pageId)
+
         self.searchDone.emit()
 
 
@@ -67,9 +68,8 @@ class SearchWorker(QObject):
 
 class SearchWidget(QWidget):
 
-    startWork = pyqtSignal(str, str)
+    startWork = pyqtSignal(str)
     resultSelected = pyqtSignal(str)
-    # stopWork = pyqtSignal()
 
     def __init__(self, parentWidget):
         QWidget.__init__(self, parentWidget)
@@ -119,8 +119,14 @@ class SearchWidget(QWidget):
         self.ui.startStopButton.setIcon(self.stopIcon)
         self.resultListModel.clear()
         queryText = self.ui.searchInput.text()
-        rootPath = self.editorWidget.page.notepad.getRootpath()
-        self.startWork.emit(rootPath, queryText)
+        # rootPath = self.editorWidget.page.notepad.getRootpath()
+
+        # Setup worker with required data
+        self.worker.notepad = self.editorWidget.page.notepad
+        # NOTE: we are querying the page list in this thread,
+        # to avoid concurrency issues with SQLite.
+        self.worker.pageList = self.editorWidget.page.notepad.getAllPages()
+        self.startWork.emit(queryText)
 
 
     def searchDone(self):
@@ -131,7 +137,7 @@ class SearchWidget(QWidget):
         self.ui.startStopButton.setIcon(self.startIcon)
 
     def addMatch(self, pageId):
-        print("    Adding: {}".format(pageId))
+        # print("    Adding: {}".format(pageId))
         self.ui.resultWidget.setCurrentIndex(0)     # make sure to show the list
         resultItem = QStandardItem(pageId)
         resultItem.setEditable(False)
@@ -148,6 +154,8 @@ class SearchWidget(QWidget):
 
 class LinklistWidget(QListView):
     
+    resultSelected = pyqtSignal(str)
+
     def __init__(self, parent):
         QListView.__init__(self, parent)
 
@@ -160,8 +168,7 @@ class LinklistWidget(QListView):
         if len(indexes) == 1:
             item = self.resultListModel.itemFromIndex(indexes[0])
             pageId = item.text()
-            # self.resultSelected.emit(pageId)
-            print("ITEM SELECTED {}".format(pageId))
+            self.resultSelected.emit(pageId)
 
     def setContents(self, linkList):
         self.resultListModel.clear()
@@ -172,9 +179,9 @@ class LinklistWidget(QListView):
 
 
 # The central widget for the MainWindow.
-class MynPad(QWidget):
+class CentralWidget(QWidget):
 
-    l = logging.getLogger('MynPad')
+    l = logging.getLogger('CentralWidget')
 
     updateWindowTitle = pyqtSignal(str)
 
@@ -204,46 +211,51 @@ class MynPad(QWidget):
         self.editorWidget.navigate.connect(self.navigate)
 
         tabLayout.addWidget(self.editorWidget)
-        self.tabWidget.addTab(tab, "Edit")
+        self.editTabIdx = self.tabWidget.addTab(tab, "Edit")
 #############################
 
         self.browser = QWebView(self.tabWidget)
         self.browser.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
         self.browser.linkClicked.connect(self.navigateWeb)
-        self.tabWidget.addTab(self.browser, "View web")
+        self.webTabIdx = self.tabWidget.addTab(self.browser, "View web")
 
-        self.tabWidget.addTab(QWidget(self.tabWidget), "View pdf")
+        self.pdfTabIdx = self.tabWidget.addTab(QWidget(self.tabWidget), "View pdf")
 
         self.textView = QTextEdit(self.tabWidget)
         self.textView.setReadOnly(True)
         self.textView.setFontFamily('Courier')
         self.textView.setFontPointSize(8)
-        self.tabWidget.addTab(self.textView, "View document structure")
+        self.structureTabIdx = self.tabWidget.addTab(self.textView, "View document structure")
 
         self.customView = QTextEdit(self.tabWidget)
         self.customView.setReadOnly(True)
         self.customView.setFontFamily('Courier')
         self.customView.setFontPointSize(10)
-        self.tabWidget.addTab(self.customView, "View XML")
+        self.xmlTabIdx = self.tabWidget.addTab(self.customView, "View XML")
 
         self.htmlView = QTextEdit(self.tabWidget)
         self.htmlView.setReadOnly(True)
         self.htmlView.setFontFamily('Courier')
         self.htmlView.setFontPointSize(10)
-        self.tabWidget.addTab(self.htmlView, "View Html")
+        self.htmlTabIdx = self.tabWidget.addTab(self.htmlView, "View Html")
 
         self.tabWidget.currentChanged.connect(self.tabSelected)
 
+# Search/Links widget in lower left corner ####################################
         self.searchWidget = SearchWidget(self)
         self.searchWidget.resultSelected.connect(self.navigateDirect)
 
         self.toLinksWidget = LinklistWidget(self)
+        self.toLinksWidget.resultSelected.connect(self.navigateDirect)
+
         self.fromLinksWidget = LinklistWidget(self)
+        self.fromLinksWidget.resultSelected.connect(self.navigateDirect)
 
         self.listsWidget = QTabWidget(self)
         self.listsWidget.addTab(self.searchWidget, 'Search')
         self.listsWidget.addTab(self.toLinksWidget, 'Links to')
         self.listsWidget.addTab(self.fromLinksWidget, 'Links from')
+###############################################################################
 
         leftWidget = QSplitter(Qt.Vertical, self)
         leftWidget.addWidget(self.browserWidget)
@@ -274,25 +286,19 @@ class MynPad(QWidget):
 
     def navigate(self, pageId):
         """Assumption: pageId is sub page of current page"""
-        print('Navigating to sub page "{}"'.format(pageId))
+        self.l.debug('Navigating to sub page "{}"'.format(pageId))
 
         self.editorWidget.save()
-        self.editorWidget.load(self.editorWidget.page.notepad, pageId)
-        self.updateLinkLists(self.editorWidget.page.notepad, pageId)
-
-        self.browserWidget.navigate(pageId)
+        self.browserWidget.navigate(pageId)        # Will implicitly load the page
 
 
     def navigateDirect(self, pageId):
         """Assumption: pageId is NOT sub page of current page. 
         Hence we need to let the browser point to the first occurrence of the page."""
-        print('Navigating directly to "{}"'.format(pageId))
+        self.l.debug('Navigating directly to "{}"'.format(pageId))
 
         self.editorWidget.save()
-        self.editorWidget.load(self.editorWidget.page.notepad, pageId)
-        self.updateLinkLists(self.editorWidget.page.notepad, pageId)
-
-        self.browserWidget.navigateDirect(pageId)
+        self.browserWidget.navigateDirect(pageId)   # Will implicitly load the page
 
 
     def itemSelected(self):
@@ -314,52 +320,41 @@ class MynPad(QWidget):
         linksTo = notepad.getChildPages(pageId)
         linksFrom = notepad.getParentPages(pageId)
 
-        print('Links to: {}'.format(linksTo))
-        print('Links from: {}'.format(linksFrom))
-
         self.toLinksWidget.setContents(linksTo)
         self.fromLinksWidget.setContents(linksFrom)
 
 
     def tabSelected(self, index):
-        if index == 1:        # Web View
-            exporter = HTMLExporter(self.editorWidget.page.getPageDir())
-            self.htmlView.setPlainText(exporter.getHtmlString(self.editorWidget.editView.document()))
-
-            ########### get URL for the stylesheet and for the base URL
-            mypath = os.getcwd()
-            mypath = mypath.replace('\\', '/')
-            stylesheetURL = QUrl('file:///{}/webpage.css'.format(mypath))
-            baseURL = QUrl('file:///{}/'.format(mypath))
-            ###########
-
-            self.browser.settings().setUserStyleSheetUrl(stylesheetURL)
-            self.browser.setHtml(self.htmlView.toPlainText(), baseURL)
-
-        elif index == 2:      # PDF
+        if index == self.editTabIdx:
             pass
-
-        elif index == 3:
-            self.dumpTextStructure()
-
-        elif index == 4:
-            exporter = XMLExporter(self.editorWidget.page.getPageDir(), None)
-            self.customView.setPlainText(exporter.getXmlString(self.editorWidget.editView.document()))
-
-        elif index == 5:
-            exporter = HTMLExporter(self.editorWidget.page.getPageDir())
-            self.htmlView.setPlainText(exporter.getHtmlString(self.editorWidget.editView.document()))
-
-
-    def blocks(self, frame):
-        blocks = frame.begin()
-        while not blocks.atEnd():
-            block = blocks.currentBlock()
-            yield block
-            blocks += 1
+        elif index == self.webTabIdx:
+            self.activateWebView()
+        elif index == self.pdfTabIdx:
+            pass
+        elif index == self.structureTabIdx:
+            self.activateStructureView()
+        elif index == self.xmlTabIdx:
+            self.activateXMLView()
+        elif index == self.htmlTabIdx:
+            self.activateHTMLView()
 
 
-    def dumpTextStructure(self):
+    def activateWebView(self):
+        exporter = HTMLExporter(self.editorWidget.page.getPageDir())
+        self.htmlView.setPlainText(exporter.getHtmlString(self.editorWidget.editView.document()))
+
+        ########### get URL for the stylesheet and for the base URL
+        mypath = os.getcwd()
+        mypath = mypath.replace('\\', '/')
+        stylesheetURL = QUrl('file:///{}/webpage.css'.format(mypath))
+        baseURL = QUrl('file:///{}/'.format(mypath))
+        ###########
+
+        self.browser.settings().setUserStyleSheetUrl(stylesheetURL)
+        self.browser.setHtml(self.htmlView.toPlainText(), baseURL)
+
+
+    def activateStructureView(self):
         self.textView.clear()
 
         doc = self.editorWidget.editView.document()
@@ -369,6 +364,15 @@ class MynPad(QWidget):
         sp = StructurePrinter(tree, self.textView.insertPlainText)
         sp.traverse()
 
+
+    def activateXMLView(self):
+        exporter = XMLExporter(self.editorWidget.page.getPageDir(), None)
+        self.customView.setPlainText(exporter.getXmlString(self.editorWidget.editView.document()))
+
+
+    def activateHTMLView(self):
+        exporter = HTMLExporter(self.editorWidget.page.getPageDir())
+        self.htmlView.setPlainText(exporter.getHtmlString(self.editorWidget.editView.document()))
 
 
 class MainWindow(QMainWindow):
@@ -413,7 +417,7 @@ class MainWindow(QMainWindow):
         self.statusBar = QStatusBar()
         self.statusBar.showMessage("Ready.")
         self.setStatusBar(self.statusBar)
-        self.mainWidget = MynPad(self, self.settings)
+        self.mainWidget = CentralWidget(self, self.settings)
         self.mainWidget.updateWindowTitle.connect(self.updateWindowTitle)
         self.setCentralWidget(self.mainWidget)
 

@@ -181,7 +181,8 @@ class StylableTextEdit(QTextEdit):
 
 
     def handleCharFormatChanged(self):
-        print("CHAR FORMAT CHANGED, ADJUST CURSOR COLOR ...")
+        pass
+        #print("CHAR FORMAT CHANGED, ADJUST CURSOR COLOR ...")
         # self.setTextColor(Qt.blue)
         #p = self.palette();
         #p.setColor(QPalette.WindowText, QColor(255, 0, 0))

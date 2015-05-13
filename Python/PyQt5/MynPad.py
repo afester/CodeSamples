@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import QApplication
 
 import logging.config
 
-from ui.Richtext import MainWindow
+from ui.MainWindow import MainWindow
 
 
 def main():
