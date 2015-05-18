@@ -1,6 +1,8 @@
 #include "add.h"
 
-static const char* value = "Hello World";
+static const char* value = "Hello World!";
+
+int main();
 
 void _start() {
    main();
@@ -9,7 +11,8 @@ void _start() {
 
 int main() {
   int result = add(1, 3);
- // char* p = value;
- // while(*p) p++;
+  int* res = &result;
+/*  char* p = value;*/
+/*  while(*p) p++;*/
   return 0;
 }
