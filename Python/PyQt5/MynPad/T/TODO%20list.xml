@@ -11,6 +11,15 @@
       <title>Next steps</title>
       <itemizedlist>
         <listitem>
+          <para><emphasis role="highlight">Clean up unused image files - probably simply delete unused files when saving the page</emphasis></para>
+        </listitem>
+        <listitem>
+          <para><emphasis role="highlight">Update Browser when new page is created - done, but item is not yet created at the right location! Also, the parent might appear more than once in the browser!</emphasis></para>
+        </listitem>
+        <listitem>
+          <para><emphasis role="highlight">Copy&amp;Paste should support format - currently only plain text is copied into the clipboard</emphasis></para>
+        </listitem>
+        <listitem>
           <para>External URL handling</para>
           <itemizedlist>
             <listitem>
@@ -59,9 +68,6 @@
           </itemizedlist>
         </listitem>
         <listitem>
-          <para>Update Browser when new page is created - done, but item is not yet created at the right location!</para>
-        </listitem>
-        <listitem>
           <para>UNDO/REDO state not reset when saving a page</para>
         </listitem>
         <listitem>
@@ -75,9 +81,6 @@
       <itemizedlist>
         <listitem>
           <para>How to delete / rename pages?</para>
-        </listitem>
-        <listitem>
-          <para>Copy&amp;Paste should support format - currently only plain text is copied into the clipboard</para>
         </listitem>
         <listitem>
           <para>support of numbered (ordered) lists</para>
@@ -96,9 +99,6 @@
         </listitem>
         <listitem>
           <para>Maintain creation date and last update date for each page</para>
-        </listitem>
-        <listitem>
-          <para>Clean up unused image files - probably simply delete unused files when saving the page</para>
         </listitem>
         <listitem>
           <para>Support of tables. Currently an issue since the <code>QTextTableCell</code> is missing the python methods for <code>begin()</code> and <code>end()</code>, so that it is not possible to traverse the table cells contents.</para>
