@@ -16,6 +16,7 @@ from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PyQt5 import uic
 
 import sys, os, platform, re, sqlite3, logging
+import io, pkg_resources, data
 
 from ui.EditorWidget import EditorWidget
 from ui.BrowserWidget import BrowserWidget
@@ -344,13 +345,29 @@ class CentralWidget(QWidget):
         self.htmlView.setPlainText(exporter.getHtmlString(self.editorWidget.editView.document()))
 
         ########### get URL for the stylesheet and for the base URL
+
+        webpageCSS = pkg_resources.resource_string(data.__name__, 'webpage.css')
+        print("webpage.css file: {} - {}".format(webpageCSS, type(webpageCSS)))
+
         mypath = os.getcwd()
         mypath = mypath.replace('\\', '/')
-        stylesheetURL = QUrl('file:///{}/webpage.css'.format(mypath))
         baseURL = QUrl('file:///{}/'.format(mypath))
+
+        # The location must be either a path on the local filesystem, or a 
+        # data URL with UTF-8 and Base64 encoded data, such as:
+        # "data:text/css;charset=utf-8;base64,cCB7IGJhY2tncm91bmQtY29sb3I6IHJlZCB9Ow=="
+        # BASE64 works on bytes!!
+        import base64
+        cssData = base64.b64encode(webpageCSS)
+        cssData = cssData.decode('utf-8')
+        cssDataUrl = 'data:text/css;charset=utf-8;base64,{}'.format(cssData)
+        print("webpage.css base64: {}".format(cssDataUrl ))
+        # cssDataUrl = QUrl('data:text/css;charset=utf-8;base64,{}'.format(cssData)) # 'file:///{}/webpage.css'.format(mypath))
+
         ###########
 
-        self.browser.settings().setUserStyleSheetUrl(stylesheetURL)
+        self.browser.settings().setUserStyleSheetUrl(QUrl(cssDataUrl))
+
         self.browser.setHtml(self.htmlView.toPlainText(), baseURL)
 
 

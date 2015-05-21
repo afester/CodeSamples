@@ -7,7 +7,7 @@ Created on 20.02.2015
 from PyQt5.QtGui import QTextFormat, QTextBlockFormat, QTextCharFormat, QTextListFormat, QFont, QColor
 import cssutils
 import re
-
+import io, pkg_resources, data
 
 class Format:
     
@@ -170,7 +170,9 @@ class FormatManager:
     def loadFormats(self):
         self.formats = {}
 
-        styleSheet = cssutils.parseFile('styles.css')
+        stylesCSS = pkg_resources.resource_string(data.__name__, 'styles.css')
+        print("styles.css file: {}".format(stylesCSS))
+        styleSheet = cssutils.parseString(stylesCSS)
 
         blockFormats = ['title[level="1"]', 
                         'title[level="2"]', 
