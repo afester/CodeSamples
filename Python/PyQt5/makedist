@@ -1,0 +1,6 @@
+#!/bin/bash
+
+rm -rf dist build MynPad.egg-info
+pip list
+python3 setup.py bdist_egg
+unzip -l dist/MynPad-0.1-py3.4.egg
