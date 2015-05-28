@@ -11,6 +11,9 @@
       <title>Next steps</title>
       <itemizedlist>
         <listitem>
+          <para><emphasis role="highlight">Pressing ENTER should create a new paragraph with Standard style - currently, the format of the previous paragraph is taken</emphasis></para>
+        </listitem>
+        <listitem>
           <para><emphasis role="highlight">Clean up unused image files - probably simply delete unused files when saving the page</emphasis></para>
         </listitem>
         <listitem>

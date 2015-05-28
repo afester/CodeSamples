@@ -16,6 +16,7 @@ from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon
 
 import sys, os, platform, re, sqlite3, logging
 import pkg_resources, data
+from os.path import expanduser
 
 from ui.EditorWidget import EditorWidget
 from ui.BrowserWidget import BrowserWidget
@@ -418,7 +419,10 @@ class MainWindow(QMainWindow):
         app.aboutToQuit.connect(self.saveState)
 
         # read the local configuration file
-        self.settings = Settings()
+        iniPath = 'mynpad.ini'
+        if not os.path.exists(iniPath):
+            iniPath = os.path.join(expanduser("~"), iniPath)
+        self.settings = Settings(iniPath)
         self.settings.load()
 
         # Set up the menu bar

@@ -15,17 +15,18 @@ class Settings(object):
     l = logging.getLogger('Settings')
 
 
-    def __init__(self):
+    def __init__(self, fileName = 'notepad.ini'):
+        self.fileName = fileName
         self.notepads = []
         self.mainWindowSize = QSize(1200, 700)
         self.mainWindowPos = QPoint(240, 200)
         self.browserPath = []
 
     
-    def load(self, fileName = 'notepad.ini'):
+    def load(self):
         self.l.debug('Loading local settings ...')
         config = configparser.ConfigParser()
-        config.read(fileName)
+        config.read(self.fileName)
 
         # load dropbox configuration
         self.dropboxToken = ''
@@ -95,8 +96,8 @@ class Settings(object):
         config.write(channel)
 
     
-    def save(self, fileName = 'notepad.ini'):
-        with open(fileName, 'w') as configfile:
+    def save(self):
+        with open(self.fileName, 'w') as configfile:
             self.dump(configfile)
 
 
