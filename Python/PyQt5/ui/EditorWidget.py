@@ -52,13 +52,13 @@ class FindWidget(QWidget):
         self.searchPattern.editingFinished.connect(self.hideWidget)
         self.searchPattern.textEdited.connect(self.doSearch)
 
-        upAction = QAction(QIcon('icons/find-up.png'), "Find backwards (Shift-F3)", self)
+        upAction = QAction(QIcon(':/icons/find-up.png'), "Find backwards (Shift-F3)", self)
         upAction.setShortcut(Qt.SHIFT + Qt.Key_F3);
         upAction.triggered.connect(self.findUpwards)
         self.upButton = QToolButton(self)
         self.upButton.setDefaultAction(upAction)
 
-        downAction = QAction(QIcon('icons/find-down.png'), "Find next (F3)", self)
+        downAction = QAction(QIcon(':/icons/find-down.png'), "Find next (F3)", self)
         downAction.setShortcut(Qt.Key_F3);
         downAction.triggered.connect(self.findDownwards)
         self.downButton = QToolButton(self)

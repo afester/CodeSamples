@@ -13,20 +13,22 @@ from PyQt5.QtWidgets import QAction, QStatusBar, QMenuBar, QMessageBox, QListVie
 from PyQt5.QtWebKitWidgets import QWebView, QWebPage
 from PyQt5.QtCore import QUrl, QObject, QThread 
 from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon
-from PyQt5 import uic
 
 import sys, os, platform, re, sqlite3, logging
-import io, pkg_resources, data
+import pkg_resources, data
 
 from ui.EditorWidget import EditorWidget
 from ui.BrowserWidget import BrowserWidget
 from model.Page import LocalPage
+from ui.SearchWidget import Ui_SearchWidget
 
 from Settings import Settings
 from StylableTextEdit.StylableTextModel import TextDocumentTraversal, StructurePrinter
 from model.XMLExporter import XMLExporter
 from HTMLExporter import HTMLExporter
 from model.XMLImporter import XMLImporter
+
+import ui.resources
 
 class SearchWorker(QObject):
     
@@ -78,13 +80,15 @@ class SearchWidget(QWidget):
         self.editorWidget = parentWidget.editorWidget   # TODO: Review class structure
 
         self.searching = False
-        self.ui = uic.loadUi('ui/SearchWidget.ui', self)
+        self.ui = Ui_SearchWidget()
+        self.ui.setupUi(self)
         self.resultListModel = QStandardItemModel(self.ui.resultList)
-        self.ui.resultWidget.setCurrentIndex(0) # show (empty) result list by default
+        self.ui.resultWidget.setCurrentIndex(0)
         self.ui.resultList.setModel(self.resultListModel)
         self.ui.resultList.selectionModel().selectionChanged.connect(self.doResultSelected)
-        self.startIcon = QIcon('icons/search-global-start.png')
-        self.stopIcon = QIcon('icons/search-global-stop.png')
+
+        self.startIcon = QIcon(':/icons/search-global-start.png')
+        self.stopIcon = QIcon(':/icons/search-global-stop.png')
         self.ui.startStopButton.setIcon(self.startIcon)
 
         self.ui.searchInput.returnPressed.connect(self.doReturnKey)
@@ -401,7 +405,7 @@ class MainWindow(QMainWindow):
         self.l.debug('Initializing MainWindow ...')
 
         self.setWindowTitle('MynPad')
-        app.setWindowIcon(QIcon('icons/mynpad.png'))
+        app.setWindowIcon(QIcon(':/icons/mynpad.png'))
 
         if os.name == 'nt':
             # On Windows, make sure to use a unique Application User Model Id, otherwise

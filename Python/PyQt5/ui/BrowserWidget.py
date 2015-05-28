@@ -7,12 +7,12 @@ Created on 25.02.2015
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QToolBar, QAction
 from PyQt5.QtWidgets import QVBoxLayout, QDialog, QFileDialog, QDialogButtonBox
-from PyQt5 import uic
 
 import os, logging
 from model.Notepad import LocalNotepad, DropboxNotepad
 import dropbox
 from dropbox.rest import ErrorResponse
+from ui.AddNotepadDlg import Ui_AddNotepadDlg
 
 
 class AddNotepadDlg(QDialog):
@@ -21,7 +21,8 @@ class AddNotepadDlg(QDialog):
         QDialog.__init__(self, parentWidget)
         self.settings = settings
 
-        self.ui = uic.loadUi('ui/AddNotepadDlg.ui', self)
+        self.ui = Ui_AddNotepadDlg()
+        self.ui.setupUi(self)
 
         self.ui.buttonBox.clicked.connect(self.applyAuth)   # TODO
  

@@ -102,7 +102,7 @@ class BlockStyleSelector(TitledToolbar):
         self.styleToDropdown = {}
 
 ##########################
-        d1 = IconDropDown(self, 'icons/format-text-paragraph.png')
+        d1 = IconDropDown(self, ':/icons/format-text-paragraph.png')
         d1.entrySelected.connect(self.styleSelected)
 
         selector = ('para', None, None)
@@ -126,7 +126,7 @@ class BlockStyleSelector(TitledToolbar):
         self.styleToIndex[selector] = 3
 
 ##########################
-        d2 = IconDropDown(self, 'icons/format-text-header.png')
+        d2 = IconDropDown(self, ':/icons/format-text-header.png')
         d2.entrySelected.connect(self.styleSelected)
 
         selector = ('title', 'level', '1')
@@ -145,7 +145,7 @@ class BlockStyleSelector(TitledToolbar):
         self.styleToIndex[selector] = 2
 
 ##########################
-        d3 = IconDropDown(self, "icons/format-list-unordered.png")
+        d3 = IconDropDown(self, ":/icons/format-list-unordered.png")
         d3.entrySelected.connect(self.styleSelected)
 
         selector = ('itemizedlist', 'level', '1')
@@ -159,7 +159,7 @@ class BlockStyleSelector(TitledToolbar):
         self.styleToIndex[selector] = 1
 
 ##########################
-        d4 = IconDropDown(self, "icons/format-text-code.png")
+        d4 = IconDropDown(self, ":/icons/format-text-code.png")
         d4.entrySelected.connect(self.styleSelected)
 
         selector = ('programlisting', 'language', 'cpp')
@@ -202,11 +202,11 @@ class BlockStyleSelector(TitledToolbar):
         toolbar.addWidget(d3)
         toolbar.addWidget(d4)
 
-        intendLessAction = QAction(QIcon("icons/format-indent-less.png"), "", toolbar) 
+        intendLessAction = QAction(QIcon(":/icons/format-indent-less.png"), "", toolbar) 
         intendLessAction.triggered.connect(self.indentLess)
         toolbar.addAction(intendLessAction)
 
-        intendMoreAction = QAction(QIcon("icons/format-indent-more.png"), "", toolbar) 
+        intendMoreAction = QAction(QIcon(":/icons/format-indent-more.png"), "", toolbar) 
         intendMoreAction.triggered.connect(self.indentMore)
         toolbar.addAction(intendMoreAction)
 
@@ -260,7 +260,7 @@ class TextStyleSelector(TitledToolbar):
 
         self.styleToAction = {}
 
-        textKeywordAction = QAction(QIcon("icons/format-keyword.png"), "Notepad link", toolbar)
+        textKeywordAction = QAction(QIcon(':/icons/format-keyword.png'), 'Notepad link', toolbar)
         textKeywordAction.setCheckable(True);
         selector = ('olink', None, None)
         textKeywordAction.setProperty('style', selector)
@@ -268,7 +268,7 @@ class TextStyleSelector(TitledToolbar):
         textKeywordAction.triggered.connect(self.styleSelected)
         toolbar.addAction(textKeywordAction)
 
-        textLinkAction = QAction(QIcon("icons/format-link.png"), "Internet link", toolbar)
+        textLinkAction = QAction(QIcon(':/icons/format-link.png'), 'Internet link', toolbar)
         textLinkAction.setCheckable(True);
         selector = ('link', None, None)
         textLinkAction.setProperty('style', selector)
@@ -276,7 +276,7 @@ class TextStyleSelector(TitledToolbar):
         textLinkAction.triggered.connect(self.styleSelected)
         toolbar.addAction(textLinkAction)
 
-        textBoldAction = QAction(QIcon("icons/format-text-emphasized.png"), "Emphasize", toolbar)
+        textBoldAction = QAction(QIcon(':/icons/format-text-emphasized.png'), 'Emphasize', toolbar)
         textBoldAction.setCheckable(True);
         selector = ('emphasis', None, None)
         textBoldAction.setProperty('style', selector)
@@ -284,7 +284,7 @@ class TextStyleSelector(TitledToolbar):
         textBoldAction.triggered.connect(self.styleSelected)
         toolbar.addAction(textBoldAction)
 
-        textHighlightAction = QAction(QIcon("icons/format-text-highlight.png"), "Highlight", toolbar)
+        textHighlightAction = QAction(QIcon(':/icons/format-text-highlight.png'), 'Highlight', toolbar)
         textHighlightAction.setCheckable(True);
         selector = ('emphasis', 'role', 'highlight')
         textHighlightAction.setProperty('style', selector)
@@ -292,7 +292,7 @@ class TextStyleSelector(TitledToolbar):
         textHighlightAction.triggered.connect(self.styleSelected)
         toolbar.addAction(textHighlightAction)
  
-        textCodeAction = QAction(QIcon("icons/format-text-code.png"), "Code", toolbar)
+        textCodeAction = QAction(QIcon(':/icons/format-text-code.png'), 'Code', toolbar)
         textCodeAction.setCheckable(True);
         selector = ('code', None, None)
         textCodeAction.setProperty('style', selector)
@@ -330,37 +330,37 @@ class ActionSelector(TitledToolbar):
         toolbar.setFloatable(False)
         toolbar.setMovable(False)
 
-        self.saveAction = QAction(QIcon("icons/file-save.png"), "Save (Ctrl-S)", toolbar)
+        self.saveAction = QAction(QIcon(":/icons/file-save.png"), "Save (Ctrl-S)", toolbar)
         self.saveAction.setShortcut(Qt.CTRL + Qt.Key_S);
         self.saveAction.triggered.connect(parent.save)
         toolbar.addAction(self.saveAction)
 
-        self.nonprintableAction = QAction(QIcon("icons/view-nonprintable.png"), "View nonprintable chars", toolbar)
+        self.nonprintableAction = QAction(QIcon(":/icons/view-nonprintable.png"), "View nonprintable chars", toolbar)
         self.nonprintableAction.setCheckable(True);
         self.nonprintableAction.triggered.connect(parent.toggleNonprintable)
         toolbar.addAction(self.nonprintableAction)
 
-        self.undoAction = QAction(QIcon("icons/edit-undo.png"), "Undo (Ctrl-Z)", toolbar)
+        self.undoAction = QAction(QIcon(":/icons/edit-undo.png"), "Undo (Ctrl-Z)", toolbar)
         # saveAction.setShortcut(Qt.CTRL + Qt.Key_Z);
         self.undoAction.triggered.connect(parent.undo)
         toolbar.addAction(self.undoAction)
 
-        self.redoAction = QAction(QIcon("icons/edit-redo.png"), "Redo (Ctrl-Y)", toolbar)
+        self.redoAction = QAction(QIcon(":/icons/edit-redo.png"), "Redo (Ctrl-Y)", toolbar)
         # saveAction.setShortcut(Qt.CTRL + Qt.Key_Y);
         self.redoAction.triggered.connect(parent.redo)
         toolbar.addAction(self.redoAction)
 
-        self.backAction = QAction(QIcon("icons/view-back.png"), "Back", toolbar)
+        self.backAction = QAction(QIcon(":/icons/view-back.png"), "Back", toolbar)
         self.backAction.setEnabled(False)
         self.backAction.triggered.connect(parent.navigateBack)
         toolbar.addAction(self.backAction)
 
-        self.forwardAction = QAction(QIcon("icons/view-forward.png"), "Forward", toolbar)
+        self.forwardAction = QAction(QIcon(":/icons/view-forward.png"), "Forward", toolbar)
         self.forwardAction.setEnabled(False)
         self.forwardAction.triggered.connect(parent.navigateForward)
         toolbar.addAction(self.forwardAction)
 
-        insertImageAction = QAction(QIcon("icons/edit-insert-image.png"), "Insert Image", toolbar)
+        insertImageAction = QAction(QIcon(":/icons/edit-insert-image.png"), "Insert Image", toolbar)
         insertImageAction.triggered.connect(parent.insertImage)
         toolbar.addAction(insertImageAction)
 
@@ -368,7 +368,7 @@ class ActionSelector(TitledToolbar):
         insertFormulaAction.triggered.connect(parent.insertFormula)
         toolbar.addAction(insertFormulaAction)
 
-        findInPageAction = QAction(QIcon("icons/edit-find.png"), "Find in page (CTRL-F)", toolbar)
+        findInPageAction = QAction(QIcon(":/icons/edit-find.png"), "Find in page (CTRL-F)", toolbar)
         findInPageAction.setShortcut(Qt.CTRL + Qt.Key_F);
         findInPageAction.triggered.connect(parent.findInPage)
         toolbar.addAction(findInPageAction)
