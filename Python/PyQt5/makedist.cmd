@@ -1,10 +1,11 @@
 @echo off
 SETLOCAL
 
+SET VENV_NAME=mynpad
 SET PYTHON_HOME=D:\Python342
 SET ZIP="unzip.exe"
-SET VENV_DIR=C:\temp\Venv-MynPad
-SET PROXY=
+SET VENV_DIR=C:\temp\%VENV_NAME%
+SET PROXY=http://proxy.de:80
 
 SET PATH=%PYTHON_HOME%;%PYTHON_HOME%\Scripts;%PYTHON_HOME%\Tools\Scripts;%PATH%
 
@@ -14,7 +15,7 @@ REM the .pyc files, the source .py files (can also be omitted) and resource file
 RMDIR /Q/S dist build MynPad.egg-info
 pip list
 python setup.py bdist_egg
-%ZIP% l dist\MynPad-0.1-py3.4.egg
+%ZIP% -l dist\MynPad-0.1-py3.4.egg
 
 REM Create the virtual environment
 echo Creating virtual python environment %VENV_DIR% ...
@@ -48,3 +49,6 @@ cd c:\Users\afester\Downloads\dropbox-python-sdk-2.2.0
 python setup.py install
 
 pip list
+
+cd %VENV_DIR%\..
+zip -r %VENV_NAME%.zip %VENV_NAME%
