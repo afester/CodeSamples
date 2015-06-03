@@ -3,9 +3,10 @@ SETLOCAL
 
 SET VENV_NAME=mynpad
 SET PYTHON_HOME=D:\Python342
-SET ZIP="unzip.exe"
+SET UNZIPEXE="unzip.exe"
+SET ZIPEXE="zip.exe"
 SET VENV_DIR=C:\temp\%VENV_NAME%
-SET PROXY=http://proxy.de:80
+SET PROXY=
 
 SET PATH=%PYTHON_HOME%;%PYTHON_HOME%\Scripts;%PYTHON_HOME%\Tools\Scripts;%PATH%
 
@@ -15,15 +16,19 @@ REM the .pyc files, the source .py files (can also be omitted) and resource file
 RMDIR /Q/S dist build MynPad.egg-info
 pip list
 python setup.py bdist_egg
-%ZIP% -l dist\MynPad-0.1-py3.4.egg
+%UNZIPEXE% -l dist\MynPad-0.1-py3.4.egg
 
 REM Create the virtual environment
 echo Creating virtual python environment %VENV_DIR% ...
 rem MOVE %VENV_DIR% %VENV_DIR%.xyz
 rem RMDIR /S/Q %VENV_DIR%.xyz
 pyvenv --clear %VENV_DIR%
+COPY %SystemRoot%\system32\python34.dll %VENV_DIR%\Scripts
+xcopy /E/F %PYTHON_HOME%\Lib /EXCLUDE:exclude.txt %VENV_DIR%\Lib
+CD %VENV_DIR%
+del pyvenv.cfg
 echo Activating virtual python environment %VENV_DIR% ...
-call %VENV_DIR%\Scripts\activate.bat
+call Scripts\activate.bat
 
 REM Install the egg file into the virtual environment
 easy_install dist\MynPad-0.1-py3.4.egg
@@ -36,7 +41,6 @@ FOR /F %%f in (qtfiles.txt) DO (
     echo %PYTHON_HOME%\Lib\site-packages\%%f  %VENV_DIR%\Lib\site-packages\%%f
     cmd /c echo F | XCOPY %PYTHON_HOME%\Lib\site-packages\%%f %VENV_DIR%\Lib\site-packages\%%f /E
 )
-REM XCOPY %PYTHON_HOME%\Lib\site-packages\PyQt5\uic %VENV_DIR%\Lib\site-packages\PyQt5\uic /I/E
 COPY %PYTHON_HOME%\Lib\site-packages\sip.pyd %VENV_DIR%\Lib\site-packages\
 COPY qt.conf %VENV_DIR%\Scripts
 
@@ -51,4 +55,4 @@ python setup.py install
 pip list
 
 cd %VENV_DIR%\..
-zip -r %VENV_NAME%.zip %VENV_NAME%
+%ZIPEXE% -r "%VENV_NAME%.zip" "%VENV_NAME%"
