@@ -47,7 +47,18 @@ COPY qt.conf %VENV_DIR%\Scripts
 REM Install and upgrade python packages
 pip install cssutils --proxy %PROXY%
 pip install urllib3 --proxy %PROXY%
+rem pip install matplotlib --proxy %PROXY%
 pip install --upgrade setuptools --proxy %PROXY%
+
+REM pending: install numpy and matplotlib with their dependencies
+REM six, dateutil and pyparsing can most likely be installed through pip
+REM matplotlib requires VC10
+rem cp -R six* /cygdrive/c/Program\ Files/mynpad/Lib/site-packages/
+rem cp -R dateutil* /cygdrive/c/Program\ Files/mynpad/Lib/site-packages/
+rem cp -R pyparsing* /cygdrive/c/Program\ Files/mynpad/Lib/site-packages/
+rem cp -R numpy* /cygdrive/c/Program\ Files/mynpad/Lib/site-packages/
+rem cp -R matplot* /cygdrive/c/Program\ Files/mynpad/Lib/site-packages/
+rem cp -R unittest /cygdrive/c/Program\ Files/mynpad/Lib/
 
 cd c:\Users\afester\Downloads\dropbox-python-sdk-2.2.0
 python setup.py install
