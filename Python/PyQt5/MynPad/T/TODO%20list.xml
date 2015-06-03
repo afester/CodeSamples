@@ -54,6 +54,9 @@
       <title>Bugs</title>
       <itemizedlist>
         <listitem>
+          <para><emphasis role="highlight">Access violation</emphasis> occurs when exitting MynPad <emphasis>after a page had been opened which contans a math formula</emphasis></para>
+        </listitem>
+        <listitem>
           <para>List related</para>
           <itemizedlist>
             <listitem>
