@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<adfc-config xmlns="http://xmlns.oracle.com/adf/controller" version="1.2">
+  <task-flow-definition id="BackingBeanTF">
+    <default-activity>BackingBean</default-activity>
+    <data-control-scope>
+      <shared/>
+    </data-control-scope>
+    <managed-bean id="__1">
+      <managed-bean-name>requestBean</managed-bean-name>
+      <managed-bean-class>com.example.adf.view.bean.SimpleBean</managed-bean-class>
+      <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+    <managed-bean id="__2">
+      <managed-bean-name>backingBean</managed-bean-name>
+      <managed-bean-class>com.example.adf.view.bean.SimpleBean</managed-bean-class>
+      <managed-bean-scope>backingBean</managed-bean-scope>
+    </managed-bean>
+    <view id="BackingBean">
+      <page>/BackingBean.jsff</page>
+    </view>
+    <use-page-fragments/>
+  </task-flow-definition>
+</adfc-config>

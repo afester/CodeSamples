@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<pageDefinition xmlns="http://xmlns.oracle.com/adfm/uimodel" version="12.1.3.10.8"
+                id="CombinedTF_CombinedTF_methodCall2PageDef" Package="flows" SkipValidation="true">
+  <parameters/>
+  <executables>
+    <variableIterator id="variables"/>
+  </executables>
+  <bindings>
+    <methodAction id="doBusiness" RequiresUpdateModel="true" Action="invokeMethod" MethodName="doBusiness"
+                  IsViewObjectMethod="false" DataControl="SimpleTableAMDataControl"
+                  InstanceName="data.SimpleTableAMDataControl.dataProvider"
+                  ReturnName="data.SimpleTableAMDataControl.methodResults.doBusiness_SimpleTableAMDataControl_dataProvider_doBusiness_result">
+      <NamedData NDName="what" NDValue='"SECOND"' NDType="java.lang.String"/>
+    </methodAction>
+  </bindings>
+</pageDefinition>

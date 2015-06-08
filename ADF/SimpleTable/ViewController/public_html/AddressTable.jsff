@@ -3,15 +3,20 @@
           xmlns:f="http://java.sun.com/jsf/core">
   <af:panelCollection id="pc1">
     <f:facet name="menus"/>
+    
+    
+
     <f:facet name="toolbar">
       <af:toolbar id="t2">
         <af:button text="button 1" id="b1" action="#{ButtonBean.dumpBindings}"/>
 
         <af:selectOneChoice label="Show table" id="soc1"
-                            valueChangeListener="#{viewScope.AddressTableBean.tableFormatChanged}" autoSubmit="true">
+                            valueChangeListener="#{viewScope.AddressTableBean.tableFormatChanged}" 
+                            autoSubmit="true">
           <af:selectItem label="Table" value="table" id="si1"/>
           <af:selectItem label="Form" value="form" id="si2"/>
         </af:selectOneChoice>
+
       </af:toolbar>
     </f:facet>
     <f:facet name="statusbar"/>
@@ -82,6 +87,7 @@
             <f:validator binding="#{row.bindings.Zipcode.validator}"/>
           </af:inputText>
         </af:column>
+
         <af:column headerText="#{bindings.AddressVO.hints.Phone.label}" id="c8">
           <af:inputText value="#{row.bindings.Phone.inputValue}" label="#{bindings.AddressVO.hints.Phone.label}"
                         required="#{bindings.AddressVO.hints.Phone.mandatory}"
@@ -90,6 +96,13 @@
                         shortDesc="#{bindings.AddressVO.hints.Phone.tooltip}" id="it8">
             <f:validator binding="#{row.bindings.Phone.validator}"/>
           </af:inputText>
+        </af:column>
+
+        <af:column headerText="Icon" id="c9">
+          <af:image source="#{resource['images:red.png']}" id="i1"
+                    rendered="#{row.bindings.Zipcode.inputValue ge 20000}"/>
+          <af:image source="#{resource['images:green.png']}" id="i2"
+                    rendered="#{row.bindings.Zipcode.inputValue lt 20000}"/>
         </af:column>
 
     </af:table>

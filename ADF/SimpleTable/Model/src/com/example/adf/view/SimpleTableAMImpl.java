@@ -37,6 +37,12 @@ public class SimpleTableAMImpl extends ApplicationModuleImpl implements SimpleTa
         txn.commit();
     }
 
+
+    public void doBusiness(String what) {
+        System.err.println("Executing business logic: " + what);
+    }
+
+
     /**
      * Container's getter for TaskEOView1.
      * @return TaskEOView1

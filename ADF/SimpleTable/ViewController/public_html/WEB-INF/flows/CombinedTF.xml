@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<adfc-config xmlns="http://xmlns.oracle.com/adf/controller" version="1.2">
+  <task-flow-definition id="CombinedTF">
+    <default-activity>CombinedSample</default-activity>
+    <data-control-scope>
+      <shared/>
+    </data-control-scope>
+    <view id="CombinedSample">
+      <page>/CombinedSample.jsff</page>
+    </view>
+    <method-call id="methodCall1">
+      <method>#{bindings.doBusiness.execute}</method>
+      <outcome>
+        <fixed-outcome>retx</fixed-outcome>
+      </outcome>
+    </method-call>
+    <method-call id="methodCall2">
+      <method>#{bindings.doBusiness.execute}</method>
+      <outcome>
+        <fixed-outcome>retx</fixed-outcome>
+      </outcome>
+    </method-call>
+    <control-flow-rule id="__1">
+      <from-activity-id>CombinedSample</from-activity-id>
+      <control-flow-case id="__2">
+        <from-outcome>business1</from-outcome>
+        <to-activity-id>methodCall1</to-activity-id>
+      </control-flow-case>
+      <control-flow-case id="__5">
+        <from-outcome>business2</from-outcome>
+        <to-activity-id>methodCall2</to-activity-id>
+      </control-flow-case>
+    </control-flow-rule>
+    <control-flow-rule id="__3">
+      <from-activity-id>methodCall1</from-activity-id>
+      <control-flow-case id="__4">
+        <from-outcome>retx</from-outcome>
+        <to-activity-id>CombinedSample</to-activity-id>
+      </control-flow-case>
+    </control-flow-rule>
+    <control-flow-rule id="__6">
+      <from-activity-id>methodCall2</from-activity-id>
+      <control-flow-case id="__7">
+        <from-outcome>retx</from-outcome>
+        <to-activity-id>CombinedSample</to-activity-id>
+      </control-flow-case>
+    </control-flow-rule>
+    <use-page-fragments/>
+  </task-flow-definition>
+</adfc-config>
