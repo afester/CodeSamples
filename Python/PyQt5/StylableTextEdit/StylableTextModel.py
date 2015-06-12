@@ -33,8 +33,11 @@ class Frame(Node):
         fac = PlainTextFactory()
         return fac.getPlainText(self)
 
-    def __str__(self):
+    def getLocalName(self):
         return 'Frame'
+
+    def __str__(self):
+        return '{}'.format(self.getLocalName())
 
 
 # A Paragraph is a container for Fragments
@@ -46,8 +49,11 @@ class Paragraph(Node):
         self.indent = indentLevel
         self.style = style
 
+    def getLocalName(self):
+        return 'Paragraph'
+
     def __str__(self):
-        return 'Paragraph[style={}]'.format(self.style)
+        return '{}[style={}]'.format(self.getLocalName(), self.style)
 
 
 # A List is a container for Paragraphs and Lists on a deeper level
@@ -57,8 +63,11 @@ class List(Node):
         Node.__init__(self)
         self.style = style
 
+    def getLocalName(self):
+        return 'List'
+
     def __str__(self):
-        return 'List[style={}]'.format(self.style)
+        return '{}[style={}]'.format(self.getLocalName(), self.style)
 
 
 
@@ -90,8 +99,11 @@ class TextFragment(Fragment):
     def setText(self, text):
         self.text = text
 
+    def getLocalName(self):
+        return 'TextFragment'
+
     def __str__(self):
-        return 'TextFragment[style={}, text="{}", href={}]'.format(self.style, self.text, self.href)
+        return '{}[style={}, text="{}", href={}]'.format(self.getLocalName(), self.style, self.text, self.href)
 
 
 class ImageFragment(Fragment):
@@ -103,8 +115,11 @@ class ImageFragment(Fragment):
     def setImage(self, img):
         self.image = img
 
+    def getLocalName(self):
+        return 'ImageFragment'
+
     def __str__(self):
-        return 'ImageFragment[image={}, href={}]'.format(self.image, self.href)
+        return '{}[image={}, href={}]'.format(self.getLocalName(), self.image, self.href)
 
 
 class MathFragment(Fragment):
@@ -120,9 +135,70 @@ class MathFragment(Fragment):
     def setImage(self, img):
         self.image = img
 
-    def __str__(self):
-        return 'MathFragment[text="{}", image={}, href={}]'.format(self.text, self.image, self.href)
+    def getLocalName(self):
+        return 'MathFragment'
 
+    def __str__(self):
+        return '{}[text="{}", image={}, href={}]'.format(self.getLocalName(), self.text, self.image, self.href)
+
+
+class TextDocumentSelectionTraversal:
+
+    def __init__(self):
+        pass
+
+    def traverse(self, cursor, document):
+        selectionStart = cursor.selectionStart()
+        selectionEnd = cursor.selectionEnd()
+        print("Start: {}".format(selectionStart))
+        print("End  : {}".format(selectionEnd))
+
+        done = False
+        block = document.findBlock(selectionStart)
+        while block.isValid() and not done:
+            blockFormat = block.blockFormat()
+            blockStyle = blockFormat.property(QTextFormat.UserProperty)
+
+            print('{}'.format(blockStyle))
+            #listLevel = 0
+            #textList = block.textList()
+            #if textList:
+            #    listFormat = textList.format()
+            #    listLevel = listFormat.indent()
+           
+            #result = Paragraph(listLevel, blockStyle)
+
+            iterator = block.begin()
+            while not iterator.atEnd() and not done:
+                fragment = iterator.fragment()
+                fragStart = fragment.position()
+                fragEnd = fragment.position() + fragment.length() - 1
+
+                text = fragment.text().replace('\u2028', '\n')
+                text = text.replace('\ufffc', 'X')
+
+                if fragStart > selectionEnd:
+                    return
+                elif fragEnd >= selectionEnd:     # TODO: check condition!
+                    count = selectionEnd - fragStart
+                    if count == 0:
+                        return
+                    text = text[:count]
+                    fragEnd = selectionEnd
+                    done = True
+
+
+
+                charFormat = fragment.charFormat()
+                style = charFormat.property(QTextFormat.UserProperty)
+
+                print('   {} ({}-{}): {}'.format(style, fragStart, fragEnd, text))
+
+                #for frag in self.getFragments(fragment):   # Fragment could contain more than one image!
+                #    result.add(frag)
+                iterator += 1
+    
+            block = block.next()
 
 
 class TextDocumentTraversal:

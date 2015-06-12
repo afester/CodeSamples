@@ -12,6 +12,7 @@ from PyQt5.QtGui import QTextCursor, QTextFormat, QGuiApplication, QCursor, QTex
 from PyQt5.QtWidgets import QTextEdit, QFrame, QHBoxLayout, QLineEdit, QPushButton, QMessageBox
 
 from StylableTextEdit.CustomObjects import MathFormulaObject, ImageObject
+from StylableTextEdit.StylableTextModel import TextDocumentTraversal, StructurePrinter, Frame, Paragraph, List, TextFragment, TextDocumentSelectionTraversal
 
 class UrlEditor(QFrame):
 
@@ -38,6 +39,42 @@ class UrlEditor(QFrame):
     def setUrl(self, text):
         self.editLine.setText(text)
 
+
+
+class AppXmlPrinter:
+    
+    def __init__(self, root, out):
+        self.rootFrame = root
+        self.indent = 0
+        self.out = out
+
+    def prefix(self):
+        return '\u00a0' * self.indent * 2
+
+    def traverse(self):
+        self.recursiveTraverse(self.rootFrame)
+
+    def recursiveTraverse(self, parent):
+        print("{}<{}".format(self.prefix(), parent.getLocalName()), end='')
+        if type(parent) == Paragraph or type(parent) == TextFragment:
+            print(' style="{}"'.format(parent.style), end='')
+
+        if type(parent) == TextFragment:
+            print('>', end='')
+            print(parent.text, end='')
+        else:
+            print('>')
+
+        if type(parent) == Paragraph or type(parent) == Frame or type(parent) == List:
+            for c in parent.children:
+                self.indent += 1
+                self.recursiveTraverse(c)
+                self.indent -= 1
+
+        if type(parent) == TextFragment:
+            print("</{}>".format(parent.getLocalName()))
+        else:
+            print("{}</{}>".format(self.prefix(), parent.getLocalName()))
 
 
 class StylableTextEdit(QTextEdit):
@@ -426,6 +463,21 @@ class StylableTextEdit(QTextEdit):
         selection = selection.replace('\u2029', '\n')
         selection = selection.replace('\u2028', '\n')
         result.setText(selection)
+
+        # create an xml representation of the selected document structure 
+        traversal = TextDocumentSelectionTraversal()
+        tree = traversal.traverse(self.textCursor(), self.document())
+        return
+
+        sp = AppXmlPrinter(tree, None)
+        sp.traverse()
+
+        blafasel = '''<?xml version="1.0" encoding="utf-8"?>
+<article version="5.0" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title></title></article>'''
+        result.setData("application/xml", blafasel)
         return result
 
 
