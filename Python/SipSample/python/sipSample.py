@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
 
-from hello import HelloWorld
+from helloworld import HelloWorld
 
 print("Hello World")
