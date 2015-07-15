@@ -1,0 +1,6 @@
+cmake_minimum_required (VERSION 2.6)
+project (libSimpleParser)
+add_library(SimpleParser SimpleLexer.cpp SimpleParser.cpp)
+include_directories(../../../../nodistrib/antlr-3.5.2/include)
+set (CMAKE_C_COMPILER "/usr/bin/c99")
+set (CMAKE_C_FLAGS "-Wall -pedantic")

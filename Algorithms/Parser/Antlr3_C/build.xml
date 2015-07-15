@@ -1,0 +1,70 @@
+<project name="MyProject" default="help" basedir=".">
+  <description>
+      ant script to create the jar archives for the applet sample
+  </description>
+
+  <!-- set global properties for this build -->
+  <property name="src" location="src"/>
+  <property name="build" location="WebContent/classes"/>
+  <property name="dist"  location="WebContent"/>
+
+  <target name="help" depends="init">
+    <echo>ant help  - show this help message</echo>
+    <echo>ant antlr - Rebuilds the parser sources from the grammar</echo>
+    <echo>ant grun  - Runs the graphical parse tree visualizer</echo>
+    <echo>ant clean - Cleans all generated files at ${antlr.outdir}</echo>
+  </target>
+
+  <target name="init">
+    <!-- Master properties - can be overridden in a property file -->
+    <property name="antlr.grammarname" value="Hello"/>
+    <property name="antlr.package" value="com.example.helloparser"/>
+    <property name="antlr.startrule" value="r"/>
+    <property name="antlr.outdir" value="src"/>
+
+    <!-- the following properties are derived from the master properties -->
+    <property name="antlr.grammar" value="${antlr.grammarname}.g"/>
+
+ <!--   <property name="antlr.jarfile" value="../../../nodistrib/antlr-3.4-complete-no-antlrv2.jar"/> -->
+    <property name="antlr.jarfile" value="../../../nodistrib/antlr-3.5.2-complete-no-st3.jar"/> 
+
+    <echo>antlr.jarfile  : ${antlr.jarfile}</echo>
+    <echo>antlr.package  : ${antlr.package}</echo>
+    <echo>antlr.outdir   : ${antlr.outdir}</echo>
+    <echo>antlr.grammar  : ${antlr.grammar}</echo>
+    <echo>antlr.startrule: ${antlr.startrule}</echo>
+  </target>
+
+
+  <target name="antlr" depends="init"
+          description="Rebuilds the parser sources from the grammar">
+    <java jar="${antlr.jarfile}" fork="true">
+
+      <!-- Pending: make configurable through properties -->
+      <arg value="-o"/>
+      <arg value="${antlr.outdir}"/>
+      <arg value="${antlr.grammar}"/>
+    </java>
+  </target>
+
+
+  <target name="grun" depends="init"
+          description="Runs the graphical parse tree visualizer">
+    <java classname="org.antlr.v4.runtime.misc.TestRig" fork="true">
+      <classpath>
+        <pathelement location="${antlr.jarfile}"/>
+        <pathelement path="bin"/>
+      </classpath>
+
+      <arg value="${antlr.package}.${antlr.grammarname}"/>
+      <arg value="${antlr.startrule}"/>
+      <arg value="-gui"/>
+    </java>
+  </target>
+
+
+  <target name="clean" depends="init"
+          description="Cleans generated parser sources">
+    <delete dir="${antlr.outdir}"/>
+  </target>
+</project>
