@@ -1,0 +1,3 @@
+Directory layout:
+* cpp - the library we want to wrap
+* sip - the SIP library wrapper
