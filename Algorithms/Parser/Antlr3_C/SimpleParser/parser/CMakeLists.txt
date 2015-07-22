@@ -9,4 +9,4 @@ set (CMAKE_C_COMPILER "/usr/bin/c99")
 set (CMAKE_C_FLAGS "-Wall -pedantic")
 
 add_custom_command(OUTPUT  SimpleLexer.cpp SimpleParser.cpp  Simple.tokens  SimpleLexer.hpp  SimpleParser.hpp
-                   COMMAND /cygdrive/c/Program\ Files/Java/jdk1.7.0_80/bin/java ARGS -jar C:\\\\Users\\\\afester\\\\Projects\\\\CodeSamples\\\\nodistrib\\\\antlr-3.5.2-complete-no-st3.jar -verbose ../../parser/Simple.g)
+                   COMMAND /cygdrive/c/Program\ Files/Java/jdk1.7.0_80/bin/java ARGS -jar C:\\\\Users\\\\afester\\\\Projects\\\\CodeSamples\\\\nodistrib\\\\antlr-3.5.2-fes.jar -verbose ../../parser/Simple.g)
