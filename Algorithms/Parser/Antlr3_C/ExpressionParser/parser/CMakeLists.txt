@@ -1,0 +1,17 @@
+set (CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
+cmake_minimum_required (VERSION 2.6)
+
+set (PARSER_NAME Expression)
+project (lib${PARSER_NAME}Parser)
+
+add_library(${PARSER_NAME}Parser ${PARSER_NAME}Lexer.cpp ${PARSER_NAME}Parser.cpp)
+
+include_directories(../../../../../nodistrib/antlr-3.5.2/include)
+set (CMAKE_C_COMPILER "/usr/bin/c99")
+set (CMAKE_C_FLAGS "-Wall -pedantic")
+
+# Build the parser
+set (JAVA_EXE /cygdrive/c/Program\ Files/Java/jdk1.7.0_80/bin/java)
+set (ANTLR_JAR C:\\\\Users\\\\afester\\\\Projects\\\\CodeSamples\\\\nodistrib\\\\antlr-3.5.2-fes.jar)
+add_custom_command(OUTPUT  ${PARSER_NAME}Lexer.cpp ${PARSER_NAME}Parser.cpp  ${PARSER_NAME}.tokens  ${PARSER_NAME}Lexer.hpp  ${PARSER_NAME}Parser.hpp
+                   COMMAND ${JAVA_EXE} ARGS -jar ${ANTLR_JAR} -verbose ../../parser/${PARSER_NAME}.g)
