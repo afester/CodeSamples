@@ -1,1 +1,18 @@
 * ANTLR v4 does not yet support the C++ target
+* Antlr 3.5.2 works with the "Cpp" target
+  * there is a bug which prevents compilation of the parser when using token
+    and rule references in an action
+  * can be fixed in the Cpp.stg template:
+
+--- OLD/tool/src/main/resources/org/antlr/codegen/templates/Cpp/Cpp.stg    2014-03-25 07:07:00.000000000 +0100
++++ NEW/tool/src/main/resources/org/antlr/codegen/templates/Cpp/Cpp.stg   2015-07-21 08:56:46.875683900 +0200
+@@ -1007,7 +1007,7 @@
+                bitsets,
+                ASTLabelType,
+                superClass="Parser",
+-               labelType="ImplTraits::CommonTokenType*",
++               labelType="const ImplTraits::CommonTokenType*",
+                members={<actions.parser.members>}
+                ) ::= <<
+ <beginNamespace(actions)>
+  * has been fixed in 3.5.3-SNAPSHOT
