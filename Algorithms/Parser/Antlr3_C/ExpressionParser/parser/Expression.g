@@ -4,7 +4,6 @@ grammar Expression;
 
 options {
   language=Cpp;
-  backtrack=true;
 }
 
 @parser::includes {
@@ -17,27 +16,33 @@ options {
   class ExpressionParser;
   typedef antlr3::Traits< ExpressionLexer, ExpressionParser > ExpressionLexerTraits;
   typedef ExpressionLexerTraits ExpressionParserTraits;
+
+  typedef double NumberType;
 }
 
 
-start : expr+
+start : expr { std::cerr << "RESULT:" << $expr.value << std::endl; }
       ;
 
-expr : term
-     | term '+' expr	{ std::cerr << "term: " << $term.text << std::endl;  }
-     ;
+expr returns [NumberType value]
+      : t1=term { $value = $t1.value; }
+             ('+' t2=term { $value = $value + $t2.value; }
+             |'-' t2=term { $value = $value - $t2.value; }
+             )*
+      ;
 
-term : factor 
-     | factor '*' term
-     ;
+term returns [NumberType value]
+      : f1=factor { $value = $f1.value; } 
+             ('*' f2=factor { $value = $value * $f2.value; }
+             |'/' f2=factor { $value = $value / $f2.value; }
+             )*
+      ;
 
-factor : NUMBER	        { std::cerr << "NUMBER: " << $NUMBER.text << std::endl;  }
-       | ID				{ std::cerr << "ID: " << $ID.text << std::endl;  }
-       | '(' expr ')'
-       ;
+factor returns [NumberType value]
+    : NUMBER	        { $value = atol($NUMBER.text.c_str()); }
+    | '(' expr ')'	{ $value = $expr.value; }
+    ;
 
 NUMBER: '0'..'9' + ;
-
-ID: 'a'..'z' + ;
-
-WS: ( ' ' |'\n' |'\r')+ {$channel=HIDDEN;} ; // ignore whitespace
+ID:     'a'..'z' + ;
+WS:     ( ' ' |'\n' |'\r')+ { $channel=HIDDEN; } ; // ignore whitespace
