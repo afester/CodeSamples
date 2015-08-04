@@ -1,7 +1,8 @@
 #include <iostream>
+#include <math.h>
+
 #include "ExpressionParser.hpp"
 #include "SymbolTable.h"
-#include "Math.h"
 
 
 class ExpressionEvaluator {
