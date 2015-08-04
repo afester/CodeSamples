@@ -4,6 +4,6 @@ project (ExpressionExample)
 
 add_executable(ExpressionExample main.cpp)
 target_link_libraries(ExpressionExample ExpressionParser)
-include_directories( ${CMAKE_BINARY_DIR}/parser  ${CMAKE_HOME_DIRECTORY}/../../../../nodistrib/antlr-3.5.2/include )
+include_directories( ${CMAKE_SOURCE_DIR}/parser ${CMAKE_BINARY_DIR}/parser  ${CMAKE_HOME_DIRECTORY}/../../../../nodistrib/antlr-3.5.2/include )
 set (CMAKE_C_COMPILER "/usr/bin/c99")
 set (CMAKE_C_FLAGS "-Wall -pedantic")

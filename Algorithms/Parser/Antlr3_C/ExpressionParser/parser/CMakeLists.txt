@@ -4,9 +4,9 @@ cmake_minimum_required (VERSION 2.6)
 set (PARSER_NAME Expression)
 project (lib${PARSER_NAME}Parser)
 
-add_library(${PARSER_NAME}Parser ${PARSER_NAME}Lexer.cpp ${PARSER_NAME}Parser.cpp)
+add_library(${PARSER_NAME}Parser ${PARSER_NAME}Lexer.cpp ${PARSER_NAME}Parser.cpp SymbolTable.cpp)
 
-include_directories(../../../../../nodistrib/antlr-3.5.2/include)
+include_directories(. ../../../../../nodistrib/antlr-3.5.2/include)
 set (CMAKE_C_COMPILER "/usr/bin/c99")
 set (CMAKE_C_FLAGS "-Wall -pedantic")
 
