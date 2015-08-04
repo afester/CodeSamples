@@ -5,15 +5,19 @@
     <f:facet name="start"/>
     <f:facet name="bottom"/>
     <f:facet name="end"/>
+
     <f:facet name="top">
       <af:toolbar id="t2">
         <af:selectOneChoice label="Show table" id="soc1"
-                            valueChangeListener="#{viewScope.AddressTableBean.tableFormatChanged}" autoSubmit="true">
+                            valueChangeListener="#{viewScope.AddressTableBean.tableFormatChanged}" 
+                            autoSubmit="true"
+                            value="#{AddressTableBB.choiceValue}">
           <af:selectItem label="Table" value="table" id="si1"/>
           <af:selectItem label="Form" value="form" id="si2"/>
         </af:selectOneChoice>
       </af:toolbar>
     </f:facet>
+
     <af:panelFormLayout id="pfl1">
       <af:inputText value="#{bindings.Firstname.inputValue}" label="#{bindings.Firstname.hints.label}"
                     required="#{bindings.Firstname.hints.mandatory}" readOnly="true"

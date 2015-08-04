@@ -18,8 +18,11 @@ all:
 	@echo "Creating binary image ..."
 	cp main main_stripped
 	strip main_stripped
+
 	objcopy -O binary main_stripped main_raw
-	objdump -D -b binary -mi386 -Maddr16,data16 main_raw
+
+	# objdump -D -b binary -mi386 -Maddr16,data16 main_raw
+	objdump -D -b binary -mi386 main_raw
 
 clean:
 	rm main main_stripped main_raw *.o *.S

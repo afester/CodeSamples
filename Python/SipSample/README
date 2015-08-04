@@ -1,3 +1,6 @@
 Directory layout:
-* cpp - the library we want to wrap
+
+* cpp - the library we want to wrap. Just a simple class with some methods,
+        built using CMake.
+
 * sip - the SIP library wrapper

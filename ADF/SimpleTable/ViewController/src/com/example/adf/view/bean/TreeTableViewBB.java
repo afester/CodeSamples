@@ -37,7 +37,10 @@ public class TreeTableViewBB {
             System.err.println("   Initializing disclosed row keys ...");
 
             // main issue: how to get the tree component???
-            TreeTableBB tbb = (TreeTableBB) ADFContext.getCurrent().getRequestScope().get("TreeTableBB");
+            
+            // from request scope bean (Note: not officially supported!)
+            //TreeTableBB tbb = (TreeTableBB) ADFContext.getCurrent().getRequestScope().get("TreeTableBB");
+            TreeTableBB tbb = (TreeTableBB) ADFContext.getCurrent().getScope("backingBeanScope").get("TreeTableBB");
             System.err.println("   TreeTableBB: " + tbb);
 
             RichTreeTable rtt = tbb.getTaskTreeTable();

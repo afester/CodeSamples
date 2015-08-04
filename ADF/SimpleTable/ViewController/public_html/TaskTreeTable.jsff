@@ -8,7 +8,7 @@
       <f:facet name="statusbar"/>
       <af:treeTable value="#{bindings.Task.treeModel}" var="node"
                     selectionListener="#{bindings.Task.treeModel.makeCurrent}" rowSelection="single" id="tt1"
-                    binding="#{TreeTableBB.taskTreeTable}" 
+                    binding="#{backingBeanScope.TreeTableBB.taskTreeTable}" 
                     disclosedRowKeys="#{viewScope.TreeTableViewBB.disclosedRowKeys}">
     
         <!-- Tree column, including disclosure icon -->
