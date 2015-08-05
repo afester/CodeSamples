@@ -33,6 +33,14 @@ public:
 
 	virtual ~SymbolTableEntry();
 
+	inline std::string getName() const { return id; }
+
+	inline SYMBOL_KIND getKind() const { return kind; }
+
+	inline MATH_FUN getFun() const { return fun; }
+
+	inline double getValue() const { return val; }
+
 	std::string kindToName(SYMBOL_KIND kind) const;
 
 	std::string toString() const;
@@ -57,6 +65,8 @@ public:
 	double getValue(const std::string& id) const;
 
 	double executeFunction(const std::string& id, double argument) const;
+
+	const SymbolTableEntry& getSymbol(const std::string& name) const;
 };
 
 #endif

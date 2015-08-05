@@ -67,6 +67,7 @@ void SymbolTable::init() {
 	table["pi"] = SymbolTableEntry("pi", M_PI);
 
     table["sin"] = SymbolTableEntry("sin", sin);
+    table["cos"] = SymbolTableEntry("cos", cos);
 }
 
 void SymbolTable::dump() {
@@ -118,6 +119,7 @@ double SymbolTable::getValue(const std::string& id) const {
 	return entry.val;
 }
 
+
 double SymbolTable::executeFunction(const std::string& id, double argument) const {
 	std::map<std::string, SymbolTableEntry>::const_iterator it = table.find(id);
 	if (it == table.end()) {
@@ -132,4 +134,15 @@ double SymbolTable::executeFunction(const std::string& id, double argument) cons
 	}
 
 	return entry.fun(argument);
+}
+
+
+const SymbolTableEntry& SymbolTable::getSymbol(const std::string& id) const {
+	std::map<std::string, SymbolTableEntry>::const_iterator it = table.find(id);
+	if (it == table.end()) {
+		std::cerr << "ERROR: Unknown symbol " << id << std::endl;
+		return SymbolTableEntry();	// TODO!!!
+	}
+
+	return it->second;
 }

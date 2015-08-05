@@ -3,6 +3,10 @@
 
 #include "ExpressionParser.hpp"
 #include "SymbolTable.h"
+#include "Profile.h"
+
+#include "ExpressionASTParser.hpp"
+#include "ExpressionAST.h"
 
 
 class ExpressionEvaluator {
@@ -40,32 +44,47 @@ public:
 		return psr.expr();
 	}
 
-	void test() {
-	    ExpressionLexer::InputStreamType
+};
+
+
+
+
+class ExpressionEvaluator2 {
+    SymbolTable st;
+    std::string expr;
+    Node* exprAst;
+
+public:
+
+	ExpressionEvaluator2(const std::string& anExpr) : expr(anExpr), exprAst(0) {
+	    st.init();
+	}
+
+
+	inline void setVariable(const std::string& name, double value) {
+		st.setValue(name, value);
+	}
+
+	void parse() {
+	    ExpressionASTLexer::InputStreamType
 	    		input((const ANTLR_UINT8*)expr.c_str(), ANTLR_ENC_8BIT,
 	    				expr.length(), NULL);
+	    ExpressionASTLexer lxr(&input);
 
-	    ExpressionLexer lxr(&input);
-
-	    ExpressionParser::TokenStreamType tstream(ANTLR_SIZE_HINT, lxr.get_tokSource() );
-	    ExpressionParser psr(&tstream);
+	    ExpressionASTParser::TokenStreamType tstream(ANTLR_SIZE_HINT, lxr.get_tokSource() );
+	    ExpressionASTParser psr(&tstream);
 	    psr.setSymbolTable(&st);
 
-	    for (double x = 0;  x < 4;  x += 0.5) {
-			setVariable("x", x);
-			lxr.reset();
-			input.reset();
+		exprAst = psr.expr();
+	}
 
-		    ExpressionLexer::InputStreamType
-		    		input((const ANTLR_UINT8*)expr.c_str(), ANTLR_ENC_8BIT,
-		    				expr.length(), NULL);
-		    ExpressionParser::TokenStreamType tstream(ANTLR_SIZE_HINT, lxr.get_tokSource() );
-			lxr.setCharStream(&input);
-			psr.init(&tstream);
-			psr.reset();
-			double result = psr.expr();
-			std::cerr << "RES:" << result << std::endl;
-	    }
+
+	void dump() {
+		exprAst->dump();
+	}
+
+	double evaluateExpression() {
+		return exprAst->evaluate();
 	}
 };
 
@@ -73,9 +92,6 @@ public:
 
 void testFunction() {
     ExpressionEvaluator ev("sin(x)");
-    ev.test();
-    return;
-
     for (double x = 0;  x < 2*M_PI;  x += 0.1) {
     	ev.setVariable("x", x);
     	double result = ev.evaluateExpression();
@@ -84,18 +100,75 @@ void testFunction() {
 }
 
 
+void testPerformance()  {
+    ProcessTimeCounter p1;
+    RealTimeCounter r1;
+
+    p1.start();
+    r1.start();
+
+    ExpressionEvaluator ev("(3 + cos(x) * sin(x)) / 5");
+    for (int run = 0;  run < 10000;  run++) {
+       for (double x = 0; x < 2;  x += 0.1) {
+    	   ev.evaluateExpression();
+       }
+    }
+
+    p1.stop();
+    r1.stop();
+
+    std::cerr << p1 << std::endl;
+    std::cerr << r1 << std::endl;
+}
+
+
+void testPerformance2()  {
+    ProcessTimeCounter p1;
+    RealTimeCounter r1;
+
+    p1.start();
+    r1.start();
+
+    ExpressionEvaluator2 ev("(3 + cos(x) * sin(x)) / 5");
+    ev.parse();
+
+    for (int run = 0;  run < 10000;  run++) {
+       for (double x = 0; x < 2;  x += 0.1) {
+    	   ev.evaluateExpression();
+       }
+    }
+
+    p1.stop();
+    r1.stop();
+
+    std::cerr << p1 << std::endl;
+    std::cerr << r1 << std::endl;
+}
+
+void testAST1() {
+    // ExpressionEvaluator2 ev("sin(x)");
+    //ExpressionEvaluator2 ev("(3 + cos(x) * sin(x)) / 5");
+	ExpressionEvaluator ev("(3 + cos(x) * sin(x)) / 5");
+
+    std::cerr << "Parsing ..." << std::endl;
+    // ev.parse();
+
+    std::cerr << "Evaluating ..." << std::endl;
+    double result = ev.evaluateExpression();
+    std::cerr << "Result: " << result << std::endl;
+
+    //std::cerr << "Dumping ..." << std::endl;
+    //ev.dump();
+}
+
+
 int main(int argc, char *argv[]) {
     std::cout << "ExpressionParser example" << std::endl;
-    testFunction();
 
-/*
-    ExpressionEvaluator ev("pi / x");
-    for (int i = 0;  i < 10;  i++) {
-    	ev.setVariable("x", i);
-    	double result = ev.evaluateExpression();
-    	std::cerr << "Result: " << result << std::endl;
-    }
-*/
+    //testAST1();
+    //testFunction();
+    testPerformance();
+    testPerformance2();
 
     return 0;
 }

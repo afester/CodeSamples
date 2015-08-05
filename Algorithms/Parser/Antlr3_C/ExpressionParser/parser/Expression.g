@@ -59,9 +59,9 @@ term returns [NumberType value]
       ;
 
 factor returns [NumberType value]
-    : NUMBER	    { $value = atol($NUMBER.text.c_str()); }
-    | ID            { $value = st->getValue($ID.text); }
-    | '(' expr ')'	{ $value = $expr.value; }
+    : NUMBER	      { $value = atol($NUMBER.text.c_str());                 }
+    | ID              { $value = st->getValue($ID.text);                     }
+    | '(' expr ')'    { $value = $expr.value;                                }
     | ID '(' expr ')' { $value = st->executeFunction($ID.text, $expr.value); }
     ;
 
