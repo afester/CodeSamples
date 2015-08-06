@@ -11,10 +11,38 @@
       <title>Next steps</title>
       <itemizedlist>
         <listitem>
-          <para>Update Browser when new page is created</para>
+          <para><emphasis role="highlight">Pressing ENTER should create a new paragraph with Standard style - currently, the format of the previous paragraph is taken</emphasis></para>
+        </listitem>
+        <listitem>
+          <para><emphasis role="highlight">Clean up unused image files - probably simply delete unused files when saving the page</emphasis></para>
+        </listitem>
+        <listitem>
+          <para><emphasis role="highlight">Update Browser when new page is created - done, but item is not yet created at the right location! Also, the parent might appear more than once in the browser!</emphasis></para>
+        </listitem>
+        <listitem>
+          <para><emphasis role="highlight">Copy&amp;Paste should support format - currently only plain text is copied into the clipboard</emphasis></para>
+        </listitem>
+        <listitem>
+          <para>External URL handling</para>
+          <itemizedlist>
+            <listitem>
+              <para>when marking a text fragment as URL, then, if the text fragment starts with http:// or https://, then use the fragment as default for the HREF</para>
+            </listitem>
+            <listitem>
+              <para>Also open the url editor immediately when marking a fragment as URL</para>
+            </listitem>
+          </itemizedlist>
         </listitem>
         <listitem>
           <para>Search functionality</para>
+          <itemizedlist>
+            <listitem>
+              <para>Need to find a concept for navigation - currently an issue <emphasis role="highlight">when switching between notepads and then selecting the search result from an earlier search!</emphasis></para>
+            </listitem>
+            <listitem>
+              <para><emphasis role="highlight">Navigation to title page fails</emphasis> (since its page id is "None")</para>
+            </listitem>
+          </itemizedlist>
         </listitem>
         <listitem>
           <para>Add page name to article's &lt;title&gt; tag</para>
@@ -26,19 +54,30 @@
       <title>Bugs</title>
       <itemizedlist>
         <listitem>
-          <para><emphasis>List where the next level is indented more than one additional level misses a &lt;listitem&gt; tag</emphasis></para>
+          <para><emphasis role="highlight">Access violation</emphasis> occurs when exitting MynPad <emphasis>after a page had been opened which contans a math formula</emphasis></para>
+        </listitem>
+        <listitem>
+          <para>List related</para>
+          <itemizedlist>
+            <listitem>
+              <para>if a nested list is indented more than once from its parent list, invalid docbook XML is created - in docbook, each itemizedlist MUST contain a listitem! Possible solution to generate valid docbook is to either prevent the user from creating lists with missing intermediate levels (might be too complex) or to use a special attribute to determine the actual nesting level (like role="level:2"). A third alternative would be to keep creating invalid docbook in this particular case - not a preferred approach, though...</para>
+            </listitem>
+            <listitem>
+              <para>List format not reflected in Block style toolbar</para>
+            </listitem>
+            <listitem>
+              <para>Unindent List must add item to right list (important for numbered / ordered lists)</para>
+            </listitem>
+            <listitem>
+              <para>Editing a list of keyword links is a mess - the format of the previous list item is taken, thus effectively inserting a keyword link - even if resetting the format, once the list item content is deleted to its beginning (with backspace), when entering new characters, again the format from the previous item is used.</para>
+            </listitem>
+          </itemizedlist>
         </listitem>
         <listitem>
           <para>UNDO/REDO state not reset when saving a page</para>
         </listitem>
         <listitem>
-          <para>List format not reflected in Block style toolbar</para>
-        </listitem>
-        <listitem>
-          <para><emphasis role="highlight">Make XMLExporter more robust - must not destroy existing page!!!</emphasis></para>
-        </listitem>
-        <listitem>
-          <para>Unindent List must add item to right list (important for numbered / ordered lists)</para>
+          <para><emphasis>Make XMLExporter more robust - must not destroy existing page!!!</emphasis></para>
         </listitem>
       </itemizedlist>
     </section>
@@ -47,10 +86,7 @@
       <title>Important topics</title>
       <itemizedlist>
         <listitem>
-          <para>How to delete / rename pages? Should we maintain a global "database" of pages and their links? Would allow to query the database to build the browser tree instead of loading the page to get its links</para>
-        </listitem>
-        <listitem>
-          <para>Copy&amp;Paste should support format - currently only plain text is copied into the clipboard</para>
+          <para>How to delete / rename pages?</para>
         </listitem>
         <listitem>
           <para>support of numbered (ordered) lists</para>
@@ -69,9 +105,6 @@
         </listitem>
         <listitem>
           <para>Maintain creation date and last update date for each page</para>
-        </listitem>
-        <listitem>
-          <para>Clean up unused image files - probably simply delete unused files when saving the page</para>
         </listitem>
         <listitem>
           <para>Support of tables. Currently an issue since the <code>QTextTableCell</code> is missing the python methods for <code>begin()</code> and <code>end()</code>, so that it is not possible to traverse the table cells contents.</para>
@@ -95,10 +128,19 @@
           <para>Style Editor</para>
         </listitem>
         <listitem>
+          <para>MathML integration</para>
+        </listitem>
+        <listitem>
+          <para>Thumbnail view of all Images contained in a Notepad</para>
+        </listitem>
+        <listitem>
           <para>Version Control of pages</para>
         </listitem>
         <listitem>
           <para>Syntax highlighting inside code blocks</para>
+        </listitem>
+        <listitem>
+          <para>Spell checker</para>
         </listitem>
         <listitem>
           <para>Inline resizing of images through some kind of handles - this will most likely require the implementation of a custom text object, see <link xlink:href="http://doc.qt.io/qt-5/qtsvg-richtext-textobject-example.html">http://doc.qt.io/qt-5/qtsvg-richtext-textobject-example.html</link></para>

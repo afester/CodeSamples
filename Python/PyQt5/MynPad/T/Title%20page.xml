@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article version="5.0" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title></title>
+
+  <section>
+    <title>Welcome to MynPad</title>
+
+    <section>
+      <title>Introduction</title>
+      <para>MynPad is a <emphasis>structure based, stylable, link and cloud enabled</emphasis> notepad. It reads and writes its contents in Docbook 5 format and the rendering of the individual elements can be customized through a style sheet.</para>
+    </section>
+
+    <section>
+      <title>Requirements</title>
+      <itemizedlist>
+        <listitem>
+          <para>Python 3.3</para>
+        </listitem>
+        <listitem>
+          <para>PyQt 5.4</para>
+        </listitem>
+        <listitem>
+          <para>cssutils 1.0</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Further information</title>
+      <itemizedlist>
+        <listitem>
+          <para><olink targetdoc="TODO%20list">TODO list</olink></para>
+        </listitem>
+        <listitem>
+          <para><olink targetdoc="Sample%20Page">Sample Page</olink></para>
+        </listitem>
+        <listitem>
+          <para><olink targetdoc="List%20of%20used%20Docbook%20tags">List of used Docbook tags</olink></para>
+        </listitem>
+        <listitem>
+          <para><olink targetdoc="Technical%20background">Technical background</olink></para>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+</article>

@@ -47,4 +47,14 @@ public class DynamicRegionManager implements Serializable {
         setDynamicTaskFlowId("/WEB-INF/flows/TreeTableTF.xml#TreeTableTF");
         return null;
     }
+
+    public String backingBeanSampleTF() {
+        setDynamicTaskFlowId("/WEB-INF/flows/BackingBeanTF.xml#BackingBeanTF");
+        return null;
+    }
+
+    public String combinedSampleTF() {
+        setDynamicTaskFlowId("/WEB-INF/flows/CombinedTF.xml#CombinedTF");
+        return null;
+    }
 }

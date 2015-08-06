@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.1" xmlns:af="http://xmlns.oracle.com/adf/faces/rich"
+          xmlns:f="http://java.sun.com/jsf/core">
+  <af:panelBorderLayout id="pbl1">
+    <f:facet name="start"/>
+    <f:facet name="bottom"/>
+    <f:facet name="end"/>
+
+    <f:facet name="top">
+
+        <af:menuBar id="mb1">
+        <af:menu text="Execute:" id="m1">
+          <af:commandMenuItem text="Business 1" id="cmi1" action="business1"/>
+          <af:commandMenuItem text="Business 2" id="cmi2" action="business2"/>
+        </af:menu>
+        </af:menuBar>
+
+    </f:facet>
+
+    <af:region value="#{bindings.AddressTableTF1.regionModel}" id="r1"/>
+  </af:panelBorderLayout>
+</jsp:root>

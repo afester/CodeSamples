@@ -8,7 +8,7 @@
     <managed-bean id="__1">
       <managed-bean-name>TreeTableBB</managed-bean-name>
       <managed-bean-class>com.example.adf.view.bean.TreeTableBB</managed-bean-class>
-      <managed-bean-scope>request</managed-bean-scope>
+      <managed-bean-scope>backingBean</managed-bean-scope>
     </managed-bean>
     <managed-bean id="__2">
       <managed-bean-name>TreeTableViewBB</managed-bean-name>

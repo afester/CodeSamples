@@ -1,0 +1,87 @@
+body {
+  background-color: #F8F8F8;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: 75.00%;
+  color: #333;
+
+  border: 1px solid #D0D0D0;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  margin: 5px;
+  padding: 5px;
+  line-height: 1.5em;
+}
+
+h1 {
+  font-size: 22px;
+  font-weight: normal;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: normal;
+}
+
+h3 {
+  font-size: 14px;
+  font-weight: normal;
+}
+
+h4 {
+  font-size: 12px;
+  font-weight: normal;
+}
+
+table.tip {
+  margin-left: 20px;
+  font-style: italic;
+}
+
+table.tip td {
+	vertical-align: top;
+}
+
+table.warning {
+  margin-left: 20px;
+  font-style: italic;
+}
+
+table.warning td {
+	vertical-align: top;
+	color: #ff0000;
+}
+
+img.math {
+	/*background-color: #e4e4e4;*/
+	vertical-align: middle;		/* this is the best we can currently do to somewhat align math images with the text. */
+}
+
+div.mathsection {
+	background-color: red;
+}
+
+blockquote {
+  margin-left: 25px;
+  padding-left: 5px;
+  border-left: 2px solid #000000;
+  font-style: italic;
+}
+
+tt {
+  font-size: 9pt;
+  background-color: #EAEAEA;
+  color: #008000;
+}
+
+pre {
+  font-family: Consolas, 'Bitstream Vera Sans Mono', 'Courier New', Courier, monospace;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: normal;
+  background-color: #EAEAEA;
+}
+
+
+em {
+	background-color: yellow;
+}

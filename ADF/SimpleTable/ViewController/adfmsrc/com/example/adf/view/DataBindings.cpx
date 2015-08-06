@@ -19,6 +19,11 @@
           usageId="com_example_adf_view_DynamicDataTF_DynamicDataTF_ExecutePageDef"/>
     <page path="/CustomModel.jsff" usageId="com_example_adf_view_CustomModelPageDef"/>
     <page path="/TaskTreeTable.jsff" usageId="com_example_adf_view_TaskTreeTablePageDef"/>
+    <page path="/CombinedSample.jsff" usageId="com_example_adf_view_CombinedSamplePageDef"/>
+    <page path="/WEB-INF/flows/CombinedTF.xml#CombinedTF@methodCall1"
+          usageId="com_example_adf_view_CombinedTF_CombinedTF_methodCall1PageDef"/>
+    <page path="/WEB-INF/flows/CombinedTF.xml#CombinedTF@methodCall2"
+          usageId="com_example_adf_view_CombinedTF_CombinedTF_methodCall2PageDef"/>
   </pageMap>
   <pageDefinitionUsages>
     <page id="com_example_adf_view_AddressTablePageDef" path="com.example.adf.view.pageDefs.AddressTablePageDef"/>
@@ -33,6 +38,11 @@
           path="flows.DynamicDataTF_DynamicDataTF_ExecutePageDef"/>
     <page id="com_example_adf_view_CustomModelPageDef" path="com.example.adf.view.pageDefs.CustomModelPageDef"/>
     <page id="com_example_adf_view_TaskTreeTablePageDef" path="com.example.adf.view.pageDefs.TaskTreeTablePageDef"/>
+    <page id="com_example_adf_view_CombinedSamplePageDef" path="com.example.adf.view.pageDefs.CombinedSamplePageDef"/>
+    <page id="com_example_adf_view_CombinedTF_CombinedTF_methodCall1PageDef"
+          path="flows.CombinedTF_CombinedTF_methodCall1PageDef"/>
+    <page id="com_example_adf_view_CombinedTF_CombinedTF_methodCall2PageDef"
+          path="flows.CombinedTF_CombinedTF_methodCall2PageDef"/>
   </pageDefinitionUsages>
   <dataControlUsages>
     <BC4JDataControl id="SimpleTableAMDataControl" Package="com.example.adf.view"

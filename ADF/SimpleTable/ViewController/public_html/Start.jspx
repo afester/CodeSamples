@@ -28,6 +28,10 @@
                                          action="#{viewScope.DynamicRegionManager.dynamicBeanSampleTF}"/>
                                 <af:link id="l6" text="Tree table sample"
                                          action="#{viewScope.DynamicRegionManager.treeTableSampleTF}"/>
+                                <af:link id="l7" text="Backing bean sample"
+                                         action="#{viewScope.DynamicRegionManager.backingBeanSampleTF}"/>
+                                <af:link id="l8" text="Combined Taskflow sample"
+                                         action="#{viewScope.DynamicRegionManager.combinedSampleTF}"/>
                             </af:panelGroupLayout>
 
                             <af:spacer width="0" height="20" id="s1"/>

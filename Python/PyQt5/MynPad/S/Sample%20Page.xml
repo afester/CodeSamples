@@ -22,12 +22,39 @@
         <listitem>
           <para><olink targetdoc="Encoding%20Test">Encoding Test</olink></para>
         </listitem>
+        <listitem>
+          <para><olink targetdoc="Math%20Test">Math Test</olink></para>
+        </listitem>
+        <listitem>
+          <para><olink targetdoc="Test2">Test2</olink></para>
+        </listitem>
       </itemizedlist>
     </section>
 
     <section>
       <title>Links</title>
       <para>This sample Wiki is used to test and show the various features of the <link xlink:href="http://doc.qt.io/qt-5/qtwidgets-richtext-textedit-example.html">Rich Text Editor in Qt.</link></para>
+    </section>
+
+    <section>
+      <title>A tip</title>
+      <tip><para>This section shows how a tip looks like.</para></tip>
+    </section>
+
+    <section>
+      <title>A quotation</title>
+      <blockquote><para>This section shows how a quotation looks like.</para></blockquote>
+    </section>
+
+    <section>
+      <title>A warning</title>
+      <warning><para>This section shows how a warning looks like.</para></warning>
+    </section>
+
+    <section>
+      <title>A  mathematical expression</title>
+      <para><inlineequation><mathphrase>\mathcal{R}\prod_{i=\alpha_{i+1}}^\infty a_i\sin(2 \pi f x_i)</mathphrase></inlineequation></para>
+      <para><inlineequation><mathphrase>x_{1,2} = - \frac{p}{2} \pm \sqrt{(\frac{p}{2})^2 - q}</mathphrase></inlineequation></para>
     </section>
 
     <section>
@@ -83,7 +110,18 @@ FormatManager.py:                         'pre' : 'pre'}</screen>
 An item with a second line</para>
           <itemizedlist>
             <listitem>
-              <para>An item on the next level</para>
+              <para>An item on the next level, and an image on a new line, as part of the list item:
+<mediaobject><imageobject><imagedata fileref="8734434072b647df985d106d4a688aeb.png"/></imageobject></mediaobject></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para>Code Section - a complete code section as a list item</para>
+          <itemizedlist>
+            <listitem>
+              <programlisting language="cpp">int main() {
+   printf("Hello World")
+}</programlisting>
             </listitem>
           </itemizedlist>
         </listitem>

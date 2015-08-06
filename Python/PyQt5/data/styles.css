@@ -1,0 +1,237 @@
+/* the searchMarker is used to define the style for highlighting found text */
+searchMarker {
+	background-color: #800000;
+	color: white;
+}
+
+
+/**************** Block formats **********************************************/
+title[level="1"] {
+	margin-top: 18px;
+	margin-bottom: 5px;
+	font-family: "Arial";
+	font-size: 18pt;
+}
+
+title[level="2"] {
+	margin-top: 14px;
+	margin-bottom: 3px;
+	font-family: "Arial";
+	font-size: 16pt;
+}
+
+title[level="3"] {
+	color: #5f5f5f;
+	margin-top: 10px;
+	margin-bottom: 3px;
+	font-family: "Arial";
+	font-size: 12pt;
+	font-weight: bold;
+}
+
+para {
+	margin-top: 3px;
+	margin-bottom: 3px;
+	font-family: "Sans";
+	font-size: 10pt;
+}
+
+tip {
+	margin-top: 3px;
+	margin-bottom: 3px;
+	margin-left: 20px;
+	background-color: #e4e4e4;
+	color: #000000;
+	font-family: "Sans";
+	font-size: 10pt;
+	font-style: italic;
+}
+
+warning {
+	margin-top: 15px;
+	margin-bottom: 15px;
+	margin-left: 20px;
+	background-color: #ffffff;
+	color: #ff0000;
+	font-family: "Sans";
+	font-size: 12pt;
+	font-style: italic;
+}
+
+blockquote {
+	margin-top: 3px;
+	margin-bottom: 3px;
+	margin-left: 20px;
+	/*background-color: #caddff;*/
+	color: #000000;
+	font-family: "Sans";
+	font-size: 10pt;
+	font-style: italic;
+}
+
+programlisting[language="java"] {
+	white-space: pre;
+
+	margin-top: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	margin-left: 5px;
+	background-color: #0000ff;
+
+	color: yellow;
+	font-family: "Courier";
+	font-size: 10pt;
+	font-weight: bold;
+}
+
+programlisting[language="cpp"] {
+	white-space: pre;
+
+	margin-top: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	margin-left: 5px;
+	background-color: #f0f0f0;
+
+	color: black;
+	font-family: "Courier";
+	font-size: 10pt;
+	font-weight: bold;
+}
+
+programlisting[language="xml"] {
+	white-space: pre;
+	
+	margin-top: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	margin-left: 5px;
+	background-color: #f0f0f0;
+
+	color: #800000;
+	font-family: "Courier";
+	font-size: 10pt;
+}
+
+programlisting[language="sql"] {
+	white-space: pre;
+	
+	margin-top: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	margin-left: 5px;
+	background-color: #f0f0f0;
+	
+	color: blue;
+	font-family: "Courier";
+	font-size: 10pt;
+}
+
+programlisting[language="python"] {
+	white-space: pre;
+	
+	margin-top: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	margin-left: 5px;
+	background-color: #f0f0f0;
+	
+	color: black;
+	font-family: "Courier";
+	font-size: 10pt;
+}
+
+programlisting[language="bash"] {
+	white-space: pre;
+	
+	margin-top: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	margin-left: 5px;
+	background-color: #808080;
+	
+	color: #ffff00;
+	font-family: "Courier";
+	font-size: 10pt;
+}
+
+screen {
+	white-space: pre;
+	
+	margin-top: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	margin-left: 5px;
+	background-color: #808080;
+
+	color: #80ff80;
+	font-family: "Courier";
+	font-size: 10pt;
+}
+
+/**************** List formats **********************************************/
+itemizedlist[level="1"] {
+	list-style-type: disc;
+}
+
+itemizedlist[level="2"] {
+	list-style-type: circle;
+}
+
+itemizedlist[level="3"] {
+	list-style-type: square;
+}
+
+itemizedlist[level="4"] {
+	list-style-type: square;
+}
+
+orderedlist[level="1"] {
+	list-style-type: decimal;
+}
+
+orderedlist[level="2"] {
+	list-style-type: decimal;
+}
+
+orderedlist[level="3"] {
+	list-style-type: decimal;
+}
+
+orderedlist[level="4"] {
+	list-style-type: decimal;
+}
+
+
+/**************** Inline formats **********************************************/
+
+/* Note: They are based on the "p" block format - not sure if this is the right approach!
+   Note that these are char formats only - especially the backgrund-color refers
+   to the fragment's background color, not the block background color!
+   Also, the fact that <keyword> and <a> are anchors needs to be reflected in the code. 
+*/
+
+emphasis[role="highlight"] {
+	background-color: yellow;
+}
+
+emphasis {
+	font-weight: bold;
+}
+
+code {
+	background-color: #e8e8e8;
+	color: green;
+	font-family: "Courier";
+}
+
+link {
+	color: blue;
+	text-decoration: underline;
+}
+
+olink {
+	background-color: #dcdcdc;
+	color: blue;
+	text-decoration: underline;
+}

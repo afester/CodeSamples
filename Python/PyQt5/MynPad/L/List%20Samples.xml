@@ -1,12 +1,21 @@
-<?xml version = '1.0' encoding = 'UTF-8'?>
-<page>
+<?xml version="1.0" encoding="utf-8"?>
+<article version="5.0" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title></title>
 
-   <h1>List Samples</h1>
-   <ul>
-     <li>Item 1</li>
-     <li>Item 2</li>
-     <li>Item 3</li>
-   </ul>
-   <p></p>
-   <p></p>
-</page>
+  <section>
+    <title>List Samples</title>
+    <itemizedlist>
+      <listitem>
+        <para>Item 1</para>
+      </listitem>
+      <listitem>
+        <para>Item 2</para>
+      </listitem>
+      <listitem>
+        <para>Item 3</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+</article>

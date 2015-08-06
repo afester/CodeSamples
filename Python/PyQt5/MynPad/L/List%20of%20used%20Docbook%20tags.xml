@@ -32,10 +32,31 @@
           <para><link xlink:href="http://docbook.org/tdg51/en/html/para.html">para</link></para>
         </listitem>
         <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/blockquote.html">blockquote</link></para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/tip.html">tip</link></para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/warning.html">warning</link></para>
+        </listitem>
+        <listitem>
           <para><link xlink:href="http://docbook.org/tdg51/en/html/programlisting.html">programlisting</link></para>
         </listitem>
         <listitem>
           <para><link xlink:href="http://docbook.org/tdg51/en/html/screen.html">screen</link></para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/informalequation.html">informalequation</link> (Not yet)</para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/mediaobject.html">mediaobject</link></para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/imageobject.html">imageobject</link></para>
+        </listitem>
+        <listitem>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/imagedata.html">imagedata</link></para>
         </listitem>
       </itemizedlist>
     </section>
@@ -47,22 +68,19 @@
           <para><link xlink:href="http://docbook.org/tdg51/en/html/emphasis.html">emphasis</link></para>
         </listitem>
         <listitem>
-          <para>code</para>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/code.html">code</link></para>
         </listitem>
         <listitem>
-          <para>olink</para>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/olink.html">olink</link></para>
         </listitem>
         <listitem>
-          <para>link</para>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/link.html">link</link></para>
         </listitem>
         <listitem>
-          <para>mediaobject</para>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/inlineequation.html">inlineequation</link></para>
         </listitem>
         <listitem>
-          <para>imageobject</para>
-        </listitem>
-        <listitem>
-          <para>imagedata</para>
+          <para><link xlink:href="http://docbook.org/tdg51/en/html/mathphrase.html">mathphrase</link></para>
         </listitem>
       </itemizedlist>
     </section>

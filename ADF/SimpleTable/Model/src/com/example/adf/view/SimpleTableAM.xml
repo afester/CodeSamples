@@ -59,6 +59,16 @@
         Name="theData"
         Type="java.lang.String"/>
     </Method>
+    <Method
+      Name="doBusiness"
+      MethodName="doBusiness">
+      <Return
+        Name="_return_type_"
+        Type="void"/>
+      <Parameter
+        Name="what"
+        Type="java.lang.String"/>
+    </Method>
   </ClientInterface>
   <ResourceBundle>
     <PropertiesBundle

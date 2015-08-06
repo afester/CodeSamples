@@ -21,11 +21,62 @@
           <listitem>
             <para>Item 4</para>
           </listitem>
+          <listitem>
+            <para></para>
+          </listitem>
+          <listitem>
+            <para>Item 4a</para>
+          </listitem>
         </itemizedlist>
       </listitem>
       <listitem>
         <para>Item 5</para>
       </listitem>
     </itemizedlist>
+    <para></para>
+    <itemizedlist>
+      <listitem>
+        <para>Item A</para>
+        <itemizedlist>
+          <itemizedlist>
+            <listitem>
+              <para>Item B</para>
+            </listitem>
+          </itemizedlist>
+        </itemizedlist>
+      </listitem>
+    </itemizedlist>
+    <para></para>
+    <itemizedlist>
+      <itemizedlist>
+        <itemizedlist>
+          <listitem>
+            <para>Item 10</para>
+          </listitem>
+        </itemizedlist>
+        <listitem>
+          <para>Item 9</para>
+        </listitem>
+      </itemizedlist>
+      <listitem>
+        <para>Item 8</para>
+      </listitem>
+    </itemizedlist>
+    <para></para>
+    <itemizedlist>
+      <itemizedlist>
+        <listitem>
+          <para>Level2 (a)</para>
+        </listitem>
+        <listitem>
+          <para>Level2 (b)</para>
+        </listitem>
+      </itemizedlist>
+      <listitem>
+        <para>test</para>
+      </listitem>
+    </itemizedlist>
+    <para></para>
+    <para></para>
   </section>
 </article>

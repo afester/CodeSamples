@@ -7,5 +7,7 @@ import oracle.jbo.ApplicationModule;
 // ---------------------------------------------------------------------
 public interface SimpleTableAM extends ApplicationModule {
     void updateData(String theData);
+
+    void doBusiness(String what);
 }
 
