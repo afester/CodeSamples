@@ -2,8 +2,10 @@ VBOX_IMAGE=$(HOME)/VirtualBox\ VMs/Plain/Plain.vdi
 
 all:
 
-minimal:
+creator:
 	gcc -Wall -pedantic -o createboot createboot.c
+
+minimal:
 	nasm -f bin -o source.bin minimal.asm -l minimal.lst
 	./createboot $(VBOX_IMAGE)
 

@@ -2,14 +2,14 @@
 
 static const char* value = "Hello World!";
 
-int main();
-
-void _start() {
-   main();
+void put(char c) {
+    char* vid = (char*) 0xb8000;
+    *vid = c;
 }
 
-
 int main() {
+  put('A');
+
   int result = add(1, 3);
   int* res = &result;
 /*  char* p = value;*/
