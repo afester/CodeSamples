@@ -1,0 +1,4 @@
+set (JAVA_EXE /cygdrive/c/Program\ Files/Java/jdk1.7.0_80/bin/java)
+set (ANTLR_JAR C:\\\\Users\\\\afester\\\\Projects\\\\CodeSamples\\\\nodistrib\\\\antlr-3.5.2-fes.jar)
+#set (JAVA_EXE /opt/jdk1.7.0_45/bin/java)
+#set (ANTLR_JAR /home/andreas/Projects/CodeSamples/nodistrib/antlr-complete-3.5.3-SNAPSHOT.jar)
