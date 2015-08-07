@@ -456,6 +456,10 @@ class StylableTextEdit(QTextEdit):
         return QTextEdit.mousePressEvent(self, event)
 
 
+    def outPut(self, line):
+        print(line, end='')
+
+
     def createMimeDataFromSelection(self):
         result = QMimeData()
         cursor = self.textCursor()
@@ -466,10 +470,16 @@ class StylableTextEdit(QTextEdit):
 
         # create an xml representation of the selected document structure 
         traversal = TextDocumentSelectionTraversal()
-        tree = traversal.traverse(self.textCursor(), self.document())
+        frame = traversal.traverse(self.textCursor(), self.document())
+
+        print('\n-----------------------------------------------')
+        printer = StructurePrinter(frame, self.outPut)
+        printer.traverse()
+        print('-----------------------------------------------')
+
         return
 
-        sp = AppXmlPrinter(tree, None)
+        sp = AppXmlPrinter(frame, None)
         sp.traverse()
 
         blafasel = '''<?xml version="1.0" encoding="utf-8"?>

@@ -1,0 +1,9 @@
+# Despite CshTop10.txt, sometimes you *need* to work with csh -
+# then, at least setup a reasonable environment ...
+
+# The .login script is executed for login shells.
+# Note that when opening a new xterm or a new tab in gnome terminal,
+# the new shell is not a login shell by default! Hence this script
+# is not executed - instead, check for the $prompt variable in .cshrc
+# to distinguish between interactive and non interactive shells!
+

@@ -64,6 +64,12 @@ factor returns [Node* result]
         $result = new NumberNode(value);    
       }
 
+    | FLOATNUMBER {
+    	// TODO: check number format!
+    	double value = atof($FLOATNUMBER.text.c_str());
+    	$result = new NumberNode(value);
+      }
+
     | ID {
     	const SymbolTableEntry& entry = st->getSymbol($ID.text);
     	if (entry.getKind() == SYM_FUN) {
@@ -91,6 +97,7 @@ factor returns [Node* result]
 
 /* Tokens ********************************************************************/
 
-NUMBER: '0'..'9' + ;
-ID:     'a'..'z' + ;
-WS:     ( ' ' |'\n' |'\r')+ { $channel=HIDDEN; } ; // ignore whitespace
+NUMBER      : '0'..'9' + ;
+FLOATNUMBER : NUMBER ('.' '0'..'9'+)?;
+ID          :     'a'..'z' + ;
+WS          :     ( ' ' |'\n' |'\r')+ { $channel=HIDDEN; } ; // ignore whitespace

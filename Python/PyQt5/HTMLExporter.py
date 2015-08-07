@@ -74,7 +74,7 @@ class HtmlPrinter:
 
             self.isPre = False
             if node.style[0] == 'programlisting':
-                self.out('</code></pre>')
+                self.out('\n</code></pre>')
             elif node.style[0] == 'screen':
                 self.out('</pre>')
             elif node.style[0] == 'title':

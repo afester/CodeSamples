@@ -15,6 +15,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 
 public class GrammarTester {
 
@@ -98,9 +99,14 @@ public class GrammarTester {
         }
 
         if (isTerminal) {
+            TerminalNodeImpl tni = (TerminalNodeImpl) node;
             System.err.printf("%s \"%s\"\n", indent(level*3), node.getText());
         } else {
-            System.err.printf("%s %s\n", indent(level*3), node.getClass().getSimpleName());
+            String context = node.getClass().getSimpleName();
+            if (context.endsWith("Context")) {
+                context = context.substring(0, context.length() - "Context".length());
+            }
+            System.err.printf("%s %s\n", indent(level*3), context);
         }
 
         for (int idx = 0;   idx < node.getChildCount();  idx++) {
@@ -214,8 +220,8 @@ public class GrammarTester {
         System.err.printf("Lexer     : %s\n", lexerClassname);
         System.err.printf("Parser    : %s\n\n", parserClassname);
 
-        dumpTokens();
-        dumpParseTree();
+//        dumpTokens();
+//        dumpParseTree();
         renderParseTree();
     }
 
@@ -228,9 +234,13 @@ public class GrammarTester {
         //final String startRule = "prog";
         //final String inputFile = "Expr.txt";
 
-        final String grammar = "/com/example/grammars/uuids/UUIDs.g4";
-        final String startRule = "uuidlist";
-        final String inputFile = "UUIDs.txt";
+        //final String grammar = "/com/example/grammars/uuids/UUIDs.g4";
+        //final String startRule = "uuidlist";
+        //final String inputFile = "UUIDs.txt";
+
+        final String grammar = "/com/example/grammars/midl/Midl.g4";
+        final String startRule = "midl";
+        final String inputFile = "Midl.txt";
 
         new GrammarTester(grammar, startRule, inputFile).run();
     }

@@ -3,6 +3,24 @@ package com.example.tree;
 import org.junit.Test;
 
 
+enum OperatorEnum{
+    PLUS, MULTIPLY
+}
+
+class OperatorNode extends TreeNode<OperatorEnum> {
+    public OperatorNode(OperatorEnum content) {
+        super(content);
+    }
+}
+
+class NumberNode extends TreeNode<Integer> {
+    public NumberNode(Integer content) {
+        super(content);
+    }
+}
+
+
+
 public class TreeTest {
 
    // The tree is represented as a hierarchical set of TreeNode objects
@@ -87,4 +105,44 @@ public class TreeTest {
        // algorithms. Hence, the TreeNodeTraversal.traverse() takes the 
        // role of the accept() method.
      }
+
+   
+   @Test
+   public void expressionTest() {
+       OperatorNode top = new OperatorNode(OperatorEnum.PLUS);
+       OperatorNode left = new OperatorNode(OperatorEnum.MULTIPLY);
+       OperatorNode right = new OperatorNode(OperatorEnum.MULTIPLY);
+       left.addChildren(new NumberNode(2));
+       left.addChildren(new NumberNode(4));
+       right.addChildren(new NumberNode(6));
+       right.addChildren(new NumberNode(8));
+       top.addChildren(left);
+       top.addChildren(right);
+
+       TreeNodeVisitor visitor = new TreeNodeExpressionVisitor();
+       TreeTraversal tt1 = new DepthFirstTraversal();
+       tt1.traverse(tree, visitor);
+     }
+
+
+   
+   @Test
+   public void iteratorTest() {
+       TreeNode<String> tree = createTree(3, 3);
+
+       TreeNodeIterator iter = new TreeNodeIterator(tree);
+
+       System.err.println(iter.next());
+       System.err.println(iter.next());
+       System.err.println(iter.next());
+
+       System.err.println(iter.prev());
+       System.err.println(iter.prev());
+       System.err.println(iter.prev());
+       System.err.println(iter.prev());
+       
+       System.err.println(iter.next());
+       System.err.println(iter.next());
+   }
+
 }

@@ -39,6 +39,7 @@ options {
   typedef double NumberType;
 }
 
+/* Rules *********************************************************************/
 
 /* Dummy rule to avoid "no start rule" warning */
 start : expr
@@ -60,11 +61,15 @@ term returns [NumberType value]
 
 factor returns [NumberType value]
     : NUMBER	      { $value = atol($NUMBER.text.c_str());                 }
+    | FLOATNUMBER     { $value = atof($FLOATNUMBER.text.c_str());            }
     | ID              { $value = st->getValue($ID.text);                     }
     | '(' expr ')'    { $value = $expr.value;                                }
     | ID '(' expr ')' { $value = st->executeFunction($ID.text, $expr.value); }
     ;
 
-NUMBER: '0'..'9' + ;
-ID:     'a'..'z' + ;
-WS:     ( ' ' |'\n' |'\r')+ { $channel=HIDDEN; } ; // ignore whitespace
+/* Tokens ********************************************************************/
+
+NUMBER      : '0' | ('-'|'+')? '1'..'9' '0'..'9'*;
+FLOATNUMBER : NUMBER ('.' '0'..'9'+)?;
+ID          : 'a'..'z' + ;
+WS          : ( ' ' |'\n' |'\r')+ { $channel=HIDDEN; } ; // ignore whitespace

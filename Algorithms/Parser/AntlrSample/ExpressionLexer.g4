@@ -1,4 +1,4 @@
-lexer grammar ExpressionLexerRules;
+lexer grammar ExpressionLexer;
 
 // match paranthesis
 OPAR : '(' ; 

@@ -1,14 +1,21 @@
 # Despite CshTop10.txt, sometimes you *need* to work with csh -
 # then, at least setup a reasonable environment ...
 
-# set a reasonable command line prompt
-set prompt="\
-%n@%m:%~\
-%# "
+# The .cshrc script is executed for login and non-login shells
+# You should make sure that this script does not output anything
+# on stdout or stderr, as this might confuse remote commands which 
+# are, for example, executed over ssh
 
-set promptchars="%#"
-set autolist
-set autoexpand
+# The .login script is executed for login shells.
+# Note that when opening a new xterm or a new tab in gnome terminal,
+# the new shell is not a login shell by default! Hence this script
+# is not executed - instead, check for the $prompt variable in .cshrc
+# to distinguish between interactive and non interactive shells!
+
+set IS_INTERACTIVE=0
+if($?prompt) then
+  set IS_INTERACTIVE=1
+endif
 
 # Set sort order for e.g. ls - directories first
 setenv LC_COLLATE C
@@ -16,17 +23,30 @@ setenv LC_COLLATE C
 # Expand search path with local directories
 setenv PATH ${HOME}/scripts:${HOME}/local/bin:${PATH}
 
-# Colorized grep
-setenv GREP_OPTIONS "--color=auto"
-setenv GREP_COLOR '00;38;5;11;48;5;4'
-
-# Colorized man pages
-setenv C1 `printf "\033[0;32m"`
-setenv C2 `printf "\033[1;34m"`
-setenv C3 `printf "\033[31m"`
-setenv C4 `printf "\033[33;44m"`
-alias man 'env LESS_TERMCAP_ue="$C1" LESS_TERMCAP_me="$C1" LESS_TERMCAP_se="$C1" LESS_TERMCAP_md="$C2" LESS_TERMCAP_us="$C3" LESS_TERMCAP_so="$C4" man'
-
 # enable unlimited core dumps
 limit coredumpsize unlimited
+# Despite CshTop10.txt, sometimes you *need* to work with csh -
+# then, at least setup a reasonable environment ...
+
+if (${} == 1} then
+  # set a reasonable command line prompt
+  set prompt="\
+%n@%m:%~\
+%# "
+
+  set promptchars="%#"
+  set autolist
+  set autoexpand
+
+  # Colorized grep
+  setenv GREP_OPTIONS "--color=auto"
+  setenv GREP_COLOR '00;38;5;11;48;5;4'
+
+  # Colorized man pages
+  setenv C1 `printf "\033[0;32m"`
+  setenv C2 `printf "\033[1;34m"`
+  setenv C3 `printf "\033[31m"`
+  setenv C4 `printf "\033[33;44m"`
+  alias man 'env LESS_TERMCAP_ue="$C1" LESS_TERMCAP_me="$C1" LESS_TERMCAP_se="$C1" LESS_TERMCAP_md="$C2" LESS_TERMCAP_us="$C3" LESS_TERMCAP_so="$C4" man'
+endif
 

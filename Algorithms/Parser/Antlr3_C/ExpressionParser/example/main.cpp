@@ -162,13 +162,101 @@ void testAST1() {
 }
 
 
+double evaluate(const std::string& expr) {
+    ExpressionEvaluator ev(expr);
+    return ev.evaluateExpression();
+}
+
+void testFloat()  {
+	std::string expr = "0";
+	double result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "5";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "-5";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "1045";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "-9000";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "1.005";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "-10.15";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "10";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "1.9 + 0.1";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+}
+
+double evaluate2(const std::string& expr) {
+    ExpressionEvaluator2 ev(expr);
+    return ev.evaluateExpression();
+}
+
+void testFloatAST()  {
+	std::string expr = "0";
+	double result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "5";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "-5";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "1045";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "-9000";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "1.005";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "-10.15";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "10";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+
+	expr = "1.9 + 0.1";
+	result = evaluate(expr);
+	std::cerr << "\"" << expr << "\" => " << result << std::endl;
+}
+
+
 int main(int argc, char *argv[]) {
     std::cout << "ExpressionParser example" << std::endl;
 
     //testAST1();
     //testFunction();
-    testPerformance();
-    testPerformance2();
+    //testPerformance();
+    //testPerformance2();
+    testFloat();
 
     return 0;
 }

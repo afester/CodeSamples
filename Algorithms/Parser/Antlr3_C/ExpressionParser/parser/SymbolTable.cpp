@@ -59,7 +59,7 @@ SymbolTable::~SymbolTable() {
 }
 
 void SymbolTable::init() {
-	std::cerr << "Initializing Symbol table ..." << std::endl;
+	// std::cerr << "Initializing Symbol table ..." << std::endl;
 
 	table["x"] = SymbolTableEntry("x");
 
