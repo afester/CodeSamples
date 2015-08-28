@@ -1,5 +1,8 @@
 package com.example;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * http://docs.oracle.com/javase/tutorial/java/generics/types.html
  * 
@@ -16,6 +19,13 @@ package com.example;
  * - By convention, type parameter names are single, uppercase letters.
  */
 public class GenericsSample {
+
+    
+    
+   public List getRawCollection() {
+       return Collections.EMPTY_LIST;
+   }
+    
 
    @SuppressWarnings("unchecked")
    public static void main(String[] args) {
@@ -40,5 +50,10 @@ public class GenericsSample {
       Pair rawPair = new OrderedPair("First",  1);
 
       int result = GenericMethod.convert(4.5);
+
+      GenericsSample sample = new GenericsSample();
+      List<?> errors = sample.getRawCollection();
+      Exception[] x  = (Exception[]) errors.toArray(new Exception[0]);  // errors.size()]);
+      System.err.println(x);
    }
 }

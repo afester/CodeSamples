@@ -46,12 +46,16 @@ FROM dba_data_files;
 -- Create user
 -- Oracle Database automatically creates a schema when you create a user.
 CREATE USER userName 
-    IDENTIFIED BY "password"    -- NOTE: quotes required when password starts with letter!
+    IDENTIFIED BY "password"    -- NOTE: quotes required when password starts with letter! But NOT a String (no ' quote!!!)
     DEFAULT TABLESPACE users
     QUOTA unlimited on users    -- NOTE: users require quota on tablespace, default is 0
     TEMPORARY TABLESPACE temp;
-        
+
 -- ALTER USER userName QUOTA unlimited on users;
+
+-- Change password for user
+ALTER USER userName IDENTIFIED BY "password";
+
 
 GRANT connect TO userName;
 GRANT create table TO userName;
@@ -105,11 +109,37 @@ FROM DBA_TABLES
 WHERE TEMPORARY='Y'
 ORDER BY TABLE_NAME;
 
+-- Select constraint definition
+SELECT OWNER, CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME, SEARCH_CONDITION 
+FROM ALL_CONSTRAINTS 
+WHERE CONSTRAINT_NAME = 'constraintName';
+
+-- Select all Index definitions for a table
+SELECT index_name 
+FROM user_indexes
+WHERE table_name = 'tableName';
+
+-- Dump the DDL statement used to create a table
+SELECT DBMS_METADATA.GET_DDL('TABLE','tableName', 'schemaName') 
+FROM DUAL;
+
+
 -- Select all current USER (not BACKGROUND) sessions
 -- "process" is the process ID of the client
 SELECT sid, serial#, username, status, process, machine, sql_id
 FROM v$session 
 WHERE type='USER';
+
+-- Select *current* SQL statement for user 
+--SELECT rows_processed, sql_text
+--FROM v$sql
+--JOIN v$session ON v$session.sql_id=v$sql.sql_id
+--WHERE username='userName';
+SELECT rows_processed, sql_fulltext
+FROM v$sql
+JOIN v$session ON v$session.sql_id=v$sql.sql_id
+WHERE username='userName';
+
 
 -- Select current SQL statement for user, including the bind variables
 -- (Note: each bind variable results in one row - TODO: Use the PIVOT operator ...) 

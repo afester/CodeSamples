@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#define _USE_MATH_DEFINES // Required by MSVC
 #include <math.h>
 #include "SymbolTable.h"
 

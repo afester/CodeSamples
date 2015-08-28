@@ -6,26 +6,25 @@
  */
 
 
-#include <QMainWindow>
-#include <QApplication>
+#include <QLayout>
 
-class CustomWidget : public QWidget {
+
+class ScrollAreaLayout : public QLayout {
+    QLayoutItem* theItem;
 
 public:
-    CustomWidget(QWidget* parent = 0);
-
-    virtual QSize sizeHint() const;
+    ScrollAreaLayout();
 
 protected:
-    void paintEvent ( QPaintEvent * event );
-};
+    virtual QSize sizeHint() const;
 
+    virtual void addItem(QLayoutItem *item);
 
-class MainWindow : public QMainWindow {
-    Q_OBJECT;
+    virtual QLayoutItem *itemAt(int index) const;
 
-public:
+    virtual QLayoutItem *takeAt(int index);
 
-    MainWindow(QWidget* parent);
-    ~MainWindow();
+    virtual int count() const;
+
+    virtual void setGeometry ( const QRect & r );
 };

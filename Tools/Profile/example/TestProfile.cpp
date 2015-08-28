@@ -1,5 +1,5 @@
 #include <iostream>
-#include <unistd.h>
+//#include <unistd.h>
 
 using namespace std;
 
@@ -20,7 +20,12 @@ int main() {
 	//for (int i = 0;  i < 1650;  i++) 
 	for (int i = 0;  i < 880;  i++) 
         for (int j = 0;  j < 100000;  j++) { int x = i + j; f(x); }
+
+#ifdef WIN32
+	Sleep(500);
+#else
 	usleep(500000);
+#endif
 
 	c1.stop();
 	p1.stop();

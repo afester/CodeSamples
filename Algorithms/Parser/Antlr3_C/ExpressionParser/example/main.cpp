@@ -1,4 +1,5 @@
 #include <iostream>
+#define _USE_MATH_DEFINES // Required by MSVC
 #include <math.h>
 
 #include "ExpressionParser.hpp"

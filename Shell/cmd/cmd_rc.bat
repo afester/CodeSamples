@@ -8,7 +8,7 @@ SET MVN_HOME=c:\Program Files\apache-maven-3.2.5
 SET ANT_HOME=c:\Program Files\apache-ant-1.9.1
 SET CYGWIN_HOME=d:\cygwin64
 SET CMAKE_HOME=c:\Program Files (x86)\cmake-3.3.0-win32-x86
-SET MSVC_HOME=C:\Program Files (x86)\Microsoft Visual Studio 8\vc
+SET MSVC_HOME=C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC
 
 SET PATH=%CMAKE_HOME%\bin;%JAVA_HOME%\bin;%MVN_HOME%\bin;%ANT_HOME%\bin;%CYGWIN_HOME%\bin;%PATH%
 CALL "%MSVC_HOME%\vcvarsall.bat"

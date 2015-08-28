@@ -8,5 +8,5 @@ QT = gui core widgets
 
 CONFIG += qt warn_on debug console
 
-HEADERS = ScrollArea.h
-SOURCES = ScrollArea.cpp main.cpp
+HEADERS = ScrollAreaLayout.h ScrollArea.h
+SOURCES = ScrollAreaLayout.cpp ScrollArea.cpp main.cpp

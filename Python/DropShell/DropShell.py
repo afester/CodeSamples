@@ -4,11 +4,11 @@ Created on 23.02.2015
 @author: afester
 '''
 
-import dropbox
 import configparser
 import time
 
-from dropbox.datastore import DatastoreError, DatastoreManager, Date, Bytes
+import dropbox
+from dropbox.datastore import DatastoreManager
 
 
 class DropShell:
@@ -19,6 +19,7 @@ class DropShell:
         self.settings = self.config["DropBox"]
         self.wdPath = []
         self.datastoreManager = None
+
 
     def getFilePath(self, fileName):
         if len(self.wdPath) == 0:

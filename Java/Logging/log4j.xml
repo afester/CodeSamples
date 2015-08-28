@@ -5,15 +5,23 @@
     <Console name="Console" target="SYSTEM_ERR">
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
     </Console>
+    
+    <Socket name="UDP1241" host="localhost" port="1241" protocol="UDP">
+    </Socket>
+
+    <Socket name="LILITH" host="localhost" port="4445">
+    </Socket>
   </Appenders>
 
   <Loggers>
-    <Logger name="com.foo.Bar" level="trace">
+    <Logger name="com.example" level="info">
       <AppenderRef ref="Console"/>
+      <AppenderRef ref="LILITH"/>
     </Logger>
 
-    <Root level="info">
-      <AppenderRef ref="Console"/>
+    <Root level="debug">
+<!--      <AppenderRef ref="Console"/>
+-->
     </Root>
   </Loggers>
 

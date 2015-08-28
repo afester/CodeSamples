@@ -1,6 +1,7 @@
 -- SQL*Plus settings - restrict column sizes and enlarge line sizes and page sizes
 SET LINESIZE 1000
 SET PAGESIZE 300
+SET NUMWIDTH 18
 COLUMN Label FORMAT A30
 COLUMN Node FORMAT A30
 COLUMN Path FORMAT A50

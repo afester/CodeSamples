@@ -7,11 +7,11 @@
 #include <ostream>
 
 using namespace std;
-
+/*
 #include <time.h>
 #include <stdio.h>
 #include <unistd.h>
-
+*/
 #include <windows.h>
 
 class TickCounter {
