@@ -1,94 +1,10 @@
 #include <iostream>
+
 #define _USE_MATH_DEFINES // Required by MSVC
 #include <math.h>
 
-#include "ExpressionParser.hpp"
-#include "SymbolTable.h"
+#include "ExpressionEvaluator.h"
 #include "Profile.h"
-
-#include "ExpressionASTParser.hpp"
-#include "ExpressionAST.h"
-
-
-class ExpressionEvaluator {
-    SymbolTable st;
-    std::string expr;
-
-public:
-
-	ExpressionEvaluator(const std::string& anExpr) : expr(anExpr) {
-	    st.init();
-	}
-
-
-	inline void setVariable(const std::string& name, double value) {
-		st.setValue(name, value);
-	}
-
-	double evaluateExpression() {
-		//std::cerr << "Expression:" << expr << std::endl;
-		//st.dump();
-
-		// TODO: There should be no need to recreate a new lexer and parser,
-		// however the reset() methods of lexer and parser do not work (yet)
-		// a possible solution could be to create an AST in the parser,
-		// and then reuse the AST during evaluation
-	    ExpressionLexer::InputStreamType
-	    		input((const ANTLR_UINT8*)expr.c_str(), ANTLR_ENC_8BIT,
-	    				expr.length(), NULL);
-	    ExpressionLexer lxr(&input);
-
-	    ExpressionParser::TokenStreamType tstream(ANTLR_SIZE_HINT, lxr.get_tokSource() );
-	    ExpressionParser psr(&tstream);
-	    psr.setSymbolTable(&st);
-
-		return psr.expr();
-	}
-
-};
-
-
-
-
-class ExpressionEvaluator2 {
-    SymbolTable st;
-    std::string expr;
-    Node* exprAst;
-
-public:
-
-	ExpressionEvaluator2(const std::string& anExpr) : expr(anExpr), exprAst(0) {
-	    st.init();
-	}
-
-
-	inline void setVariable(const std::string& name, double value) {
-		st.setValue(name, value);
-	}
-
-	void parse() {
-	    ExpressionASTLexer::InputStreamType
-	    		input((const ANTLR_UINT8*)expr.c_str(), ANTLR_ENC_8BIT,
-	    				expr.length(), NULL);
-	    ExpressionASTLexer lxr(&input);
-
-	    ExpressionASTParser::TokenStreamType tstream(ANTLR_SIZE_HINT, lxr.get_tokSource() );
-	    ExpressionASTParser psr(&tstream);
-	    psr.setSymbolTable(&st);
-
-		exprAst = psr.expr();
-	}
-
-
-	void dump() {
-		exprAst->dump();
-	}
-
-	double evaluateExpression() {
-		return exprAst->evaluate();
-	}
-};
-
 
 
 void testFunction() {

@@ -1,7 +1,10 @@
 #include <iostream>
 #include <sstream>
+
 #define _USE_MATH_DEFINES // Required by MSVC
 #include <math.h>
+
+#define API_EXPORT __declspec(dllexport)
 #include "SymbolTable.h"
 
 SymbolTableEntry::SymbolTableEntry() {

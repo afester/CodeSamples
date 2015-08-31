@@ -4,11 +4,14 @@
 
 #include <map>
 
+#ifndef API_EXPORT
+#define API_EXPORT
+#endif
 
 typedef double (*MATH_FUN)(double arg);
 typedef enum {SYM_VAR, SYM_CONST, SYM_FUN} SYMBOL_KIND;
 
-class SymbolTableEntry {
+class  API_EXPORT SymbolTableEntry {
 	std::string id;
 	SYMBOL_KIND kind;
 
@@ -48,7 +51,7 @@ public:
 
 
 
-class SymbolTable {
+class API_EXPORT SymbolTable {
 	std::map<std::string, SymbolTableEntry> table;
 
 public:
