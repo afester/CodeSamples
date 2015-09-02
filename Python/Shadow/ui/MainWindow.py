@@ -4,7 +4,7 @@ Created on 01.09.2015
 @author: afester
 '''
 # 
-from PyQt5.QtCore import PYQT_VERSION_STR, QT_VERSION_STR, qVersion, pyqtSignal, Qt, QRectF, QPointF
+from PyQt5.QtCore import PYQT_VERSION_STR, QT_VERSION_STR, qVersion, pyqtSignal, Qt, QRectF, QPointF, QDate, QTime
 from PyQt5.QtWidgets import QWidget, QTabWidget
 from PyQt5.QtWidgets import QTextEdit, QSplitter, QHBoxLayout, QVBoxLayout, QMainWindow
 from PyQt5.QtWidgets import QAction, QStatusBar, QMenuBar, QMessageBox, QListView
@@ -25,166 +25,6 @@ from os.path import expanduser
 # 
 from Settings import Settings
 from PyQt5.Qt import QPoint, QSizeF
-# from StylableTextEdit.StylableTextModel import TextDocumentTraversal, StructurePrinter
-# from model.XMLExporter import XMLExporter
-# from HTMLExporter import HTMLExporter
-# from model.XMLImporter import XMLImporter
-# 
-# import ui.resources
-# 
-# class SearchWorker(QObject):
-#     
-#     searchDone = pyqtSignal()
-#     addMatch = pyqtSignal(str)
-# 
-#     def __init__(self):
-#         QObject.__init__(self)
-#         self.notepad = None
-#         self.pageList = []
-# 
-#     def startSearch(self, searchText):
-#         self.aborted = False
-#         print('Starting search operation "{}" on {} ...'.format(searchText, self.notepad.getName()))
-# 
-#         for pageId in self.pageList:
-#             if self.aborted:
-#                 return
-# 
-#             page = LocalPage(self.notepad, pageId)
-# 
-#             imp = XMLImporter(page.getPageDir(), page.getFilename(), None)
-#             topFrame = imp.importModel()
-#             contents = topFrame.getPlainText()
-# 
-#             if re.search(searchText, contents, re.IGNORECASE):
-#                 self.addMatch.emit(pageId)
-# 
-#         self.searchDone.emit()
-# 
-# 
-#     def stopSearch(self):
-#         '''We can not call this method through a slot, since it would be 
-#         queued until the actual worker method is done'''
-# 
-#         print('Stopping search operation ...')
-#         self.aborted = True
-# 
-# 
-# 
-# class SearchWidget(QWidget):
-# 
-#     startWork = pyqtSignal(str)
-#     resultSelected = pyqtSignal(str)
-# 
-#     def __init__(self, parentWidget):
-#         QWidget.__init__(self, parentWidget)
-#         
-#         self.editorWidget = parentWidget.editorWidget   # TODO: Review class structure
-# 
-#         self.searching = False
-#         self.ui = Ui_SearchWidget()
-#         self.ui.setupUi(self)
-#         self.resultListModel = QStandardItemModel(self.ui.resultList)
-#         self.ui.resultWidget.setCurrentIndex(0)
-#         self.ui.resultList.setModel(self.resultListModel)
-#         self.ui.resultList.selectionModel().selectionChanged.connect(self.doResultSelected)
-# 
-#         self.startIcon = QIcon(':/icons/search-global-start.png')
-#         self.stopIcon = QIcon(':/icons/search-global-stop.png')
-#         self.ui.startStopButton.setIcon(self.startIcon)
-# 
-#         self.ui.searchInput.returnPressed.connect(self.doReturnKey)
-#         self.ui.startStopButton.clicked.connect(self.doStartStopButton)
-# 
-#         self.workerThread = QThread()
-#         self.worker = SearchWorker()
-#         self.worker.moveToThread(self.workerThread)
-#         self.startWork.connect(self.worker.startSearch)
-#         self.worker.searchDone.connect(self.searchDone)
-#         self.worker.addMatch.connect(self.addMatch)
-#         # self.stopWork.connect(self.worker.stopSearch)
-#         self.workerThread.start()
-# 
-# 
-#     def doReturnKey(self):
-#         if self.searching:
-#             self.worker.stopSearch()        # must not call trough a slot since it would be queued
-#                                             # ATTENTION! Still a race condition!!! (At least when the search process just finished normally)
-#         self.startSearch()
-# 
-# 
-#     def doStartStopButton(self):
-#         if self.searching:
-#             self.worker.stopSearch()        # must not call trough a slot since it would be queued
-#             self.searchDone()
-#         else: 
-#             self.startSearch()
-# 
-# 
-#     def startSearch(self):
-#         self.searching = True
-#         self.ui.startStopButton.setIcon(self.stopIcon)
-#         self.resultListModel.clear()
-#         queryText = self.ui.searchInput.text()
-#         # rootPath = self.editorWidget.page.notepad.getRootpath()
-# 
-#         # Setup worker with required data
-#         self.worker.notepad = self.editorWidget.page.notepad
-#         # NOTE: we are querying the page list in this thread,
-#         # to avoid concurrency issues with SQLite.
-#         self.worker.pageList = self.editorWidget.page.notepad.getAllPages()
-#         self.startWork.emit(queryText)
-# 
-# 
-#     def searchDone(self):
-#         print("Search Done.")
-#         self.searching = False
-#         if self.resultListModel.rowCount() == 0:
-#             self.ui.resultWidget.setCurrentIndex(1)  # show error page
-#         self.ui.startStopButton.setIcon(self.startIcon)
-# 
-#     def addMatch(self, pageId):
-#         # print("    Adding: {}".format(pageId))
-#         self.ui.resultWidget.setCurrentIndex(0)     # make sure to show the list
-#         resultItem = QStandardItem(pageId)
-#         resultItem.setEditable(False)
-#         self.resultListModel.appendRow(resultItem)
-# 
-# 
-#     def doResultSelected(self, selectedtItem, idx2):
-#         indexes = selectedtItem.indexes()
-#         if len(indexes) == 1:
-#             item = self.resultListModel.itemFromIndex(indexes[0])
-#             pageId = item.text()
-#             self.resultSelected.emit(pageId)
-# 
-# 
-# class LinklistWidget(QListView):
-#     
-#     resultSelected = pyqtSignal(str)
-# 
-#     def __init__(self, parent):
-#         QListView.__init__(self, parent)
-# 
-#         self.resultListModel = QStandardItemModel(self)
-#         self.setModel(self.resultListModel)
-#         self.selectionModel().selectionChanged.connect(self.doItemSelected)
-# 
-#     def doItemSelected(self, selectedtItem, idx2):
-#         indexes = selectedtItem.indexes()
-#         if len(indexes) == 1:
-#             item = self.resultListModel.itemFromIndex(indexes[0])
-#             pageId = item.text()
-#             self.resultSelected.emit(pageId)
-# 
-#     def setContents(self, linkList):
-#         self.resultListModel.clear()
-#         for item in linkList:
-#             resultItem = QStandardItem(item)
-#             resultItem.setEditable(False)
-#             self.resultListModel.appendRow(resultItem)
-# 
-# 
 
 class ShadowWidget(QWidget):
 
@@ -300,7 +140,8 @@ class MainWindow(QMainWindow):
         self.right = ShadowWidget(self.centralWidget)
 
         self.left.ui.testSlider.valueChanged.connect(self.right.setAngle)
-
+        self.left.ui.dateEdit.dateChanged.connect(self.updateDate)
+        self.left.ui.timeEdit.timeChanged.connect(self.updateTime)
 
         layout = QHBoxLayout()
         self.centralWidget.setLayout(layout)
@@ -316,7 +157,50 @@ class MainWindow(QMainWindow):
         self.move(pos.x(), pos.y())
         size = self.settings.getMainWindowSize()
         self.resize(size)
- 
+
+        self.time = QTime()
+        self.date = QDate()
+
+
+    def updateDate(self, date):
+        self.date = date
+        self.recalculate()
+
+    def updateTime(self, time):
+        self.time = time
+        self.recalculate()
+
+
+    def getJulianDay(self):
+        #print("Date: {}".format(self.date))
+        #print("Time: {}".format(self.time))
+        JD = float(self.date.toJulianDay())
+        minuteOfDay = self.time.msecsSinceStartOfDay() / (60 * 1000)
+        timeFraction = minuteOfDay / (24 * 60) - 0.5    # time base on 01/01/2000 is 12:00 !!!!
+        #print("minuteOfDay: {}".format(minuteOfDay))
+        #print("timeFraction: {}".format(timeFraction))
+        JD = JD + timeFraction
+        return JD 
+
+    def recalculate(self):
+        JD = self.getJulianDay()
+        self.left.ui.jDLineEdit.setText(str(JD))
+
+        n = JD - 2451545.0
+        self.left.ui.timeVariableNLineEdit.setText(str(n))
+
+        L = 280.460 + 0.9856474 * n
+        divis = int(L / 360)
+        L = L - divis * 360
+        self.left.ui.LVariableLineEdit.setText(str(L))
+
+        g = 357.528 +0.9856003 * n
+        divis = int(g / 360)
+        g = g - divis * 360
+        self.left.ui.meanAnomalyGLineEdit.setText(str(g))
+
+        Lambda = L + 1.915 * math.sin(math.radians(g)) + 0.01997 * math.sin(math.radians(2 * g)) 
+        self.left.ui.eclipticLengthLineEdit.setText(str(Lambda))
 
     def saveState(self):
 #         # Note: there is no way to have eclipse shutdown the application faithfully,

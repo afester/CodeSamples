@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>256</width>
-    <height>393</height>
+    <height>508</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QFormLayout" name="formLayout">
      <item row="0" column="0">
@@ -29,7 +29,7 @@
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Time:</string>
+        <string>Time (UTC):</string>
        </property>
       </widget>
      </item>
@@ -50,32 +50,22 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Days:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="lineEdit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
+     <item row="3" column="0" colspan="2">
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
      <item row="4" column="0">
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="jDLabel">
        <property name="text">
-        <string>Sonnenstand:</string>
+        <string>Julian day (JD):</string>
        </property>
       </widget>
      </item>
      <item row="4" column="1">
-      <widget class="QLineEdit" name="lineEdit_2">
+      <widget class="QLineEdit" name="jDLineEdit">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -85,13 +75,122 @@
       </widget>
      </item>
      <item row="5" column="0">
+      <widget class="QLabel" name="timeVariableNLabel">
+       <property name="text">
+        <string>Time variable (n):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QLineEdit" name="timeVariableNLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="eclipticLengthLLabel">
+       <property name="text">
+        <string>Ecliptic Length (L):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QLineEdit" name="LVariableLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLabel" name="meanAnomalyGLabel">
+       <property name="text">
+        <string>Mean Anomaly (g)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QLineEdit" name="meanAnomalyGLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="eclipticLengthLabel">
+       <property name="text">
+        <string>Ecliptic Length (Λ)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QLineEdit" name="eclipticLengthLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0" colspan="2">
+      <widget class="Line" name="line_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="0">
+      <widget class="QLabel" name="rightAscensionLabel">
+       <property name="text">
+        <string>Right ascension (α)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="1">
+      <widget class="QLineEdit" name="rightAscensionLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="14" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Sonnenstand:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="14" column="1">
+      <widget class="QLineEdit" name="lineEdit_2">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="15" column="0">
       <widget class="QLabel" name="label_6">
        <property name="text">
         <string>Schattenlänge:</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
+     <item row="15" column="1">
       <widget class="QLineEdit" name="lineEdit_4">
        <property name="enabled">
         <bool>false</bool>
@@ -107,13 +206,54 @@
        </property>
       </widget>
      </item>
-     <item row="6" column="0" colspan="2">
+     <item row="16" column="0" colspan="2">
       <widget class="QSlider" name="testSlider">
        <property name="maximum">
         <number>360</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="0" colspan="2">
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="0">
+      <widget class="QLabel" name="eclipticSkewLabel">
+       <property name="text">
+        <string>Ecliptic skew (ε)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="1">
+      <widget class="QLineEdit" name="eclipticSkewLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="12" column="0">
+      <widget class="QLabel" name="declinationLabel">
+       <property name="text">
+        <string>Declination (δ)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="12" column="1">
+      <widget class="QLineEdit" name="declinationLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
