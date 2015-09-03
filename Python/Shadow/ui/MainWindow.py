@@ -139,7 +139,6 @@ class MainWindow(QMainWindow):
         self.left = DataWidget(self.centralWidget)
         self.right = ShadowWidget(self.centralWidget)
 
-        self.left.ui.testSlider.valueChanged.connect(self.right.setAngle)
         self.left.ui.dateEdit.dateChanged.connect(self.updateDate)
         self.left.ui.timeEdit.timeChanged.connect(self.updateTime)
 
@@ -161,6 +160,12 @@ class MainWindow(QMainWindow):
         self.time = QTime()
         self.date = QDate()
 
+        # sample values
+        self.left.ui.latitudeLineEdit.setValue(48.1)
+        self.left.ui.LongitudeLineEdit.setValue(11.6)
+        self.left.ui.treeHeightLineEdit.setValue(10)
+        self.left.ui.dateEdit.setDate(QDate(2006, 8, 6))
+        self.left.ui.timeEdit.setTime(QTime(6, 0))  # UTC
 
     def updateDate(self, date):
         self.date = date
@@ -183,6 +188,7 @@ class MainWindow(QMainWindow):
         return JD 
 
     def recalculate(self):
+
         JD = self.getJulianDay()
         self.left.ui.jDLineEdit.setText(str(JD))
 
@@ -201,6 +207,59 @@ class MainWindow(QMainWindow):
 
         Lambda = L + 1.915 * math.sin(math.radians(g)) + 0.01997 * math.sin(math.radians(2 * g)) 
         self.left.ui.eclipticLengthLineEdit.setText(str(Lambda))
+
+        epsilon = 23.439 -0.0000004 * n
+        self.left.ui.eclipticSkewLineEdit.setText(str(epsilon))
+
+        denominator = math.cos(math.radians(Lambda))
+        alpha = math.atan( math.cos(math.radians(epsilon)) * math.sin(math.radians(Lambda)) / denominator )
+        if denominator < 0:
+            alpha = alpha + math.radians(180)
+        alpha = math.degrees(alpha)
+        self.left.ui.rightAscensionLineEdit.setText(str(alpha))
+
+        delta = math.asin(math.sin(math.radians(epsilon)) * math.sin(math.radians(Lambda)))
+        delta = math.degrees(delta)
+        self.left.ui.declinationLineEdit.setText(str(delta))
+
+        JD_0 = float(self.date.toJulianDay()) - 0.5   # time base on 01/01/2000 is 12:00 !!!!
+        self.left.ui.jD_0LineEdit.setText(str(JD_0))
+        
+        T_0 = (JD_0 - 2451545.0) / 36525
+        self.left.ui.t_0LineEdit.setText(str(T_0))
+
+        T = self.time.msecsSinceStartOfDay() / (60 * 60 * 1000)
+        ThetaH_G = 6.697376 + 2400.05134 * T_0 + 1.002738 * T
+        divis = int(ThetaH_G / 24)
+        ThetaH_G = ThetaH_G - divis * 24
+
+        self.left.ui.sternzeitH_GLineEdit.setText(str(ThetaH_G))
+
+        Theta_G = ThetaH_G * 15
+        self.left.ui.greenwichStundenwinkelFP_GLineEdit.setText(str(Theta_G))
+
+        longitude = self.left.ui.LongitudeLineEdit.value()  # lambda
+        Theta = Theta_G + longitude
+        divis = int(Theta / 360)
+        Theta = Theta - divis * 360
+
+        self.left.ui.stundenwinkelFrHlingspunktLineEdit.setText(str(Theta))
+
+        tau = Theta - alpha
+        self.left.ui.stundenwinkelLineEdit.setText(str(tau))
+
+        latitude = self.left.ui.latitudeLineEdit.value()    # Phi
+        denominator = math.cos(math.radians(tau)) * math.sin(math.radians(latitude)) - math.tan(math.radians(delta)) * math.cos(math.radians(latitude))
+        azimut = math.atan( math.sin(math.radians(tau)) / denominator )
+        if denominator < 0:
+            azimut = azimut + math.radians(180)
+        azimut = math.degrees(azimut)
+        self.left.ui.azimutALineEdit.setText(str(azimut))
+
+        sunHeight = math.asin( math.cos(math.radians(delta)) * math.cos(math.radians(tau)) * math.cos(math.radians(latitude)) + math.sin(math.radians(delta)) * math.sin(math.radians(latitude)) )
+        self.left.ui.sunHeightHLineEdit.setText(str(math.degrees(sunHeight)))
+
+        self.right.setAngle(azimut)
 
     def saveState(self):
 #         # Note: there is no way to have eclipse shutdown the application faithfully,

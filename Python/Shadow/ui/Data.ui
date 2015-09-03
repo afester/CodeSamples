@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>256</width>
-    <height>508</height>
+    <width>367</width>
+    <height>684</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,31 +24,80 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QDateEdit" name="dateEdit"/>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QDateEdit" name="dateEdit"/>
+       </item>
+       <item>
+        <widget class="QTimeEdit" name="timeEdit"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>UTC</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Time (UTC):</string>
+        <string>Location:</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QTimeEdit" name="timeEdit"/>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QDoubleSpinBox" name="latitudeLineEdit"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>°N</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="LongitudeLineEdit"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>°O</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="label_5">
+      <widget class="QLabel" name="treeHeightLabel">
        <property name="text">
-        <string>Baumhöhe:</string>
+        <string>Tree height</string>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QLineEdit" name="lineEdit_3">
-       <property name="inputMask">
-        <string>nnn m</string>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QSpinBox" name="treeHeightLineEdit">
+         <property name="suffix">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>m</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item row="3" column="0" colspan="2">
       <widget class="Line" name="line">
@@ -149,80 +198,6 @@
        </property>
       </widget>
      </item>
-     <item row="11" column="0">
-      <widget class="QLabel" name="rightAscensionLabel">
-       <property name="text">
-        <string>Right ascension (α)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="11" column="1">
-      <widget class="QLineEdit" name="rightAscensionLineEdit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="14" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Sonnenstand:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="14" column="1">
-      <widget class="QLineEdit" name="lineEdit_2">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="15" column="0">
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>Schattenlänge:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="15" column="1">
-      <widget class="QLineEdit" name="lineEdit_4">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="inputMask">
-        <string>nnn m</string>
-       </property>
-       <property name="text">
-        <string>0m m</string>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="16" column="0" colspan="2">
-      <widget class="QSlider" name="testSlider">
-       <property name="maximum">
-        <number>360</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="13" column="0" colspan="2">
-      <widget class="Line" name="line_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
      <item row="10" column="0">
       <widget class="QLabel" name="eclipticSkewLabel">
        <property name="text">
@@ -232,6 +207,23 @@
      </item>
      <item row="10" column="1">
       <widget class="QLineEdit" name="eclipticSkewLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="0">
+      <widget class="QLabel" name="rightAscensionLabel">
+       <property name="text">
+        <string>Right ascension (α)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="1">
+      <widget class="QLineEdit" name="rightAscensionLineEdit">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -251,6 +243,179 @@
       <widget class="QLineEdit" name="declinationLineEdit">
        <property name="enabled">
         <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="0" colspan="2">
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="14" column="0">
+      <widget class="QLabel" name="jD_0Label">
+       <property name="text">
+        <string>JD_0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="14" column="1">
+      <widget class="QLineEdit" name="jD_0LineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="15" column="0">
+      <widget class="QLabel" name="t_0Label">
+       <property name="text">
+        <string>T_0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="15" column="1">
+      <widget class="QLineEdit" name="t_0LineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="16" column="0">
+      <widget class="QLabel" name="sternzeitH_GLabel">
+       <property name="text">
+        <string>Sternzeit (Θ-h_G):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="16" column="1">
+      <widget class="QLineEdit" name="sternzeitH_GLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="17" column="0">
+      <widget class="QLabel" name="greenwichStundenwinkelFP_GLabel">
+       <property name="text">
+        <string>Greenwich Stundenwinkel FP (Θ_G):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="17" column="1">
+      <widget class="QLineEdit" name="greenwichStundenwinkelFP_GLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="18" column="0">
+      <widget class="QLabel" name="stundenwinkelFrHlingspunktLabel">
+       <property name="text">
+        <string>Stundenwinkel Frühlingspunkt (Θ)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="18" column="1">
+      <widget class="QLineEdit" name="stundenwinkelFrHlingspunktLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="19" column="0">
+      <widget class="QLabel" name="stundenwinkelLabel">
+       <property name="text">
+        <string>Stundenwinkel (τ):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="19" column="1">
+      <widget class="QLineEdit" name="stundenwinkelLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="20" column="0" colspan="2">
+      <widget class="Line" name="line_5">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="21" column="0">
+      <widget class="QLabel" name="azimutALabel">
+       <property name="text">
+        <string>Azimut (a):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="21" column="1">
+      <widget class="QLineEdit" name="azimutALineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="22" column="0">
+      <widget class="QLabel" name="sunHeightHLabel">
+       <property name="text">
+        <string>Sun height (h):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="22" column="1">
+      <widget class="QLineEdit" name="sunHeightHLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="23" column="0">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>Length of shadow:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="23" column="1">
+      <widget class="QLineEdit" name="lineEdit_4">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="inputMask">
+        <string>nnn m</string>
+       </property>
+       <property name="text">
+        <string>0m m</string>
        </property>
        <property name="readOnly">
         <bool>true</bool>
