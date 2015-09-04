@@ -32,7 +32,8 @@ class ShadowWidget(QWidget):
         QWidget.__init__(self, parentWidget)
 
         self.texture = QImage("ui/gras.png")
-        self.svgRenderer = QSvgRenderer("ui/tree.svg")
+        self.tree = QSvgRenderer("ui/tree.svg")
+        self.compass = QSvgRenderer("ui/compass2.svg")
 
         # set the gras texture as the background image
         self.setAutoFillBackground(True)
@@ -73,7 +74,12 @@ class ShadowWidget(QWidget):
 
         # draw the tree
         painter.setOpacity(1)
-        self.svgRenderer.render(painter, bounds)
+        self.tree.render(painter, bounds)
+
+        bounds = QRectF( 10, 10, 50, 50)
+        self.compass.render(painter, bounds)
+        #painter.setBrush(Qt.NoBrush)
+        #painter.drawRect(bounds)
 
 
 class DataWidget(QWidget):
@@ -141,6 +147,7 @@ class MainWindow(QMainWindow):
 
         self.left.ui.dateEdit.dateChanged.connect(self.updateDate)
         self.left.ui.timeEdit.timeChanged.connect(self.updateTime)
+        self.left.ui.timeSlider.valueChanged.connect(self.slideTime)
 
         layout = QHBoxLayout()
         self.centralWidget.setLayout(layout)
@@ -175,6 +182,11 @@ class MainWindow(QMainWindow):
         self.time = time
         self.recalculate()
 
+
+    def slideTime(self, value):
+        minute = value % 60
+        hour = value // 60
+        self.left.ui.timeEdit.setTime(QTime(hour, minute))
 
     def getJulianDay(self):
         #print("Date: {}".format(self.date))
@@ -259,7 +271,8 @@ class MainWindow(QMainWindow):
         sunHeight = math.asin( math.cos(math.radians(delta)) * math.cos(math.radians(tau)) * math.cos(math.radians(latitude)) + math.sin(math.radians(delta)) * math.sin(math.radians(latitude)) )
         self.left.ui.sunHeightHLineEdit.setText(str(math.degrees(sunHeight)))
 
-        self.right.setAngle(azimut)
+        shadowAngle = -azimut
+        self.right.setAngle(shadowAngle)
 
     def saveState(self):
 #         # Note: there is no way to have eclipse shutdown the application faithfully,
