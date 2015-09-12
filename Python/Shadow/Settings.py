@@ -16,14 +16,18 @@ class Settings(object):
 
     def __init__(self, fileName = 'shadow.ini'):
         self.fileName = fileName
+        self.tzIdx = 0
         self.mainWindowSize = QSize(1200, 700)
         self.mainWindowPos = QPoint(240, 200)
 
-    
     def load(self):
         self.l.debug('Loading local settings from {}'.format(self.fileName))
         config = configparser.ConfigParser()
         config.read(self.fileName)
+
+        if config.has_section('common'):
+            commonSettings = config['common']
+            self.tzIdx = int(commonSettings.get('tz', 0))
 
         # load main window position and size
         if config.has_section('mainWindow'):
@@ -37,10 +41,14 @@ class Settings(object):
             size = windowSettings.get('size', '{},{}'.format(self.mainWindowSize.width(), self.mainWindowSize.height())).split(',')
             self.mainWindowSize = QSize(int(size[0]), int(size[1]))
 
+        
 
     def dump(self, channel):
         self.l.debug('Saving local settings ...')
         config = configparser.ConfigParser()
+
+        config.add_section('common')
+        config.set('common', 'tz', str(self.tzIdx))
 
         config.add_section('mainWindow')
         config.set('mainWindow', 'pos', '{},{}'.format(self.mainWindowPos.x(), self.mainWindowPos.y()))
@@ -64,3 +72,9 @@ class Settings(object):
 
     def getMainWindowSize(self):
         return self.mainWindowSize
+
+    def getTzIndex(self):
+        return self.tzIdx
+
+    def setTzIdx(self, idx):
+        self.tzIdx = idx

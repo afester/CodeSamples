@@ -10,10 +10,12 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    id="svg3816"
-   viewBox="0 0 142.47 147.54"
+   viewBox="0 0 160.19154 160.19155"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="compass2.svg">
+   sodipodi:docname="compass2.svg"
+   width="160.19154"
+   height="160.19154">
   <defs
      id="defs4152">
     <linearGradient
@@ -94,10 +96,10 @@
        inkscape:collect="always"
        xlink:href="#linearGradient4493"
        id="linearGradient4499"
-       x1="26.672175"
-       y1="61.95458"
-       x2="36.672178"
-       y2="61.95458"
+       x1="26.672174"
+       y1="61.954578"
+       x2="36.672176"
+       y2="61.954578"
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(2.2410068,0,0,2.2410068,11.532818,-33.888818)" />
     <linearGradient
@@ -124,17 +126,23 @@
      inkscape:window-height="1178"
      id="namedview4150"
      showgrid="false"
-     inkscape:zoom="2"
-     inkscape:cx="131.94318"
-     inkscape:cy="-4.5231819"
+     inkscape:zoom="2.2443114"
+     inkscape:cx="79.789628"
+     inkscape:cy="23.997661"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg3816"
-     showguides="true">
+     showguides="true"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0">
     <inkscape:grid
        type="xygrid"
-       id="grid4336" />
+       id="grid4336"
+       originx="2.5874676"
+       originy="2.7707531" />
   </sodipodi:namedview>
   <title
      id="title3047">tree-04</title>
@@ -146,7 +154,7 @@
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
         <cc:license
-           rdf:resource="http://creativecommons.org/licenses/publicdomain/" />
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
         <dc:publisher>
           <cc:Agent
              rdf:about="http://openclipart.org/">
@@ -176,7 +184,7 @@
         </dc:subject>
       </cc:Work>
       <cc:License
-         rdf:about="http://creativecommons.org/licenses/publicdomain/">
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
         <cc:permits
            rdf:resource="http://creativecommons.org/ns#Reproduction" />
         <cc:permits
@@ -189,12 +197,12 @@
   <circle
      style="opacity:1;fill:#e9ddaf;fill-opacity:1;stroke:none;stroke-width:0.1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
      id="path4338"
-     cx="71.290596"
-     cy="71.32383"
+     cx="80.095772"
+     cy="80.095772"
      r="69.748924" />
   <g
      id="g4417"
-     transform="matrix(2.2410068,0,0,1.8332412,11.532818,-14.741953)">
+     transform="matrix(2.2410068,0,0,1.8332412,20.338001,-5.9700381)">
     <path
        sodipodi:nodetypes="cccc"
        inkscape:connector-curvature="0"
@@ -210,7 +218,7 @@
   </g>
   <g
      id="g4226"
-     transform="matrix(1,0,0,0.81804357,0,12.942327)">
+     transform="matrix(1,0,0,0.81804357,8.8051831,21.714244)">
     <path
        sodipodi:nodetypes="cccc"
        inkscape:connector-curvature="0"
@@ -227,45 +235,57 @@
   <text
      xml:space="preserve"
      style="font-style:normal;font-weight:normal;font-size:15px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     x="65.760933"
-     y="14.250365"
+     x="74.566109"
+     y="23.02228"
      id="text4168"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
        id="tspan4170"
-       x="65.760933"
-       y="14.250365">N</tspan></text>
+       x="74.566109"
+       y="23.02228">N</tspan></text>
   <text
      xml:space="preserve"
      style="font-style:normal;font-weight:normal;font-size:15px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     x="65.889648"
-     y="139.25752"
+     x="74.694824"
+     y="148.02946"
      id="text4168-9"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
        id="tspan4170-4"
-       x="65.889648"
-       y="139.25752">S</tspan></text>
+       x="74.694824"
+       y="148.02946">S</tspan></text>
   <text
      xml:space="preserve"
      style="font-style:normal;font-weight:normal;font-size:15px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     x="2.3896484"
-     y="76.257523"
+     x="11.194833"
+     y="85.029465"
      id="text4168-6"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
        id="tspan4170-2"
-       x="2.3896484"
-       y="76.257523">W</tspan></text>
+       x="11.194833"
+       y="85.029465">W</tspan></text>
   <text
      xml:space="preserve"
      style="font-style:normal;font-weight:normal;font-size:15px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     x="125.33942"
-     y="76.169136"
+     x="134.14459"
+     y="84.941078"
      id="text4168-6-5"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
        id="tspan4170-2-6"
-       x="125.33942"
-       y="76.169136">O</tspan></text>
+       x="134.14459"
+       y="84.941078">O</tspan></text>
+  <circle
+     style="opacity:1;fill:none;fill-opacity:1;stroke:#d4aa00;stroke-width:10.71530819;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     id="path4338-4"
+     cx="80.095772"
+     cy="80.095772"
+     r="74.738121" />
+  <circle
+     style="opacity:1;fill:#1a1a1a;fill-opacity:1;stroke:none;stroke-width:0.1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     id="path4338-49"
+     cx="80.095772"
+     cy="80.095772"
+     r="5" />
 </svg>

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>413</width>
-    <height>602</height>
+    <width>424</width>
+    <height>705</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,57 +17,122 @@
    <item>
     <layout class="QFormLayout" name="formLayout">
      <item row="0" column="0">
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="timeZoneLabel">
        <property name="text">
-        <string>Date:</string>
+        <string>Time zone:</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QDateEdit" name="dateEdit"/>
+      <widget class="QComboBox" name="timeZoneComboBox">
+       <property name="currentIndex">
+        <number>6</number>
+       </property>
+       <item>
+        <property name="text">
+         <string>UTC-6</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>UTC-5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>UTC-4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>UTC-3</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>UTC-2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>UTC-1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>UTC</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>UTC+1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>UTC+2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>UTC+3</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>UTC+4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>UTC+5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>UTC+6</string>
+        </property>
+       </item>
+      </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string>Time:</string>
+        <string>Date / Time:</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
-      <layout class="QHBoxLayout" name="horizontalLayout">
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
-        <widget class="QSlider" name="timeSlider">
-         <property name="minimum">
-          <number>240</number>
-         </property>
-         <property name="maximum">
-          <number>1320</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
+        <widget class="QDateEdit" name="dateEdit"/>
        </item>
        <item>
         <widget class="QTimeEdit" name="timeEdit"/>
        </item>
-       <item>
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>UTC</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </item>
-     <item row="2" column="0">
+     <item row="2" column="1">
+      <widget class="QSlider" name="timeSlider">
+       <property name="minimum">
+        <number>240</number>
+       </property>
+       <property name="maximum">
+        <number>1320</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Location:</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
+     <item row="3" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <property name="spacing">
         <number>0</number>
@@ -94,14 +159,14 @@
        </item>
       </layout>
      </item>
-     <item row="3" column="0">
+     <item row="4" column="0">
       <widget class="QLabel" name="treeHeightLabel">
        <property name="text">
         <string>Tree height</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="4" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
         <widget class="QSpinBox" name="treeHeightLineEdit">
@@ -119,39 +184,22 @@
        </item>
       </layout>
      </item>
-     <item row="4" column="0" colspan="2">
+     <item row="5" column="0" colspan="2">
       <widget class="Line" name="line">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="jDLabel">
-       <property name="text">
-        <string>Julian day (JD):</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QLineEdit" name="jDLineEdit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
      <item row="6" column="0">
-      <widget class="QLabel" name="timeVariableNLabel">
+      <widget class="QLabel" name="timeUTCLabel">
        <property name="text">
-        <string>Time variable (n):</string>
+        <string>Time (UTC):</string>
        </property>
       </widget>
      </item>
      <item row="6" column="1">
-      <widget class="QLineEdit" name="timeVariableNLineEdit">
+      <widget class="QLineEdit" name="timeUTCLineEdit">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -161,14 +209,14 @@
       </widget>
      </item>
      <item row="7" column="0">
-      <widget class="QLabel" name="eclipticLengthLLabel">
+      <widget class="QLabel" name="jDLabel">
        <property name="text">
-        <string>Ecliptic Length (L):</string>
+        <string>Julian day (JD):</string>
        </property>
       </widget>
      </item>
      <item row="7" column="1">
-      <widget class="QLineEdit" name="LVariableLineEdit">
+      <widget class="QLineEdit" name="jDLineEdit">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -178,14 +226,14 @@
       </widget>
      </item>
      <item row="8" column="0">
-      <widget class="QLabel" name="meanAnomalyGLabel">
+      <widget class="QLabel" name="timeVariableNLabel">
        <property name="text">
-        <string>Mean Anomaly (g)</string>
+        <string>Time variable (n):</string>
        </property>
       </widget>
      </item>
      <item row="8" column="1">
-      <widget class="QLineEdit" name="meanAnomalyGLineEdit">
+      <widget class="QLineEdit" name="timeVariableNLineEdit">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -195,13 +243,47 @@
       </widget>
      </item>
      <item row="9" column="0">
+      <widget class="QLabel" name="eclipticLengthLLabel">
+       <property name="text">
+        <string>Ecliptic Length (L):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="1">
+      <widget class="QLineEdit" name="LVariableLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="0">
+      <widget class="QLabel" name="meanAnomalyGLabel">
+       <property name="text">
+        <string>Mean Anomaly (g)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="1">
+      <widget class="QLineEdit" name="meanAnomalyGLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="0">
       <widget class="QLabel" name="eclipticLengthLabel">
        <property name="text">
         <string>Ecliptic Length (Λ)</string>
        </property>
       </widget>
      </item>
-     <item row="9" column="1">
+     <item row="11" column="1">
       <widget class="QLineEdit" name="eclipticLengthLineEdit">
        <property name="enabled">
         <bool>false</bool>
@@ -211,21 +293,21 @@
        </property>
       </widget>
      </item>
-     <item row="10" column="0" colspan="2">
+     <item row="12" column="0" colspan="2">
       <widget class="Line" name="line_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="11" column="0">
+     <item row="13" column="0">
       <widget class="QLabel" name="eclipticSkewLabel">
        <property name="text">
         <string>Ecliptic skew (ε)</string>
        </property>
       </widget>
      </item>
-     <item row="11" column="1">
+     <item row="13" column="1">
       <widget class="QLineEdit" name="eclipticSkewLineEdit">
        <property name="enabled">
         <bool>false</bool>
@@ -235,14 +317,14 @@
        </property>
       </widget>
      </item>
-     <item row="12" column="0">
+     <item row="14" column="0">
       <widget class="QLabel" name="rightAscensionLabel">
        <property name="text">
         <string>Right ascension (α)</string>
        </property>
       </widget>
      </item>
-     <item row="12" column="1">
+     <item row="14" column="1">
       <widget class="QLineEdit" name="rightAscensionLineEdit">
        <property name="enabled">
         <bool>false</bool>
@@ -252,14 +334,14 @@
        </property>
       </widget>
      </item>
-     <item row="13" column="0">
+     <item row="15" column="0">
       <widget class="QLabel" name="declinationLabel">
        <property name="text">
         <string>Declination (δ)</string>
        </property>
       </widget>
      </item>
-     <item row="13" column="1">
+     <item row="15" column="1">
       <widget class="QLineEdit" name="declinationLineEdit">
        <property name="enabled">
         <bool>false</bool>
@@ -269,21 +351,21 @@
        </property>
       </widget>
      </item>
-     <item row="14" column="0" colspan="2">
+     <item row="16" column="0" colspan="2">
       <widget class="Line" name="line_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="15" column="0">
+     <item row="17" column="0">
       <widget class="QLabel" name="jD_0Label">
        <property name="text">
         <string>JD_0</string>
        </property>
       </widget>
      </item>
-     <item row="15" column="1">
+     <item row="17" column="1">
       <widget class="QLineEdit" name="jD_0LineEdit">
        <property name="enabled">
         <bool>false</bool>
@@ -293,14 +375,14 @@
        </property>
       </widget>
      </item>
-     <item row="16" column="0">
+     <item row="18" column="0">
       <widget class="QLabel" name="t_0Label">
        <property name="text">
         <string>T_0</string>
        </property>
       </widget>
      </item>
-     <item row="16" column="1">
+     <item row="18" column="1">
       <widget class="QLineEdit" name="t_0LineEdit">
        <property name="enabled">
         <bool>false</bool>
@@ -310,14 +392,14 @@
        </property>
       </widget>
      </item>
-     <item row="17" column="0">
+     <item row="19" column="0">
       <widget class="QLabel" name="sternzeitH_GLabel">
        <property name="text">
         <string>Sternzeit (Θ-h_G):</string>
        </property>
       </widget>
      </item>
-     <item row="17" column="1">
+     <item row="19" column="1">
       <widget class="QLineEdit" name="sternzeitH_GLineEdit">
        <property name="enabled">
         <bool>false</bool>
@@ -327,14 +409,14 @@
        </property>
       </widget>
      </item>
-     <item row="18" column="0">
+     <item row="20" column="0">
       <widget class="QLabel" name="greenwichStundenwinkelFP_GLabel">
        <property name="text">
         <string>Greenwich Stundenwinkel FP (Θ_G):</string>
        </property>
       </widget>
      </item>
-     <item row="18" column="1">
+     <item row="20" column="1">
       <widget class="QLineEdit" name="greenwichStundenwinkelFP_GLineEdit">
        <property name="enabled">
         <bool>false</bool>
@@ -344,14 +426,14 @@
        </property>
       </widget>
      </item>
-     <item row="19" column="0">
+     <item row="21" column="0">
       <widget class="QLabel" name="stundenwinkelFrHlingspunktLabel">
        <property name="text">
         <string>Stundenwinkel Frühlingspunkt (Θ)</string>
        </property>
       </widget>
      </item>
-     <item row="19" column="1">
+     <item row="21" column="1">
       <widget class="QLineEdit" name="stundenwinkelFrHlingspunktLineEdit">
        <property name="enabled">
         <bool>false</bool>
@@ -361,14 +443,14 @@
        </property>
       </widget>
      </item>
-     <item row="20" column="0">
+     <item row="22" column="0">
       <widget class="QLabel" name="stundenwinkelLabel">
        <property name="text">
         <string>Stundenwinkel (τ):</string>
        </property>
       </widget>
      </item>
-     <item row="20" column="1">
+     <item row="22" column="1">
       <widget class="QLineEdit" name="stundenwinkelLineEdit">
        <property name="enabled">
         <bool>false</bool>
@@ -378,14 +460,122 @@
        </property>
       </widget>
      </item>
-     <item row="21" column="0" colspan="2">
+     <item row="23" column="0" colspan="2">
       <widget class="Line" name="line_5">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="22" column="0">
+     <item row="24" column="0">
+      <widget class="QLabel" name="sunriseLabel">
+       <property name="palette">
+        <palette>
+         <active>
+          <colorrole role="WindowText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </active>
+         <inactive>
+          <colorrole role="WindowText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </inactive>
+         <disabled>
+          <colorrole role="WindowText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>120</red>
+             <green>120</green>
+             <blue>120</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </disabled>
+        </palette>
+       </property>
+       <property name="text">
+        <string>Sunrise:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="24" column="1">
+      <widget class="QLineEdit" name="sunriseLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="25" column="0">
+      <widget class="QLabel" name="sunsetLabel">
+       <property name="palette">
+        <palette>
+         <active>
+          <colorrole role="WindowText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </active>
+         <inactive>
+          <colorrole role="WindowText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>255</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </inactive>
+         <disabled>
+          <colorrole role="WindowText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>120</red>
+             <green>120</green>
+             <blue>120</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </disabled>
+        </palette>
+       </property>
+       <property name="text">
+        <string>Sunset:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="25" column="1">
+      <widget class="QLineEdit" name="sunsetLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="26" column="0">
       <widget class="QLabel" name="azimutALabel">
        <property name="palette">
         <palette>
@@ -429,7 +619,7 @@
        </property>
       </widget>
      </item>
-     <item row="22" column="1">
+     <item row="26" column="1">
       <widget class="QLineEdit" name="azimutALineEdit">
        <property name="enabled">
         <bool>false</bool>
@@ -439,7 +629,7 @@
        </property>
       </widget>
      </item>
-     <item row="23" column="0">
+     <item row="27" column="0">
       <widget class="QLabel" name="sunHeightHLabel">
        <property name="palette">
         <palette>
@@ -483,7 +673,7 @@
        </property>
       </widget>
      </item>
-     <item row="23" column="1">
+     <item row="27" column="1">
       <widget class="QLineEdit" name="sunHeightHLineEdit">
        <property name="enabled">
         <bool>false</bool>
@@ -493,23 +683,23 @@
        </property>
       </widget>
      </item>
-     <item row="24" column="0">
+     <item row="28" column="0">
       <widget class="QLabel" name="label_6">
        <property name="text">
         <string>Length of shadow:</string>
        </property>
       </widget>
      </item>
-     <item row="24" column="1">
-      <widget class="QLineEdit" name="lineEdit_4">
+     <item row="28" column="1">
+      <widget class="QLineEdit" name="shadowLengthLineEdit">
        <property name="enabled">
         <bool>false</bool>
        </property>
        <property name="inputMask">
-        <string>nnn m</string>
+        <string/>
        </property>
        <property name="text">
-        <string>0m m</string>
+        <string/>
        </property>
        <property name="readOnly">
         <bool>true</bool>
