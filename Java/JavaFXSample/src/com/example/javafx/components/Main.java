@@ -1,5 +1,17 @@
 package com.example.javafx.components;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+
+import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
+import org.apache.batik.anim.dom.SVGOMPathElement;
+import org.apache.batik.util.XMLResourceDescriptor;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import com.example.svg.Sample;
+
 import javafx.animation.Interpolator;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
@@ -16,6 +28,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -25,6 +39,7 @@ import javafx.scene.paint.Stop;
 import javafx.scene.shape.Arc;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Shear;
 import javafx.stage.Screen;
@@ -158,7 +173,26 @@ public class Main extends Application {
 
         addRow(new Text("Seven segment display:"), displayGroup, pb, mb);
 
+        
+        try {
+            String parser = XMLResourceDescriptor.getXMLParserClassName();
+            SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parser);
+            String uri = new File("meter.svg").toURL().toString();
+            Document doc = f.createDocument(uri);
+            SVGOMPathElement e = (SVGOMPathElement) doc.getElementById("pointer");
+            System.err.println("STYLE: " + e.getAttribute("style"));
+            System.err.println("PATH: " + e.getAttribute("d"));
+            // e.setAttribute("d", "M 16.403436,103.76923 173.43481,183.6916"); // WORKS
+            e.setAttribute("transform",  "matrix(0.97784462,0.20933203,-0.20933203,0.97784462,0,0)");   // also works!!!
+            Image i = Sample.getImage(doc);
+            addRow(new Text("Seven segment display (Rendered):"), new ImageView(i));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+/*
         Meter m = new Meter();
         m.setUnit("mV");
         Slider s2 = new Slider(0.0, 1.0, 0.0);
@@ -173,7 +207,7 @@ public class Main extends Application {
             });
 
         addRow(new Text("Meter:"), m, s2);
-
+*/
         /********** Simple animation sample */
 
         final Button b3 = new Button("Absolute");
