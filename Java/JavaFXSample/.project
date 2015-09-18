@@ -3,6 +3,7 @@
 	<name>JavaFXSample</name>
 	<comment></comment>
 	<projects>
+		<project>batik-1.8</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

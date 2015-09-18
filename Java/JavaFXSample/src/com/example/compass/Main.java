@@ -1,5 +1,8 @@
 package com.example.compass;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Control;

@@ -1,15 +1,22 @@
 package com.example.javafx.components;
 
+import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
 import org.apache.batik.anim.dom.SVGOMPathElement;
+import org.apache.batik.ext.awt.g2d.GraphicContext;
+import org.apache.batik.svggen.SVGGeneratorContext;
+import org.apache.batik.svggen.SVGTransform;
 import org.apache.batik.util.XMLResourceDescriptor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.example.svg.SVGLoader;
 import com.example.svg.Sample;
 
 import javafx.animation.Interpolator;
@@ -173,40 +180,55 @@ public class Main extends Application {
 
         addRow(new Text("Seven segment display:"), displayGroup, pb, mb);
 
-        
-        try {
-            String parser = XMLResourceDescriptor.getXMLParserClassName();
-            SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parser);
-            String uri = new File("meter.svg").toURL().toString();
-            Document doc = f.createDocument(uri);
-            SVGOMPathElement e = (SVGOMPathElement) doc.getElementById("pointer");
-            System.err.println("STYLE: " + e.getAttribute("style"));
-            System.err.println("PATH: " + e.getAttribute("d"));
-            // e.setAttribute("d", "M 16.403436,103.76923 173.43481,183.6916"); // WORKS
-            e.setAttribute("transform",  "matrix(0.97784462,0.20933203,-0.20933203,0.97784462,0,0)");   // also works!!!
-            Image i = Sample.getImage(doc);
-            addRow(new Text("Seven segment display (Rendered):"), new ImageView(i));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        SVGLoader loader = new SVGLoader();
+
+        Slider s2 = new Slider(0.0, 1.5, 0.0);
+        Node iv = loader.loadSvg("meter.svg");
+        final HBox displayGroup2 = new HBox();
+        displayGroup2.getChildren().addAll(new Text("Meter (As JavaFX nodes):"), iv, s2);
+        addRow(displayGroup2);
 
 /*
-        Meter m = new Meter();
-        m.setUnit("mV");
-        Slider s2 = new Slider(0.0, 1.0, 0.0);
-        s2.valueProperty().addListener(
-            new ChangeListener<Number>() {
-    
-                @Override
-                public void changed(ObservableValue<? extends Number> arg0,
-                        Number oldValue, Number newValue) {
-                    m.setValue(newValue.doubleValue());
-                }
-            });
 
-        addRow(new Text("Meter:"), m, s2);
+        ImageView iv = new ImageView();
+
+        final HBox displayGroup2 = new HBox();
+        displayGroup2.getChildren().addAll(new Text("Meter (Rendered):"), iv, s2);
+        addRow(displayGroup2);
+
+        Document doc = loader.loadSvgDocument("meter.svg");
+        SVGOMPathElement e = (SVGOMPathElement) doc.getElementById("pointer");
+
+        Pattern pattern = Pattern.compile("[Mm] (\\d+\\.\\d+),(\\d+\\.\\d+) (\\d+\\.\\d+),(\\d+\\.\\d+)");
+        Matcher matcher = pattern.matcher(e.getAttribute("d"));
+        matcher.find();
+        double w = Double.parseDouble(matcher.group(3));
+        double h = Double.parseDouble(matcher.group(4));
+
+        SVGGeneratorContext ctx = SVGGeneratorContext.createDefault(doc);
+        SVGTransform trans = new SVGTransform(ctx);
+        s2.valueProperty().addListener(
+                new ChangeListener<Number>() {
+        
+                    @Override
+                    public void changed(ObservableValue<? extends Number> arg0,
+                            Number oldValue, Number newValue) {
+
+                        AffineTransform at = new AffineTransform();
+                        at.rotate(newValue.doubleValue(), w, h);
+                        GraphicContext gctx = new GraphicContext(at);
+                        String matrix = trans.toSVGTransform(gctx);
+                        //System.err.println("TRANSFORM: " + matrix);
+                        e.setAttribute("transform",  matrix);
+
+                        Image i = loader.getImage(doc);
+                        iv.setImage(i);
+                    }
+                });
+
+        Image i = loader.getImage(doc);
+        iv.setImage(i);
 */
         /********** Simple animation sample */
 
