@@ -4,50 +4,62 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.Node;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.CubicCurve;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.SVGPath;
+import javafx.scene.shape.Shape;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.transform.Affine;
 
 import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
 import org.apache.batik.anim.dom.SVGDOMImplementation;
+import org.apache.batik.anim.dom.SVGOMAnimatedPathData;
+import org.apache.batik.anim.dom.SVGOMAnimatedPathData.BaseSVGPathSegList;
 import org.apache.batik.anim.dom.SVGOMDefsElement;
 import org.apache.batik.anim.dom.SVGOMDocument;
 import org.apache.batik.anim.dom.SVGOMGElement;
 import org.apache.batik.anim.dom.SVGOMMetadataElement;
 import org.apache.batik.anim.dom.SVGOMPathElement;
+import org.apache.batik.anim.dom.SVGOMPatternElement;
 import org.apache.batik.anim.dom.SVGOMRectElement;
 import org.apache.batik.anim.dom.SVGOMSVGElement;
 import org.apache.batik.anim.dom.SVGOMTSpanElement;
 import org.apache.batik.anim.dom.SVGOMTextElement;
+import org.apache.batik.anim.dom.SVGStylableElement;
+import org.apache.batik.css.dom.CSSOMSVGStyleDeclaration;
+import org.apache.batik.css.dom.CSSOMSVGStyleDeclaration.StyleDeclarationPaintValue;
+import org.apache.batik.css.dom.CSSOMStyleDeclaration.StyleDeclarationValue;
 import org.apache.batik.css.engine.CSSContext;
 import org.apache.batik.css.engine.CSSEngine;
-import org.apache.batik.css.engine.SVGCSSEngine;
 import org.apache.batik.css.engine.value.Value;
-import org.apache.batik.css.parser.Parser;
 import org.apache.batik.dom.GenericComment;
 import org.apache.batik.dom.GenericElementNS;
 import org.apache.batik.dom.GenericText;
+import org.apache.batik.dom.svg.SVGPathSegItem;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.ImageTranscoder;
 import org.apache.batik.util.ParsedURL;
 import org.apache.batik.util.XMLResourceDescriptor;
-import org.w3c.css.sac.CSSException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.css.CSSPrimitiveValue;
 import org.w3c.dom.css.CSSStyleDeclaration;
-import org.w3c.dom.css.CSSValue;
-
-import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
+import org.w3c.dom.svg.SVGMatrix;
+import org.w3c.dom.svg.SVGPaint;
+import org.w3c.dom.svg.SVGTransform;
+import org.w3c.dom.svg.SVGTransformList;
+import org.w3c.dom.svg.SVGTransformable;
 
 class BufferedImageTranscoder extends ImageTranscoder {
 
@@ -105,6 +117,15 @@ public class SVGLoader implements CSSContext {
     private int level = 0;
     
     private void handle(org.w3c.dom.Node node) {
+/*        if (node instanceof SVGElement) {
+            SVGElement e = (SVGElement) node;
+            System.err.println("NODE TYPE: " + e.getNodeType());
+        } else {
+            System.err.println("NOPE.");
+        }
+*/
+        Node result = null;
+
         if (node instanceof SVGOMDocument) {
             SVGOMDocument obj = (SVGOMDocument) node;
             //System.err.printf("%s%s\n", indent(level), "SVGOMDocument");
@@ -144,27 +165,36 @@ public class SVGLoader implements CSSContext {
         } else if (node instanceof SVGOMPathElement) {
             SVGOMPathElement obj = (SVGOMPathElement) node;
             //System.err.printf("%s%s\n", indent(level), "SVGOMPathElement");
-            handlePath(obj);
+            result = handlePath(obj);
             
         // The <svg:rect> element
         } else if (node instanceof SVGOMRectElement) {
             SVGOMRectElement obj = (SVGOMRectElement) node;
             //System.err.printf("%s%s\n", indent(level), "SVGOMRectElement");
-            handleRect(obj);
+            result = handleRect(obj);
 
         // The <svg:text> element
         } else if (node instanceof SVGOMTextElement) {
             SVGOMTextElement obj = (SVGOMTextElement) node;
             //System.err.printf("%s%s\n", indent(level), "SVGOMTextElement");
-            handleText(obj);
+            result = handleText(obj);
 
         } else if (node instanceof SVGOMTSpanElement) {
             SVGOMTSpanElement obj = (SVGOMTSpanElement) node;
             //System.err.printf("%s%s\n", indent(level), "SVGOMTSpanElement");
 
+        } else if (node instanceof SVGOMPatternElement) {
+            SVGOMPatternElement obj = (SVGOMPatternElement) node;
+            //System.err.printf("%s%s\n", indent(level), "SVGOMPatternElement: " + obj);
+            
         } else {
-            System.err.println("UNKNOWN!");
+            System.err.println("UNKNOWN: " + node.getClass().getName());
         }
+
+        if (result != null) {
+            parentNode.getChildren().add(result);
+        }
+
 
         level++;
         Pane par = parentNode;  // save current parent
@@ -178,50 +208,273 @@ public class SVGLoader implements CSSContext {
     }
 
 
-    private void handleText(SVGOMTextElement obj) {
-        String text = obj.getTextContent();
-        float xpos = Float.parseFloat(obj.getAttribute("x"));
-        float ypos = Float.parseFloat(obj.getAttribute("y"));
-        System.err.printf("%s%s\n", indent(level), "TEXT: " + text + "/" + xpos + "/" + ypos + "/" + obj.getTransform().getBaseVal().getNumberOfItems());
+    
+    private Affine getTransform(SVGTransformable element) {
+        Affine fxTrans = null;
 
-        parentNode.getChildren().add(new Text(xpos, ypos, text));
+        SVGTransformList svgTransformations = element.getTransform().getBaseVal();
+        if (svgTransformations.getNumberOfItems() > 1) {
+            throw new RuntimeException("More than one transformation matrix not yet supported");
+        }
+        if (svgTransformations.getNumberOfItems() == 1) {
+            SVGTransform svgTrans = svgTransformations.getItem(0);
+            SVGMatrix m = svgTrans.getMatrix();
+
+            // SVG: matrix(0.67018323,-0.74219568,0.74219568,0.67018323,0,0)
+            //         [   a    c    e  ]
+            //         [   b    d    f  ]
+            //         [   0    0    1  ]
+
+            // JavaFX: [  mxx  mxy  mxz  tx  ]
+            //         [  myx  myy  myz  ty  ]
+            //         [  mzx  mzy  mzz  tz  ]
+
+            fxTrans = new Affine(m.getA(), m.getC(), m.getE(), m.getB(), m.getD(), m.getF());
+        }
+
+        return fxTrans;
+    }
+    
+    private Color getFillColor(CSSStyleDeclaration style) {
+        Color result = null;
+        CSSOMSVGStyleDeclaration.StyleDeclarationPaintValue val = (StyleDeclarationPaintValue) style.getPropertyCSSValue("fill");
+        if (val != null && val.getPaintType() != SVGPaint.SVG_PAINTTYPE_NONE) {
+            float red = val.getRed().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
+            float green = val.getGreen().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
+            float blue = val.getBlue().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
+            CSSOMSVGStyleDeclaration.StyleDeclarationValue opacity = (StyleDeclarationValue) style.getPropertyCSSValue("fill-opacity");
+            float alpha = opacity.getFloatValue(CSSPrimitiveValue.CSS_NUMBER);
+            result = new Color(red, green, blue, alpha);
+        }
+        return result;
     }
 
-    int x = 0;
-    private void handleRect(SVGOMRectElement obj) {
-        float xpos = Float.parseFloat(obj.getAttribute("x"));
-        float ypos = Float.parseFloat(obj.getAttribute("y"));
-        float width = Float.parseFloat(obj.getAttribute("width"));
-        float height = Float.parseFloat(obj.getAttribute("height"));
-        System.err.printf("%sRECT(%f, %f, %f, %f)\n", indent(level), xpos, ypos, width, height);
+    private Color getStrokeColor(CSSStyleDeclaration style) {
+        Color result = null;
+        CSSOMSVGStyleDeclaration.StyleDeclarationPaintValue val = (StyleDeclarationPaintValue) style.getPropertyCSSValue("stroke");
+        if (val != null && val.getPaintType() != SVGPaint.SVG_PAINTTYPE_NONE) {
+            float red = val.getRed().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
+            float green = val.getGreen().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
+            float blue = val.getBlue().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
 
-        CSSStyleDeclaration style = obj.getStyle();
-        //CSSStyleDeclaration style = obj.getOverrideStyle();
-        //CSSValue fill = style.getPropertyCSSValue("fill");
-        //CSSValue fill = obj.getPresentationAttribute("fill");
-        System.err.println("FILL: " + style.getPropertyCSSValue("fill").getValue()); // .getCssValueType());// .getPropertyValue("fill"));
+            CSSOMSVGStyleDeclaration.StyleDeclarationValue opacity = (StyleDeclarationValue) style.getPropertyCSSValue("stroke-opacity");
+            float alpha = opacity.getFloatValue(CSSPrimitiveValue.CSS_NUMBER);
 
-        Paint paint = null;
-        switch(x) {
-        case 0 : paint = new Color(1.0, 0.0, 0.0, 0.5);break;
-        case 1 : paint = new Color(0.0, 1.0, 0.0, 0.5);break;
-        case 2 : paint = new Color(0.0, 0.0, 1.0, 0.5);break;
-        default :paint = new Color(0.0, 1.0, 1.0, 0.5);break;
+            result = new Color(red, green, blue, alpha);
         }
-        x++;
-        Rectangle fxObj = new Rectangle(xpos, ypos, width, height);
-        fxObj.setFill(paint);
+        return result;
+    }
+
+
+    private void applyStyle(Shape fxObj, SVGStylableElement obj) {
+        CSSStyleDeclaration style = obj.getStyle();
+
+        Color fillColor = getFillColor(style);
+        fxObj.setFill(fillColor);
+
+        Color strokeColor = getStrokeColor(style);
+        fxObj.setStroke(strokeColor);
+
+        CSSOMSVGStyleDeclaration.StyleDeclarationValue swidth = (StyleDeclarationValue) style.getPropertyCSSValue("stroke-width");
+        if (swidth != null) {
+            float strokeWidth = swidth.getFloatValue(CSSPrimitiveValue.CSS_NUMBER);
+            fxObj.setStrokeWidth(strokeWidth);
+        }
+
+    }
+
+    
+    private void applyTextStyle(Text fxObj, SVGStylableElement obj) {
+        CSSStyleDeclaration style = obj.getStyle();
+
+        CSSOMSVGStyleDeclaration.StyleDeclarationValue val = (StyleDeclarationValue) style.getPropertyCSSValue("font-family");
+        String fontFamily = val.getCssText();
+
+        CSSOMSVGStyleDeclaration.StyleDeclarationValue val2 = (StyleDeclarationValue) style.getPropertyCSSValue("font-size");
+        float fontSize = val2.getFloatValue(CSSPrimitiveValue.CSS_PX);  // https://bugs.launchpad.net/inkscape/+bug/168164
+
+        Font font = Font.font(fontFamily, fontSize);
+        fxObj.setFont(font);
+
+/*        font-style:normal;
+        font-variant:normal;
+        font-weight:normal;
+        font-stretch:normal;
+*/
+    }
+
+    private Node handleText(SVGOMTextElement obj) {
+        // Get attributes from SVG node
+        String text = obj.getTextContent();
+        float xpos = obj.getX().getBaseVal().getItem(0).getValue();
+        float ypos = obj.getY().getBaseVal().getItem(0).getValue();
+
+        // Create JavaFX text object
+        Text fxObj = new Text(xpos, ypos, text);
         fxObj.setId(obj.getId());
 
-        parentNode.getChildren().add(fxObj);
+        Affine transformation = getTransform(obj);
+        if (transformation != null) {
+            fxObj.getTransforms().add(transformation);
+        }
+
+        applyTextStyle(fxObj, obj);
+
+        return fxObj;
     }
 
-    private void handlePath(SVGOMPathElement obj) {
-        System.err.printf("%s%s\n", indent(level), "PATH: "); 
+    private Node handleRect(SVGOMRectElement obj) {
+        // Get attributes from SVG node
+        float xpos = obj.getX().getBaseVal().getValue();
+        float ypos = obj.getY().getBaseVal().getValue();
+        float width = obj.getWidth().getBaseVal().getValue();
+        float height = obj.getHeight().getBaseVal().getValue();
+
+        // Create JavaFX Rectangle object
+        Rectangle fxObj = new Rectangle(xpos, ypos, width, height);
+        fxObj.setId(obj.getId());
+
+        Affine transformation = getTransform(obj);
+        if (transformation != null) {
+            fxObj.getTransforms().add(transformation);
+        }
+
+        applyStyle(fxObj, obj);
+        
+        return fxObj;
     }
+
+    
+    private Node handlePath(SVGOMPathElement obj) {
+        // Get attributes from SVG node
+        String path = obj.getAttribute("d");
+
+        // Create JavaFX SVGPath object
+        SVGPath fxObj = new SVGPath();
+        fxObj.setContent(path);
+        fxObj.setId(obj.getId());
+
+        Affine transformation = getTransform(obj);
+        if (transformation != null) {
+            fxObj.getTransforms().add(transformation);
+        }
+
+        applyStyle(fxObj, obj);
+        
+        return fxObj;
+    }
+
+
+    /**
+     * Alternative handling of an SVG path.
+     * Creates distinct JavaFX Shapes for each path segment.
+     * 
+     * @param obj
+     */
+    private void handlePath2(SVGOMPathElement obj) {
+        double xpos = 0.0;
+        double ypos = 0.0;
+
+        CSSStyleDeclaration style = obj.getStyle();
+        SVGOMAnimatedPathData.BaseSVGPathSegList list = (BaseSVGPathSegList) obj.getPathSegList();
+        System.err.printf("%s%s\n", indent(level), "PATH: " + list.getNumberOfItems());
+        for (int i = 0;  i < list.getNumberOfItems();  i++) {
+            SVGPathSegItem item = (SVGPathSegItem) list.getItem(i);
+            Shape fxObj = null;
+
+            switch(item.getPathSegType()) { 
+                case SVGPathSegItem.PATHSEG_UNKNOWN : 
+                    System.err.printf("%s PATHSEG_UNKNOWN\n", indent(level+2));
+                    break;
+                
+                case SVGPathSegItem.PATHSEG_CLOSEPATH : 
+                    System.err.printf("%s PATHSEG_CLOSEPATH\n", indent(level+2));
+                    break;
+
+                case SVGPathSegItem.PATHSEG_MOVETO_ABS : 
+                    xpos = item.getX();
+                    ypos = item.getY();
+                    System.err.printf("%s moveto(%f/%f)\n", indent(level+2), xpos, ypos);
+                    break;
+                
+                case SVGPathSegItem.PATHSEG_MOVETO_REL :
+                    xpos += item.getX();
+                    ypos += item.getY();
+                    System.err.printf("%s moveto(%f/%f)\n", indent(level+2), xpos, ypos);
+                    break;
+
+                case SVGPathSegItem.PATHSEG_LINETO_ABS  : { 
+                        double x2 = item.getX();
+                        double y2 = item.getY();
+                        
+                        System.err.printf("%s lineto(%f/%f)\n", indent(level+2), x2, y2);
+                        fxObj = new Line(xpos, ypos, x2, y2);
+                        
+                        xpos = x2;
+                        ypos = y2;
+                    }
+                    break;
+
+                case SVGPathSegItem.PATHSEG_LINETO_REL  : {
+                        double x2 = xpos + item.getX();
+                        double y2 = ypos + item.getY();
+                        
+                        System.err.printf("%s lineto(%f/%f)\n", indent(level+2), x2, y2);
+                        fxObj = new Line(xpos, ypos, x2, y2);
+                        
+                        xpos = x2;
+                        ypos = y2;
+                    }
+                    break;
+
+                case SVGPathSegItem.PATHSEG_CURVETO_CUBIC_ABS  : {
+                        double endX = xpos + item.getX();
+                        double endY = ypos + item.getY();
+                        
+                        System.err.printf("%s cubicCurve(%f/%f, %f/%f)\n", indent(level+2), xpos, ypos, endX, endY);
+                        fxObj = new CubicCurve(xpos, ypos, item.getX1(), item.getY1(), item.getX2(), item.getY2(), endX, endY);
+
+                        xpos = endX;
+                        ypos = endY;
+                    }
+                    break;
+
+                case SVGPathSegItem.PATHSEG_CURVETO_CUBIC_REL : { 
+                        double endX = xpos + item.getX();
+                        double endY = ypos + item.getY();
+                        double x1 = xpos + item.getX1();
+                        double y1 = ypos + item.getY1();
+                        double x2 = xpos + item.getX2();
+                        double y2 = ypos + item.getY2();
+                        
+                        System.err.printf("%s cubicCurve(%f/%f, %f/%f)\n", indent(level+2), xpos, ypos, endX, endY);
+                        fxObj = new CubicCurve(xpos, ypos, x1, y1, x2, y2, endX, endY);
+
+                        xpos = endX;
+                        ypos = endY;
+                    }
+                    break;
+
+                default:
+                    System.err.printf("%s UNKNOWN\n", indent(level+2));
+                    break;
+            }
+
+            if (fxObj != null) {
+                Color fillColor = getFillColor(style);
+                fxObj.setFill(fillColor);   // null allowed to specify no fill
+
+                Color strokeColor = getStrokeColor(style);
+                fxObj.setStroke(strokeColor);
+
+                parentNode.getChildren().add(fxObj);
+            }
+            
+        }
+    }
+
 
     private void handleGroup(SVGOMGElement obj) {
-        System.err.printf("%s%s\n", indent(level), "GROUP: ");
         Pane group = new Pane();
         parentNode.getChildren().add(group);
         parentNode = group;

@@ -1,14 +1,11 @@
 package com.example.javafx.components;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
+
+import com.example.svg.SVGLoader;
 
 /**
  *  
@@ -50,10 +47,12 @@ public class SevenSegment extends Control {
 
 
     public SevenSegment() {
+        SVGLoader loader = new SVGLoader();
 
-        FXMLLoader loader = new FXMLLoader();
-        try {
-            Group g = loader.load(new FileInputStream("7segment.fxml"));
+//        FXMLLoader loader = new FXMLLoader();
+        //try {
+            //Group g = loader.load(new FileInputStream("7segment.fxml"));
+            Node g = loader.loadSvg("7segment.svg");
             getChildren().add(g);
 
             segments[0] = (SVGPath) g.lookup("#segA");
@@ -68,11 +67,11 @@ public class SevenSegment extends Control {
 
             // minimum size required for proper layouting
             setMinSize(50, 75);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        //} catch (FileNotFoundException e) {
+        //    e.printStackTrace();
+        //} catch (IOException e) {
+        //    e.printStackTrace();
+        //}
     }
 
 

@@ -1,24 +1,5 @@
 package com.example.javafx.components;
 
-import java.awt.geom.AffineTransform;
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
-import org.apache.batik.anim.dom.SVGOMPathElement;
-import org.apache.batik.ext.awt.g2d.GraphicContext;
-import org.apache.batik.svggen.SVGGeneratorContext;
-import org.apache.batik.svggen.SVGTransform;
-import org.apache.batik.util.XMLResourceDescriptor;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import com.example.svg.SVGLoader;
-import com.example.svg.Sample;
-
 import javafx.animation.Interpolator;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
@@ -35,8 +16,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -46,7 +25,6 @@ import javafx.scene.paint.Stop;
 import javafx.scene.shape.Arc;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Shear;
 import javafx.stage.Screen;
@@ -63,8 +41,7 @@ public class Main extends Application {
         launch(args);
     }
 
-    
-    
+
     private void addRow(Node ... nodes) {
         int column = 0;
         for(Node node : nodes) {
@@ -180,14 +157,24 @@ public class Main extends Application {
 
         addRow(new Text("Seven segment display:"), displayGroup, pb, mb);
 
-
-        SVGLoader loader = new SVGLoader();
-
         Slider s2 = new Slider(0.0, 1.5, 0.0);
-        Node iv = loader.loadSvg("meter.svg");
+        Meter m = new Meter();
+
         final HBox displayGroup2 = new HBox();
-        displayGroup2.getChildren().addAll(new Text("Meter (As JavaFX nodes):"), iv, s2);
+        displayGroup2.getChildren().addAll(new Text("Meter (As JavaFX nodes):"), m, s2);
         addRow(displayGroup2);
+        
+        s2.valueProperty().addListener(
+                new ChangeListener<Number>() {
+
+                    @Override
+                    public void changed(ObservableValue<? extends Number> arg0,
+                            Number oldValue, Number newValue) {
+                        m.setValue(newValue.doubleValue());
+                    }
+                } );
+
+
 
 /*
 
