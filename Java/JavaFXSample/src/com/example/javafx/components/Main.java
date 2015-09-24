@@ -26,6 +26,7 @@ import javafx.scene.shape.Arc;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Scale;
 import javafx.scene.transform.Shear;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -122,40 +123,13 @@ public class Main extends Application {
 
         addRow(new Text("Shapes:"), r1, e1, a1);
 
-
-        SevenSegment s7 = new SevenSegment();
-        s7.setDigit(number);
-        Button pb = new Button("+");
-        pb.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent arg0) {
-                number++;
-                if (number > 15) {
-                    number = 0;
-                }
-                s7.setDigit(number);
-            }
-        });
-        Button mb = new Button("-");
-        mb.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent arg0) {
-                number--;
-                if (number < 0) {
-                    number = 15;
-                }
-                s7.setDigit(number);
-            }
-        });
-        
-
-        SevenSegment s7_2 = new SevenSegment();
-        s7_2.setDigit(0);
-        
-        final HBox displayGroup = new HBox();
-        displayGroup.getChildren().addAll(s7, s7_2);
-
-        addRow(new Text("Seven segment display:"), displayGroup, pb, mb);
+        SevenSegmentPanel s7Panel = new SevenSegmentPanel(4, 2);
+        s7Panel.setOnColor(new Color(0.95, 0.0, 0.0, 1.0));
+        s7Panel.setOffColor(new Color(0.3, 0.0, 0.0, 1.0));
+        s7Panel.setDisplayBackground(new Color(0.35, 0.0, 0.0, 1.0));
+        s7Panel.getTransforms().add(new Scale(0.6, 0.6));
+        s7Panel.setText("µA  ");
+        addRow(new Text("Seven segment display:"), s7Panel);
 
         Slider s2 = new Slider(0.0, 1.5, 0.0);
         Meter m = new Meter();
@@ -163,14 +137,21 @@ public class Main extends Application {
         final HBox displayGroup2 = new HBox();
         displayGroup2.getChildren().addAll(new Text("Meter (As JavaFX nodes):"), m, s2);
         addRow(displayGroup2);
-        
+
         s2.valueProperty().addListener(
                 new ChangeListener<Number>() {
 
                     @Override
                     public void changed(ObservableValue<? extends Number> arg0,
                             Number oldValue, Number newValue) {
-                        m.setValue(newValue.doubleValue());
+                        double val = newValue.doubleValue();
+                        if (val > 1.0) {
+                            m.setValue(1.0);
+                            s7Panel.setText("Err ");
+                        } else {
+                            m.setValue(val);
+                            s7Panel.setValue(val);
+                        }
                     }
                 } );
 
