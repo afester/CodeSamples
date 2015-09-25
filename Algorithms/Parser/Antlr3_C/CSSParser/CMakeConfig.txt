@@ -1,0 +1,11 @@
+# Cygwin config
+#set (JAVA_EXE /cygdrive/c/Program\ Files/Java/jdk1.7.0_80/bin/java)
+#set (ANTLR_JAR C:\\\\Users\\\\afester\\\\Projects\\\\CodeSamples\\\\nodistrib\\\\antlr-3.5.2-fes.jar)
+
+# Linux config
+#set (JAVA_EXE /opt/jdk1.7.0_45/bin/java)
+#set (ANTLR_JAR /home/andreas/Projects/CodeSamples/nodistrib/antlr-complete-3.5.3-SNAPSHOT.jar)
+
+# Win32 config
+set (JAVA_EXE c:\\Program\ Files\\Java\\jdk1.7.0_80\\bin\\java)
+set (ANTLR_JAR C:\\Users\\afester\\Projects\\CodeSamples\\nodistrib\\antlr-3.5.2-fes.jar)

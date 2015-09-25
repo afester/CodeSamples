@@ -16,10 +16,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
+import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.shape.Arc;
@@ -55,6 +57,18 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        primaryStage.setTitle("Control panel sample");
+
+        ControlPanelSample cps = new ControlPanelSample();
+        Scene scene = cps.createScene();
+
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+
+    //@Override
+    public void start2(Stage primaryStage) {
         primaryStage.setTitle("Sample application for JavaFX components");
 
         final Group mainGroup = new Group();
@@ -235,8 +249,11 @@ public class Main extends Application {
         mainGroup.getChildren().add(b3);
 
         Scene scene = new Scene(mainGroup, 800, 600);
-        primaryStage.setScene(scene);
+        Image img = new Image("file:background2.png");
+        ImagePattern bg = new ImagePattern(img, 0, 0, img.getWidth(), img.getHeight(), false);
+        scene.setFill(bg);
 
+        primaryStage.setScene(scene);
         primaryStage.show();
 
         transTransition.play();

@@ -15,7 +15,6 @@ public class SevenSegment extends Control {
     private SVGPath panel = null;
     private SVGPath[] segments = new SVGPath[7];
     private SVGPath segDP = null;
-    private Color onColor = new Color(0x23 / 255.0, 0x2A / 255.0, 0x47 / 255.0, 1.0);
     private Color offColor = new Color(0xC9 / 255.0, 0xD3 / 255.0, 0xBB / 255.0, 1.0);
     private Color bgColor = new Color(0xDC / 255.0, 0xE1 / 255.0, 0xD1 / 255.0, 1.0);
     private int number;
@@ -59,8 +58,28 @@ public class SevenSegment extends Control {
         {false,  true, false, false,  true,  true, true}// µ
     };
 
+    
+    
+    private Color onColor = new Color(0x23 / 255.0, 0x2A / 255.0, 0x47 / 255.0, 1.0);
+   
+    
+    private ColorProperty onColor1;
+    
+    /**
+     * Sets the color to use for enabled segments.
+     *
+     * @param color The color to use when painting enabled segments.
+     */
+    public void setOnColor(Color color) {
+        this.onColor = color;
+        setDigit(this.number);
+        setDP(this.isDp);
+    }
+
 
     public SevenSegment() {
+        getStyleClass().add("seven-segment");
+
         SVGLoader loader = new SVGLoader();
 
         Node g = loader.loadSvg("7segment.svg");
@@ -80,6 +99,12 @@ public class SevenSegment extends Control {
         setMinSize(49, 75);
     }
 
+    @Override
+    public String getUserAgentStylesheet() {
+       String result =SevenSegment.class.getResource("sevensegment.css").toExternalForm();
+       // System.err.println("getUserAgentStylesheet: " + result);
+       return result;
+    }
 
     /**
      * Enables the necessary digits to show a (hexadecimal) number from 
@@ -166,16 +191,6 @@ public class SevenSegment extends Control {
         }
     }
 
-    /**
-     * Sets the color to use for enabled segments.
-     *
-     * @param color The color to use when painting enabled segments.
-     */
-    public void setOnColor(Color color) {
-        this.onColor = color;
-        setDigit(this.number);
-        setDP(this.isDp);
-    }
 
 
     /**

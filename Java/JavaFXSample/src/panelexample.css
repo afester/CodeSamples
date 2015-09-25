@@ -1,0 +1,7 @@
+.root {
+   -fx-background-image: url(background2.png);
+}
+
+.seven-segment {
+   -fx-on-color: blue;
+}

@@ -1,0 +1,4 @@
+
+.seven-segment {
+   -fx-skin: "com.example.javafx.components.SevenSegmentSkin";
+}
