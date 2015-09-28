@@ -63,8 +63,6 @@ public class SevenSegment extends Control {
     private Color onColor = new Color(0x23 / 255.0, 0x2A / 255.0, 0x47 / 255.0, 1.0);
    
     
-    private ColorProperty onColor1;
-    
     /**
      * Sets the color to use for enabled segments.
      *

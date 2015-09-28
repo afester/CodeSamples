@@ -40,7 +40,7 @@ public class Meter extends Control {
         h = Double.parseDouble(matcher.group(4));
 
         unitText = (Text) iv.lookup("#unitText");
-        System.err.println(unitText);
+        // System.err.println(unitText);
 
         getChildren().add(iv);
 /*

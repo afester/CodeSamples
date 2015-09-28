@@ -13,6 +13,7 @@ import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -96,7 +97,7 @@ public class SceneGraphTree {
     * @param theScene The scene to visualize.
     */
    @SuppressWarnings("unchecked")
-public void setSceneTree(Scene theScene) {
+   public void setSceneTree(Scene theScene) {
       // create a TreeItem structure with the scene graph
       Parent parentNode = theScene.getRoot();
       SceneGraphItem rootItem = new SceneGraphItem(parentNode);
@@ -125,6 +126,11 @@ public void setSceneTree(Scene theScene) {
             nodeProperties.add(new TableData("Properties", "" + node.getProperties()));
             nodeProperties.add(new TableData("Bounds in local", "" + node.getBoundsInLocal()));
             nodeProperties.add(new TableData("Bounds in parent", "" + node.getBoundsInParent()));
+            if (node instanceof Shape) {
+                Shape s = (Shape) node;
+                nodeProperties.add(new TableData("Fill", "" + s.getFill()));
+                nodeProperties.add(new TableData("Stroke", "" + s.getStroke()));
+            }
          }
 
       } );
