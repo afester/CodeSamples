@@ -62,6 +62,12 @@ public class Meter extends Control {
         */
     }
 
+
+    @Override
+    protected javafx.scene.control.Skin<?> createDefaultSkin() {
+        return new MeterSkin(this);
+    };
+
     
     public void setUnit(String unit) {
     	unitText.setText(unit);

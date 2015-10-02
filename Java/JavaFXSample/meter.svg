@@ -39,16 +39,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1"
-     inkscape:cx="127.82669"
-     inkscape:cy="795.65558"
+     inkscape:zoom="1.4142136"
+     inkscape:cx="265.54233"
+     inkscape:cy="972.30702"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1443"
+     inkscape:window-width="1583"
      inkscape:window-height="817"
-     inkscape:window-x="386"
-     inkscape:window-y="205"
+     inkscape:window-x="111"
+     inkscape:window-y="286"
      inkscape:window-maximized="0"
      inkscape:snap-to-guides="true"
      inkscape:snap-grids="false"
@@ -69,6 +69,15 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.58725715;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect6628-2-8"
+       width="230.46657"
+       height="123.80894"
+       x="58.007885"
+       y="39.984901"
+       ry="7.7508249"
+       rx="5" />
     <path
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path6634"
@@ -90,13 +99,6 @@
        inkscape:label="#path6638"
        inkscape:transform-center-x="38.890873"
        inkscape:transform-center-y="-40.65864" />
-    <rect
-       style="fill:#383838;fill-opacity:1;stroke:#000000;stroke-width:0.4651992;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="rect6628"
-       width="231.44588"
-       height="70.858406"
-       x="57.982597"
-       y="156.34479" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;line-height:125%;font-family:Arial;-inkscape-font-specification:'Arial, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -134,12 +136,21 @@
          x="233.11024"
          y="-127.33103">100</tspan></text>
     <rect
-       style="fill:#747474;fill-opacity:0.09148265;stroke:none;stroke-width:0.58725715;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#747474;fill-opacity:0.09148266;stroke:none;stroke-width:0.58725715;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect6628-2"
        width="230.46657"
-       height="115.80894"
+       height="123.80894"
        x="57.972019"
-       y="40.31168" />
+       y="40.31168"
+       ry="7.7508249"
+       rx="5" />
+    <rect
+       style="fill:#383838;fill-opacity:1;stroke:#000000;stroke-width:0.4651992;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect6628"
+       width="231.44588"
+       height="70.858406"
+       x="57.982597"
+       y="156.34479" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;line-height:125%;font-family:Arial;-inkscape-font-specification:'Arial, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -173,14 +184,6 @@
        y="222.73143"
        rx="7.4330425"
        ry="6.7456498" />
-    <rect
-       style="fill:none;fill-opacity:1;stroke:#b3b3b3;stroke-width:1.97599995;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="rect6630"
-       width="230.56464"
-       height="196.64977"
-       x="58.270973"
-       y="39.96439"
-       ry="8.5" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;line-height:125%;font-family:Arial;-inkscape-font-specification:'Arial, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -211,5 +214,13 @@
        d="m 160.84918,110.8622 25.76777,0"
        id="path6752"
        inkscape:connector-curvature="0" />
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#b3b3b3;stroke-width:1.97599995;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect6630"
+       width="230.56464"
+       height="196.64977"
+       x="58.270973"
+       y="39.96439"
+       ry="8.5" />
   </g>
 </svg>

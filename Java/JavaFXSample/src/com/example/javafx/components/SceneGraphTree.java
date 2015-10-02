@@ -90,6 +90,8 @@ public class SceneGraphTree {
       }
    }
 
+   
+   private String oldStyle = null;
 
    /**
     * Sets the scene to visualize in this tree.
@@ -111,12 +113,18 @@ public class SceneGraphTree {
          @Override
          public void changed(ObservableValue<? extends TreeItem<String>> arg0,
                              TreeItem<String> oldValue, TreeItem<String> newValue) {
-           // SceneGraphItem oldItem = (SceneGraphItem) oldValue; // ?????
             SceneGraphItem newItem = (SceneGraphItem) newValue; // ?????
 
+            if (oldStyle != null) { 
+                SceneGraphItem oldItem = (SceneGraphItem) oldValue; // ?????
+                Node oldNode = oldItem.getNode();
+                oldNode.setStyle(oldStyle);
+            }
+
             Node node = newItem.getNode();
-            //node.setStyle("-fx-opacity: 0.5;");
-            //node.setStyle("-fx-effect: innershadow(one-pass-box, #ff0000, 10, 0.5, 1, 1);");
+            oldStyle = node.getStyle();
+            node.setStyle("-fx-opacity: 0.5;");
+            node.setStyle("-fx-effect: innershadow(one-pass-box, #ff0000, 10, 0.5, 1, 1);");
 
             // Note: need to use the ObservableList here, not its backing list!
             nodeProperties.clear();

@@ -93,17 +93,22 @@ class BufferedImageTranscoder extends ImageTranscoder {
 
 public class SVGLoader implements CSSContext {
 
+    private Group parentNode;
+    private Color parentFill = null;    // TODO: HACK!
+    private Color parentStroke = null;    // TODO: HACK!
     
+    private Group result;
     
+    private boolean addRootRect = false;    // flag wheter to add a rectangle in the size of the drawing
+
+
     public SVGLoader() {
     }
-    
 
-    private Pane parentNode;
-    private Pane result; 
 
     /**
      * @param fileName The name of the SVG file to load.
+     *
      * @return A JavaFX node representing the SVG file.
      */
     public Node loadSvg(String fileName) {
@@ -111,13 +116,24 @@ public class SVGLoader implements CSSContext {
         // probably a SAX based approach would be better from a performance perspective.
         SVGOMDocument doc = (SVGOMDocument) loadSvgDocument(fileName);
 
-        result = new Pane();
+        result = new Group();
         parentNode = result;
         handle(doc);
         return result;
     }
 
+
+    /**
+     * @param flag Flag to determine whether or not to add a rectangle in the 
+     *             size of the drawing's viewbox.
+     */
+    public void setAddViewboxRect(boolean flag) {
+        this.addRootRect = flag;
+    }
+
     
+
+
     private String indent(int level) {
         return "                                    ".substring(0, level*2);
     }
@@ -135,6 +151,12 @@ public class SVGLoader implements CSSContext {
 */
         Node result = null;
 
+        Group par = parentNode;  // save current parent
+        Color parFill = parentFill;
+        Color parStroke = parentStroke;
+
+        // System.err.printf("%s%s\n", indent(level), node.getClass());
+
         if (node instanceof SVGOMDocument) {
             SVGOMDocument obj = (SVGOMDocument) node;
             //System.err.printf("%s%s\n", indent(level), "SVGOMDocument");
@@ -142,16 +164,17 @@ public class SVGLoader implements CSSContext {
         // The <svg> tag
         } else if (node instanceof SVGOMSVGElement) {
             SVGOMSVGElement obj = (SVGOMSVGElement) node;
-            float height = obj.getViewBox().getBaseVal().getHeight();
-            float width = obj.getViewBox().getBaseVal().getWidth();
-            result = new Rectangle(width,  height, null);
-            ((Rectangle)result).setStroke(Color.BLACK);
-            ((Rectangle)result).getStrokeDashArray().addAll(3.0,7.0,3.0,7.0);
-            result.setId(obj.getId());
-            System.err.printf("%s%s %f/%f\n", indent(level), "SVGOMSVGElement", width, height);
 
-            
-            
+            // optionally add a rectangle using the size of the whole drawing
+            if (addRootRect) {
+                float height = obj.getViewBox().getBaseVal().getHeight();
+                float width = obj.getViewBox().getBaseVal().getWidth();
+                result = new Rectangle(width,  height, null);
+                ((Rectangle)result).setStroke(Color.BLACK);
+                ((Rectangle)result).getStrokeDashArray().addAll(3.0,7.0,3.0,7.0);
+                result.setId(obj.getId());
+            }
+
         } else if (node instanceof GenericComment) {
             GenericComment obj = (GenericComment) node;
             //System.err.printf("%s%s\n", indent(level), "GenericComment");
@@ -209,22 +232,23 @@ public class SVGLoader implements CSSContext {
         }
 
         if (result != null) {
-            System.err.println(result);
+            // System.err.println(result);
             parentNode.getChildren().add(result);
         }
 
 
         level++;
-        Pane par = parentNode;  // save current parent
         NodeList children = node.getChildNodes();
         for (int i = 0;  i < children.getLength();  i++) {
             org.w3c.dom.Node element = children.item(i);
             handle(element);
         }
-        parentNode = par;       // restore current parent
         level--;
-    }
 
+        parentFill = parFill;
+        parentStroke = parStroke;
+        parentNode = par;       // restore current parent
+    }
 
     
     private Affine getTransform(SVGTransformable element) {
@@ -296,6 +320,10 @@ public class SVGLoader implements CSSContext {
             }
         }
 
+        if (result == null) {
+            result = parentFill;  // TODO: need to search up the hierarchy ...
+        }
+
         return result;
     }
 
@@ -304,6 +332,7 @@ public class SVGLoader implements CSSContext {
 
         Color result = null;
         CSSOMSVGStyleDeclaration.StyleDeclarationPaintValue val = (StyleDeclarationPaintValue) style.getPropertyCSSValue("stroke");
+
         if (val != null && val.getPaintType() != SVGPaint.SVG_PAINTTYPE_NONE) {
             float red = val.getRed().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
             float green = val.getGreen().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
@@ -314,7 +343,7 @@ public class SVGLoader implements CSSContext {
 
             result = new Color(red, green, blue, alpha);
         }
-        
+
         if (result == null) {
             SVGStylableElement.PresentationAttributePaintValue stroke =(PresentationAttributePaintValue) obj.getPresentationAttribute("stroke");
             if (stroke != null && stroke.getPaintType() != SVGPaint.SVG_PAINTTYPE_NONE) {
@@ -325,6 +354,10 @@ public class SVGLoader implements CSSContext {
                 //float alpha = opacity.getFloatValue(CSSPrimitiveValue.CSS_NUMBER);
                 result = new Color(red, green, blue, 1.0);
             }            
+        }
+        
+        if (result == null) {
+            result = parentStroke;  // TODO: need to search up the hierarchy ...
         }
 
         return result;
@@ -400,10 +433,14 @@ public class SVGLoader implements CSSContext {
         float ypos = obj.getY().getBaseVal().getValue();
         float width = obj.getWidth().getBaseVal().getValue();
         float height = obj.getHeight().getBaseVal().getValue();
+        float rX = obj.getRx().getBaseVal().getValue();
+        float rY = obj.getRy().getBaseVal().getValue();
 
         // Create JavaFX Rectangle object
         Rectangle fxObj = new Rectangle(xpos, ypos, width, height);
         fxObj.setId(obj.getId());
+        fxObj.setArcWidth(2*rX);
+        fxObj.setArcHeight(2*rY);
 
         Affine transformation = getTransform(obj);
         if (transformation != null) {
@@ -431,7 +468,8 @@ public class SVGLoader implements CSSContext {
         }
 
         applyStyle(fxObj, element);
-        
+
+        //fxObj.setStroke(Color.VIOLET);
         return fxObj;
     }
 
@@ -549,13 +587,19 @@ public class SVGLoader implements CSSContext {
 
 
     private void handleGroup(SVGOMGElement obj) {
-        Pane fxObj = new Pane();
+        Group fxObj = new Group();
         fxObj.setId(obj.getId());
 
         Affine transformation = getTransform(obj);
         if (transformation != null) {
             fxObj.getTransforms().add(transformation);
         }
+
+        // TODO: Can a group inherit its presentation properties to its children??
+        //applyStyle(fxObj, obj);
+        //fxObj.setStyle("-fx-background-color: blue; -fx-stroke-color: yellow;");
+        parentStroke = getStrokeColor(obj);
+        parentFill = getFillColor(obj);
 
         parentNode.getChildren().add(fxObj);
         parentNode = fxObj;
