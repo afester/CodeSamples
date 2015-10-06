@@ -3,6 +3,7 @@ package com.example.javafx.components;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import com.sun.javafx.css.converters.ColorConverter;
 
@@ -12,53 +13,68 @@ import javafx.css.Styleable;
 import javafx.css.StyleableObjectProperty;
 import javafx.css.StyleableProperty;
 import javafx.scene.control.Control;
-import javafx.scene.layout.Background;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 
+/**
+ * A seven segment display panel which is capable of displaying fixed point
+ * numbers and some limited text.
+ */
 public class SevenSegmentPanel extends Control {
 
-    private int decimalCount = 0;
     private SevenSegment[] digits;
-    private int factor = 0;
+    private String format;
 
+    /**
+     * Creates a new seven segment display panel.
+     * Initially, all segments of the display are turned off.
+     * Then, the display contents can be set with the setText() and setValue() 
+     * methods.
+     *
+     * @param numberOfDigits The number of digits for the panel.
+     */
     public SevenSegmentPanel(int numberOfDigits) {
         this(numberOfDigits, 0);
     }
 
+
+    /**
+     * Creates a new seven segment display panel.
+     * Initially, all segments of the display are turned off.
+     * Then, the display contents can be set with the setText() and setValue() 
+     * methods.
+     *
+     * @param numberOfDigits The overall number of digits
+     * @param decimalCount The number of decimal places
+     */
     public SevenSegmentPanel(int numberOfDigits, int decimalCount) {
-        this.decimalCount = decimalCount;
+        this.getStyleClass().add("seven-segment-panel");
+
         final HBox displayGroup = new HBox();
+        displayGroup.setId("segments");
 
         digits = new SevenSegment[numberOfDigits];
         for (int i = 0;  i < numberOfDigits;  i++) {
             digits[i] = new SevenSegment();
+            digits[i].setId("seg" + i);
             displayGroup.getChildren().add(digits[i]);
         }
         getChildren().add(displayGroup);
+        displayGroup.setMaxSize(displayGroup.getMaxWidth(), displayGroup.getPrefHeight());
 
-        // for now, use a hard coded decimal point
-        int decimalPointIdx = digits.length - decimalCount - 1;
-        digits[decimalPointIdx].setDP(true);
-
-        // this.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(0.0), new Insets(0.0))));
-
-        factor = (int) Math.pow(10, decimalCount);
-        setValue(2.56);
-  
-    
-    
+        
+        
         // TODO: why is this done in onColorProperty() originally??
         onColor = new SimpleStyleableObjectProperty<Color>(
-                        StyleableProperties.ON_COLOR, this, "onColor", 
-                        new Color(0x23 / 255.0, 0x2A / 255.0, 0x47 / 255.0, 1.0));
+                        StyleableProperties.ON_COLOR, this, "onColor", Color.YELLOW);
+                        //new Color(0x23 / 255.0, 0x2A / 255.0, 0x47 / 255.0, 1.0));
         onColor.addListener( (obs, oldVal, newVal) -> {
             for (SevenSegment s : digits) {
                 s.setOnColor(newVal);
             }
         });
-        
+        setOnColor(onColor.get());
+
         offColor = new SimpleStyleableObjectProperty<Color>(
                 StyleableProperties.OFF_COLOR, this, "offColor", 
                 new Color(0xC9 / 255.0, 0xD3 / 255.0, 0xBB / 255.0, 1.0));
@@ -67,40 +83,50 @@ public class SevenSegmentPanel extends Control {
                 s.setOffColor(newVal);
             }
         });
+        setOffColor(offColor.get());
 
-        this.backgroundProperty().addListener((obs, oldVal, newVal) -> {
+/*        this.backgroundProperty().addListener((obs, oldVal, newVal) -> {
             Color newPaint = (Color) newVal.getFills().get(0).getFill();
             
             for (SevenSegment s : digits) {
-                s.setBackgroundColor(newPaint); //  newPaint);
+                s.setBackgroundColor(newPaint);
             }
         });
+*/
 
+        // create the format specifier for floating point conversion
+        format = String.format("%%%d.%df", numberOfDigits + 1, decimalCount);
     }
 
-    @Override
-    protected javafx.scene.control.Skin<?> createDefaultSkin() {
-        return new SevenSegmentPanelSkin(this);
-    };
 
+    /**
+     * Sets a floting point number to display in the display panel.
+     * The number is auto-formatted to fit the setup of the display regarding
+     * the number of digits and the number of decimal places.
+     *
+     * @param value The floating point number to display.
+     */
     public void setValue(double value) {
+        String text = String.format(Locale.US, format, value);    // Important: use dot as decimal point!
+        setText(text);
+/*
         int whole = (int) value;
         int frac = (int) (value * factor);
-        //System.err.println(whole + "/" + frac);
 
+        // TODO: probably it is better to format the floating point number 
+        // into a String and the use the setText method.
+ 
         int decimalPointIdx = digits.length - decimalCount - 1;
         int i = 0;
         for (i = digits.length - 1;  i > decimalPointIdx;  i--) {
            int dig = frac % 10;
            frac = frac / 10;
-           //System.err.println("FRAC: " + dig + "/" + i);
            digits[i].setDigit(dig);
            digits[i].setDP(false);
         }
         for (   ;  i >= 0;  i--) {
            int dig = whole % 10;
            whole = whole / 10;
-           //System.err.println("WHOLE: " + dig + "/" + i);
            digits[i].setDigit(dig);
            digits[i].setDP(false);
            if (whole == 0) {
@@ -109,27 +135,52 @@ public class SevenSegmentPanel extends Control {
            }
         }
         for (   ;  i >= 0;  i--) {
-            //System.err.println("EMPTY: " + i);
             digits[i].clear();
             digits[i].setDP(false);
         }
         digits[decimalPointIdx].setDP(true);
+*/
+    }
+
+
+    /**
+     * Convenience method to display text in the display panel.
+     * Supported characters are:  
+     * 
+     * 0123456789abcdefHlLoOPrvµ. and the space character.
+     *
+     * @param text
+     */
+    public void setText(String text) {
+        // TODO: use Java 1.8 chars() method!
+
+        int didx = 0;
+        for (int i = 0;  i < text.length() && didx < digits.length; i++) {
+            char c = text.charAt(i);
+            if (c == '.') {
+                digits[didx-1].setDP(true); // DP is located in previous digit!
+            } else {
+                digits[didx].setChar(c);
+                digits[didx].setDP(false);
+                didx++;
+            }
+        }
     }
 
     
-    
-    
-    
-    // TODO: Duplicate code in SevenSegment - however, it is more important to 
-    // allow styling of the SevenSegmentPanel since this is actually the component
-    // which is used in the UI ...
-    // we can probably remove the corresponding code from SevenSegment
+
+/** Skinning and style sheet support */
+
+    @Override
+    protected javafx.scene.control.Skin<?> createDefaultSkin() {
+        return new SevenSegmentPanelSkin(this);
+    };
 
     // This private static class defines all CSS properties which are supported by this control
     private static class StyleableProperties {
 
         private static final CssMetaData<SevenSegmentPanel, Color> ON_COLOR = // TODO: HOLD ON - xxxConverter classes are part of com.sun!!!!
-                new CssMetaData<SevenSegmentPanel, Color>("-fx-on-color", ColorConverter.getInstance(), Color.BLUE) {
+                new CssMetaData<SevenSegmentPanel, Color>("-fx-on-color", ColorConverter.getInstance(), Color.ORANGE) {
 
                     @Override
                     public boolean isSettable(SevenSegmentPanel styleable) {
@@ -179,35 +230,13 @@ public class SevenSegmentPanel extends Control {
     public List<CssMetaData<? extends Styleable, ?>> getControlCssMetaData() {
         return getClassCssMetaData();
     }
+
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
         List<CssMetaData<? extends Styleable, ?>> result = StyleableProperties.PROPERTIES;
-        System.err.println("supported properties:" + result);
         return result;
     }
     
-
-/*    
-    
-    public void setOnColor(Color color) {
-        for (SevenSegment s : digits) {
-            s.setOnColor(color);
-        }
-    }
-
-    public void setDisplayBackground(Color color) {
-        for (SevenSegment s : digits) {
-            // s.setDisplayBackground(color);
-        }
-    }
-
-    public void setOffColor(Color color) {
-        for (SevenSegment s : digits) {
-            s.setOffColor(color);
-        }
-    }
-*/
-    
-    
+   
     // TODO: change listener!
     // private ObjectProperty<Color> onColor = new SimpleObjectProperty<>(new Color(0x23 / 255.0, 0x2A / 255.0, 0x47 / 255.0, 1.0));
     private StyleableObjectProperty<Color> onColor = null;
@@ -254,29 +283,4 @@ public class SevenSegmentPanel extends Control {
         return offColor;
     }
 
-    
-    
-    /**
-     * Convenience method to display text in the display panel.
-     * Supported characters are:  
-     * 
-     * 0123456789abcdefHlLoOPrvµ. and the space character.
-     *
-     * @param text
-     */
-    public void setText(String text) {
-        // TODO: use Java 1.8 chars() method!
-
-        int didx = 0;
-        for (int i = 0;  i < text.length() && didx < digits.length; i++) {
-            char c = text.charAt(i);
-            if (c == '.') {
-                digits[didx-1].setDP(true); // DP is located in previous digit!
-            } else {
-                digits[didx].setChar(c);
-                digits[didx].setDP(false);
-                didx++;
-            }
-        }
-    }
 }

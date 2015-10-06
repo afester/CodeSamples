@@ -3,17 +3,15 @@
 }
 
 /* Blue */
-/*
-.seven-segment {
+/*.seven-segment-panel {
    -fx-on-color: #1B1C5D;
    -fx-off-color: #4E6BDB;
    -fx-background-color: #5472EA;
 }
 */
-
 /* Green */
 /*
-.seven-segment {
+.seven-segment-panel {
    -fx-on-color: #27FD01;
    -fx-off-color: #383634;
    -fx-background-color: #1F1E23;
@@ -21,7 +19,7 @@
 */
 /* Red */
 /*
-.seven-segment {
+.seven-segment-panel {
    -fx-on-color: #FF0A29;
    -fx-off-color: #383634;
    -fx-background-color: #1F1E23;
@@ -29,22 +27,21 @@
 */
 
 /* Red with red filter */
-/*
-.seven-segment {
-   -fx-on-color: #B5191B;
-   -fx-off-color: #352524;
-   -fx-background-color: #211716;
+.seven-segment-panel {
+   -fx-on-color: #BC1C1E;
+   -fx-off-color: #2D1F1E;
+   -fx-background-color: #231918;
 }
-*/
 
 /* LC style */
 /*
-.seven-segment {
+.seven-segment-panel {
    -fx-on-color: #25312D;
    -fx-off-color: #64706C;
    -fx-background-color: #6C7874;
 }
 */
+ /*
 #current {
    -fx-on-color: #FF0A29;
    -fx-off-color: #383634;
@@ -56,3 +53,4 @@
    -fx-off-color: #383634;
    -fx-background-color: #1F1E23;
 }
+*/
