@@ -41,13 +41,22 @@
    -fx-background-color: #6C7874;
 }
 */
- /*
-#current {
-   -fx-on-color: #FF0A29;
-   -fx-off-color: #383634;
-   -fx-background-color: #1F1E23;
-}
 
+#current {
+/*   -fx-on-color: #FF0A29;
+   -fx-off-color: #383634;
+   -fx-background-color: #1F1E23;*/
+   -fx-on-color: #BC1C1E;
+   -fx-off-color: #2D1F1E;
+   -fx-background-color: #231918;
+/*
+   -fx-border-color: #c8c8c8, #bebebe, #b4b4b4;
+   -fx-border-insets: 0px;
+   -fx-border-radius: 0px;
+   -fx-border-style: solid;
+   -fx-border-width: 6px, 4px, 2px;*/
+}
+/*
 #voltage {
    -fx-on-color: #27FD01;
    -fx-off-color: #383634;

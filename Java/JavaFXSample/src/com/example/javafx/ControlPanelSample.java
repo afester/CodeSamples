@@ -9,7 +9,10 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderImage;
+import javafx.scene.layout.BorderRepeat;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
@@ -27,17 +30,23 @@ public class ControlPanelSample {
 
         SevenSegmentPanel s7Panel = new SevenSegmentPanel(4, 2);
         s7Panel.setId("current");
-        s7Panel.getTransforms().add(new Scale(0.6, 0.6));
+       //  s7Panel.getTransforms().add(new Scale(0.6, 0.6));
         s7Panel.setValue(0);
 
+        BorderImage img1 = 
+                new BorderImage(new Image("/left.png"), new BorderWidths(6), new Insets(0),  
+                                new BorderWidths(5), true, BorderRepeat.REPEAT, BorderRepeat.REPEAT);
+        BorderImage img2 = 
+                new BorderImage(new Image("/top.png"), new BorderWidths(6), new Insets(5),  
+                                new BorderWidths(15), true, BorderRepeat.REPEAT, BorderRepeat.REPEAT);
         BorderStroke bs3 = new BorderStroke(new Color(180/255f, 180/255f, 180/255f, 1.0), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2));
         BorderStroke bs2 = new BorderStroke(new Color(190/255f, 190/255f, 190/255f, 1.0), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(4));
         BorderStroke bs1 = new BorderStroke(new Color(200/255f, 200/255f, 200/255f, 1.0), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(6));
-        Border b = new Border(bs1, bs2, bs3);
-        
+        Border b = new Border(img1, img2, img1, img2, img1, img2); // bs1, bs2, bs3);
+
         // NOTE: Setting the border on the SevenSegmentPanel causes the border
         // to be scaled along with the panel!!!!
-        //s7Panel.setBorder(b);
+        s7Panel.setBorder(b);
 
         //VBox group1 = new VBox(new Group(s7Panel));
         //group1.setAlignment(Pos.TOP_CENTER);
