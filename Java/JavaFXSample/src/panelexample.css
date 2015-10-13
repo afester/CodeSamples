@@ -29,8 +29,8 @@
 /* Red with red filter */
 .seven-segment-panel {
    -fx-on-color: #BC1C1E;
-   -fx-off-color: #2D1F1E;
-   -fx-background-color: #231918;
+   -fx-off-color: #371F1E;
+   -fx-background-color: #3F2221;
 }
 
 /* LC style */
@@ -41,20 +41,17 @@
    -fx-background-color: #6C7874;
 }
 */
-
+/*
 #current {
-/*   -fx-on-color: #FF0A29;
-   -fx-off-color: #383634;
-   -fx-background-color: #1F1E23;*/
    -fx-on-color: #BC1C1E;
-   -fx-off-color: #2D1F1E;
-   -fx-background-color: #231918;
+   -fx-off-color: #371F1E;
+   -fx-background-color: #3F2221;
 /*
    -fx-border-color: #c8c8c8, #bebebe, #b4b4b4;
    -fx-border-insets: 0px;
    -fx-border-radius: 0px;
    -fx-border-style: solid;
-   -fx-border-width: 6px, 4px, 2px;*/
+   -fx-border-width: 6px, 4px, 2px;
 }
 /*
 #voltage {
@@ -63,3 +60,11 @@
    -fx-background-color: #1F1E23;
 }
 */
+
+#currentBorder, #voltageBorder {
+	-fx-border-image-source: url(border2.png);
+	-fx-border-image-insets: 6px;
+	-fx-border-image-repeat: repeat;
+	-fx-border-image-slice: 6px;
+	-fx-border-image-width: 6px;
+}
