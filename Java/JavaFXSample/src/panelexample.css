@@ -60,11 +60,19 @@
    -fx-background-color: #1F1E23;
 }
 */
-
+/*
 #currentBorder, #voltageBorder {
 	-fx-border-image-source: url(border4.png), url(trafficlight.png);
 	-fx-border-image-slice:  16px,             16px 0px 0px 0px;
 	-fx-border-image-insets: 0px,              0px;
 	-fx-border-image-repeat: repeat,           no-repeat;
 	-fx-border-image-width:  16px,             16px 0px 0px 0px;
+}*/
+
+#currentBorder, #voltageBorder, #hello {
+	-fx-border-image-source: url(border4.png), url(trafficlight.png);
+	-fx-border-image-slice:  6px             , 16px 0px 0px 0px;
+	-fx-border-image-insets: 0px             , 0px;
+	-fx-border-image-repeat: repeat          , no-repeat;
+	-fx-border-image-width:  6px             , 16px 0px 0px 0px;
 }

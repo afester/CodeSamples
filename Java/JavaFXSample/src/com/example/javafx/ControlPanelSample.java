@@ -29,6 +29,9 @@ public class ControlPanelSample {
 
     public Scene createScene() {
 
+        Region r = new Button("Hello World");
+        r.setId("hello");
+
         SevenSegmentPanel s7Panel = new SevenSegmentPanel(4, 2);
         s7Panel.setId("current");
         s7Panel.getTransforms().add(new Scale(0.6, 0.6));
@@ -63,6 +66,7 @@ public class ControlPanelSample {
         leftGroup.getChildren().add(m);
         leftGroup.getChildren().add(new Group(borderBox));
         leftGroup.getChildren().add(s2);
+        leftGroup.getChildren().add(r);
 
 /*************************/
 
