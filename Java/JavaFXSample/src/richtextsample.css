@@ -1,0 +1,26 @@
+
+.richtext {
+  -fx-background-image: url(background2.png);
+  -fx-font-family: serif;
+}
+
+/* Header 1 paragraph */
+.h1 {
+  -fx-font-size: 18pt;
+  -fx-padding: 0px 0px 12px 0px;
+}
+
+/* normal paragraph */
+.p {
+  -fx-padding: 0px 0px 12px 10px;
+}
+
+.em {
+  -fx-font-weight: bold;
+}
+
+.strong {
+  -fx-fill: yellow;
+  -fx-backgrund-color: blue;
+  -fx-stroke: green;
+}
