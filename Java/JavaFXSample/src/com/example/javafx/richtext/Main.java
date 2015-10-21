@@ -244,6 +244,11 @@ public class Main extends Application {
         mainPane.getItems().add(leftPane);
         mainPane.getItems().add(tabPane);
 
+        
+        
+        DocbookImporter di = new DocbookImporter("C:\\Users\\afester\\Projects\\CodeSamples\\Python\\PyQt5\\MynPad\\S", "Sample%20Page.xml");
+        di.importDocument();
+
 //        StyledDocument<TextStyle, ParStyle> sample = new StyledDocument<>("Hello World", new TextStyle());
         // area.getDocument();
         area.appendText("Hello World");
