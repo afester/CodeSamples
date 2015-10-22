@@ -21,10 +21,9 @@ class Handler extends DefaultHandler { //(xml.sax.handler.ContentHandler):
     
     
     private String content = "";    // TODO: use StringBuffer?
-    
+    private int sectionLevel = 0;
 
     public Handler(String contentPath) {
-        
     }
 
 
@@ -37,7 +36,7 @@ class Handler extends DefaultHandler { //(xml.sax.handler.ContentHandler):
             // self.nodeStack = [Frame()]
         }
         else if (name.equals("section")) {
-            // self.sectionLevel += 1
+            sectionLevel += 1;
         }
         else if (name.equals("itemizedlist")) {  // create a List node and set it as current parent
             // self.listLevel += 1
@@ -66,11 +65,12 @@ class Handler extends DefaultHandler { //(xml.sax.handler.ContentHandler):
             // self.paraStyle = ('warning', None, None)
         }
         else if (name.equals("title")) { // create a title paragraph and set it as current parent
-            //if self.sectionLevel > 0:   # no title for <article>
+            if (sectionLevel > 0) { // no title for <article>
             //    para = Paragraph(0, ('title', 'level', str(self.sectionLevel)))
             //    parent = self.nodeStack[-1]                    # top()
             //    self.nodeStack.append(para)   # push()
             //    parent.add(para)
+            }
             content = "";
         }
         else if (name.equals("para")) {  // # a paragraph contains only fragments
@@ -202,7 +202,7 @@ class Handler extends DefaultHandler { //(xml.sax.handler.ContentHandler):
             // self.result = self.nodeStack[0]
         }
         else if (name.equals("section")) {
-            // self.sectionLevel -= 1
+            sectionLevel -= 1;
         }
         else if (name.equals("itemizedlist")) {
             // self.nodeStack = self.nodeStack[0:-1]     # pop()
@@ -228,14 +228,14 @@ class Handler extends DefaultHandler { //(xml.sax.handler.ContentHandler):
         }
 
         else if (name.equals("title")) {
-            //if self.sectionLevel > 0:
+            if (sectionLevel > 0) {
             //    parent = self.nodeStack[-1]
             //    self.nodeStack = self.nodeStack[0:-1]     # pop()
             //    frag = TextFragment(None)
             //    frag.setText(self.content)
             //    parent.add(frag)
-
-            System.err.println("FRAG:" + content);
+                System.err.println("TITLE:" + content);
+            }
             content = null;
         }
         else if (name.equals("para")) {
@@ -253,6 +253,97 @@ class Handler extends DefaultHandler { //(xml.sax.handler.ContentHandler):
             }
 
             // self.nodeStack = self.nodeStack[0:-1]     # pop()
+        }
+        else if (name.equals("programlisting")) {
+            if (!content.isEmpty()) {
+                System.err.println("CODE:" + content);
+            //    parent = self.nodeStack[-1]
+
+            //    frag = TextFragment(self.currentStyle)
+            //    frag.setText(self.content)
+            //    self.content = None
+                content = null;
+            //    parent.add(frag)
+            //    self.currentStyle = None            # todo: nested styles support (needs yet another stack ...)
+            }
+
+            //self.nodeStack = self.nodeStack[0:-1]     # pop()
+        }
+        else if (name.equals("screen")) {
+            if (!content.isEmpty()) {
+                System.err.println("SCREEN:" + content);
+            //    parent = self.nodeStack[-1]
+
+            //    frag = TextFragment(self.currentStyle)
+            //    frag.setText(self.content)
+                content = null;
+            //    parent.add(frag)
+            //    self.currentStyle = None            # todo: nested styles support (needs yet another stack ...)
+            }
+
+            // self.nodeStack = self.nodeStack[0:-1]     # pop()
+        }
+        else if (name.equals("emphasis")) {
+            //parent = self.nodeStack[-1]
+
+            System.err.println("<em>" + content + "</em>");
+
+            //frag = TextFragment(self.currentStyle)
+            //frag.setText(self.content)
+            content = "";
+            //parent.add(frag)
+            //self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
+        }
+        else if (name.equals("code")) {
+            //parent = self.nodeStack[-1]
+
+            System.err.println("<tt>" + content + "</tt>");
+
+            //frag = TextFragment(self.currentStyle)
+            //frag.setText(self.content)
+            content = "";
+            //parent.add(frag)
+            //self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
+        }
+        else if (name.equals("link")) {
+            //parent = self.nodeStack[-1]
+
+            //frag = TextFragment(self.currentStyle)
+            //frag.setText(self.content)
+            //frag.setHref(self.href)
+            //self.href = None
+            //self.content = ''
+            //parent.add(frag)
+            //self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
+        }
+        else if (name.equals("olink")) {
+            //parent = self.nodeStack[-1]
+
+            //frag = TextFragment(self.currentStyle)
+            //frag.setText(self.content)
+            //parent.add(frag)
+
+            //self.keywordLinks.add(self.content) 
+
+            //self.content = ''
+            //self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
+        }
+        else if (name.equals("imagedata")) {
+        }
+        else if (name.equals("mathphrase")) {
+            System.err.println("MATH: " + content);
+            //mathFormula = MathFormulaObject()
+            //mathFormula.setFormula(self.content)
+            //mathFormula.renderFormula()             # generate image - TODO: is there a better approach?
+            //                                        # Do we need the image as part of the fragment?
+            //parent = self.nodeStack[-1]
+            //frag = MathFragment()
+            //frag.setText(mathFormula.formula)
+            //frag.setImage(mathFormula.image)
+            //parent.add(frag)
+
+            //self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
+            content = "";
         }
     }
 
