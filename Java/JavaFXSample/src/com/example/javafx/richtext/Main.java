@@ -1,9 +1,12 @@
 package com.example.javafx.richtext;
 
+import java.util.Optional;
+
 import org.fxmisc.richtext.InlineStyleTextArea;
 import org.fxmisc.richtext.Paragraph;
 import org.fxmisc.richtext.StyledDocument;
 import org.fxmisc.richtext.StyledText;
+import org.fxmisc.richtext.StyledTextArea;
 import org.fxmisc.richtext.demo.richtext.ParStyle;
 import org.fxmisc.richtext.demo.richtext.TextStyle;
 
@@ -101,65 +104,6 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Richtext panel sample");
-/*
-        TabPane tabPane = new TabPane();
-
-        HTMLEditor editor = new HTMLEditor();
-
-
-        VBox textPanel = new VBox();
-        textPanel.getStyleClass().add("richtext");
-
-        TextFlow header = new TextFlow();
-        header.getStyleClass().add("h1");
-
-        Text headerText = new Text("Title");
-        header.getChildren().add(headerText);
-
-        Text hello = new Text("Hello");
-        Text world = new Text(" World");
-        world.getStyleClass().add("strong");
-        world.setFill(Color.YELLOW);
-
-        Text hello2 = new Text("Hello");
-        Text moon = new Text(" Moon");
-        moon.getStyleClass().add("em");
-
-        TextFlow helloText = new TextFlow();
-        helloText.getStyleClass().add("p");
-        helloText.getChildren().add(hello);
-        helloText.getChildren().add(world);
-
-        TextFlow helloText2 = new TextFlow();
-        helloText2.getStyleClass().add("p");
-        helloText2.getChildren().add(hello2);
-        helloText2.getChildren().add(moon);
-
-        textPanel.getChildren().add(header);
-        textPanel.getChildren().add(helloText);
-        textPanel.getChildren().add(helloText2);
-
-        Canvas canvas = new Canvas(300, 300);
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.setFill(Color.BLUE);
-        gc.fillText("Hello World", 20, 20);
-
-        Tab tab = new Tab();
-        tab.setText("HTMLEditor");
-        tab.setContent(editor);
-        tabPane.getTabs().add(tab);
-
-        Tab tab2 = new Tab();
-        tab2.setText("TextFlow");
-        tab2.setContent(textPanel);
-        tabPane.getTabs().add(tab2);
-
-        Tab tab3 = new Tab();
-        tab3.setText("Canvas");
-        tab3.setContent(canvas);
-        tabPane.getTabs().add(tab3);
-
-*/
         
         structureView.setFont(Font.font("Courier New"));
         structureView.setEditable(false);
@@ -252,6 +196,14 @@ public class Main extends Application {
 //        StyledDocument<TextStyle, ParStyle> sample = new StyledDocument<>("Hello World", new TextStyle());
         // area.getDocument();
         area.appendText("Hello World");
+        
+        
+
+        StyledDocument<TextStyle, ParStyle> document = area.getDocument();
+        StyledText<TextStyle> t1 = new StyledText<>("Hello", new TextStyle(Optional.of(Boolean.TRUE), null, null, null, null, null, null, null));
+        StyledText<TextStyle> t2 = new StyledText<>("World", new TextStyle(null, Optional.of(Boolean.TRUE), null, null, null, null, null, null));
+        Paragraph<TextStyle, ParStyle> p = new Paragraph<TextStyle, ParStyle>(new ParStyle(null, null), t1, t2);
+
         // area.getParagraphs().add(new Paragraph<TextStyle, ParStyle>("Hello", null, null));
         // .getParagraphs().add(new Paragraph<TextStyle, ParStyle>("Hello", null, null));
 
