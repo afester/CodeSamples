@@ -7,8 +7,9 @@ import javafx.scene.paint.Color;
 
 public class SevenSegmentPanelSkin extends SkinBase<SevenSegmentPanel> {
 
-    private SevenSegment[] digits;
-    
+   // private SevenSegment[] digits;
+    private FourteenSegment[] digits;
+
     // TODO: why do we need to duplicate the properties here and synchronize
     // them with the control's properties through bind()?
     // => obviously, there is no need to do this - the "LabelSkinBase" class,
@@ -24,7 +25,7 @@ public class SevenSegmentPanelSkin extends SkinBase<SevenSegmentPanel> {
     // (for the skin to be useable in -fx-skin CSS) - how is the code flow then? 
     // when does the UI need to be initialized? Were do we get the number of digits from?
     public SevenSegmentPanelSkin(SevenSegmentPanel control, int numberOfDigits) {
-        super(control);
+        super(control); // NOTE: SkinBase only has a Control parameter!  ... , new SevenSegmentPanelBehavior(control)));
 
         initialize(numberOfDigits);
 
@@ -44,10 +45,13 @@ public class SevenSegmentPanelSkin extends SkinBase<SevenSegmentPanel> {
         final HBox displayGroup = new HBox();
         displayGroup.setId("segments");
 
-        digits = new SevenSegment[numberOfDigits];
+        //digits = new SevenSegment[numberOfDigits];
+        digits = new FourteenSegment[numberOfDigits];
         for (int i = 0;  i < numberOfDigits;  i++) {
-            digits[i] = new SevenSegment();
+            //digits[i] = new SevenSegment();
+            digits[i] = new FourteenSegment();
             digits[i].setId("seg" + i);
+            digits[i].getCurrentMaskProperty().addListener(l -> System.err.println("MASK CHANGED."));
             displayGroup.getChildren().add(digits[i]);
         }
         displayGroup.setMaxSize(displayGroup.getMaxWidth(), displayGroup.getPrefHeight());
@@ -57,13 +61,15 @@ public class SevenSegmentPanelSkin extends SkinBase<SevenSegmentPanel> {
     }
 
     private void setOnColor(Color col) {
-        for (SevenSegment s : digits) {
+        //for (SevenSegment s : digits) {
+        for (FourteenSegment s : digits) {
             s.setOnColor(col);
         }
     }
 
     private void setOffColor(Color col) {
-        for (SevenSegment s : digits) {
+        //for (SevenSegment s : digits) {
+        for (FourteenSegment s : digits) {
             s.setOffColor(col);
         }
     }
