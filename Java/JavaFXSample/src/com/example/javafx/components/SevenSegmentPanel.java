@@ -7,6 +7,8 @@ import java.util.Locale;
 
 import com.sun.javafx.css.converters.ColorConverter;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.css.CssMetaData;
@@ -14,7 +16,9 @@ import javafx.css.SimpleStyleableObjectProperty;
 import javafx.css.Styleable;
 import javafx.css.StyleableObjectProperty;
 import javafx.css.StyleableProperty;
+import javafx.event.EventHandler;
 import javafx.scene.control.Control;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 
 /**
@@ -60,6 +64,13 @@ public class SevenSegmentPanel extends Control {
     public Color getOffColor() { return offColor.get(); }
     public void setOffColor(Color col) { offColor.set(col); }
     public StyleableObjectProperty<Color> offColorProperty() { return offColor; }
+
+    /** Event handler handling for digit changes */
+    private ObjectProperty<EventHandler<DigitChangeEvent>> digitChangedProperty = 
+            new SimpleObjectProperty<>();
+    public void setOnDigitChanged(EventHandler<DigitChangeEvent> handler) { onDigitChangedProperty().set(handler); }
+    public final EventHandler<DigitChangeEvent> getOnDigitChanged() { return onDigitChangedProperty().get(); }
+    public final ObjectProperty<EventHandler<DigitChangeEvent>> onDigitChangedProperty() { return digitChangedProperty; }
 
     
     /**

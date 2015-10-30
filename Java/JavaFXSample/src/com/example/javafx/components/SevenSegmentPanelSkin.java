@@ -1,5 +1,8 @@
 package com.example.javafx.components;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.event.EventHandler;
 import javafx.scene.control.SkinBase;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -41,17 +44,29 @@ public class SevenSegmentPanelSkin extends SkinBase<SevenSegmentPanel> {
         //text.bind(control.textProperty());
     }
 
+    private int i = 0;
     private void initialize(int numberOfDigits) {
         final HBox displayGroup = new HBox();
         displayGroup.setId("segments");
 
         //digits = new SevenSegment[numberOfDigits];
         digits = new FourteenSegment[numberOfDigits];
-        for (int i = 0;  i < numberOfDigits;  i++) {
+        for (i = 0;  i < numberOfDigits;  i++) {
             //digits[i] = new SevenSegment();
             digits[i] = new FourteenSegment();
             digits[i].setId("seg" + i);
-            digits[i].getCurrentMaskProperty().addListener(l -> System.err.println("MASK CHANGED."));
+            digits[i].getCurrentMaskProperty().addListener(new InvalidationListener() {
+
+                private FourteenSegment source = null;
+                { source = digits[i]; }
+
+                @Override
+                public void invalidated(Observable observable) {
+                    EventHandler<DigitChangeEvent> handler = SevenSegmentPanelSkin.this.getSkinnable().getOnDigitChanged();
+                    handler.handle(new DigitChangeEvent(source));
+                }
+                
+            });
             displayGroup.getChildren().add(digits[i]);
         }
         displayGroup.setMaxSize(displayGroup.getMaxWidth(), displayGroup.getPrefHeight());

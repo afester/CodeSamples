@@ -1,5 +1,6 @@
 package com.example.javafx;
 
+import com.example.javafx.components.FourteenSegment;
 import com.example.javafx.components.Meter;
 import com.example.javafx.components.SevenSegmentPanel;
 
@@ -40,16 +41,24 @@ public class SegmentEditor {
         leftBox.setAlignment(Pos.CENTER);
 
         // create panel digit
+        Label label = new Label("00000000000000");
+
         SevenSegmentPanel s7Panel = new SevenSegmentPanel(1);
         s7Panel.setId("current");
         s7Panel.setText("");
-        
-        Label label = new Label("00000000000000");
+        s7Panel.setOnDigitChanged(e -> {
+            FourteenSegment digit = (FourteenSegment) e.getSource();
+            String res = Long.toBinaryString(digit.getCurrentMask());
+            res = String.format("%16s", res).replace(' ', '0');
+            label.setText(res);
+        });
+        s7Panel.setOnKeyPressed(null);
+
         leftBox.getChildren().addAll(s7Panel, label);
 
         // create table
-        TableView table = new TableView();
-        TableColumn<?, ?> codepoint = new TableColumn("CodePoint");
+        TableView<TableRow> table = new TableView<>();
+        TableColumn codepoint = new TableColumn("CodePoint");
         codepoint.setCellValueFactory(new PropertyValueFactory("codePoint"));
         TableColumn character = new TableColumn("Char");
         character.setCellValueFactory(new PropertyValueFactory("character"));
@@ -58,7 +67,6 @@ public class SegmentEditor {
 
         table.getColumns().addAll(codepoint, character, segmentMask);
 
-        
         ObservableList rows = FXCollections.observableArrayList();
         for (int i = 32;  i <= 128;  i++) {
             rows.add(new TableRow(i));
