@@ -91,11 +91,7 @@ public class FourteenSegment extends Group {
         0b0000000000000010
     };
 
-    private void toggle(int idx) {
-        System.err.println("TOGGLE: " + idx);
-    }
 
-    //int mask = 0b0000000000000001;
     int idx = 0;
     public FourteenSegment() {
 
@@ -130,6 +126,20 @@ public class FourteenSegment extends Group {
                                 // the panel shape to not be rendered at all
         clear();
         setDP(false);
+        
+        currentMaskProperty.addListener(e -> {
+            long mask = ((LongProperty) e).getValue();
+
+            long bit = 1;
+            for (int s = 0;  s < segments.length;  s++) {
+                if ((mask & bit) != 0) {
+                    segments[s].setFill(onColor);
+                } else {
+                    segments[s].setFill(offColor);
+                }
+                bit <<= 1;
+            }
+        });
     }
 
 

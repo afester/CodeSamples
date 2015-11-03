@@ -102,6 +102,9 @@ public class SevenSegmentPanel extends Control {
         format = String.format("%%%d.%df", numberOfDigits + 1, decimalCount);
     }
 
+    public void setSegmentMap(int i, long segmentMap) {
+        ((SevenSegmentPanelSkin) getSkin()).setSegmentMap(i, segmentMap);   // TODO: Is there a better approach??
+    }
 
     /**
      * Sets a floting point number to display in the display panel.

@@ -1,5 +1,7 @@
 package com.example.javafx;
 
+import java.io.Serializable;
+
 import com.example.javafx.components.Meter;
 import com.example.javafx.components.SevenSegmentPanel;
 
@@ -30,28 +32,45 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Scale;
 
 
-public class TableRow {
-    private int xcodePoint;
-    private char xcharacter;
-    private long xsegmentMap;
+public class TableRow implements Serializable {
+    private static final long serialVersionUID = 892250634507648425L;
+
+    private int codePoint;
+    private char character;
+    private long segmentMap;
+    private boolean isSupported;
     
     public TableRow(int codePoint) {
-        this.xcodePoint = codePoint;
-        this.xcharacter = (char) codePoint; 
-        xsegmentMap = 0;
+        this.codePoint = codePoint;
+        this.character = (char) codePoint; 
+        segmentMap = 0;
+        isSupported = true;
     }
+
     
-    
+    public boolean isSupported() {
+        return isSupported;
+    }
+
     public String getCodePoint() {
-        return String.valueOf(xcodePoint);
+        return String.valueOf(codePoint);
     }
     
     public String getCharacter() {
-        return String.valueOf(xcharacter);
+        return String.valueOf(character);
+    }
+
+    public String getSegmentMapString() {
+        String res = Long.toBinaryString(segmentMap);
+        return String.format("%16s", res).replace(' ', '0');
     }
     
-    public String getSegmentMap() {
-        String res = Long.toBinaryString(xsegmentMap);
-        return String.format("%16s", res).replace(' ', '0');
+    public long getSegmentMap() {
+        return segmentMap;
+    }
+
+
+    public void setSegmentMap(long currentMask) {
+        segmentMap = currentMask;
     }
 }

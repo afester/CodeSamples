@@ -75,6 +75,12 @@ public class SevenSegmentPanelSkin extends SkinBase<SevenSegmentPanel> {
         getChildren().add(displayGroup); // !!!! Nodes are added to the Control's children through this getChildren() method inherited from SkinBase!
     }
 
+
+    public void setSegmentMap(int idx, long segmentMap) {
+        digits[idx].setCurrentMask(segmentMap);
+    }
+
+
     private void setOnColor(Color col) {
         //for (SevenSegment s : digits) {
         for (FourteenSegment s : digits) {
@@ -119,5 +125,4 @@ public class SevenSegmentPanelSkin extends SkinBase<SevenSegmentPanel> {
             double rightInset, double bottomInset, double leftInset) {
         return computePrefHeight(width, topInset, rightInset, bottomInset, leftInset);
     }
-
 }
