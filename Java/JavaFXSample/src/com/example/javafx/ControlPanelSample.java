@@ -32,10 +32,11 @@ public class ControlPanelSample {
         Region r = new Button("Hello World");
         r.setId("hello");
 
-        SevenSegmentPanel s7Panel = new SevenSegmentPanel(4, 2);
+        SevenSegmentPanel s7Panel = new SevenSegmentPanel(10, 0);
         s7Panel.setId("current");
         s7Panel.getTransforms().add(new Scale(0.6, 0.6));
-        s7Panel.setValue(0);
+        // s7Panel.setValue(0);
+        s7Panel.setText("Andreas");
 
         // Note: A region alone does not *reposition* its children!
         // hence we wrap the LED panel in a HBox which allows us to define the

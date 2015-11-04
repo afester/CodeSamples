@@ -56,8 +56,8 @@ public class TableRow implements Serializable {
         return String.valueOf(codePoint);
     }
     
-    public String getCharacter() {
-        return String.valueOf(character);
+    public Character getCharacter() {
+        return character;
     }
 
     public String getSegmentMapString() {

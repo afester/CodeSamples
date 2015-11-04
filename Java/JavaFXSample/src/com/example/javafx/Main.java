@@ -66,8 +66,8 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Control panel sample");
 
-        //ControlPanelSample cps = new ControlPanelSample();
-        SegmentEditor cps = new SegmentEditor(primaryStage);
+        ControlPanelSample cps = new ControlPanelSample();
+        //SegmentEditor cps = new SegmentEditor(primaryStage);
         Scene scene = cps.createScene();
 
         primaryStage.setScene(scene);

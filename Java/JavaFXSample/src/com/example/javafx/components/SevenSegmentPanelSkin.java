@@ -1,5 +1,7 @@
 package com.example.javafx.components;
 
+import java.io.CharConversionException;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.event.EventHandler;
@@ -63,9 +65,11 @@ public class SevenSegmentPanelSkin extends SkinBase<SevenSegmentPanel> {
                 @Override
                 public void invalidated(Observable observable) {
                     EventHandler<DigitChangeEvent> handler = SevenSegmentPanelSkin.this.getSkinnable().getOnDigitChanged();
-                    handler.handle(new DigitChangeEvent(source));
+                    if (handler != null) {
+                        handler.handle(new DigitChangeEvent(source));
+                    }
                 }
-                
+
             });
             displayGroup.getChildren().add(digits[i]);
         }
@@ -95,7 +99,7 @@ public class SevenSegmentPanelSkin extends SkinBase<SevenSegmentPanel> {
         }
     }
 
-    private void setText(String text) {
+    private void setText(String text) throws CharConversionException {
 
         // TODO: use Java 1.8 chars() method!
 

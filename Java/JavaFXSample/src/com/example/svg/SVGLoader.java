@@ -99,7 +99,7 @@ public class SVGLoader implements CSSContext {
     
     private Group result;
     
-    private boolean addRootRect = false;    // flag wheter to add a rectangle in the size of the drawing
+    private boolean addRootRect = false;    // flag whether to add a rectangle in the size of the drawing
 
 
     public SVGLoader() {
@@ -111,7 +111,7 @@ public class SVGLoader implements CSSContext {
      *
      * @return A JavaFX node representing the SVG file.
      */
-    public Node loadSvg(String fileName) {
+    public Group loadSvg(String fileName) {
         // note: uses the DOM approach.
         // probably a SAX based approach would be better from a performance perspective.
         SVGOMDocument doc = (SVGOMDocument) loadSvgDocument(fileName);
@@ -610,7 +610,7 @@ public class SVGLoader implements CSSContext {
      * @param The name of the SVG file to load.
      * @return An XML document with the loaded SVG file.
      */
-    public Document loadSvgDocument(String fileName) {
+    private Document loadSvgDocument(String fileName) {
         String parser = XMLResourceDescriptor.getXMLParserClassName();
         SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parser);
         try {

@@ -1,10 +1,15 @@
 package com.example.javafx.components;
 
-import java.util.Arrays;
+import java.io.CharConversionException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -12,6 +17,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 
+import com.example.javafx.TableRow;
 import com.example.svg.SVGLoader;
 
 /**
@@ -28,69 +34,17 @@ public class FourteenSegment extends Group {
     private Color onColor = Color.RED; //  new Color(0x23 / 255.0, 0x2A / 255.0, 0x47 / 255.0, 1.0);
     private Color offColor = Color.GREEN; // new Color(0xC9 / 255.0, 0xD3 / 255.0, 0xBB / 255.0, 1.0);
     private Color bgColor = Color.VIOLET;
-    private int number;
+    private char content;
     private boolean isDp;
 
     private LongProperty currentMaskProperty = new SimpleLongProperty(0);
     public LongProperty getCurrentMaskProperty() { return currentMaskProperty; }
     public long getCurrentMask() { return currentMaskProperty.get(); }
     public void setCurrentMask(long value) { currentMaskProperty.set(value); }
-    
-    private final static boolean[][] digits = new boolean[][] {
-        //     a
-        //    __
-        //  f| g|  b
-        //    --
-        //  e|__|  c
-        //     d
-        //
-        // a     b      c      d      e      f      g1      g2     h       i      j       k      l       m
-        {true,  true,  true,  true,  true,  true,  false,  false, false, false, true,  false, false,  true}, // 0
-        {false, true,  true,  false, false, false, false,  false, false, false, false,  false, false,  false}, //1
-        {true,  true,  false, true,  true,  false, true ,  true, false, false, false,  false, false,  false}, // 2
-        {true,  true,  true,  true,  false, false, false,  true, false, false, false,  false, false,  false}, // 3
-        {false, true,  true,  false, false, true,  true ,  true, false, false, false,  false, false,  false}, // 0
-        {true,  false, true,  true,  false, true,  true ,  true, false, false, false,  false, false,  false}, // 0
-        {true,  false, true,  true,  true,  true,  true ,  false, false, false, false,  false, false,  false}, // 0
-        {true,  true,  true,  false, false, false, false,  false, false, false, false,  false, false,  false}, // 0
-        {true,  true,  true,  true,  true,  true,  true ,  false, false, false, false,  false, false,  false}, // 0
-        {true,  true,  true,  true,  false, true,  true ,  false, false, false, false,  false, false,  false}, // 0
-
-        {true,  true,  true,  false, true,  true,  true ,  false, false, false, false,  false, false,  false}, // 0
-        {false, false, true,  true,  true,  true,  true ,  false, false, false, false,  false, false,  false}, // 0
-        {true,  false, false, true,  true,  true,  false,  false, false, false, false,  false, false,  false}, // 0
-        {false, true,  true,  true,  true,  false, true ,  false, false, false, false,  false, false,  false}, // 0
-        {true,  false, false, true,  true,  true,  true ,  false, false, false, false,  false, false,  false}, // 0
-        {true,  false, false, false, true,  true,  true ,  false, false, false, false,  false, false,  false}, // 0
-
-        {false, false, false, false, true,  false, true ,  false, false, false, false,  false, false,  false}, // 0
-        {false, false, true,  true,  true,  false, false,  false, false, false, false,  false, false,  false}, // 0
-        {false, false, false, false, true,  true,  false,  false, false, false, false,  false, false,  false}, // 0
-        {false, false, true,  true,  true,  false, false,  false, false, false, false,  false, false,  false}, // 0
-        {false, false, false, false, false, false, false,  false, false, false, false,  false, false,  false}, // 0
-        {false, true,  true,  false, true,  true,  true ,  false, false, false, false,  false, false,  false}, // 0
-        {false, false, false, true,  true,  true,  false,  false, false, false, false,  false, false,  false}, // 0
-        {true,  true,  false, false, true,  true,  true ,  false, false, false, false,  false, false,  false}, // 0
-        {false, true,  false, false, true,  true,  true ,  false, false, false, false,  false, false,  false}, // 0
-        {false, false, true,  false, true,  false, true ,  false, false, false, false,  false, false,  false} // 0
-    };
 
 
-    //     a
-    //    -- --
-    //  f|\ | /|
-    //  f| \|/ |
-    //    -- --
-    //   | /|\ |
-    //  e|/ | \|
-    //    -- --
-
-    private final static long segmentTable[] = {
-        0b0000000000000000,
-        0b0000000000000001,
-        0b0000000000000010
-    };
-
+    // TODO: static data - required once only!
+    private final /* static */ Map<Character, Long> segmentTable = new HashMap<>();
 
     int idx = 0;
     public FourteenSegment() {
@@ -124,8 +78,6 @@ public class FourteenSegment extends Group {
                                 // the bounds of the panel shape are not considered
                                 // when layouting! i.e. setFill(null) will cause
                                 // the panel shape to not be rendered at all
-        clear();
-        setDP(false);
         
         currentMaskProperty.addListener(e -> {
             long mask = ((LongProperty) e).getValue();
@@ -140,6 +92,24 @@ public class FourteenSegment extends Group {
                 bit <<= 1;
             }
         });
+        
+        
+        // load the character set
+        try (ObjectInputStream source = new ObjectInputStream(new FileInputStream("charset14.dat"))) {
+            TableRow[] loadedRows = (TableRow[]) source.readObject();
+            for (TableRow row : loadedRows) {
+                segmentTable.put(row.getCharacter(), row.getSegmentMap());
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        clear();
+        setDP(false);
     }
 
 
@@ -155,7 +125,11 @@ public class FourteenSegment extends Group {
      */
     public void setOnColor(Color col) {
         onColor = col;
-        setDigit(this.number);
+        try {
+            setChar(this.content);
+        } catch (CharConversionException e) {
+            e.printStackTrace();
+        }
         setDP(this.isDp);
     }
 
@@ -170,7 +144,11 @@ public class FourteenSegment extends Group {
      */
     public void setOffColor(Color col) {
         offColor = col;
-        setDigit(this.number);
+        try {
+            setChar(this.content);
+        } catch (CharConversionException e) {
+            e.printStackTrace();
+        }
         setDP(this.isDp);
     }
 
@@ -200,56 +178,31 @@ public class FourteenSegment extends Group {
      * 
      * @param number The number to show (0 to 15)
      */
-    public void setDigit(int number) {
+/*    public void setDigit(int number) {
         this.number = number;
         for (int s = 0;  s < segments.length;  s++) {
             setSegmentEnabled(s, digits[number][s]);
         }
     }
-
+*/
 
     /**
-     * Shows a particular character in the display.
-     * Currently, the display supports numbers from 0 to 9 and the characters
-     * <code>abcdef</code> (shown in either capital or non-capital depending on the 
-     * actual character - e.g. 'a' is always displayed as "A", independant whether
-     * it is passed as 'a' or 'A').
-     * Additionally, the characters <code>HlLnoOPrvµ</code> and the space character
-     * are supported. The capital 'O' is shown identical to the number 0,
-     * and the rendering of the 'v' looks very bad.
-     *
+     * Shows a particular character in this display digit.
+     * Currently all characters from code point 32 (space character) to code point
+     * 127 are supported.
+     * Unsupported characters will throw a Runtime exception.
+     
      * @param c The character to display.
-     * @throws RuntimeException if the character is not supported. Some
-     *         characters (such as M or Z) can not be displayed with seven segments
-     *         in a useful way. Use an 14 segment display instead. 
+     * @throws CharConversionException if the character is not supported.
      */
-    public void setChar(char c) {
-        if (c < 32 || c >= 128) {
-            throw new RuntimeException("Error: invalid character '" + c + "'");
+    public void setChar(char c) throws CharConversionException {
+        Long segmentMask = segmentTable.get(c);
+        if (segmentMask == null) {
+            throw new CharConversionException("Error: invalid character '" + c + "'");
         }
 
-        // " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
-        int hexVal = Character.digit(c, 16);
-        if (hexVal >= 0) {
-            setDigit(hexVal);
-        } else {
-            switch(c) {
-                // TODO: Use Map
-                case 'O' : setDigit(0);   break;
-                case 'r' : setDigit(16);  break;
-                case 'v' : setDigit(17);  break;
-                case 'l' : setDigit(18);  break;
-                case 'o' : setDigit(19);  break;
-                case ' ' : setDigit(20);  break;
-                case 'H' : setDigit(21);  break;
-                case 'L' : setDigit(22);  break;
-                case 'P' : setDigit(23);  break;
-                case 'µ' : setDigit(24);  break;
-
-                default:
-                    throw new RuntimeException("Error: invalid character '" + c + "'");
-            }
-        }
+        setCurrentMask(segmentMask);
+        content = c;
     }
 
 
@@ -258,10 +211,15 @@ public class FourteenSegment extends Group {
      * method - to disable all segments, use clear() and setDP(false).
      */
     public void clear() {
-        for (SVGPath seg : segments) {
-            seg.setFill(offColor);
+//        for (SVGPath seg : segments) {
+//            seg.setFill(offColor);
+//        }
+        try {
+            setChar(' ');
+        } catch (CharConversionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-        this.number = 20; // space ; TODO!
     }
 
     /**
