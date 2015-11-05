@@ -1,19 +1,18 @@
 package com.example.svg;
 
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -29,6 +28,7 @@ import org.apache.batik.anim.dom.SVGOMAnimatedPathData;
 import org.apache.batik.anim.dom.SVGOMAnimatedPathData.BaseSVGPathSegList;
 import org.apache.batik.anim.dom.SVGOMDefsElement;
 import org.apache.batik.anim.dom.SVGOMDocument;
+import org.apache.batik.anim.dom.SVGOMElement;
 import org.apache.batik.anim.dom.SVGOMGElement;
 import org.apache.batik.anim.dom.SVGOMMetadataElement;
 import org.apache.batik.anim.dom.SVGOMPathElement;
@@ -46,10 +46,6 @@ import org.apache.batik.css.dom.CSSOMStyleDeclaration.StyleDeclarationValue;
 import org.apache.batik.css.engine.CSSContext;
 import org.apache.batik.css.engine.CSSEngine;
 import org.apache.batik.css.engine.value.Value;
-import org.apache.batik.dom.GenericComment;
-import org.apache.batik.dom.GenericElementNS;
-import org.apache.batik.dom.GenericText;
-import org.apache.batik.dom.svg.SVGContext;
 import org.apache.batik.dom.svg.SVGPathSegItem;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
@@ -101,10 +97,139 @@ public class SVGLoader implements CSSContext {
     
     private boolean addRootRect = false;    // flag whether to add a rectangle in the size of the drawing
 
+    
+    private Map<String, Consumer<SVGOMElement>> elementMap = new HashMap<>();
 
     public SVGLoader() {
+        elementMap.put("svg",      e -> handleElement((SVGOMSVGElement) e));
+        elementMap.put("defs",     e -> handleElement((SVGOMDefsElement) e));
+        elementMap.put("metadata", e -> handleElement((SVGOMMetadataElement) e));
+        elementMap.put("g",        e -> handleElement((SVGOMGElement) e));
+        elementMap.put("path",     e -> handleElement((SVGOMPathElement) e));
+        elementMap.put("rect",     e -> handleElement((SVGOMRectElement) e));
+        elementMap.put("text",     e -> handleElement((SVGOMTextElement) e));
+        elementMap.put("tspan",    e -> handleElement((SVGOMTSpanElement) e));
+        elementMap.put("pattern",  e -> handleElement((SVGOMPatternElement) e));
     }
 
+
+    void handleElement(SVGOMSVGElement element) {
+        // optionally add a rectangle using the size of the whole drawing
+        if (addRootRect) {
+            float height = element.getViewBox().getBaseVal().getHeight();
+            float width = element.getViewBox().getBaseVal().getWidth();
+            Rectangle result = new Rectangle(width,  height, null);
+            result.setId(element.getId());
+            result.setStroke(Color.BLACK);
+            result.getStrokeDashArray().addAll(3.0,7.0,3.0,7.0);
+
+            parentNode.getChildren().add(result);    
+        }
+    }
+
+
+    void handleElement(SVGOMDefsElement element) {
+        System.err.println("Handling <defs>: " + element);
+    }
+
+
+    void handleElement(SVGOMGElement element) {
+        Group result = new Group();
+        result.setId(element.getId());
+
+        Affine transformation = getTransform(element);
+        if (transformation != null) {
+            result.getTransforms().add(transformation);
+        }
+
+        // TODO: Can a group inherit its presentation properties to its children??
+        //applyStyle(fxObj, obj);
+        //fxObj.setStyle("-fx-background-color: blue; -fx-stroke-color: yellow;");
+        parentStroke = getStrokeColor(element);
+        parentFill = getFillColor(element);
+
+        parentNode.getChildren().add(result);
+        parentNode = result;
+    }
+
+
+    void handleElement(SVGOMMetadataElement element) {
+        System.err.println("Handling <metadata>: " + element);
+    }
+
+    
+    void handleElement(SVGOMPathElement element) {
+        // Get attributes from SVG node
+        String path = element.getAttribute("d");
+
+        // Create JavaFX SVGPath object
+        SVGPath result = new SVGPath();
+        result.setId(element.getId());
+        result.setContent(path);
+
+        Affine transformation = getTransform(element);
+        if (transformation != null) {
+            result.getTransforms().add(transformation);
+        }
+
+        applyStyle(result, element);
+
+        //fxObj.setStroke(Color.VIOLET);
+        parentNode.getChildren().add(result);
+    }
+   
+    void handleElement(SVGOMRectElement element) {
+        // Get attributes from SVG node
+        float xpos = element.getX().getBaseVal().getValue();
+        float ypos = element.getY().getBaseVal().getValue();
+        float width = element.getWidth().getBaseVal().getValue();
+        float height = element.getHeight().getBaseVal().getValue();
+        float rX = element.getRx().getBaseVal().getValue();
+        float rY = element.getRy().getBaseVal().getValue();
+
+        // Create JavaFX Rectangle object
+        Rectangle result = new Rectangle(xpos, ypos, width, height);
+        result.setId(element.getId());
+        result.setArcWidth(2*rX);
+        result.setArcHeight(2*rY);
+
+        Affine transformation = getTransform(element);
+        if (transformation != null) {
+            result.getTransforms().add(transformation);
+        }
+
+        applyStyle(result, element);
+
+        parentNode.getChildren().add(result);
+    }
+
+    void handleElement(SVGOMTextElement element) {
+        // Get attributes from SVG node
+        String text = element.getTextContent();
+        float xpos = element.getX().getBaseVal().getItem(0).getValue();
+        float ypos = element.getY().getBaseVal().getItem(0).getValue();
+
+        // Create JavaFX text object
+        Text result = new Text(xpos, ypos, text);
+        result.setId(element.getId());
+
+        Affine transformation = getTransform(element);
+        if (transformation != null) {
+            result.getTransforms().add(transformation);
+        }
+
+        applyTextStyle(result, element);
+
+        parentNode.getChildren().add(result);
+    }
+
+    void handleElement(SVGOMTSpanElement element) {
+        System.err.println("Handling <tspan>: " + element);
+    }
+
+    void handleElement(SVGOMPatternElement element) {
+        System.err.println("Handling <pattern>: " + element);
+    }
 
     /**
      * @param fileName The name of the SVG file to load.
@@ -132,8 +257,6 @@ public class SVGLoader implements CSSContext {
     }
 
     
-
-
     private String indent(int level) {
         return "                                    ".substring(0, level*2);
     }
@@ -142,101 +265,22 @@ public class SVGLoader implements CSSContext {
     private int level = 0;
     
     private void handle(org.w3c.dom.Node node) {
-/*        if (node instanceof SVGElement) {
-            SVGElement e = (SVGElement) node;
-            System.err.println("NODE TYPE: " + e.getNodeType());
-        } else {
-            System.err.println("NOPE.");
-        }
-*/
-        Node result = null;
-
         Group par = parentNode;  // save current parent
         Color parFill = parentFill;
         Color parStroke = parentStroke;
 
-        // System.err.printf("%s%s\n", indent(level), node.getClass());
-
-        if (node instanceof SVGOMDocument) {
-            SVGOMDocument obj = (SVGOMDocument) node;
-            //System.err.printf("%s%s\n", indent(level), "SVGOMDocument");
-
-        // The <svg> tag
-        } else if (node instanceof SVGOMSVGElement) {
-            SVGOMSVGElement obj = (SVGOMSVGElement) node;
-
-            // optionally add a rectangle using the size of the whole drawing
-            if (addRootRect) {
-                float height = obj.getViewBox().getBaseVal().getHeight();
-                float width = obj.getViewBox().getBaseVal().getWidth();
-                result = new Rectangle(width,  height, null);
-                ((Rectangle)result).setStroke(Color.BLACK);
-                ((Rectangle)result).getStrokeDashArray().addAll(3.0,7.0,3.0,7.0);
-                result.setId(obj.getId());
+        // Dispatch handling of the current node to its handler
+        String localName = node.getLocalName();
+        if (localName != null) {
+            Consumer<SVGOMElement> c = elementMap.get(node.getLocalName());
+            if (c != null) {
+                c.accept((SVGOMElement) node);
+            } else {
+                System.err.println("UNKNOWN:" + node.getLocalName() + "/" + node);
             }
-
-        } else if (node instanceof GenericComment) {
-            GenericComment obj = (GenericComment) node;
-            //System.err.printf("%s%s\n", indent(level), "GenericComment");
-            
-        } else if (node instanceof GenericText) {
-            GenericText obj = (GenericText) node;
-            //System.err.printf("%s%s\n", indent(level), "GenericText");
-            
-        } else if (node instanceof SVGOMDefsElement) {
-            SVGOMDefsElement obj = (SVGOMDefsElement) node;
-            //System.err.printf("%s%s\n", indent(level), "SVGOMDefsElement");
-            
-        } else if (node instanceof GenericElementNS) {
-            GenericElementNS obj = (GenericElementNS) node;
-            //System.err.printf("%s%s\n", indent(level), "GenericElementNS");
-            
-        } else if (node instanceof SVGOMMetadataElement) {
-            SVGOMMetadataElement obj = (SVGOMMetadataElement) node;
-            //System.err.printf("%s%s\n", indent(level), "SVGOMMetadataElement");
-
-        // The <svg:g> element
-        } else if (node instanceof SVGOMGElement) {
-            SVGOMGElement obj = (SVGOMGElement) node;
-            //System.err.printf("%s%s\n", indent(level), "SVGOMGElement");
-            handleGroup(obj);
-
-        // The <svg:path> element
-        } else if (node instanceof SVGOMPathElement) {
-            SVGOMPathElement obj = (SVGOMPathElement) node;
-            //System.err.printf("%s%s\n", indent(level), "SVGOMPathElement");
-            result = handlePath(obj);
-            
-        // The <svg:rect> element
-        } else if (node instanceof SVGOMRectElement) {
-            SVGOMRectElement obj = (SVGOMRectElement) node;
-            //System.err.printf("%s%s\n", indent(level), "SVGOMRectElement");
-            result = handleRect(obj);
-
-        // The <svg:text> element
-        } else if (node instanceof SVGOMTextElement) {
-            SVGOMTextElement obj = (SVGOMTextElement) node;
-            //System.err.printf("%s%s\n", indent(level), "SVGOMTextElement");
-            result = handleText(obj);
-
-        } else if (node instanceof SVGOMTSpanElement) {
-            SVGOMTSpanElement obj = (SVGOMTSpanElement) node;
-            //System.err.printf("%s%s\n", indent(level), "SVGOMTSpanElement");
-
-        } else if (node instanceof SVGOMPatternElement) {
-            SVGOMPatternElement obj = (SVGOMPatternElement) node;
-            //System.err.printf("%s%s\n", indent(level), "SVGOMPatternElement: " + obj);
-            
-        } else {
-            System.err.println("UNKNOWN: " + node.getClass().getName());
         }
 
-        if (result != null) {
-            // System.err.println(result);
-            parentNode.getChildren().add(result);
-        }
-
-
+        // Recursively handle child nodes
         level++;
         NodeList children = node.getChildNodes();
         for (int i = 0;  i < children.getLength();  i++) {
@@ -327,6 +371,7 @@ public class SVGLoader implements CSSContext {
         return result;
     }
 
+    
     private Color getStrokeColor(SVGStylableElement obj) {
         CSSStyleDeclaration style = obj.getStyle();
 
@@ -405,72 +450,6 @@ public class SVGLoader implements CSSContext {
         font-weight:normal;
         font-stretch:normal;
 */
-    }
-
-    private Node handleText(SVGOMTextElement obj) {
-        // Get attributes from SVG node
-        String text = obj.getTextContent();
-        float xpos = obj.getX().getBaseVal().getItem(0).getValue();
-        float ypos = obj.getY().getBaseVal().getItem(0).getValue();
-
-        // Create JavaFX text object
-        Text fxObj = new Text(xpos, ypos, text);
-        fxObj.setId(obj.getId());
-
-        Affine transformation = getTransform(obj);
-        if (transformation != null) {
-            fxObj.getTransforms().add(transformation);
-        }
-
-        applyTextStyle(fxObj, obj);
-
-        return fxObj;
-    }
-
-    private Node handleRect(SVGOMRectElement obj) {
-        // Get attributes from SVG node
-        float xpos = obj.getX().getBaseVal().getValue();
-        float ypos = obj.getY().getBaseVal().getValue();
-        float width = obj.getWidth().getBaseVal().getValue();
-        float height = obj.getHeight().getBaseVal().getValue();
-        float rX = obj.getRx().getBaseVal().getValue();
-        float rY = obj.getRy().getBaseVal().getValue();
-
-        // Create JavaFX Rectangle object
-        Rectangle fxObj = new Rectangle(xpos, ypos, width, height);
-        fxObj.setId(obj.getId());
-        fxObj.setArcWidth(2*rX);
-        fxObj.setArcHeight(2*rY);
-
-        Affine transformation = getTransform(obj);
-        if (transformation != null) {
-            fxObj.getTransforms().add(transformation);
-        }
-
-        applyStyle(fxObj, obj);
-        
-        return fxObj;
-    }
-
-    
-    private Node handlePath(SVGOMPathElement element) {
-        // Get attributes from SVG node
-        String path = element.getAttribute("d");
-
-        // Create JavaFX SVGPath object
-        SVGPath fxObj = new SVGPath();
-        fxObj.setContent(path);
-        fxObj.setId(element.getId());
-
-        Affine transformation = getTransform(element);
-        if (transformation != null) {
-            fxObj.getTransforms().add(transformation);
-        }
-
-        applyStyle(fxObj, element);
-
-        //fxObj.setStroke(Color.VIOLET);
-        return fxObj;
     }
 
 
@@ -586,39 +565,19 @@ public class SVGLoader implements CSSContext {
     }
 
 
-    private void handleGroup(SVGOMGElement obj) {
-        Group fxObj = new Group();
-        fxObj.setId(obj.getId());
-
-        Affine transformation = getTransform(obj);
-        if (transformation != null) {
-            fxObj.getTransforms().add(transformation);
-        }
-
-        // TODO: Can a group inherit its presentation properties to its children??
-        //applyStyle(fxObj, obj);
-        //fxObj.setStyle("-fx-background-color: blue; -fx-stroke-color: yellow;");
-        parentStroke = getStrokeColor(obj);
-        parentFill = getFillColor(obj);
-
-        parentNode.getChildren().add(fxObj);
-        parentNode = fxObj;
-    }
-
-
     /**
      * @param The name of the SVG file to load.
      * @return An XML document with the loaded SVG file.
      */
-    private Document loadSvgDocument(String fileName) {
+    public Document loadSvgDocument(String fileName) {
         String parser = XMLResourceDescriptor.getXMLParserClassName();
         SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parser);
         try {
             String uri = new File(fileName).toURL().toString();
             SVGOMDocument doc = (SVGOMDocument) f.createDocument(uri);
+
             SVGDOMImplementation impl = (SVGDOMImplementation) ((SVGOMDocument) doc).getImplementation();
             CSSEngine eng = impl.createCSSEngine(doc, this);
-
             doc.setCSSEngine(eng);
 
             return doc;

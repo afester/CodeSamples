@@ -17,8 +17,14 @@ public class SVGSample extends Application {
         primaryStage.setTitle("SVG Display sample");
 
         SVGLoader loader = new SVGLoader();
+
         Group svgImage = loader.loadSvg("Ghostscript_Tiger.svg");
-        
+        //Group svgImage = loader.loadSvg("7segment.svg");
+        //Group svgImage = loader.loadSvg("meter.svg");
+
+        //Document doc = loader.loadSvgDocument("Ghostscript_Tiger.svg");
+        //Group svgImage = new Group(new ImageView(loader.getImage(doc)));
+
         Scene scene = new Scene(svgImage, 800, 600);
 
         primaryStage.setScene(scene);
