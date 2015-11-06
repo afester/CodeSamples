@@ -33,6 +33,7 @@ import javafx.scene.paint.Stop;
 import javafx.scene.shape.Arc;
 import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.Ellipse;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Scale;
@@ -63,7 +64,7 @@ public class Main extends Application {
 
 
     //@Override
-    public void start(Stage primaryStage) {
+    public void start2(Stage primaryStage) {
         primaryStage.setTitle("Control panel sample");
 
         ControlPanelSample cps = new ControlPanelSample();
@@ -76,7 +77,7 @@ public class Main extends Application {
 
 
     //@Override
-    public void start2(Stage primaryStage) {
+    public void start(Stage primaryStage) {
         primaryStage.setTitle("Sample application for JavaFX components");
 
         final Group mainGroup = new Group();
@@ -259,6 +260,15 @@ public class Main extends Application {
 
         mainGroup.getChildren().add(grid);
         mainGroup.getChildren().add(b3);
+
+        
+        
+        Group sg = new Group();
+        sg.setOpacity(0.2);
+//        sg.setStyle("stroke-color: red");
+        sg.getChildren().add(new Line(10, 10, 100, 100));
+        sg.getChildren().add(new Line(10, 100, 100, 10));
+        addRow(sg);
 
         Scene scene = new Scene(mainGroup, 800, 600);
         //Image img = new Image("file:background2.png");

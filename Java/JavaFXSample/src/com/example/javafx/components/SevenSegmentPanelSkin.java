@@ -38,6 +38,7 @@ public class SevenSegmentPanelSkin extends SkinBase<SevenSegmentPanel> {
         setOnColor(control.getOnColor());
         control.offColorProperty().addListener((obs, old, w) -> setOffColor(w));
         setOffColor(control.getOffColor());
+
         control.textProperty().addListener((obs, old, w) -> setText(w));
         setText(control.getText());
 
@@ -99,7 +100,7 @@ public class SevenSegmentPanelSkin extends SkinBase<SevenSegmentPanel> {
         }
     }
 
-    private void setText(String text) throws CharConversionException {
+    private void setText(String text)  {
 
         // TODO: use Java 1.8 chars() method!
 
@@ -109,7 +110,11 @@ public class SevenSegmentPanelSkin extends SkinBase<SevenSegmentPanel> {
             if (c == '.') {
                 digits[didx-1].setDP(true); // DP is located in previous digit!
             } else {
-                digits[didx].setChar(c);
+                try {   // TODO
+                    digits[didx].setChar(c);
+                } catch (CharConversionException e) {
+                    e.printStackTrace();
+                }
                 digits[didx].setDP(false);
                 didx++;
             }
