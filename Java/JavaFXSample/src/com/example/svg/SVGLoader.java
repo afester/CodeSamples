@@ -1,9 +1,7 @@
 package com.example.svg;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -11,7 +9,10 @@ import java.util.function.Consumer;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.effect.ImageInput;
 import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
@@ -23,12 +24,19 @@ import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
 
 import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
-import org.apache.batik.anim.dom.SVGDOMImplementation;
 import org.apache.batik.anim.dom.SVGOMAnimatedPathData;
 import org.apache.batik.anim.dom.SVGOMAnimatedPathData.BaseSVGPathSegList;
 import org.apache.batik.anim.dom.SVGOMDefsElement;
 import org.apache.batik.anim.dom.SVGOMDocument;
 import org.apache.batik.anim.dom.SVGOMElement;
+import org.apache.batik.anim.dom.SVGOMFECompositeElement;
+import org.apache.batik.anim.dom.SVGOMFEGaussianBlurElement;
+import org.apache.batik.anim.dom.SVGOMFEMergeElement;
+import org.apache.batik.anim.dom.SVGOMFEMergeNodeElement;
+import org.apache.batik.anim.dom.SVGOMFEOffsetElement;
+import org.apache.batik.anim.dom.SVGOMFEPointLightElement;
+import org.apache.batik.anim.dom.SVGOMFESpecularLightingElement;
+import org.apache.batik.anim.dom.SVGOMFilterElement;
 import org.apache.batik.anim.dom.SVGOMGElement;
 import org.apache.batik.anim.dom.SVGOMMetadataElement;
 import org.apache.batik.anim.dom.SVGOMPathElement;
@@ -38,23 +46,25 @@ import org.apache.batik.anim.dom.SVGOMSVGElement;
 import org.apache.batik.anim.dom.SVGOMTSpanElement;
 import org.apache.batik.anim.dom.SVGOMTextElement;
 import org.apache.batik.anim.dom.SVGStylableElement;
-import org.apache.batik.anim.dom.SVGStylableElement.PresentationAttributePaintValue;
 import org.apache.batik.anim.dom.SVGStylableElement.PresentationAttributeValue;
+import org.apache.batik.bridge.BridgeContext;
+import org.apache.batik.bridge.DocumentLoader;
+import org.apache.batik.bridge.GVTBuilder;
+import org.apache.batik.bridge.UserAgent;
+import org.apache.batik.bridge.UserAgentAdapter;
+import org.apache.batik.css.dom.CSSOMComputedStyle;
+import org.apache.batik.css.dom.CSSOMComputedStyle.ComputedCSSValue;
+import org.apache.batik.css.dom.CSSOMSVGComputedStyle;
+import org.apache.batik.css.dom.CSSOMSVGComputedStyle.ComputedCSSPaintValue;
 import org.apache.batik.css.dom.CSSOMSVGStyleDeclaration;
-import org.apache.batik.css.dom.CSSOMSVGStyleDeclaration.StyleDeclarationPaintValue;
 import org.apache.batik.css.dom.CSSOMStyleDeclaration.StyleDeclarationValue;
-import org.apache.batik.css.engine.CSSContext;
-import org.apache.batik.css.engine.CSSEngine;
-import org.apache.batik.css.engine.value.Value;
 import org.apache.batik.dom.svg.SVGPathSegItem;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.ImageTranscoder;
-import org.apache.batik.util.ParsedURL;
 import org.apache.batik.util.XMLResourceDescriptor;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.css.CSSPrimitiveValue;
 import org.w3c.dom.css.CSSStyleDeclaration;
@@ -64,7 +74,7 @@ import org.w3c.dom.svg.SVGTransform;
 import org.w3c.dom.svg.SVGTransformList;
 import org.w3c.dom.svg.SVGTransformable;
 
-import com.sun.glass.ui.Screen;
+import com.sun.scenario.effect.GaussianBlur;
 
 class BufferedImageTranscoder extends ImageTranscoder {
 
@@ -87,20 +97,23 @@ class BufferedImageTranscoder extends ImageTranscoder {
 }
 
 
-public class SVGLoader implements CSSContext {
+public class SVGLoader {
+
+    /** The root &lt;svg&gt; element */
+    private SVGOMSVGElement svgElement = null;
 
     private Group parentNode;
-    private Color parentFill = null;    // TODO: HACK!
-    private Color parentStroke = null;    // TODO: HACK!
     
     private Group result;
     
     private boolean addRootRect = false;    // flag whether to add a rectangle in the size of the drawing
 
-    
     private Map<String, Consumer<SVGOMElement>> elementMap = new HashMap<>();
 
     public SVGLoader() {
+        
+        SVGFilterHandler fh = new SVGFilterHandler();
+
         elementMap.put("svg",      e -> handleElement((SVGOMSVGElement) e));
         elementMap.put("defs",     e -> handleElement((SVGOMDefsElement) e));
         elementMap.put("metadata", e -> handleElement((SVGOMMetadataElement) e));
@@ -110,10 +123,104 @@ public class SVGLoader implements CSSContext {
         elementMap.put("text",     e -> handleElement((SVGOMTextElement) e));
         elementMap.put("tspan",    e -> handleElement((SVGOMTSpanElement) e));
         elementMap.put("pattern",  e -> handleElement((SVGOMPatternElement) e));
+
+        elementMap.put("filter",             e -> fh.handleElement((SVGOMFilterElement) e));
+        elementMap.put("feGaussianBlur",     e -> fh.handleElement((SVGOMFEGaussianBlurElement) e));
+        elementMap.put("feOffset",           e -> fh.handleElement((SVGOMFEOffsetElement) e));
+        elementMap.put("feSpecularLighting", e -> fh.handleElement((SVGOMFESpecularLightingElement) e));
+        elementMap.put("fePointLight",       e -> fh.handleElement((SVGOMFEPointLightElement) e));
+        elementMap.put("feComposite",        e -> fh.handleElement((SVGOMFECompositeElement) e));
+        elementMap.put("feMerge",            e -> fh.handleElement((SVGOMFEMergeElement) e));
+        elementMap.put("feMergeNode",        e -> fh.handleElement((SVGOMFEMergeNodeElement) e));
+
+/*        <circle>
+        <ellipse>
+*/
+/*
+        <a>
+        <altGlyph>
+        <altGlyphDef>
+        <altGlyphItem>
+        <animate>
+        <animateColor>
+        <animateMotion>
+        <animateTransform>
+        <clipPath>
+        <color-profile>
+        <cursor>
+        <desc>
+*/
+
+/* Filter effects:
+        <filter>
+        <feGaussianBlur>
+        <feOffset>
+        <feSpecularLighting>
+        <fePointLight>
+        <feComposite>
+        <feMerge>
+        <feMergeNode>
+
+        <feBlend>
+        <feColorMatrix>
+        <feComponentTransfer>
+        <feConvolveMatrix>
+        <feDiffuseLighting>
+        <feDisplacementMap>
+        <feDistantLight>
+        <feFlood>
+        <feFuncA>
+        <feFuncB>
+        <feFuncG>
+        <feFuncR>
+        <feImage>
+        <feMorphology>
+        <feSpotLight>
+        <feTile>
+        <feTurbulence>
+*/
+        
+/*
+        <font>
+        <font-face>
+        <font-face-format>
+        <font-face-name>
+        <font-face-src>
+        <font-face-uri>
+        <foreignObject>
+        <glyph>
+        <glyphRef>
+        <hkern>
+        <image>
+        <line>
+        <linearGradient>
+        <marker>
+        <mask>
+        <missing-glyph>
+        <mpath>
+        <polygon>
+        <polyline>
+        <radialGradient>
+        <script>
+        <set>
+        <stop>
+        <style>
+        <switch>
+        <symbol>
+        <textPath>
+        <title>
+        <tref>
+        <use>
+        <view>
+        <vkern>
+*/
     }
 
 
+    // <svg>
     void handleElement(SVGOMSVGElement element) {
+        svgElement = element;
+
         // optionally add a rectangle using the size of the whole drawing
         if (addRootRect) {
             float height = element.getViewBox().getBaseVal().getHeight();
@@ -128,11 +235,15 @@ public class SVGLoader implements CSSContext {
     }
 
 
+    // <defs>
     void handleElement(SVGOMDefsElement element) {
         System.err.println("Handling <defs>: " + element);
     }
 
 
+    public WritableImage snapshotImage = null;
+
+    // <g>
     void handleElement(SVGOMGElement element) {
         Group result = new Group();
         result.setId(element.getId());
@@ -142,11 +253,6 @@ public class SVGLoader implements CSSContext {
             result.getTransforms().add(transformation);
         }
 
-        // TODO: Can a group inherit its presentation properties to its children??
-        //applyStyle(fxObj, obj);
-        //fxObj.setStyle("-fx-background-color: blue; -fx-stroke-color: yellow;");
-        parentStroke = getStrokeColor(element);
-        parentFill = getFillColor(element);
 
         parentNode.getChildren().add(result);
         parentNode = result;
@@ -200,6 +306,9 @@ public class SVGLoader implements CSSContext {
 
         applyStyle(result, element);
 
+        System.err.println("*** FILL:" + result.getFill());
+//        result.setFill(new Color(0.455, 0.455, 0.455, 0.09));
+        System.err.println("*** FILL2:" + result.getFill());
         parentNode.getChildren().add(result);
     }
 
@@ -266,13 +375,12 @@ public class SVGLoader implements CSSContext {
     
     private void handle(org.w3c.dom.Node node) {
         Group par = parentNode;  // save current parent
-        Color parFill = parentFill;
-        Color parStroke = parentStroke;
 
         // Dispatch handling of the current node to its handler
         String localName = node.getLocalName();
         if (localName != null) {
             Consumer<SVGOMElement> c = elementMap.get(node.getLocalName());
+            // System.err.printf("Handling %s through %s\n", localName, c);
             if (c != null) {
                 c.accept((SVGOMElement) node);
             } else {
@@ -289,12 +397,26 @@ public class SVGLoader implements CSSContext {
         }
         level--;
 
-        parentFill = parFill;
-        parentStroke = parStroke;
+
+        // NOTE: Filer needs to be handled after the children have been added!
+        if (localName != null && localName.equals("g")) {
+            String filter = ((SVGOMElement) node).getAttribute("filter");
+            if (filter != null && !filter.isEmpty()) {
+                System.err.println(">> FILTER:" + filter);
+
+                SnapshotParameters params = new SnapshotParameters();
+                Image sourceImage = parentNode.snapshot(params, null);
+                
+                GaussianBlur mb = new GaussianBlur();
+                mb.setInput(new ImageInput(sourceImage));
+                
+            }
+        }
+
         parentNode = par;       // restore current parent
     }
 
-    
+
     private Affine getTransform(SVGTransformable element) {
         Affine fxTrans = null;
 
@@ -320,90 +442,50 @@ public class SVGLoader implements CSSContext {
 
         return fxTrans;
     }
-    
-    private Color getFillColor(SVGStylableElement obj) { // Shape fxObj, CSSStyleDeclaration style) {
-        CSSStyleDeclaration style = obj.getStyle();
 
+    private Color getFillColor(SVGStylableElement obj) {
         Color result = null;
-        CSSOMSVGStyleDeclaration.StyleDeclarationPaintValue val = (StyleDeclarationPaintValue) style.getPropertyCSSValue("fill");
-        if (val != null && val.getPaintType() != SVGPaint.SVG_PAINTTYPE_NONE) {
-            float red = val.getRed().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
-            float green = val.getGreen().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
-            float blue = val.getBlue().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
-            CSSOMSVGStyleDeclaration.StyleDeclarationValue opacity = (StyleDeclarationValue) style.getPropertyCSSValue("fill-opacity");
-            float alpha = opacity.getFloatValue(CSSPrimitiveValue.CSS_NUMBER);
-            result = new Color(red, green, blue, alpha);
-        }
-    
-        // For each styling property defined in this specification (see Property Index), 
-        // there is a corresponding XML attribute (the presentation attribute) with the 
-        // same name that is available on all relevant SVG elements. For example, SVG 
-        // has a ‘fill’ property that defines how to paint the interior of a shape. 
-        // There is a corresponding presentation attribute with the same name (i.e., ‘fill’) 
-        // that can be used to specify a value for the ‘fill’ property on a given element.
+        
+        // svgElement.getComputedStyle() takes care of all styling aspects,
+        // like inheritance of style attributes or presentation versus CSS styles
+        CSSStyleDeclaration style = svgElement.getComputedStyle(obj, null);
+        CSSOMSVGComputedStyle.ComputedCSSPaintValue val = (ComputedCSSPaintValue) style.getPropertyCSSValue("fill");
 
-        // quick google search lets us assume that style takes precedence over presentation attribute.
-
-        if (result == null) {
-            SVGStylableElement.PresentationAttributePaintValue fill =(PresentationAttributePaintValue) obj.getPresentationAttribute("fill");
-            if (fill != null && fill.getPaintType() != SVGPaint.SVG_PAINTTYPE_NONE) {
-
-                float red = fill.getRed().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
-                float green = fill.getGreen().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
-                float blue = fill.getBlue().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
-
-                Object opacity = obj.getPresentationAttribute("fill-opacity");
-                if (opacity != null) {
-                    System.err.println("OPACITY: " + opacity.getClass());
-                // float alpha = opacity.getFloatValue(CSSPrimitiveValue.CSS_NUMBER);
-                //CSSOMSVGStyleDeclaration.StyleDeclarationValue opacity = (StyleDeclarationValue) style.getPropertyCSSValue("fill-opacity");
-                //float alpha = opacity.getFloatValue(CSSPrimitiveValue.CSS_NUMBER);
-                }
-
-                result = new Color(red, green, blue, 1.0);
-            }
+        if (val.getPaintType() == SVGPaint.SVG_PAINTTYPE_NONE) {    // fill=none
+            return null;
         }
 
-        if (result == null) {
-            result = parentFill;  // TODO: need to search up the hierarchy ...
-        }
+        float red = val.getRed().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
+        float green = val.getGreen().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
+        float blue = val.getBlue().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
+
+        CSSOMComputedStyle.ComputedCSSValue  opacity = (ComputedCSSValue) style.getPropertyCSSValue("fill-opacity");
+        float alpha = opacity.getFloatValue(CSSPrimitiveValue.CSS_NUMBER);
+        result = new Color(red, green, blue, alpha);
 
         return result;
     }
 
     
     private Color getStrokeColor(SVGStylableElement obj) {
-        CSSStyleDeclaration style = obj.getStyle();
 
         Color result = null;
-        CSSOMSVGStyleDeclaration.StyleDeclarationPaintValue val = (StyleDeclarationPaintValue) style.getPropertyCSSValue("stroke");
 
-        if (val != null && val.getPaintType() != SVGPaint.SVG_PAINTTYPE_NONE) {
-            float red = val.getRed().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
-            float green = val.getGreen().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
-            float blue = val.getBlue().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
+        CSSStyleDeclaration style = svgElement.getComputedStyle(obj, null);
+        CSSOMSVGComputedStyle.ComputedCSSPaintValue val = (ComputedCSSPaintValue) style.getPropertyCSSValue("stroke");
 
-            CSSOMSVGStyleDeclaration.StyleDeclarationValue opacity = (StyleDeclarationValue) style.getPropertyCSSValue("stroke-opacity");
-            float alpha = opacity.getFloatValue(CSSPrimitiveValue.CSS_NUMBER);
-
-            result = new Color(red, green, blue, alpha);
+        if (val.getPaintType() == SVGPaint.SVG_PAINTTYPE_NONE) {
+            return null;    // stroke=none
         }
 
-        if (result == null) {
-            SVGStylableElement.PresentationAttributePaintValue stroke =(PresentationAttributePaintValue) obj.getPresentationAttribute("stroke");
-            if (stroke != null && stroke.getPaintType() != SVGPaint.SVG_PAINTTYPE_NONE) {
-                float red = stroke.getRed().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
-                float green = stroke.getGreen().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
-                float blue = stroke.getBlue().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
-                //CSSOMSVGStyleDeclaration.StyleDeclarationValue opacity = (StyleDeclarationValue) style.getPropertyCSSValue("fill-opacity");
-                //float alpha = opacity.getFloatValue(CSSPrimitiveValue.CSS_NUMBER);
-                result = new Color(red, green, blue, 1.0);
-            }            
-        }
-        
-        if (result == null) {
-            result = parentStroke;  // TODO: need to search up the hierarchy ...
-        }
+        float red = val.getRed().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
+        float green = val.getGreen().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
+        float blue = val.getBlue().getFloatValue(CSSPrimitiveValue.CSS_NUMBER) / 255;
+
+        CSSOMComputedStyle.ComputedCSSValue opacity = (ComputedCSSValue) style.getPropertyCSSValue("stroke-opacity");
+        float alpha = opacity.getFloatValue(CSSPrimitiveValue.CSS_NUMBER);
+
+        result = new Color(red, green, blue, alpha);
 
         return result;
     }
@@ -417,34 +499,40 @@ public class SVGLoader implements CSSContext {
         Color strokeColor = getStrokeColor(obj);
         fxObj.setStroke(strokeColor);
 
-        CSSStyleDeclaration style = obj.getStyle();
-        CSSOMSVGStyleDeclaration.StyleDeclarationValue swidth = (StyleDeclarationValue) style.getPropertyCSSValue("stroke-width");
+        CSSStyleDeclaration style = svgElement.getComputedStyle(obj, null);
+        CSSOMSVGComputedStyle.ComputedCSSValue swidth = (ComputedCSSValue) style.getPropertyCSSValue("stroke-width");
         if (swidth != null) {
             float strokeWidth = swidth.getFloatValue(CSSPrimitiveValue.CSS_NUMBER);
             fxObj.setStrokeWidth(strokeWidth);
-        } else {
-            SVGStylableElement.PresentationAttributeValue pwidth = (PresentationAttributeValue) obj.getPresentationAttribute("stroke-width");
-            if (pwidth != null) {
-                float strokeWidth = pwidth.getFloatValue(CSSPrimitiveValue.CSS_NUMBER);
-                fxObj.setStrokeWidth(strokeWidth);
-            }
         }
-
     }
 
     
     private void applyTextStyle(Text fxObj, SVGStylableElement obj) {
-        CSSStyleDeclaration style = obj.getStyle();
+        CSSStyleDeclaration style = svgElement.getComputedStyle(obj, null); // obj.getStyle();
 
-        CSSOMSVGStyleDeclaration.StyleDeclarationValue val = (StyleDeclarationValue) style.getPropertyCSSValue("font-family");
-        String fontFamily = val.getCssText();
+        String fontFamily = null;
+        CSSOMComputedStyle.ComputedCSSValue val = (ComputedCSSValue) style.getPropertyCSSValue("font-family");
+        if (val != null) {
+            fontFamily = val.getCssText();
+        }
 
-        CSSOMSVGStyleDeclaration.StyleDeclarationValue val2 = (StyleDeclarationValue) style.getPropertyCSSValue("font-size");
-        float fontSize = val2.getFloatValue(CSSPrimitiveValue.CSS_PX);  // https://bugs.launchpad.net/inkscape/+bug/168164
+        float fontSize = 0;
+        CSSOMComputedStyle.ComputedCSSValue val2 = (ComputedCSSValue) style.getPropertyCSSValue("font-size");
+        if (val2 != null) {
+            if (val2.getPrimitiveType() == CSSPrimitiveValue.CSS_NUMBER) {
+                fontSize = val2.getFloatValue (CSSPrimitiveValue.CSS_NUMBER);   // https://bugs.launchpad.net/inkscape/+bug/168164
+            } else {
+                fontSize = val2.getFloatValue (CSSPrimitiveValue.CSS_PX);       // https://bugs.launchpad.net/inkscape/+bug/168164
+            }
+        }
 
+        System.err.println("FONT: " + fontFamily + "/" + fontSize);
         Font font = Font.font(fontFamily, fontSize);
         fxObj.setFont(font);
-
+        
+        applyStyle(fxObj, obj);
+        
 /*        font-style:normal;
         font-variant:normal;
         font-weight:normal;
@@ -570,6 +658,25 @@ public class SVGLoader implements CSSContext {
      * @return An XML document with the loaded SVG file.
      */
     public Document loadSvgDocument(String fileName) {
+        try {
+            String parser = XMLResourceDescriptor.getXMLParserClassName();
+            SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory( parser );
+            SVGOMDocument document = (SVGOMDocument) factory.createDocument( fileName );
+    
+            UserAgent userAgent = new UserAgentAdapter();
+            DocumentLoader loader = new DocumentLoader( userAgent );
+            BridgeContext bridgeContext = new BridgeContext( userAgent, loader );
+            bridgeContext.setDynamicState( BridgeContext.DYNAMIC );
+    
+            // Enable CSS- and SVG-specific enhancements.
+            (new GVTBuilder()).build( bridgeContext, document );
+
+            return document;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+/*        
+        
         String parser = XMLResourceDescriptor.getXMLParserClassName();
         SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parser);
         try {
@@ -577,8 +684,8 @@ public class SVGLoader implements CSSContext {
             SVGOMDocument doc = (SVGOMDocument) f.createDocument(uri);
 
             SVGDOMImplementation impl = (SVGDOMImplementation) ((SVGOMDocument) doc).getImplementation();
-            CSSEngine eng = impl.createCSSEngine(doc, this);
-            doc.setCSSEngine(eng);
+            cssEngine = impl.createCSSEngine(doc, this);
+            doc.setCSSEngine(cssEngine);
 
             return doc;
         } catch (MalformedURLException e) {
@@ -586,7 +693,7 @@ public class SVGLoader implements CSSContext {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+*/
         return null;
     }
 
@@ -609,98 +716,4 @@ public class SVGLoader implements CSSContext {
 
         return result;
     }
-
-
-    @Override
-    public Value getSystemColor(String ident) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-
-    @Override
-    public Value getDefaultFontFamily() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-
-    @Override
-    public float getLighterFontWeight(float f) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-
-    @Override
-    public float getBolderFontWeight(float f) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-
-    @Override
-    public float getPixelUnitToMillimeter() {
-        // TODO: check!
-        int dpi = Screen.getMainScreen().getResolutionX();  // what about Y?
-        return 25.4f / dpi;
-    }
-
-
-    @Override
-    public float getPixelToMillimeter() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-
-    @Override
-    public float getMediumFontSize() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-
-    @Override
-    public float getBlockWidth(Element elt) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-
-    @Override
-    public float getBlockHeight(Element elt) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-
-    @Override
-    public void checkLoadExternalResource(ParsedURL resourceURL,
-            ParsedURL docURL) throws SecurityException {
-        // TODO Auto-generated method stub
-        
-    }
-
-
-    @Override
-    public boolean isDynamic() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-
-    @Override
-    public boolean isInteractive() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-
-    @Override
-    public CSSEngine getCSSEngineForElement(Element e) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 }

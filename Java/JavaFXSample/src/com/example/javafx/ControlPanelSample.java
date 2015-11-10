@@ -27,6 +27,13 @@ import javafx.scene.transform.Scale;
 public class ControlPanelSample {
 
 
+    public Scene createScene2() {
+        Meter m = new Meter();
+        Scene scene = new Scene(m, 800, 600);
+        scene.getStylesheets().add("/panelexample.css");
+        return scene;
+    }
+
     public Scene createScene() {
 
         Region r = new Button("Hello World");
