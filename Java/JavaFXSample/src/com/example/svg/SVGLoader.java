@@ -74,6 +74,7 @@ import org.w3c.dom.svg.SVGTransform;
 import org.w3c.dom.svg.SVGTransformList;
 import org.w3c.dom.svg.SVGTransformable;
 
+import com.example.javafx.tools.ColorSeparator;
 import com.sun.scenario.effect.GaussianBlur;
 
 class BufferedImageTranscoder extends ImageTranscoder {
@@ -241,7 +242,7 @@ public class SVGLoader {
     }
 
 
-    public WritableImage snapshotImage = null;
+    public Image snapshotImage = null;
 
     // <g>
     void handleElement(SVGOMGElement element) {
@@ -398,18 +399,19 @@ public class SVGLoader {
         level--;
 
 
-        // NOTE: Filer needs to be handled after the children have been added!
+        // NOTE: Filter needs to be handled after the children have been added!
         if (localName != null && localName.equals("g")) {
             String filter = ((SVGOMElement) node).getAttribute("filter");
             if (filter != null && !filter.isEmpty()) {
                 System.err.println(">> FILTER:" + filter);
 
                 SnapshotParameters params = new SnapshotParameters();
-                Image sourceImage = parentNode.snapshot(params, null);
-                
-                GaussianBlur mb = new GaussianBlur();
-                mb.setInput(new ImageInput(sourceImage));
-                
+                WritableImage sourceImage = parentNode.snapshot(params, null);
+
+                //GaussianBlur mb = new GaussianBlur();
+                //mb.setInput(new ImageInput(sourceImage));
+                ColorSeparator cs = new ColorSeparator(sourceImage);
+                snapshotImage = cs.getBlueChannel();
             }
         }
 
