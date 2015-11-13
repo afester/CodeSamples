@@ -1,8 +1,11 @@
 package com.example.svg;
 
+import com.example.javafx.tools.ColorSeparator;
+
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -30,7 +33,18 @@ public class SVGSample extends Application {
 
         VBox g = new VBox();
         g.getChildren().add(svgImage);
+        
+        ColorSeparator cs = new ColorSeparator(loader.snapshotImage);
+        Image red = cs.getRedChannel();
+        Image green = cs.getGreenChannel();
+        Image blue = cs.getBlueChannel();
+        Image alpha = cs.getAlphaChannel();
+
         g.getChildren().add(new ImageView(loader.snapshotImage));
+        g.getChildren().add(new ImageView(red));
+        g.getChildren().add(new ImageView(green));
+        g.getChildren().add(new ImageView(blue));
+        g.getChildren().add(new ImageView(alpha));
         Scene scene = new Scene(g, 800, 600);
 
         primaryStage.setScene(scene);

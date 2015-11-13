@@ -1,7 +1,5 @@
 package com.example.javafx.tools;
 
-import java.nio.ByteBuffer;
-
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.effect.Blend;
@@ -9,7 +7,6 @@ import javafx.scene.effect.BlendMode;
 import javafx.scene.effect.ColorInput;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
@@ -23,39 +20,59 @@ public class ColorSeparator {
         sourceImage = image;
     }
 
-    public Image getBlueChannel() {
-        
-        Node img = new ImageView(sourceImage);
-
-        //img.setBlendMode(BlendMode.BLUE);
-
-        Blend blend = new Blend();
-        //blend.setMode(BlendMode.EXCLUSION);
-        //blend.setMode(BlendMode.COLOR_DODGE);
-        //blend.setMode(BlendMode.DIFFERENCE);
-        //blend.setMode(BlendMode.COLOR_BURN);
-        blend.setMode(BlendMode.MULTIPLY);
-
-        // set top input
+    /**
+     * Creates a color mask in the size of the given image.
+     * 
+     * @param source The source image
+     * @param color  The color to use for the mask
+     *
+     * @return A color mask with the given color and the size of the given image. 
+     */
+    private ColorInput createColorMask(Image source, Color color) {
         ColorInput colorInput = new ColorInput();
-        colorInput.setPaint(Color.BLUE);
+        colorInput.setPaint(color);
         colorInput.setX(0);
         colorInput.setY(0);
-        colorInput.setWidth(sourceImage.getWidth());
-        colorInput.setHeight(sourceImage.getHeight());
-        blend.setTopInput(colorInput);
+        colorInput.setWidth(source.getWidth());
+        colorInput.setHeight(source.getHeight());
+        return colorInput;
+    }
 
-        System.err.println(blend.getTopInput());
-        System.err.println(blend.getBottomInput());
-        // set bottom input
+    /**
+     * 
+     * @param source
+     * @param color
+     * @return
+     */
+    private Image getChannel(Image source, Color color) {
+        Node img = new ImageView(sourceImage);
+
+        ColorInput mask = createColorMask(sourceImage, color);
+        Blend blend = new Blend();
+        blend.setMode(BlendMode.MULTIPLY);
+        blend.setTopInput(mask);
         img.setEffect(blend);
-        System.err.println(blend.getTopInput());
-        System.err.println(blend.getBottomInput());
 
         SnapshotParameters params = new SnapshotParameters();
         Image result = img.snapshot(params, null);
 
         return result;
+    }
+
+    public Image getRedChannel() {
+        return getChannel(sourceImage, Color.RED);  // #ff0000
+    }
+
+    public Image getGreenChannel() {
+        return getChannel(sourceImage, Color.LIME); // #00ff00
+    }
+
+    public Image getBlueChannel() {
+        return getChannel(sourceImage, Color.BLUE); // #0000ff
+    }
+
+    public Image getAlphaChannel() {
+        return getChannel(sourceImage, new Color(0.0, 0.0, 0.0, 1.0)); // #000000ff
     }
 
     public Image getBlueChannel1() {

@@ -405,13 +405,16 @@ public class SVGLoader {
             if (filter != null && !filter.isEmpty()) {
                 System.err.println(">> FILTER:" + filter);
 
+                
+                // NOTE: In the example, the <g> node consists of two 
+                // stretched circles and the text. For these nodes,
+                // the alpha channel is implicitly 1.0 - However, there is no
+                // background color!!!! Hence, extracting the alpha channel
+                // from those nodes would result in an exact mask of these 
+                // three shapes.
                 SnapshotParameters params = new SnapshotParameters();
-                WritableImage sourceImage = parentNode.snapshot(params, null);
-
-                //GaussianBlur mb = new GaussianBlur();
-                //mb.setInput(new ImageInput(sourceImage));
-                ColorSeparator cs = new ColorSeparator(sourceImage);
-                snapshotImage = cs.getBlueChannel();
+                params.setFill(new Color(1.0, 1.0, 1.0, 0.0));
+                snapshotImage = parentNode.snapshot(params, null);
             }
         }
 
