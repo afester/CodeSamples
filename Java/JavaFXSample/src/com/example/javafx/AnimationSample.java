@@ -26,7 +26,7 @@ public class AnimationSample extends Application {
         // setup timeline
         timeline.getKeyFrames().add(
                 new KeyFrame(Duration.millis(5000),
-                new KeyValue (rect.translateXProperty(), 400)));
+                             new KeyValue (rect.translateXProperty(), 400)));
 
         // create rectangle to move
         rect.setFill(Color.BLACK);

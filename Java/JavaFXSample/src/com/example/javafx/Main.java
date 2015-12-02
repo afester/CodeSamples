@@ -64,7 +64,7 @@ public class Main extends Application {
 
 
     //@Override
-    public void start(Stage primaryStage) {
+    public void start2(Stage primaryStage) {
         primaryStage.setTitle("Control panel sample");
 
         ControlPanelSample cps = new ControlPanelSample();
@@ -77,14 +77,14 @@ public class Main extends Application {
 
 
     //@Override
-    public void start2(Stage primaryStage) {
+    public void start(Stage primaryStage) {
         primaryStage.setTitle("Sample application for JavaFX components");
 
         final Group mainGroup = new Group();
 
         grid.setAlignment(Pos.TOP_LEFT);
         // grid.setGridLinesVisible(true);
-
+       
         addRow(new Text("Screens:"), new Text(Integer.toString(Screen.getScreens().size())));
         Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
         addRow(new Text("Primary Screen:"), new Text(String.format("%f x %f", screenBounds.getWidth(), screenBounds.getHeight())));
