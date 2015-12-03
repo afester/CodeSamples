@@ -1,9 +1,5 @@
 package com.example.javafx;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -26,12 +22,17 @@ public class GameLoopSample extends Application {
 
     private Rectangle rect = new Rectangle(60, 8);
     private Circle ball = new Circle(10);
+    private Rectangle area = new Rectangle(10, 10, 390, 250);
+
     private DIRECTION currentDirection = DIRECTION.NONE;
     private final static double SPEED = 12.0;
+    private final static double STARTANGLE_VARIANCE = Math.toRadians(45);   // +/- 45°
 
     // ball vector
-    private double bAngle = Math.toRadians(315);
+    private double bAngle = Math.toRadians(300); // 315);
     private double bSpeed = 4.0;
+    double dx = 0;
+    double dy = 0;
 
     public static void main(String[] args) {
         launch(args);
@@ -61,15 +62,19 @@ public class GameLoopSample extends Application {
 
     public void start(Stage stage) {
 
+        dx = bSpeed * Math.cos(bAngle);
+        dy = bSpeed * Math.sin(bAngle);
+
+        area.setFill(Color.LIGHTGRAY);
+        area.setStroke(Color.BLACK);
+
         // create rectangle to move
         rect.setFill(Color.BLACK);
         rect.setTranslateY(200);
         rect.setTranslateX(180);
 
         // create ball
-        ball.setFill(Color.BLUE);
-        ball.setTranslateX(100);
-        ball.setTranslateY(100);
+        resetBall();
 
         // setup timeline  duration is the complete cycle (100000 / 400 = 250 msec!)
         final Duration oneFrameAmt = Duration.millis(1000 / 60);
@@ -81,8 +86,9 @@ public class GameLoopSample extends Application {
 
         // JavaFX boilerplate - setup stage
         Group grp_main = new Group();
-        grp_main.getChildren().addAll(ball, rect);
-        Scene scn_main = new Scene(grp_main, 400, 400);
+        grp_main.getChildren().addAll(area, ball, rect);
+        Scene scn_main = new Scene(grp_main, area.getWidth() + area.getX(),
+                                             area.getHeight() + area.getY());
 
         KeyStateManager km = new KeyStateManager(scn_main);
         km.setOnKeyChangeEvent( e -> handleKey(e.getKeyCode()) );
@@ -132,60 +138,128 @@ public class GameLoopSample extends Application {
         return newAngle + reference;
     }
 
+    private boolean isExploding = false;
+
+    private void resetBall() {
+        ball.setFill(Color.BLUE);
+        ball.setTranslateX(area.getX() + area.getWidth() / 2);
+
+        double min = Math.toRadians(270) - STARTANGLE_VARIANCE;
+        double max = Math.toRadians(270) + STARTANGLE_VARIANCE;
+        bAngle = Math.random() * (max - min) + min;
+        dx = bSpeed * Math.cos(bAngle);
+        dy = bSpeed * Math.sin(bAngle);
+
+        // Note: translation point of circle is its middle point!
+        ball.setTranslateY(area.getY() + ball.getRadius());
+    }
+
+
+    private Bounds bBall;
+    private Bounds bRect;
+    private Bounds bArea;
 
     private void handleFrame() {
-        // update platform
+        //long x1 = System.currentTimeMillis();
+
+        // Update geometric bounds of all objects
+        bBall = ball.getBoundsInParent();
+        bRect = rect.getBoundsInParent();
+        bArea = area.getBoundsInParent();
+
+        handlePlatform();
+
+        if (isExploding) {
+            handleExplode();
+        } else {
+            advanceBall();
+        }
+
+        //long x2 = System.currentTimeMillis();
+        //System.err.println(x2 - x1);
+    }
+
+    private void handlePlatform() {
+
         switch(currentDirection) {
             case NONE : 
                 break;
 
             case LEFT :
                 {
-                    double pos = rect.getTranslateX();
-                    if (pos > 0) {
-                        rect.setTranslateX(pos - SPEED);
+                    double newPos = rect.getTranslateX() - SPEED;
+                    if (newPos < bArea.getMinX()) {
+                        newPos = bArea.getMinX();
                     }
+                    rect.setTranslateX(newPos);
                 }
                 break;
-
+    
             case RIGHT: 
                 {
-                    double pos = rect.getTranslateX();
-                    if (pos < 350) {
-                        rect.setTranslateX(pos + SPEED);
+                    double newPos = rect.getTranslateX() + SPEED;
+                    if (newPos > bArea.getMaxX() - bRect.getWidth()) {
+                        newPos = bArea.getMaxX() - bRect.getWidth();
                     }
+                    rect.setTranslateX(newPos);
                 }
                 break;
         }
+    }
 
-        // Update ball
 
-        // check for collision
-        Bounds bBall = ball.getBoundsInParent();
-        Bounds bRect = rect.getBoundsInParent();
-        if (bBall.intersects(bRect)) {
-            double jitter = Math.random() * Math.PI / 180;
-            bAngle = calculateExitAngle(bAngle,  0) + jitter;
-        } else if (bBall.getMinY() < 0    ||
-                   bBall.getMaxY() > 400) {
-            bAngle = calculateExitAngle(bAngle,  0);
-        } else if (bBall.getMinX() < 0 ||
-                   bBall.getMaxX() > 400) {
+    private void handleExplode() {
+        if (bBall.getMinY() > bArea.getMaxY()) {
+            isExploding = false;
+            resetBall();
+        } else {
+            ball.setTranslateX(ball.getTranslateX() + dx);
+            ball.setTranslateY(ball.getTranslateY() - dy);
+        }
+    }
 
-            bAngle = calculateExitAngle(bAngle,  Math.PI/2);
+
+    private void advanceBall() {
+        double refAngle = 0;
+        boolean doBounce = false;
+        double jitter = 0;
+
+        if (bBall.getMaxY() >= bRect.getMinY()) {
+            if (bBall.getMaxX() < bRect.getMinX() ||
+                bBall.getMinX() > bRect.getMaxX()) {
+                isExploding = true;
+                ball.setFill(Color.RED);
+            } else {
+                // calculate a value between -0.5 and 0.5 which corresponds to the
+                // position within the platform where the ball bounces
+                double pos = (ball.getTranslateX() - rect.getTranslateX()) / rect.getWidth();
+                if (pos < 0) {pos = 0;};
+                if (pos > 1) {pos = 1;};
+                pos = pos - 0.5;
+
+                System.err.printf("%s\n", pos);
+                jitter = pos;
+                doBounce = true;
+            }
         }
 
-        double dx = bSpeed * Math.cos(bAngle);
-        double dy = bSpeed * Math.sin(bAngle);
+        if (bBall.getMinY() <= bArea.getMinY() ||
+            bBall.getMaxY() >= bArea.getMaxY()) {   // this must never happen!
+            doBounce = true;
+        } else if (bBall.getMinX() <= bArea.getMinX() ||
+                   bBall.getMaxX() >= bArea.getMaxX()) {
+            doBounce = true;
+            refAngle = Math.PI/2;
+        }
+
+        if (doBounce) {
+            bAngle = calculateExitAngle(bAngle, refAngle) + jitter;
+            dx = bSpeed * Math.cos(bAngle);
+            dy = bSpeed * Math.sin(bAngle);
+        }
 
         ball.setTranslateX(ball.getTranslateX() + dx);
         ball.setTranslateY(ball.getTranslateY() - dy);
-
-        // colorize ball depending on direction (up/down)
-        if (bAngle > Math.PI){          // moving downwards
-            ball.setFill(Color.GREEN);
-        } else {                        // moving upwards
-            ball.setFill(Color.BLUE);
-        }
     }
+
 }
