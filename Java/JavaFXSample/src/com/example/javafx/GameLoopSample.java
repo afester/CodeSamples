@@ -1,5 +1,8 @@
 package com.example.javafx;
 
+import java.io.InputStream;
+
+import afester.javafx.svg.SVGLoader;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -23,6 +26,8 @@ public class GameLoopSample extends Application {
     private Rectangle rect = new Rectangle(60, 8);
     private Circle ball = new Circle(10);
     private Rectangle area = new Rectangle(10, 10, 390, 250);
+    private Group scene;
+    private Rectangle border = new Rectangle(5, 5, 400, 260);
 
     private DIRECTION currentDirection = DIRECTION.NONE;
     private final static double SPEED = 12.0;
@@ -60,6 +65,8 @@ public class GameLoopSample extends Application {
         System.err.printf("%s (%s) => %s (%s)\n", oldAngle, Math.toDegrees(oldAngle), newAngle, Math.toDegrees(newAngle));
     }
 
+
+    @Override
     public void start(Stage stage) {
 
         dx = bSpeed * Math.cos(bAngle);
@@ -72,6 +79,15 @@ public class GameLoopSample extends Application {
         rect.setFill(Color.BLACK);
         rect.setTranslateY(200);
         rect.setTranslateX(180);
+
+        border.setFill(null);
+        border.setStroke(Color.WHITE);
+        border.setStrokeWidth(10);
+
+        // setup the scene (road)
+        InputStream svgFile = getClass().getResourceAsStream("scene.svg");
+        SVGLoader loader = new SVGLoader();
+        scene = loader.loadSvg(svgFile);
 
         // create ball
         resetBall();
@@ -86,7 +102,7 @@ public class GameLoopSample extends Application {
 
         // JavaFX boilerplate - setup stage
         Group grp_main = new Group();
-        grp_main.getChildren().addAll(area, ball, rect);
+        grp_main.getChildren().addAll(area, scene, ball, rect, border);
         Scene scn_main = new Scene(grp_main, area.getWidth() + area.getX(),
                                              area.getHeight() + area.getY());
 
@@ -175,8 +191,20 @@ public class GameLoopSample extends Application {
             advanceBall();
         }
 
+        handleScene();
+
         //long x2 = System.currentTimeMillis();
         //System.err.println(x2 - x1);
+    }
+
+    private void handleScene() {
+        double pos = scene.getTranslateY();
+        if (pos > 140) {
+            pos = 0;
+        } else {
+            pos += 2;
+        }
+        scene.setTranslateY(pos);
     }
 
     private void handlePlatform() {
@@ -194,7 +222,7 @@ public class GameLoopSample extends Application {
                     rect.setTranslateX(newPos);
                 }
                 break;
-    
+
             case RIGHT: 
                 {
                     double newPos = rect.getTranslateX() + SPEED;
