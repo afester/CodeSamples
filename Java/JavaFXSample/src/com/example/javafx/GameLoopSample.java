@@ -23,14 +23,21 @@ public class GameLoopSample extends Application {
 
     enum DIRECTION {NONE, LEFT,RIGHT, UP, DOWN};
 
-    private Rectangle rect = new Rectangle(60, 8);
+    //private Rectangle rect = new Rectangle(60, 8);
     private Circle ball = new Circle(10);
-    private Rectangle area = new Rectangle(10, 10, 390, 250);
+    private Rectangle border;
+
+    private Group car;
+
+    // background scene
     private Group scene;
-    private Rectangle border = new Rectangle(5, 5, 400, 260);
+    double sceneWidth;
+    double sceneHeight;
+    double viewHeight;
+    double sceneSpeed = 1.0;
 
     private DIRECTION currentDirection = DIRECTION.NONE;
-    private final static double SPEED = 12.0;
+    private final static double SPEED = 8.0; // 12.0;
     private final static double STARTANGLE_VARIANCE = Math.toRadians(45);   // +/- 45°
 
     // ball vector
@@ -72,22 +79,33 @@ public class GameLoopSample extends Application {
         dx = bSpeed * Math.cos(bAngle);
         dy = bSpeed * Math.sin(bAngle);
 
-        area.setFill(Color.LIGHTGRAY);
-        area.setStroke(Color.BLACK);
 
         // create rectangle to move
-        rect.setFill(Color.BLACK);
-        rect.setTranslateY(200);
-        rect.setTranslateX(180);
-
-        border.setFill(null);
-        border.setStroke(Color.WHITE);
-        border.setStrokeWidth(10);
+//        rect.setFill(Color.BLACK);
+//        rect.setTranslateY(200);
+//        rect.setTranslateX(180);
 
         // setup the scene (road)
         InputStream svgFile = getClass().getResourceAsStream("scene.svg");
         SVGLoader loader = new SVGLoader();
         scene = loader.loadSvg(svgFile);
+        sceneWidth = scene.getBoundsInParent().getWidth();
+        sceneHeight = scene.getBoundsInParent().getHeight();
+        viewHeight = sceneHeight / 2;
+        scene.setTranslateY(-viewHeight + 10);
+        scene.setTranslateX(10);
+
+        // load the car
+        svgFile = getClass().getResourceAsStream("Bmw_Z_Top_View_clip_art.svg");
+        car = loader.loadSvg(svgFile);
+        car.setTranslateY(100);
+        car.setTranslateX(200);
+
+        // the border overlays the background scene
+        border = new Rectangle(5, 5, sceneWidth, viewHeight + 10);
+        border.setFill(null);
+        border.setStroke(new Color(0x64/255F, 0x83/255F, 0x9d/255F, 1.0));
+        border.setStrokeWidth(10);
 
         // create ball
         resetBall();
@@ -102,9 +120,8 @@ public class GameLoopSample extends Application {
 
         // JavaFX boilerplate - setup stage
         Group grp_main = new Group();
-        grp_main.getChildren().addAll(area, scene, ball, rect, border);
-        Scene scn_main = new Scene(grp_main, area.getWidth() + area.getX(),
-                                             area.getHeight() + area.getY());
+        grp_main.getChildren().addAll(scene, car, border);
+        Scene scn_main = new Scene(grp_main, sceneWidth + 10, viewHeight + 10);
 
         KeyStateManager km = new KeyStateManager(scn_main);
         km.setOnKeyChangeEvent( e -> handleKey(e.getKeyCode()) );
@@ -158,7 +175,7 @@ public class GameLoopSample extends Application {
 
     private void resetBall() {
         ball.setFill(Color.BLUE);
-        ball.setTranslateX(area.getX() + area.getWidth() / 2);
+        //ball.setTranslateX(area.getX() + area.getWidth() / 2);
 
         double min = Math.toRadians(270) - STARTANGLE_VARIANCE;
         double max = Math.toRadians(270) + STARTANGLE_VARIANCE;
@@ -167,7 +184,7 @@ public class GameLoopSample extends Application {
         dy = bSpeed * Math.sin(bAngle);
 
         // Note: translation point of circle is its middle point!
-        ball.setTranslateY(area.getY() + ball.getRadius());
+        //ball.setTranslateY(area.getY() + ball.getRadius());
     }
 
 
@@ -180,8 +197,8 @@ public class GameLoopSample extends Application {
 
         // Update geometric bounds of all objects
         bBall = ball.getBoundsInParent();
-        bRect = rect.getBoundsInParent();
-        bArea = area.getBoundsInParent();
+        bRect = car.getBoundsInParent();
+        bArea = scene.getBoundsInParent();
 
         handlePlatform();
 
@@ -199,10 +216,10 @@ public class GameLoopSample extends Application {
 
     private void handleScene() {
         double pos = scene.getTranslateY();
-        if (pos > 140) {
-            pos = 0;
+        if (pos > 9) {
+            pos = -viewHeight + 10;
         } else {
-            pos += 2;
+            pos += sceneSpeed;
         }
         scene.setTranslateY(pos);
     }
@@ -215,21 +232,35 @@ public class GameLoopSample extends Application {
 
             case LEFT :
                 {
-                    double newPos = rect.getTranslateX() - SPEED;
+                    double newPos = car.getTranslateX() - SPEED;
                     if (newPos < bArea.getMinX()) {
                         newPos = bArea.getMinX();
                     }
-                    rect.setTranslateX(newPos);
+                    car.setTranslateX(newPos);
                 }
                 break;
 
             case RIGHT: 
                 {
-                    double newPos = rect.getTranslateX() + SPEED;
+                    double newPos = car.getTranslateX() + SPEED;
                     if (newPos > bArea.getMaxX() - bRect.getWidth()) {
                         newPos = bArea.getMaxX() - bRect.getWidth();
                     }
-                    rect.setTranslateX(newPos);
+                    car.setTranslateX(newPos);
+                }
+                break;
+
+            case UP :
+                sceneSpeed += 0.1;
+                if (sceneSpeed > 10) {
+                    sceneSpeed = 10;
+                }
+                break;
+
+            case DOWN :
+                sceneSpeed -= 0.1;
+                if (sceneSpeed < 0) {
+                    sceneSpeed = 0;
                 }
                 break;
         }
@@ -260,14 +291,14 @@ public class GameLoopSample extends Application {
             } else {
                 // calculate a value between -0.5 and 0.5 which corresponds to the
                 // position within the platform where the ball bounces
-                double pos = (ball.getTranslateX() - rect.getTranslateX()) / rect.getWidth();
+                /*double pos = (ball.getTranslateX() - car.getTranslateX()) / car.getWidth();
                 if (pos < 0) {pos = 0;};
                 if (pos > 1) {pos = 1;};
                 pos = pos - 0.5;
 
                 System.err.printf("%s\n", pos);
                 jitter = pos;
-                doBounce = true;
+                doBounce = true;*/
             }
         }
 
