@@ -1,0 +1,48 @@
+println("root project")
+
+task sampleTask {
+    println("sampleTask - Configuration phase")
+
+    doFirst() {
+       println("sampleTask - Execution phase (doFirst)")
+    }
+
+    doLast() {
+       println("sampleTask - Execution phase (doLast)")
+    }
+
+}
+
+
+task signJars (dependsOn: sampleTask) {
+    // adding task properties - need to use "ext"!
+    ext.value = 0
+
+    println("signJars - Configuration phase")
+
+    doFirst() {
+       println("signJars - Execution phase (doFirst) " + value)
+    }
+
+    doLast() {
+       println("signJars - Execution phase (doLast) " + value)
+    }
+}
+
+// use "<<" to define a simple task with no configuration section
+// the closure is simply executed when the task is being called
+task simpleTask << {
+    String taskName = 'simpleTask'
+    println(taskName)
+    println(name)
+    println(someValue)
+}
+
+// Configuring tasks
+simpleTask {
+   ext.someValue = 35
+}
+
+signJars {
+    value = 42
+}
