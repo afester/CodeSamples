@@ -12,6 +12,5 @@
 // To declare projects as part of a multi-project build use the 'include' method
 include 'Library'
 include 'Application'
-include 'services:webservice'
-
-rootProject.name = 'Application'
+// include 'services:webservice'
+// rootProject.name = 'Application'
