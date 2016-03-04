@@ -4,6 +4,8 @@
 # Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
 
 TEMPLATE = app
+QT = gui core widgets
+
 CONFIG += debug console
 SOURCES = tablewidget.cpp
 FORMS = tablewidget.ui
