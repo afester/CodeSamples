@@ -1,0 +1,85 @@
+
+// This task copies all project jar files and the 
+// dependencies into the build/webstart/lib folder
+// by using the build directory we make sure that a "clean"
+// also removes those files.
+task wsCopyFiles(type: Copy, dependsOn: [jar]) {
+    from configurations.runtime
+    from("build/libs")
+    into("build/webstart/lib")
+    include('*.jar')
+}
+
+// This task signs all files below build/webstart/lib,
+// after the jar files have been copied
+task wsSignAll(dependsOn: [wsCopyFiles]) << {
+   def libFiles = files { file('build/webstart/lib').listFiles() }
+   libFiles.each { 
+      printf("Signing %s\n", it)
+      ant.signjar(
+                jar: it,
+                lazy: 'false',
+                preservelastmodified: 'true',
+                alias: 'selfsigned',
+                storepass: 'password')
+   }
+}
+
+// Configuration:
+// jnlpFilename
+// title
+// vendor
+// appDescription
+// mainClass
+// width
+// height
+
+task wsCreateJnlp(dependsOn: [wsCopyFiles]) {
+   ext.jnlpFilename = 'example.jnlp'
+
+   doLast {
+      String destFile = "$buildDir/webstart/$jnlpFilename"
+      printf("Creating jnlp file %s\n", destFile)
+      File jnlpFile = new File(destFile)
+      PrintWriter dest = new PrintWriter(jnlpFile)
+
+      dest.printf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+      dest.printf("<jnlp spec=\"1.0+\">\n")
+      dest.printf("      codebase=\"http://server/path\">\n\n")
+
+      dest.printf("   <information>\n")
+      dest.printf("     <title>JavaFX examples</title>\n")
+      dest.printf("     <vendor>Andreas Fester</vendor>\n")
+      dest.printf("     <offline-allowed/>\n")
+      dest.printf("   </information>\n\n")
+
+      def resources = files { file('build/webstart/lib').listFiles() }
+      resources.each {
+          dest.printf("   <resources>\n")
+          dest.printf("      <jar href=\"lib/%s\"/>\n", it.name);
+          dest.printf("   </resources>\n")
+      }
+
+      dest.printf("\n   <security>\n")
+      dest.printf("      <all-permissions/>\n")
+      dest.printf("   </security>\n\n")
+
+      dest.printf("   <application-desc\n")
+      dest.printf("         name=\"JavaFX sample application and component library\"\n")
+      dest.printf("         main-class=\"afester.javafx.examples.AllExamples\"\n")
+      dest.printf("         width=\"300\"\n")
+      dest.printf("         height=\"300\">\n")
+      dest.printf("   </application-desc>\n\n")
+      dest.printf("   <update check=\"background\"/>\n\n")
+      dest.printf("</jnlp>\n")
+      dest.close()
+   }
+}
+
+
+task wsDist(type: Zip, dependsOn: [wsCreateJnlp, wsSignAll]) {
+   from 'build/webstart'
+   include '**/*'
+   archiveName = "webstartApp.zip"   // default directory is "build/distributions"
+   description = "Bundles the project as a WebStart application."
+}

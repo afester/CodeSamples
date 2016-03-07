@@ -10,6 +10,7 @@
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 apply plugin: 'application'
+apply from: 'webstart.gradle'
 
 mainClassName = "com.example.Hello"
 
@@ -37,108 +38,4 @@ dependencies {
     // testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
     // 'test.useTestNG()' to your build script.
     // testCompile 'junit:junit:4.12'
-}
-
-
-jar.doLast {
-  println("JAR FILE CREATED:")
-  source.each{name -> println("  FILE:" + name)}
-}
-
-distZip.doLast {
-  println("**distZip.doLast")
-  printf("  => %s\n", archivePath)
-  printf("  !! %s\n", configurations.runtime.state)
-  configurations.runtime.files.each{name -> printf("    !! %s\n", name) }
-  source.each{name -> printf("    : %s\n", name) }
-//  zipFile = ZipFile(archivePath)
-//  zipFile.entries{println("  ENTRY")}
-//  source.each{name -> println("  SOURCE: " + name)}
-}
-
-// The copyFiles task copies all project jar files and the 
-// dependencies into the build/webstart/lib folder
-// by using the build directory we make sure that a clean also removes those files
-task copyFiles(type: Copy, dependsOn: [jar]) {
-    from configurations.runtime
-    from("build/libs")
-    into("build/webstart/lib")
-    include('*.jar')
-
-//    doFirst {
-//       new File('build/webstart/lib').mkdirs()
-//    }
-}
-
-// The signAll task signs all files below build/webstart/lib,
-// after the jar files have been copied
-task signAll(dependsOn: [copyFiles]) << {
-   def libFiles = files { file('build/webstart/lib').listFiles() }
-   libFiles.each { 
-      printf("Signing %s\n", it)
-      ant.signjar(
-                jar: it,
-                lazy: 'false',
-                preservelastmodified: 'true',
-                alias: 'selfsigned',
-                storepass: 'password')
-   }
-}
-
-// Configuration:
-// jnlpFilename
-// title
-// vendor
-// appDescription
-// mainClass
-// width
-// height
-
-task createJnlp(dependsOn: [copyFiles]) {
-   ext.jnlpFilename = 'example.jnlp'
-
-   doLast {
-      String destFile = "$buildDir/webstart/$jnlpFilename"
-      printf("Creating jnlp file %s\n", destFile)
-      File jnlpFile = new File(destFile)
-      PrintWriter dest = new PrintWriter(jnlpFile)
-
-      dest.printf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-      dest.printf("<jnlp spec=\"1.0+\">\n")
-      dest.printf("      codebase=\"http://server/path\">\n\n")
-
-      dest.printf("   <information>\n")
-      dest.printf("     <title>JavaFX examples</title>\n")
-      dest.printf("     <vendor>Andreas Fester</vendor>\n")
-      dest.printf("     <offline-allowed/>\n")
-      dest.printf("   </information>\n\n")
-
-      def resources = files { file('build/webstart/lib').listFiles() }
-      resources.each {
-          dest.printf("   <resources>\n")
-          dest.printf("      <jar href=\"lib/%s\"/>\n", it.name);
-          dest.printf("   </resources>\n")
-      }
-
-      dest.printf("\n   <security>\n")
-      dest.printf("      <all-permissions/>\n")
-      dest.printf("   </security>\n\n")
-
-      dest.printf("   <application-desc\n")
-      dest.printf("         name=\"JavaFX sample application and component library\"\n")
-      dest.printf("         main-class=\"afester.javafx.examples.AllExamples\"\n")
-      dest.printf("         width=\"300\"\n")
-      dest.printf("         height=\"300\">\n")
-      dest.printf("   </application-desc>\n\n")
-      dest.printf("   <update check=\"background\"/>\n\n")
-      dest.printf("</jnlp>\n")
-      dest.close()
-   }
-}
-
-
-task webstart(type: Zip, dependsOn: [createJnlp, signAll]) {
-   from 'build/webstart'
-   include '**/*'
-   archiveName = "webstartApp.zip"   // default directory is "build/distributions"
 }
