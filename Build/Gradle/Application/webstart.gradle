@@ -15,7 +15,7 @@ task wsCopyFiles(type: Copy, dependsOn: [jar]) {
 task wsSignAll(dependsOn: [wsCopyFiles]) << {
    def libFiles = files { file('build/webstart/lib').listFiles() }
    libFiles.each { 
-      printf("Signing %s\n", it)
+      printf("  Signing %s\n", it)
       ant.signjar(
                 jar: it,
                 lazy: 'false',
@@ -26,32 +26,37 @@ task wsSignAll(dependsOn: [wsCopyFiles]) << {
 }
 
 // Configuration:
-// jnlpFilename
-// title
-// vendor
-// appDescription
-// mainClass
-// width
-// height
+//   wsJnlpFilename
+//   wsTitle
+//   wsVendor
+//   wsMainClass
+//   wsWidth
+//   wsHeight
 
 task wsCreateJnlp(dependsOn: [wsCopyFiles]) {
-   ext.jnlpFilename = 'example.jnlp'
+   ext.wsJnlpFilename = "${project.name}.jnlp"
+   ext.wsTitle = "Webstart Application"
+   ext.wsVendor = "Vendor"
+   ext.wsName = "Sample Webstart Application"
+   ext.wsMainClass = "com.example.WebStart"
 
    doLast {
-      String destFile = "$buildDir/webstart/$jnlpFilename"
-      printf("Creating jnlp file %s\n", destFile)
+      String destFile = "$buildDir/webstart/$wsJnlpFilename"
+      printf("  Creating %s\n", destFile)
       File jnlpFile = new File(destFile)
       PrintWriter dest = new PrintWriter(jnlpFile)
 
-      dest.printf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-      dest.printf("<jnlp spec=\"1.0+\">\n")
-      dest.printf("      codebase=\"http://server/path\">\n\n")
+      dest.printf("""<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+">
+      codebase="http://server/path\">
 
-      dest.printf("   <information>\n")
-      dest.printf("     <title>JavaFX examples</title>\n")
-      dest.printf("     <vendor>Andreas Fester</vendor>\n")
-      dest.printf("     <offline-allowed/>\n")
-      dest.printf("   </information>\n\n")
+   <information>
+     <title>${wsTitle}</title>
+     <vendor>${wsVendor}</vendor>
+     <offline-allowed/>
+   </information>
+
+""")
 
       def resources = files { file('build/webstart/lib').listFiles() }
       resources.each {
@@ -60,18 +65,21 @@ task wsCreateJnlp(dependsOn: [wsCopyFiles]) {
           dest.printf("   </resources>\n")
       }
 
-      dest.printf("\n   <security>\n")
-      dest.printf("      <all-permissions/>\n")
-      dest.printf("   </security>\n\n")
+      dest.printf("""
+   <security>
+      <all-permissions/>
+   </security>
 
-      dest.printf("   <application-desc\n")
-      dest.printf("         name=\"JavaFX sample application and component library\"\n")
-      dest.printf("         main-class=\"afester.javafx.examples.AllExamples\"\n")
-      dest.printf("         width=\"300\"\n")
-      dest.printf("         height=\"300\">\n")
-      dest.printf("   </application-desc>\n\n")
-      dest.printf("   <update check=\"background\"/>\n\n")
-      dest.printf("</jnlp>\n")
+   <application-desc>
+         name="${wsName}"
+         main-class="${wsMainClass}"
+         width="300"
+         height="300">
+   </application-desc>
+   <update check="background"/>
+</jnlp>
+""")
+
       dest.close()
    }
 }
@@ -80,6 +88,10 @@ task wsCreateJnlp(dependsOn: [wsCopyFiles]) {
 task wsDist(type: Zip, dependsOn: [wsCreateJnlp, wsSignAll]) {
    from 'build/webstart'
    include '**/*'
-   archiveName = "webstartApp.zip"   // default directory is "build/distributions"
+   archiveName = "${project.name}Webstart.zip"   // default directory is "build/distributions"
    description = "Bundles the project as a WebStart application."
+
+   doFirst {
+      printf("  $buildDir/distributions/$archiveName\n")
+   }
 }
