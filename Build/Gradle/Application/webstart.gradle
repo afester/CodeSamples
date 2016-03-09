@@ -1,3 +1,7 @@
+/**
+ * Java WebStart distribution plugin.
+ * Based on http://www.apprenticeshipnotes.org/2013/01/generating-webstart-files-using-gradle.html
+ */
 
 // This task copies all project jar files and the 
 // dependencies into the build/webstart/lib folder
@@ -14,14 +18,24 @@ task wsCopyFiles(type: Copy, dependsOn: [jar]) {
 // after the jar files have been copied
 task wsSignAll(dependsOn: [wsCopyFiles]) << {
    def libFiles = files { file('build/webstart/lib').listFiles() }
+
+   String keystorePass = project.properties['codesign.keystorePassword']
+   if (keystorePass == null) {
+      keystorePass = ""
+   }
+   String signAlias = project.properties['codesign.signingAlias']
+   if (signAlias == null) {
+      signAlias = ""
+   }
+ 
    libFiles.each { 
       printf("  Signing %s\n", it)
       ant.signjar(
                 jar: it,
                 lazy: 'false',
                 preservelastmodified: 'true',
-                alias: 'selfsigned',
-                storepass: 'password')
+                alias: signAlias,
+                storepass: keystorePass)
    }
 }
 
@@ -47,8 +61,8 @@ task wsCreateJnlp(dependsOn: [wsCopyFiles]) {
       PrintWriter dest = new PrintWriter(jnlpFile)
 
       dest.printf("""<?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="1.0+">
-      codebase="http://server/path\">
+<jnlp spec="1.0+"
+      codebase="http://server/path">
 
    <information>
      <title>${wsTitle}</title>
@@ -70,7 +84,7 @@ task wsCreateJnlp(dependsOn: [wsCopyFiles]) {
       <all-permissions/>
    </security>
 
-   <application-desc>
+   <application-desc
          name="${wsName}"
          main-class="${wsMainClass}"
          width="300"
