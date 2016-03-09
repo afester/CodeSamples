@@ -44,7 +44,7 @@ project(':Application') {
     wsTitle = "My Example"
     wsVendor = "Andreas"
     wsName = "Example for a WebStart Application"
-    wsMainClass = "com.example.ws.WebStart"
+    wsMainClass = "com.example.Hello"
   }
 }
 

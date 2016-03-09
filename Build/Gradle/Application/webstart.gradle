@@ -23,9 +23,9 @@ task wsSignAll(dependsOn: [wsCopyFiles]) << {
    if (keystorePass == null) {
       keystorePass = ""
    }
-   String signAlias = project.properties['codesign.signingAlias']
-   if (signAlias == null) {
-      signAlias = ""
+   String signingAlias = project.properties['codesign.signingAlias']
+   if (signingAlias == null) {
+      signingAlias = ""
    }
  
    libFiles.each { 
@@ -34,7 +34,7 @@ task wsSignAll(dependsOn: [wsCopyFiles]) << {
                 jar: it,
                 lazy: 'false',
                 preservelastmodified: 'true',
-                alias: signAlias,
+                alias: signingAlias,
                 storepass: keystorePass)
    }
 }
