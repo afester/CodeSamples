@@ -1,5 +1,6 @@
 apply from: 'plugin.gradle'
 
+
 printf("Root project: %s\n", project.name)
 printf("Root project: %s\n", project)
 
@@ -39,6 +40,8 @@ simpleTask {
 project(':Application') {
   apply plugin: 'application'
   apply from: 'webstart.gradle'
+
+  version = project.properties['application.version']
 
   wsCreateJnlp {
     wsTitle = "My Example"
