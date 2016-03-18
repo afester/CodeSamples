@@ -1,5 +1,6 @@
 apply from: 'plugin.gradle'
 
+
 printf("Root project: %s\n", project.name)
 printf("Root project: %s\n", project)
 
@@ -16,21 +17,6 @@ task sampleTask {
 
 }
 
-
-task signJars (dependsOn: sampleTask) {
-    // adding task properties - need to use "ext"!
-    ext.value = 0
-
-    println("signJars - Configuration phase")
-
-    doFirst() {
-       println("signJars - Execution phase (doFirst) " + value)
-    }
-
-    doLast() {
-       println("signJars - Execution phase (doLast) " + value)
-    }
-}
 
 // use "<<" to define a simple task with no configuration section
 // the closure is simply executed when the task is being called
@@ -51,10 +37,19 @@ simpleTask {
    ext.someValue = 35
 }
 
-signJars {
-    value = 42
-}
+project(':Application') {
+  apply plugin: 'application'
+  apply from: 'webstart.gradle'
 
+  version = project.properties['application.version']
+
+  wsCreateJnlp {
+    wsTitle = "My Example"
+    wsVendor = "Andreas"
+    wsName = "Example for a WebStart Application"
+    wsMainClass = "com.example.Hello"
+  }
+}
 
 simpleTask.doFirst {
    println("simpleTask.doFirst!!!")
