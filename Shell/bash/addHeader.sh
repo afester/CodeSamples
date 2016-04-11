@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Prepends a set of files with a given header.
+
 if [ $# -ne 2 ] ; then
     echo "$0 template pattern"
     exit 1
@@ -13,7 +15,3 @@ for f in `find . -name "${PATTERN}"`; do
    cat ${TEMPLATE} ${f} > x
    mv x ${f}
 done
-
-# TODO: Allow to remove an existing header - Starting point:
-# But that is greedy!!
-# perl -0777 -i.original -pe 's/\/\*.*\*\//X/igs' Example.java
