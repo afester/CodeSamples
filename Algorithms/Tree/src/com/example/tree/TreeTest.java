@@ -77,7 +77,7 @@ public class TreeTest {
       }
 
       // visualize the tree using plain old ASCII
-      TreeAsciiRenderer2 tv = new TreeAsciiRenderer2(System.err);
+      TreeAsciiRenderer tv = new TreeAsciiRenderer(System.err);
       tv.renderHierarchical(tree);
       tv.renderFlat(tree);
    }

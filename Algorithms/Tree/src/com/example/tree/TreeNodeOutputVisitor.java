@@ -1,6 +1,6 @@
 package com.example.tree;
 
-public class TreeNodeOutputVisitor extends TreeNodeVisitor {
+public class TreeNodeOutputVisitor implements TreeNodeVisitor {
 
     @Override
     public <T> void visit(TreeNode<T> node) {

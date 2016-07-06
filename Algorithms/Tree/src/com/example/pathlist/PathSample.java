@@ -3,7 +3,7 @@ package com.example.pathlist;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.tree.TreeAsciiRenderer2;
+import com.example.tree.TreeAsciiRenderer;
 import com.example.tree.TreeNode;
 
 
@@ -40,7 +40,7 @@ public class PathSample {
 
         // render all trees which have a common root node
         System.err.println();
-        TreeAsciiRenderer2 tv = new TreeAsciiRenderer2(System.err);
+        TreeAsciiRenderer tv = new TreeAsciiRenderer(System.err);
         for (TreeNode<String> child : root.getChildren()) {
           tv.renderHierarchical(child);
         }

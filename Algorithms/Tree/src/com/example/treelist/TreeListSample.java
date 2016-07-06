@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class TreeSample {
+public class TreeListSample {
 
    // The tree is represented as a list of tree nodes
-   private List<TreeNode> tree;
+   private List<TreeListNode> tree;
 
    public void createSubTree(int level, int childCount, int levelCount, String label) {
 
@@ -17,9 +17,9 @@ public class TreeSample {
          newLabel = label + '.' + cCount;
 
          if (cCount < childCount) {
-            tree.add(new TreeNode(level, newLabel));
+            tree.add(new TreeListNode(level, newLabel));
          } else {
-            tree.add(new TreeNode(level, newLabel)); // , true));
+            tree.add(new TreeListNode(level, newLabel)); // , true));
          }
          if (levelCount > 1) {
             createSubTree(level + 1, childCount, levelCount - 1, newLabel);
@@ -34,10 +34,10 @@ public class TreeSample {
     * @param childCount The number of children each node has
     * @param depth      The number of levels of the tree
     */
-   public List<TreeNode> createTree(int childCount, int depth) {
+   public List<TreeListNode> createTree(int childCount, int depth) {
       tree = new ArrayList<>();
 
-      tree.add(new TreeNode(0, "Root")); // , false));
+      tree.add(new TreeListNode(0, "Root")); // , false));
       createSubTree(1, childCount, depth, "Node");
       
       return tree;
@@ -46,15 +46,15 @@ public class TreeSample {
 
    public void run()  {
       // Create a sample tree
-      List<TreeNode> tree = createTree(3, 3);
+      List<TreeListNode> tree = createTree(3, 3);
 
-      int idx = tree.indexOf(new TreeNode(3, "Node.2.3.1"));
-      tree.add(idx + 1, new TreeNode(4, "Node.2.3.1.2")); // , true));
-      tree.add(idx + 1, new TreeNode(4, "Node.2.3.1.1")); // , false));
+      int idx = tree.indexOf(new TreeListNode(3, "Node.2.3.1"));
+      tree.add(idx + 1, new TreeListNode(4, "Node.2.3.1.2")); // , true));
+      tree.add(idx + 1, new TreeListNode(4, "Node.2.3.1.1")); // , false));
 
-      tree.add(new TreeNode(0, "Root.2")); // , true));
-      tree.add(new TreeNode(1, "Node.R2.1"));
-      tree.add(new TreeNode(1, "Node.R2.2"));
+      tree.add(new TreeListNode(0, "Root.2")); // , true));
+      tree.add(new TreeListNode(1, "Node.R2.1"));
+      tree.add(new TreeListNode(1, "Node.R2.2"));
 
       int iter = tree.size();
       while(iter > 1) {
@@ -65,7 +65,7 @@ public class TreeSample {
       }
 
       // visualize the tree using plain old ASCII
-      TreeAsciiRenderer tv = new TreeAsciiRenderer(System.err);
+      TreeListAsciiRenderer tv = new TreeListAsciiRenderer(System.err);
       tv.renderFlat(tree);
       tv.renderHierarchical(tree);
    }
@@ -95,6 +95,6 @@ tree.add(new TreeNode(1, "X3", true));
    }
 */
    public static void main(String[] args) {
-      new TreeSample().run();
+      new TreeListSample().run();
    }
 }

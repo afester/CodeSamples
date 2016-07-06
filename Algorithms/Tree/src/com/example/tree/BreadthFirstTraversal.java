@@ -3,7 +3,7 @@ package com.example.tree;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class BreadthFirstTraversal extends TreeTraversal {
+public class BreadthFirstTraversal implements TreeTraversal {
 
     @SuppressWarnings("rawtypes")
     private Queue<TreeNode> nodeQueue = new LinkedList<>();

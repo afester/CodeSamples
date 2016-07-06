@@ -1,6 +1,6 @@
 package com.example.tree;
 
-public class TreeNodeCounterVisitor extends TreeNodeVisitor {
+public class TreeNodeCounterVisitor implements TreeNodeVisitor {
 
     private int count = 0;
 

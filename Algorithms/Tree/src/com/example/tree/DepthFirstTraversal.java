@@ -1,6 +1,6 @@
 package com.example.tree;
 
-public class DepthFirstTraversal extends TreeTraversal {
+public class DepthFirstTraversal implements TreeTraversal {
 
     @Override
     public <T> void traverse(TreeNode<T> tree, TreeNodeVisitor visitor) {

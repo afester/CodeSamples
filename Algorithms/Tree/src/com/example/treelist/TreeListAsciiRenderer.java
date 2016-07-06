@@ -4,7 +4,7 @@ import java.io.PrintStream;
 import java.util.List;
 
 
-public class TreeAsciiRenderer {
+public class TreeListAsciiRenderer {
 
    private final static char   BAR         = '|';
    private final static char   NO_BAR      = ' ';
@@ -14,15 +14,15 @@ public class TreeAsciiRenderer {
    private final static String NODE_HANDLE = "--";
    private PrintStream out = null;
    
-   public TreeAsciiRenderer(PrintStream ps) {
+   public TreeListAsciiRenderer(PrintStream ps) {
        out = ps;
    }
 
 
-   public void renderHierarchical(List<TreeNode> tree) {
+   public void renderHierarchical(List<TreeListNode> tree) {
       boolean[] hideBar = new boolean[100];  // default is false!
 
-      for (TreeNode tn : tree) {
+      for (TreeListNode tn : tree) {
          StringBuffer line = new StringBuffer();
 
          // Create the prefix for the current level
@@ -55,8 +55,8 @@ public class TreeAsciiRenderer {
    }
 
 
-   public void renderFlat(List<TreeNode> tree) {
-      for (TreeNode tn : tree) {
+   public void renderFlat(List<TreeListNode> tree) {
+      for (TreeListNode tn : tree) {
          out.println(tn);
       }
    }

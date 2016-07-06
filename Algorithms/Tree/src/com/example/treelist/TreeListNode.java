@@ -6,7 +6,7 @@ package com.example.treelist;
  * of the tree nodes inside the list together with their levels are used
  * to represent the tree.
  */
-public class TreeNode {
+public class TreeListNode {
    private int level;
    private String label;
 
@@ -20,11 +20,11 @@ public class TreeNode {
     * @param level
     * @param label
     */
-   public TreeNode(int level, String label) {
+   public TreeListNode(int level, String label) {
       this(level, label, false);
    }
 
-   public TreeNode(int level, String label, boolean isLast) {
+   public TreeListNode(int level, String label, boolean isLast) {
       this.level = level;
       this.label = label;
       this.isLast = isLast;
@@ -64,7 +64,7 @@ public class TreeNode {
          return false;
       if (getClass() != obj.getClass())
          return false;
-      TreeNode other = (TreeNode) obj;
+      TreeListNode other = (TreeListNode) obj;
       if (label == null) {
          if (other.label != null)
             return false;
