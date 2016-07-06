@@ -4,7 +4,7 @@ import java.io.PrintStream;
 import java.util.Iterator;
 
 
-public class TreeAsciiRenderer {
+public class TreeAsciiRenderer2 {
 
    private final static char   BAR         = '|';
    private final static char   NO_BAR      = ' ';
@@ -14,7 +14,7 @@ public class TreeAsciiRenderer {
    private final static String NODE_HANDLE = "--";
    private PrintStream out;
 
-   public TreeAsciiRenderer(PrintStream ps) {
+   public TreeAsciiRenderer2(PrintStream ps) {
        out = ps;
    }
 

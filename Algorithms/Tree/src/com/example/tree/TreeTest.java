@@ -77,7 +77,7 @@ public class TreeTest {
       }
 
       // visualize the tree using plain old ASCII
-      TreeAsciiRenderer tv = new TreeAsciiRenderer(System.err);
+      TreeAsciiRenderer2 tv = new TreeAsciiRenderer2(System.err);
       tv.renderHierarchical(tree);
       tv.renderFlat(tree);
    }
@@ -112,10 +112,10 @@ public class TreeTest {
        OperatorNode top = new OperatorNode(OperatorEnum.PLUS);
        OperatorNode left = new OperatorNode(OperatorEnum.MULTIPLY);
        OperatorNode right = new OperatorNode(OperatorEnum.MULTIPLY);
-       left.addChildren(new NumberNode(2));
-       left.addChildren(new NumberNode(4));
-       right.addChildren(new NumberNode(6));
-       right.addChildren(new NumberNode(8));
+//       left.addChildren(new NumberNode(2));
+//       left.addChildren(new NumberNode(4));
+//       right.addChildren(new NumberNode(6));
+//       right.addChildren(new NumberNode(8));
        top.addChildren(left);
        top.addChildren(right);
 
