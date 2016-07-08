@@ -17,11 +17,11 @@ public class TreeNodeIterator {
         // most simple approach: collect all nodes into a list and use an index
         // into the list
         
-        TreeTraversal tt1 = new DepthFirstTraversal();
-        tt1.traverse(tree, new TreeNodeVisitor() {
+        TreeTraversal<String> tt1 = new DepthFirstTraversal();
+        tt1.traverse(tree, new TreeNodeVisitor<String>() {
 
                 @Override
-                public <T> void visit(TreeNode<T> node) {
+                public void visit(TreeNode<String> node) {
                     nodes.add(node);
                 }
             } );

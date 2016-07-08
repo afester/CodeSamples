@@ -1,9 +1,9 @@
 package com.example.tree;
 
-public class TreeNodeOutputVisitor implements TreeNodeVisitor {
+public class TreeNodeOutputVisitor<T> implements TreeNodeVisitor<T> {
 
     @Override
-    public <T> void visit(TreeNode<T> node) {
+    public void visit(TreeNode<T> node) {
         System.err.println("Operating on " + node);
     }
 }

@@ -3,13 +3,13 @@ package com.example.tree;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class BreadthFirstTraversal implements TreeTraversal {
+public class BreadthFirstTraversal<T> implements TreeTraversal<T> {
 
     @SuppressWarnings("rawtypes")
     private Queue<TreeNode> nodeQueue = new LinkedList<>();
 
     @Override
-    public <T> void traverse(TreeNode<T> node, TreeNodeVisitor visitor) {
+    public void traverse(TreeNode<T> node, TreeNodeVisitor<T> visitor) {
 
         nodeQueue.add(node);
 
@@ -25,5 +25,4 @@ public class BreadthFirstTraversal implements TreeTraversal {
             }
         }
     }
-
 }

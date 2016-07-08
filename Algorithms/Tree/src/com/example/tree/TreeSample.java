@@ -43,6 +43,11 @@ public class TreeSample {
         TreeAsciiRenderer tv = new TreeAsciiRenderer(System.err);
         tv.renderHierarchical(tree);
 
+        TreeTraversal<String> tt2 = new BreadthFirstTraversal<>();
+        tt2.traverse(tree, (node) -> System.err.println(node));
+
+        TreeGrapher.main(tree);
+
         // tv.renderFlat(tree);
     }
 }
