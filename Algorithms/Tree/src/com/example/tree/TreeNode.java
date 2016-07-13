@@ -238,4 +238,72 @@ public class TreeNode <T> {
    }
 
 
+   /**
+    * @return The node left to the current node or <code>null</code> if 
+    *         there is no sibling to the left of the current node.
+    */
+   public TreeNode<T> getLeftSibling() {
+       TreeNode<T> result = null;
+
+       TreeNode<T> parent = getParent();
+       if (parent != null) {
+           int idx = parent.children.indexOf(this);     // TODO: Linear complexity!
+           if (idx > 0) {
+               result = parent.children.get(idx - 1);
+           }
+       }
+
+       return result;
+   }
+
+
+   /**
+    * @return The node right to the current node or <code>null</code> if 
+    *         there is no sibling to the right of the current node.
+    */
+   public TreeNode<T> getRightSibling() {
+       TreeNode<T> result = null;
+
+       TreeNode<T> parent = getParent();
+       if (parent != null) {
+           int idx = parent.children.indexOf(this);     // TODO: Linear complexity!
+           if (idx < parent.children.size() - 1) {
+               result = parent.children.get(idx + 1);
+           }
+       }
+
+       return result;
+   }
+
+
+   /**
+    * @return The leftmost child of this node.
+    */
+   public TreeNode<T> getFirstChild() {
+      if (children.size() > 0) {
+          return children.get(0);
+      }
+
+      return null;
+   }
+
+
+   /**
+    * @return The rightmost child of this node.
+    */
+   public TreeNode<T> getLastChild() {
+      if (children.size() > 0) {
+         return children.get(children.size() - 1);
+      }
+
+      return null;
+   }
+
+
+   /**
+    * @return <code>true</code> if this is a leaf node, <code>false</code> otherwise.
+    */
+   public boolean isLeaf() {
+      return children.size() == 0;
+   }
 }

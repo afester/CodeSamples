@@ -39,12 +39,31 @@ public class TreeSample {
         // Create a sample tree
         TreeNode<String> tree = createTree(3, 3);
 
+        TreeNode<String> addtlNode = tree.findNode(new TreeNode[] {
+                                      new TreeNode<String>("Node.2"),
+                                      new TreeNode<String>("Node.2.1"),
+                                      new TreeNode<String>("Node.2.1.2") });
+        addtlNode.addChildren(new TreeNode<>("Node.2.1.2.1"));
+        addtlNode.addChildren(new TreeNode<>("Node.2.1.2.2"));
+        addtlNode.addChildren(new TreeNode<>("Node.2.1.2.3"));
+
+        addtlNode = tree.findNode(new TreeNode[] {
+                new TreeNode<String>("Node.2"),
+                new TreeNode<String>("Node.2.1"),
+                new TreeNode<String>("Node.2.1.3") });
+        addtlNode.addChildren(new TreeNode<>("Node.2.1.3.1"));
+        addtlNode.addChildren(new TreeNode<>("Node.2.1.3.2"));
+        addtlNode.addChildren(new TreeNode<>("Node.2.1.3.3"));
+
         // visualize the tree using plain old ASCII
         TreeAsciiRenderer tv = new TreeAsciiRenderer(System.err);
         tv.renderHierarchical(tree);
 
         TreeTraversal<String> tt2 = new BreadthFirstTraversal<>();
-        tt2.traverse(tree, (node) -> System.err.println(node));
+        tt2.traversePreOrder(tree, (node) -> {
+            System.err.printf("%s (%s - %s)%n", node, node.getLeftSibling(), node.getRightSibling());
+            
+        });
 
         TreeGrapher.main(tree);
 

@@ -9,7 +9,7 @@ public class BreadthFirstTraversal<T> implements TreeTraversal<T> {
     private Queue<TreeNode> nodeQueue = new LinkedList<>();
 
     @Override
-    public void traverse(TreeNode<T> node, TreeNodeVisitor<T> visitor) {
+    public void traversePreOrder(TreeNode<T> node, TreeNodeVisitor<T> visitor) {
 
         nodeQueue.add(node);
 

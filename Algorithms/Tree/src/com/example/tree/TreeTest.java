@@ -87,15 +87,15 @@ public class TreeTest {
    public void visitorTest() {
        TreeNode<String> tree = createTree(3, 3);
 
-       TreeNodeVisitor visitor = new TreeNodeOutputVisitor();
-       TreeTraversal tt1 = new DepthFirstTraversal();
-       tt1.traverse(tree, visitor);
+       TreeNodeVisitor<String> visitor = new TreeNodeOutputVisitor<>();
+       TreeTraversal<String> tt1 = new DepthFirstTraversal<>();
+       tt1.traversePreOrder(tree, visitor);
 
-       TreeTraversal tt2 = new BreadthFirstTraversal();
-       tt2.traverse(tree, visitor);
+       TreeTraversal<String> tt2 = new BreadthFirstTraversal<>();
+       tt2.traversePreOrder(tree, visitor);
 
-       TreeNodeCounterVisitor visitor2 = new TreeNodeCounterVisitor();
-       tt1.traverse(tree,  visitor2);;
+       TreeNodeCounterVisitor<String> visitor2 = new TreeNodeCounterVisitor<>();
+       tt1.traversePreOrder(tree,  visitor2);;
        System.err.println("Number of nodes: " + visitor2.getResult());
 
        // visit() on the visitor implements the operation
@@ -119,9 +119,9 @@ public class TreeTest {
        top.addChildren(left);
        top.addChildren(right);
 
-       TreeNodeVisitor visitor = new TreeNodeExpressionVisitor();
-       TreeTraversal tt1 = new DepthFirstTraversal();
-       tt1.traverse(tree, visitor);
+       TreeNodeVisitor<String> visitor = new TreeNodeExpressionVisitor<>();
+       TreeTraversal<String> tt1 = new DepthFirstTraversal<>();
+       tt1.traversePreOrder(tree, visitor);
      }
 
 
@@ -130,7 +130,7 @@ public class TreeTest {
    public void iteratorTest() {
        TreeNode<String> tree = createTree(3, 3);
 
-       TreeNodeIterator iter = new TreeNodeIterator(tree);
+       TreeNodeIterator<String> iter = new TreeNodeIterator<>(tree);
 
        System.err.println(iter.next());
        System.err.println(iter.next());
