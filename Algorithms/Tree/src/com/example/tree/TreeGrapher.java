@@ -11,11 +11,13 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-class LayoutData {
+class LayoutData<T> {
     int yCoordinate;
     float xCoordinate;
     float flPrelim;
     float flModifier;  // mod
+    
+    TreeNode<T> prev;   // left neighbor
 }
 
 
@@ -44,6 +46,31 @@ public class TreeGrapher<T> extends Application {
     float xTopAdjustment;
     float yTopAdjustment;
 
+    // maintain a list of neighboring nodes on each level
+    // this seems to maintain the left neighbors of the current sub tree only ...
+
+    private Map<Integer, TreeNode<T>> leftNeighbor = new HashMap<>();
+
+    /**
+     * @param nLevelNbr
+     *
+     * @return The left neighbor at the given tree level.
+     */
+    private TreeNode<T> GetPrevNodeAtLevel (int nLevelNbr) {
+        return leftNeighbor.get(nLevelNbr);
+    }
+
+    
+    /**
+     * Stores the given node as the left neighbor at the current level.
+     * 
+     * @param nLevelNbr
+     * @param pThisNode
+     */
+    void SetPrevNodeAtLevel (int nLevelNbr, TreeNode<T> pThisNode) {
+        leftNeighbor.put(nLevelNbr, pThisNode);
+    }
+    
     
     private void calculateFinalX(TreeNode<T> node, float modSum) {
         LayoutData ldChild = layoutMap.get(node);
@@ -148,8 +175,17 @@ public class TreeGrapher<T> extends Application {
 
 
     private void TreeFirstWalk(TreeNode<T> pThisNode) {
+        LayoutData pThisNodeLayout = getLayout(pThisNode);
+        
+
+        pThisNodeLayout.prev = GetPrevNodeAtLevel(pThisNode.getLevel());
+        SetPrevNodeAtLevel(pThisNode.getLevel(), pThisNode);
+
+//      pThisNode->prev = GetPrevNodeAtLevel(pThisNode.getLevel());
+
+        
+        
 //      System.err.println(" => " + pThisNode);
-      LayoutData pThisNodeLayout = getLayout(pThisNode);
 
       /* Clean up old values in a node's flModifier         */
       pThisNodeLayout.flModifier = (float)0.0;
@@ -256,7 +292,7 @@ public class TreeGrapher<T> extends Application {
 //             /* flDistance to be added to each sibling       */
 
         TreeNode<T> pLeftmost = pThisNode.getFirstChild();
-        TreeNode<T> pNeighbor = pLeftmost.getLeftSibling(); // !!!!!!!!!!! LeftNeighbor(pLeftmost);
+        TreeNode<T> pNeighbor = getLayout(pLeftmost).prev; //  .getLeftSibling(); // !!!!!!!!!!! LeftNeighbor(pLeftmost);
 
         int nCompareDepth = 1;
         int nDepthToStop = /* MAXIMUM_DEPTH */ 20 - pThisNode.getLevel(); // nCurrentLevel;
@@ -332,7 +368,9 @@ public class TreeGrapher<T> extends Application {
            } else {
               pLeftmost = pLeftmost.getFirstChild();
            }
-           pNeighbor = pLeftmost.getLeftSibling();  // !!!!!!!!!!!1 LeftNeighbor(pLeftmost);
+           
+           if (pLeftmost != null) 
+           pNeighbor = getLayout(pLeftmost).prev; // .getLeftSibling();  // !!!!!!!!!!!1 LeftNeighbor(pLeftmost);
         }
     }
 
