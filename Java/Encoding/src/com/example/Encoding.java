@@ -2,6 +2,8 @@ package com.example;
 
 import java.io.UnsupportedEncodingException; 
 import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Map.Entry;
 
 
 public class Encoding {
@@ -24,8 +26,9 @@ public class Encoding {
 	
 	public void run() throws UnsupportedEncodingException {
 		dumpDefaults();
-		testSimple();
-		testSimpleUmlaut();
+		//testSimple();
+		//testSimpleUmlaut();
+		testChinese();
 	}
 	
 	
@@ -86,6 +89,48 @@ public class Encoding {
 		System.out.println("---------------------------------------------------------");
 	}
 
+	
+	private void testChinese() {
+	    short[] rawdata2 = {0xC3, 0xA4, // byte 1 0xe4
+	                       0xC2, 0xB9,  // byte 2 0xb9
+	                       0xC5, 0xBE,  // byte 3 0x9e
+
+	                       0x20, 
+
+	                       0xC3, 0xA2,         // byte 1  0xe2
+	                       0xE2, 0x80, 0x9A,   // byte 2  0x82
+	                       0xC2, 0xAC};        // byte 3  0xac
+
+	    short[] rawdata = {0xC3, 0xA4,         // byte 1  0xe4 
+	                       0xC2, 0xB9,         // byte 2  0xb9
+	                       0xEF, 0xBF, 0xBD,   // byte 3  (!!0x9d!!)
+
+	                       0x20, 
+
+	                       0xC3, 0xA2,         // byte 1  0xe2
+                           0xE2, 0x80, 0x9A,   // byte 2  0x82
+	                       0xC2, 0xAC};        // byte 3  0xac
+
+	    byte[] bytes = new byte[rawdata.length];
+	    for (int i = 0;  i < rawdata.length;  i++) {
+	        bytes[i] = (byte) rawdata[i];
+	    }
+        System.out.println("   Input: " + arrayToHex(bytes));
+
+        Charset cs = Charset.forName("UTF-8");
+	    try {
+            String str = new String(bytes, "UTF-8");
+            
+            for (int i = 0;  i < str.length();  i++) {
+                Character c = str.charAt(i);
+            }
+            bytes = str.getBytes(); // "CP");
+            System.out.println("   NOW  : " + arrayToHex(bytes) + "\n");
+        } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+	}
 
 	private void dumpDefaults() {
 		/*
@@ -100,6 +145,10 @@ public class Encoding {
 		System.out.println("   file.encoding=" + System.getProperty("file.encoding"));
 		System.out.println("   sun.io.unicode.encoding=" + System.getProperty("sun.io.unicode.encoding"));
 		System.out.println("   Default Charset: " + Charset.defaultCharset().name());
+		System.out.println("   Available Charsets: ");
+		for (Entry<String, Charset> m : Charset.availableCharsets().entrySet()) {
+		    System.out.println("     " + m.getKey());
+		}
 		System.out.println("---------------------------------------------------------");
 	}
 

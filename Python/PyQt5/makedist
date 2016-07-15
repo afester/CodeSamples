@@ -1,6 +1,20 @@
 #!/bin/bash
 
-rm -rf dist build MynPad.egg-info
+export PYTHON_HOME=/cygdrive/d/Python342
+export PATH=${PYTHON_HOME}:${PYTHON_HOME}/Scripts:${PYTHON_HOME}/Tools/Scripts:${PATH}
+export VENV_DIR=/cygdrive/c/temp/Venv-MynPad
+
+# Build the egg file - this file contains the MynPad module, but no 
+# external data files and no helper scripts or similar. It only contains
+# the .pyc files, the source .py files (can also be omitted) and resource files 
+#rm -rf dist build MynPad.egg-info
+#pip list
+#python setup.py bdist_egg
+#unzip -l dist/MynPad-0.1-py3.4.egg
+
+# Create the virtual environment
+pyvenv ${VENV_DIR}
+${VENV_DIR}/Scripts/activate
 pip list
-python3 setup.py bdist_egg
-unzip -l dist/MynPad-0.1-py3.4.egg
+#
+# Install the egg file into the virtual environment

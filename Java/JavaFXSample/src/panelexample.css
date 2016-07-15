@@ -1,0 +1,87 @@
+.root {
+   -fx-background-image: url(background2.png);
+}
+
+/* Blue */
+/*.seven-segment-panel {
+   -fx-on-color: #1B1C5D;
+   -fx-off-color: #4E6BDB;
+   -fx-background-color: #5472EA;
+}
+*/
+/* Green */
+/*
+.seven-segment-panel {
+   -fx-on-color: #27FD01;
+   -fx-off-color: #383634;
+   -fx-background-color: #1F1E23;
+}
+*/
+/* Red */
+/*
+.seven-segment-panel {
+   -fx-on-color: #FF0A29;
+   -fx-off-color: #383634;
+   -fx-background-color: #1F1E23;
+}
+*/
+
+/* Red with red filter */
+.seven-segment-panel {
+/*    -fx-skin: "com.example.javafx.components.SevenSegmentPanelSkin";*/
+   -fx-on-color: #BC1C1E;
+   -fx-off-color: #371F1E;
+   -fx-background-color: #3F2221;
+}
+
+/* LC style */
+/*
+.seven-segment-panel {
+   -fx-on-color: #25312D;
+   -fx-off-color: #64706C;
+   -fx-background-color: #6C7874;
+}
+*/
+/*
+#current {
+   -fx-on-color: #BC1C1E;
+   -fx-off-color: #371F1E;
+   -fx-background-color: #3F2221;
+/*
+   -fx-border-color: #c8c8c8, #bebebe, #b4b4b4;
+   -fx-border-insets: 0px;
+   -fx-border-radius: 0px;
+   -fx-border-style: solid;
+   -fx-border-width: 6px, 4px, 2px;
+}
+/*
+#voltage {
+   -fx-on-color: #27FD01;
+   -fx-off-color: #383634;
+   -fx-background-color: #1F1E23;
+}
+*/
+/*
+#currentBorder, #voltageBorder {
+	-fx-border-image-source: url(border4.png), url(trafficlight.png);
+	-fx-border-image-slice:  16px,             16px 0px 0px 0px;
+	-fx-border-image-insets: 0px,              0px;
+	-fx-border-image-repeat: repeat,           no-repeat;
+	-fx-border-image-width:  16px,             16px 0px 0px 0px;
+}*/
+
+/*currentBorder, #voltageBorder, #hello {
+	-fx-border-image-source: url(border4.png), url(trafficlight.png);
+	-fx-border-image-slice:  6px             , 16px 0px 0px 0px;
+	-fx-border-image-insets: 0px             , 0px;
+	-fx-border-image-repeat: repeat          , no-repeat;
+	-fx-border-image-width:  6px             , 16px 0px 0px 0px;
+}
+*/
+#currentBorder, #voltageBorder, #hello {
+	-fx-border-image-source: url(border4.png);
+	-fx-border-image-slice:  6px             ;
+	-fx-border-image-insets: 0px             ;
+	-fx-border-image-repeat: repeat         ;
+	-fx-border-image-width:  6px            ;
+}

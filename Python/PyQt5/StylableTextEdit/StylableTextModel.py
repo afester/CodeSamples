@@ -148,57 +148,118 @@ class TextDocumentSelectionTraversal:
         pass
 
     def traverse(self, cursor, document):
-        selectionStart = cursor.selectionStart()
-        selectionEnd = cursor.selectionEnd()
-        print("Start: {}".format(selectionStart))
-        print("End  : {}".format(selectionEnd))
+        
+        result = Frame()
+       
+        self.selectionStart = cursor.selectionStart()
+        self.selectionEnd = cursor.selectionEnd()
+        print("Start: {}".format(self.selectionStart))
+        print("End  : {}".format(self.selectionEnd))
 
-        done = False
-        block = document.findBlock(selectionStart)
-        while block.isValid() and not done:
-            blockFormat = block.blockFormat()
-            blockStyle = blockFormat.property(QTextFormat.UserProperty)
+        self.done = False
+        block = document.findBlock(self.selectionStart)
+        while block.isValid() and not self.done:
 
-            print('{}'.format(blockStyle))
-            #listLevel = 0
-            #textList = block.textList()
-            #if textList:
-            #    listFormat = textList.format()
-            #    listLevel = listFormat.indent()
-           
-            #result = Paragraph(listLevel, blockStyle)
+            para = self.getParagraph(block)
+            result.add(para)
 
-            iterator = block.begin()
-            while not iterator.atEnd() and not done:
-                fragment = iterator.fragment()
-                fragStart = fragment.position()
-                fragEnd = fragment.position() + fragment.length() - 1
-
-                text = fragment.text().replace('\u2028', '\n')
-                text = text.replace('\ufffc', 'X')
-
-                if fragStart > selectionEnd:
-                    return
-                elif fragEnd >= selectionEnd:     # TODO: check condition!
-                    count = selectionEnd - fragStart
-                    if count == 0:
-                        return
-                    text = text[:count]
-                    fragEnd = selectionEnd
-                    done = True
-
-
-
-                charFormat = fragment.charFormat()
-                style = charFormat.property(QTextFormat.UserProperty)
-
-                print('   {} ({}-{}): {}'.format(style, fragStart, fragEnd, text))
-
-                #for frag in self.getFragments(fragment):   # Fragment could contain more than one image!
-                #    result.add(frag)
-                iterator += 1
-    
             block = block.next()
+
+        return result
+
+
+
+    def getParagraph(self, block):
+        blockFormat = block.blockFormat()
+        blockStyle = blockFormat.property(QTextFormat.UserProperty)
+
+        listLevel = 0
+        textList = block.textList()
+        if textList:
+            listFormat = textList.format()
+            listLevel = listFormat.indent()
+       
+        result = Paragraph(listLevel, blockStyle)
+
+        iterator = block.begin()
+        while not iterator.atEnd() and not self.done:
+            fragment = iterator.fragment()
+
+            for frag in self.getFragments(fragment):   # Fragment could contain more than one image!
+                result.add(frag)
+            iterator += 1
+
+        return result
+
+
+
+    def getFragments(self, fragment):
+        result = []
+
+        text = fragment.text().replace('\u2028', '\n')
+
+        charFormat = fragment.charFormat()
+        style = charFormat.property(QTextFormat.UserProperty)
+
+        href = None
+        if style and style[0] == 'link':
+            href = charFormat.anchorHref()  #escape(charFormat.anchorHref())
+            style = None     # Link implicitly defined by setting href
+
+        isObject = (text.find('\ufffc') != -1)
+        if isObject:
+            if charFormat.isImageFormat():
+                assert(False)   # This condition should never be true anymore - we are reendering images as custom objects
+            else:
+                customObject = charFormat.property(QTextCharFormat.UserProperty+1)
+                if type(customObject) is ImageObject:
+                    frag = ImageFragment()
+                    frag.image = tools.os_path_split(customObject.imageName)[-1]
+                    frag.setHref(href)
+                    result.append(frag)
+                elif type(customObject) is MathFormulaObject:
+                    frag = MathFragment()
+                    frag.setText(customObject.formula)
+                    frag.image = customObject.image
+                    result.append(frag)
+        else:
+            frag = TextFragment(style)
+            frag.setHref(href)
+
+            # Extract possible first and last partial text
+            fragStart = fragment.position()
+            fragEnd = fragment.position() + fragment.length() - 1
+ 
+            print(" Frag: {}-{}   Sel: {}-{}".format(fragStart, fragEnd, self.selectionStart, self.selectionEnd))
+
+            print("   1Text: {}".format(text))
+ 
+            if self.selectionStart > fragStart:      # partial first fragment
+                skipCount = self.selectionStart - fragStart
+                text = text[skipCount:]
+
+            print("   2Text: {}".format(text))
+
+            if fragStart > self.selectionEnd:
+                self.done = True
+                return result
+
+            if fragEnd >= self.selectionEnd:       # partial last fragment (TODO: check condition!)
+                count = self.selectionEnd - fragStart
+                if count == 0:
+                    self.done = True
+                    return result
+                text = text[:count]
+                fragEnd = self.selectionEnd
+                self.done = True
+
+            print("   3Text: {}".format(text))
+
+
+            frag.setText(text)
+            result.append(frag)
+
+        return result
 
 
 class TextDocumentTraversal:
@@ -338,7 +399,6 @@ class TextDocumentTraversal:
                     frag.image = customObject.image
                     result.append(frag)
         else:
-            # text = escape(text)
             frag = TextFragment(style)
             frag.setHref(href)
             frag.setText(text)

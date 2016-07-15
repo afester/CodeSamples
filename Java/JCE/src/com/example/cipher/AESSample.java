@@ -17,6 +17,8 @@ public class AESSample {
 
          // Get the cipher (a cipher is a cryptographic algorithm)
          Cipher cipher = Cipher.getInstance("AES");
+         // Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding"); // same as above
+         // Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");    // NoPadding requires the input to be a multiple of 16 bytes
 
          // Create Key 
          Key aesKey = new SecretKeySpec(key.getBytes(StandardCharsets.ISO_8859_1), "AES");

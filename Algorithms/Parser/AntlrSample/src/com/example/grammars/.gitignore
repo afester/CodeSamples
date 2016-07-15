@@ -4,3 +4,8 @@ arrayinit/*.java
 expr/*.java
 uuids/*.java
 midl/*.java
+/midl/
+/expr/
+/uuids/
+/hello/
+/arrayinit/

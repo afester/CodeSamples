@@ -3,6 +3,24 @@ package com.example.tree;
 import org.junit.Test;
 
 
+enum OperatorEnum{
+    PLUS, MULTIPLY
+}
+
+class OperatorNode extends TreeNode<OperatorEnum> {
+    public OperatorNode(OperatorEnum content) {
+        super(content);
+    }
+}
+
+class NumberNode extends TreeNode<Integer> {
+    public NumberNode(Integer content) {
+        super(content);
+    }
+}
+
+
+
 public class TreeTest {
 
    // The tree is represented as a hierarchical set of TreeNode objects
@@ -69,15 +87,15 @@ public class TreeTest {
    public void visitorTest() {
        TreeNode<String> tree = createTree(3, 3);
 
-       TreeNodeVisitor visitor = new TreeNodeOutputVisitor();
-       TreeTraversal tt1 = new DepthFirstTraversal();
-       tt1.traverse(tree, visitor);
+       TreeNodeVisitor<String> visitor = new TreeNodeOutputVisitor<>();
+       TreeTraversal<String> tt1 = new DepthFirstTraversal<>();
+       tt1.traversePreOrder(tree, visitor);
 
-       TreeTraversal tt2 = new BreadthFirstTraversal();
-       tt2.traverse(tree, visitor);
+       TreeTraversal<String> tt2 = new BreadthFirstTraversal<>();
+       tt2.traversePreOrder(tree, visitor);
 
-       TreeNodeCounterVisitor visitor2 = new TreeNodeCounterVisitor();
-       tt1.traverse(tree,  visitor2);;
+       TreeNodeCounterVisitor<String> visitor2 = new TreeNodeCounterVisitor<>();
+       tt1.traversePreOrder(tree,  visitor2);;
        System.err.println("Number of nodes: " + visitor2.getResult());
 
        // visit() on the visitor implements the operation
@@ -87,4 +105,44 @@ public class TreeTest {
        // algorithms. Hence, the TreeNodeTraversal.traverse() takes the 
        // role of the accept() method.
      }
+
+   
+   @Test
+   public void expressionTest() {
+       OperatorNode top = new OperatorNode(OperatorEnum.PLUS);
+       OperatorNode left = new OperatorNode(OperatorEnum.MULTIPLY);
+       OperatorNode right = new OperatorNode(OperatorEnum.MULTIPLY);
+//       left.addChildren(new NumberNode(2));
+//       left.addChildren(new NumberNode(4));
+//       right.addChildren(new NumberNode(6));
+//       right.addChildren(new NumberNode(8));
+       top.addChildren(left);
+       top.addChildren(right);
+
+       TreeNodeVisitor<String> visitor = new TreeNodeExpressionVisitor<>();
+       TreeTraversal<String> tt1 = new DepthFirstTraversal<>();
+       tt1.traversePreOrder(tree, visitor);
+     }
+
+
+   
+   @Test
+   public void iteratorTest() {
+       TreeNode<String> tree = createTree(3, 3);
+
+       TreeNodeIterator<String> iter = new TreeNodeIterator<>(tree);
+
+       System.err.println(iter.next());
+       System.err.println(iter.next());
+       System.err.println(iter.next());
+
+       System.err.println(iter.prev());
+       System.err.println(iter.prev());
+       System.err.println(iter.prev());
+       System.err.println(iter.prev());
+       
+       System.err.println(iter.next());
+       System.err.println(iter.next());
+   }
+
 }

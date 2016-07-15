@@ -78,6 +78,7 @@ typedef struct _MBR MBR;
 MBR mbr;
 FILE* diskImage;
 BYTE bootSect[512];
+char* imageFile = "source.bin";
 
 void readBootsect(int part) {
    FILE* result = NULL;
@@ -141,7 +142,7 @@ void setupMBR(MBR* mbr) {
    PartitionEntry* p0 = NULL;
 
    /* read the machine code from source.bin into the first part of the MBR */
-   source = fopen("source.bin", "rb");
+   source = fopen(imageFile, "rb");
    fread(mbr->bootstrap, 1, sizeof(mbr->bootstrap), source);
    fclose(source); 
 
@@ -182,8 +183,14 @@ void dumpMBR(MBR* mbr) {
 
 
 int main(int argc, char* argv[]) {
+   if (argc > 2) {
+       imageFile = argv[2];
+   }
    if (argc > 1) {
        char* fileName = argv[1];
+
+       printf("Image file: %s\n", imageFile);
+       printf("Virtual disk file: %s\n", fileName);
 
        printf("Partition entry size: %ld\n", sizeof(PartitionEntry));
        printf("MBR size: %ld\n", sizeof( MBR));
@@ -214,8 +221,9 @@ int main(int argc, char* argv[]) {
 
           fclose(diskImage);
        }
-   } 
-
+   } else  {
+      printf("Usage: %s VDIFile [imageFile]\n", argv[0]);
+   }
 
    return 0;
 }

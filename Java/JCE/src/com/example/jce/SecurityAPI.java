@@ -8,7 +8,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
@@ -20,6 +19,7 @@ import java.security.SecureRandom;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -85,6 +85,17 @@ public class SecurityAPI implements ActionListener {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+/*        try {
+            MessageDigest messageDigest224 = MessageDigest.getInstance( "SHA-224");
+            byte[] bSHA224 = messageDigest224.digest( "hello word".getBytes());
+            System.err.println(messageDigest224.getProvider().getName());
+            System.err.println(Arrays.toString(bSHA224));
+        } catch (NoSuchAlgorithmException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+*/
+          
 		SecurityAPI api = new SecurityAPI();
 		api.getProvidersByType();
 		api.allProviders();

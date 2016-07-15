@@ -1,0 +1,64 @@
+apply from: 'plugin.gradle'
+
+
+printf("Root project: %s\n", project.name)
+printf("Root project: %s\n", project)
+
+task sampleTask {
+    println("sampleTask - Configuration phase")
+
+    doFirst() {
+       println("sampleTask - Execution phase (doFirst)")
+    }
+
+    doLast() {
+       println("sampleTask - Execution phase (doLast)")
+    }
+
+}
+
+
+// use "<<" to define a simple task with no configuration section
+// the closure is simply executed when the task is being called
+// The << operator is simply an alias for doLast.
+task simpleTask << {
+    String taskName = 'simpleTask'
+    println(taskName)
+    println(name)
+    println(someValue)
+
+    subprojects.each { project ->
+       printf("PRJ: %s\n", project.name);
+    }
+}
+
+// Configuring tasks
+simpleTask {
+   ext.someValue = 35
+}
+
+project(':Application') {
+  apply plugin: 'application'
+  apply from: 'webstart.gradle'
+
+  version = project.properties['application.version']
+
+  wsCreateJnlp {
+    wsTitle = "My Example"
+    wsVendor = "Andreas"
+    wsName = "Example for a WebStart Application"
+    wsMainClass = "com.example.Hello"
+  }
+}
+
+simpleTask.doFirst {
+   println("simpleTask.doFirst!!!")
+}
+
+//build.doLast {
+//   println("BUILD COMPLETE.")
+//}
+
+//distZip.doFirst {
+//   println("distZip.")
+//}

@@ -14,7 +14,7 @@ int main(int argc, char ** argv) {
 
     MainWindow win(0);
     win.show(); 
-    app.connect( &app, SIGNAL( lastWindowClosed() ), &app, SLOT( quit() ) );
+    QObject::connect( &app, &QApplication::lastWindowClosed, &app, &QApplication::quit );
 
     return app.exec();
 }

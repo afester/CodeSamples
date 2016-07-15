@@ -1,4 +1,5 @@
 set (CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
+set (BUILD_SHARED_LIBS TRUE)
 cmake_minimum_required (VERSION 2.6)
 
 set (PARSER_NAME Expression)
@@ -10,9 +11,13 @@ add_library( ${PARSER_NAME}Parser
              ${PARSER_NAME}ASTLexer.cpp 
              ${PARSER_NAME}ASTParser.cpp 
              SymbolTable.cpp
-             ExpressionAST.cpp)
+             ExpressionAST.cpp
+             ExpressionEvaluator.cpp)
 
-include_directories(. ../../../../../nodistrib/antlr-3.5.2/include)
+include_directories(.
+                    ${CMAKE_SOURCE_DIR}/parser
+                    ${CMAKE_BINARY_DIR}/parser
+                    ../../../../../nodistrib/antlr-3.5.2/include)
 set (CMAKE_C_COMPILER "/usr/bin/c99")
 set (CMAKE_C_FLAGS "-Wall -pedantic")
 

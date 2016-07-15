@@ -1,0 +1,7 @@
+* Many duplicate code in writeExternal and readExternal methods
+* Delete item
+* change z-order of item
+* undo/redo
+* EditHandle enums as class
+* Consolidate the NewItem handler classes:
+  Difference is only object type (can be instanciated through the factory method) and the initial edit handle!

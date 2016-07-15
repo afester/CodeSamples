@@ -1,6 +1,7 @@
 -- SQL*Plus settings - restrict column sizes and enlarge line sizes and page sizes
 SET LINESIZE 1000
 SET PAGESIZE 300
+SET NUMWIDTH 18
 COLUMN Label FORMAT A30
 COLUMN Node FORMAT A30
 COLUMN Path FORMAT A50
@@ -190,12 +191,18 @@ WITH Edge (Id, Left, Right, HLevel) AS
 )
 SEARCH DEPTH FIRST BY Id SET NodeSequence
 CYCLE Right SET CycleFlag TO '*' DEFAULT ' '
-SELECT e.Id, e.Left, e.Right, e.HLevel, LPAD (' ', 2 * (e.HLevel - 1)) || n.Label || CycleFlag Label, NodeSequence
+SELECT e.Id, e.Left, e.Right, e.HLevel, NodeSequence, LPAD (' ', 2 * (e.HLevel - 1)) || n.Label || CycleFlag Label
 FROM Edge e
 JOIN GraphNode n ON (e.Right = n.Id) 
 ORDER BY NodeSequence;
 
---
+-- Using a start **node** - This includes the start node in the result,
+-- and also stops if a cycle to the **start node** has been detected!
+-- Actually the anchor query could also be a simple select from dual, like
+--   SELECT null, null, Id, 1 FROM DUAL;
+-- The only difference is that selecting from GraphNode actually checks if
+-- the start node is actually available, while the select from DUAL would
+-- return a start node even if this node is not available in the database.
 WITH Edge (Id, Left, Right, HLevel) AS
 (   -- Anchor Member - start node
     SELECT null, null, Id, 1
@@ -214,7 +221,7 @@ FROM Edge e
 JOIN GraphNode n ON (e.Right = n.Id) 
 ORDER BY NodeSequence;
 
---
+-- Same as above, but reversed direction - from right to left
 WITH Edge (Id, Left, Right, HLevel) AS
 (   -- Anchor Member - start node
     SELECT null, Id, null, 1
@@ -229,6 +236,32 @@ WITH Edge (Id, Left, Right, HLevel) AS
 SEARCH DEPTH FIRST BY Id SET NodeSequence
 CYCLE Left SET CycleFlag TO '*' DEFAULT ' '
 SELECT e.Id, e.Left, e.Right, e.HLevel, LPAD (' ', 2 * (e.HLevel - 1)) || n.Label || CycleFlag Label, NodeSequence
+FROM Edge e
+JOIN GraphNode n ON (e.Left = n.Id) 
+ORDER BY NodeSequence;
+
+-- Same as above, including the Path
+WITH Edge (Id, Left, Right, HLevel, Path) AS
+(   -- Anchor Member - start node
+    SELECT null, Id, null, 1, Label
+    FROM GraphNode
+    WHERE Id = 4	-- Start node
+  UNION ALL
+    -- Recursive Member - join between parent and child
+    SELECT RightEdge.Id, RightEdge.Left, RightEdge.Right, LeftEdge.HLevel+1, LeftEdge.Path || ' -> ' || Node.Label
+    FROM GraphEdge RightEdge
+    JOIN Edge LeftEdge ON (RightEdge.Right = LeftEdge.Left)
+    JOIN GraphNode Node ON (RightEdge.Left = Node.Id) 
+)
+SEARCH DEPTH FIRST BY Id SET NodeSequence
+CYCLE Left SET CycleFlag TO '*' DEFAULT ' '
+SELECT e.Id, e.Left, e.Right, e.HLevel, 
+	   LPAD (' ', 2 * (e.HLevel - 1)) || n.Label || CycleFlag Label, NodeSequence,
+	   Path,
+	   CASE 
+	   	 WHEN HLevel - LEAD(HLevel) OVER (ORDER BY NodeSequence) < 0 THEN 0
+	   	 ELSE 1 
+	   END AS isLeaf
 FROM Edge e
 JOIN GraphNode n ON (e.Left = n.Id) 
 ORDER BY NodeSequence;

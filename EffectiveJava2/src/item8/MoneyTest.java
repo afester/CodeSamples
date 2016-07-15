@@ -58,4 +58,15 @@ public class MoneyTest {
                                         (m1.hashCode() != m3.hashCode()));
    }
 
+   @Test
+   public void checkHashcode() {
+      Money m1 = new Money(12, 95);
+      Money m2 = new Money(12, 95);
+      
+      System.err.println(m1.hashCode());
+      System.err.println(m2.hashCode());
+      System.err.println(System.identityHashCode(m1));
+      System.err.println(System.identityHashCode(m2));
+   }
+   
 }

@@ -1,5 +1,6 @@
 package com.example;
 
+import java.nio.channels.IllegalSelectorException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,11 +13,31 @@ public class RegexpSample {
    
    
    public void run() {
+      // sample2();
       // basicSamples();
       // captureGroups();
-      captureGroups1();
-      captureGroups2();
+      // captureGroups1();
+      // captureGroups2();
+      greedyLazySample();
    }
+
+
+   public void sample2() {
+       
+       // String input = "Lastname,   firstname  middlename";
+       String input = "Müller,firstname  middlename";
+       // String regexp = "([A-Za-z]+),\\s+([A-Za-z]+)\\s+([A-Za-z]+)";
+       String regexp = "(.+),\\s*(.+)\\s+(.+)";
+       // String regexp = "((?:[^\\s,])+)";
+    
+       Pattern pattern = Pattern.compile(regexp);
+       Matcher matcher = pattern.matcher(input);
+       matcher.find();
+       System.out.println("Lastname  : " + matcher.group(1));
+       System.out.println("Firstname : " + matcher.group(2));
+       System.out.println("Middlename: " + matcher.group(3));
+   }
+
 
    public void basicSamples() {
 
@@ -47,6 +68,10 @@ public class RegexpSample {
       printMatch("Db(User|Password)", "sampleDbUser");
       printMatch("Db(User|Password)", "sampleDbPassword");
       printMatch("=(.*)", "name=value", 1);
+      
+      
+
+      
    }
 
    
@@ -103,6 +128,54 @@ public class RegexpSample {
       System.out.println("Number: " + matcher.group("number"));
    }
 
+   
+   private void matchGroups2(String input, String regexp) {
+       Pattern pattern = Pattern.compile(regexp);
+       Matcher matcher = pattern.matcher(input);
+       matcher.find();
+
+       System.out.printf("\n\"%s\" matched against \"%s\"\n", input, regexp);
+       
+       String g1 = "";
+       try {
+           g1 = "\"" + matcher.group(1) + "\"";
+       } catch (IllegalStateException ise) {
+           g1 = "Error: " + ise.getMessage();
+       }
+
+       String g2 = "";
+       try {
+           g2 = "\"" + matcher.group(2) + "\"";
+       } catch (IllegalStateException ise) {
+           g2 = "Error: " + ise.getMessage();
+       }
+
+       System.out.printf("  first : %s\n", g1);
+       System.out.printf("  second: %s\n", g2);
+   }
+
+   public void greedyLazySample() {
+       //matchGroups2("first second", "(.*) (.*)");
+       //matchGroups2("first",        "(.*) (.*)");
+
+       //matchGroups2("first", "(.*) ?(.*)?");
+       //matchGroups2("first second", "(.*) ?(.*)?");
+
+       String regexp = "(.*?)\\s*(?: (.*))?$";
+       matchGroups2("first second", regexp);
+       matchGroups2("first",        regexp);
+       matchGroups2("first ",        regexp);
+       
+       
+       regexp = "(\\S+)\\s*(\\S+)?";
+       matchGroups2("first second", regexp);
+       matchGroups2("first",        regexp);
+       matchGroups2("first ",        regexp);
+
+   }
+
+   
+   
 
    public void printMatch(String regexp, String str, int group) {
       System.out.println("\nMatching \"" + regexp + "\"\n against \"" + str + "\"");

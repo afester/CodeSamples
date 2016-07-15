@@ -9,6 +9,8 @@ public class SampleLog4j {
 
     public void run() {
         l.info("Application Running.");
+        l.error("Application Error occured.");
+        l.error("EXCEPTION Occurred", new Throwable());
     }
 
     public static void main(String[] args) {
