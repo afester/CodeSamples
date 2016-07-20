@@ -2,10 +2,11 @@ package com.example.tree;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
-import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 
 public class GraphicalTreeSample extends Application {
@@ -33,7 +34,11 @@ public class GraphicalTreeSample extends Application {
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("JavaFX Tree viewer example");
 
+        BorderPane mainLayout = new BorderPane();
+
         TreeNode<String> tree = createTree(3, 3);
+
+
 
         TreeNode<String> addtlNode = tree.findNode(new TreeNode[] {
                                       new TreeNode<String>("Node.2"),
@@ -51,13 +56,32 @@ public class GraphicalTreeSample extends Application {
         addtlNode.addChildren(new TreeNode<>("Node.2.1.3.2"));
         addtlNode.addChildren(new TreeNode<>("Node.2.1.3.3"));
         
-        Region mainLayout = new TreeLayout<String>(tree);
+        TreeLayout<String> treeLayout = new TreeLayout<>(tree);
+        
+        
+        HBox buttons = new HBox();
+        Button modify = new Button("Modify");
+        modify.setOnAction(e -> {
+            TreeNode<String> node = tree.findNode(new TreeNode[] {
+                                    new TreeNode<String>("Node.1"),
+                                    new TreeNode<String>("Node.1.1"),
+                                    new TreeNode<String>("Node.1.1.2") });
+            node.setContent("Hello World, how are you?");
+            node.setStyleClass("redNode");
+            treeLayout.doLayout();
+        });
+        buttons.getChildren().add(modify);
+
+        
+        
+        mainLayout.setTop(buttons);
+        mainLayout.setCenter(treeLayout);
 
         ScrollPane s1 = new ScrollPane();
-//        s1.setPrefSize(120, 120);
         s1.setContent(mainLayout);
 
         Scene scene = new Scene(s1, 600, 400);
+        scene.getStylesheets().add("/com/example/tree/treelayout.css");
         primaryStage.setScene(scene);
         primaryStage.show();
     }

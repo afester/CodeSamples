@@ -30,6 +30,31 @@ public class TreeNode <T> {
    private TreeNode<T> parent;
    private T content;
 
+   // this is probably the best approach to store the layout data.
+   // it only adds minimal overhead (one additional reference) to
+   // the TreeNode, but allows to store any kind of additional data
+   // on the tree node which is required for the (various) layout algorithms.
+   // It avoids that we have to create a specific sub class or a hash table to map
+   // between the TreeNode and its layout data. 
+   private LayoutData<T> layoutData;
+
+   LayoutData<T> getLayoutData() {
+       return layoutData;
+   }
+
+   void setLayoutData(LayoutData<T> data) {
+       layoutData = data;
+   }
+
+   private String styleClass;
+   
+   public void setStyleClass(String string) {
+       this.styleClass = string;
+   }
+   public String getStyleClass() {
+       return this.styleClass;
+   }
+
    
    /**
     * Creates a new tree node.
@@ -47,6 +72,14 @@ public class TreeNode <T> {
     */
    public T getContent() {
       return content;
+   }
+
+
+   /**
+    * @param content
+    */
+   public void setContent(T content) {
+       this.content = content;
    }
 
 
@@ -306,4 +339,6 @@ public class TreeNode <T> {
    public boolean isLeaf() {
       return children.size() == 0;
    }
+
+
 }

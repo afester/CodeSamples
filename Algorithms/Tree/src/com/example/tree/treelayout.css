@@ -1,0 +1,9 @@
+.TreeNode {
+    -fx-background-color: #C0FFD0;
+    -fx-border-style: solid;
+}
+
+.redNode {
+    -fx-background-color: red;
+    -fx-border-style: dashed;
+}
