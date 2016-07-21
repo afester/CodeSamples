@@ -2,15 +2,23 @@ package com.example.tree;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
+import javafx.scene.Node;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 
 // https://blogs.oracle.com/jfxprg/entry/dynamical_layouts_in_fx
 public class TreeLayout<T> extends Region {
 
     private final TreeNode<T> rootNode;
+    private final Function<TreeNode<T>, Node> createNode;
+    private final Function<TreeNode<T>, Node> createEdge;
+
     private static final float HORIZONTAL_SPACING = 5.0F;
+    private static final float SUBTREE_SEPARATION = 80.0F;
+    private static final int LEVEL_SEPARATION = 120;
 
     private boolean needsLayout = true;
     private double maxWidth = 0;
@@ -31,8 +39,12 @@ public class TreeLayout<T> extends Region {
     /**
      * @param rootNode
      */
-    public TreeLayout(TreeNode<T> rootNode) {
+    public TreeLayout(TreeNode<T> rootNode, 
+                      Function<TreeNode<T>, Node> createNode,
+                      Function<TreeNode<T>, Node> createLine) {
         this.rootNode = rootNode;
+        this.createNode = createNode;
+        this.createEdge = createLine;
     }
 
 
@@ -47,24 +59,22 @@ public class TreeLayout<T> extends Region {
             node.setLayoutData(layoutData);
 
             // create the node
-            layoutData.createNodePanel(node);
-            getChildren().add(layoutData.nodePanel);
+            Node nodeView = createNode.apply(node);
+            layoutData.nodePanel = (Pane) nodeView;
+            getChildren().add(nodeView);
 
             // create the edge to the parent
             TreeNode<T> parent = node.getParent();
             if (parent != null) {
-                layoutData.edgeLine = new Line();
-                getChildren().add(layoutData.edgeLine);
+                Node edgeView = createEdge.apply(node);
+                layoutData.edgeLine = (Line) edgeView;
+                getChildren().add(edgeView);
             }
-
         });
 
-        System.err.println("SIZE:" + getChildren().size());
 
         this.applyCss();        // !!!!! Required in order to consider CSS layout properties!!!!
         calculateLayout();
-
-        System.err.println("SIZE:" + getChildren().size());
     }
 
 
@@ -233,8 +243,8 @@ public class TreeLayout<T> extends Region {
             /* Set the global mean width of these two nodes */
             float flMeanWidth = TreeMeanNodeSize(pLeftmost.getLayoutData(), pNeighbor.getLayoutData());
 
-            flDistance = (((LayoutDataImpl<T>) pNeighbor.getLayoutData()).flPrelim + flLeftModsum +  80.0F + // SUBTREE_SEPARATION
-                                                                                      // +
+            flDistance = (((LayoutDataImpl<T>) pNeighbor.getLayoutData()).flPrelim + flLeftModsum +  SUBTREE_SEPARATION
+                                                                                      +
                     (float) flMeanWidth) - (((LayoutDataImpl<T>)pLeftmost.getLayoutData()).flPrelim + flRightModsum);
 
             if (flDistance > (float) 0.0) {
@@ -297,7 +307,7 @@ public class TreeLayout<T> extends Region {
         flNewModsum = flModsum;
 
         lxTemp = (long) xTopAdjustment + (long) (pThisNode2Layout.flPrelim + flModsum);
-        lyTemp = (long) yTopAdjustment + (long) (nCurrentLevel * 80); // LEVEL_SEPARATION);
+        lyTemp = (long) yTopAdjustment + (long) (nCurrentLevel * LEVEL_SEPARATION);
 
         //
         // if (CheckExtentsRange(lxTemp, lyTemp)) {
