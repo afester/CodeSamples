@@ -45,6 +45,8 @@ public class TreeLayout<T> extends Region {
         this.rootNode = rootNode;
         this.createNode = createNode;
         this.createEdge = createLine;
+        
+        getStyleClass().add("TreeLayout");
     }
 
 
