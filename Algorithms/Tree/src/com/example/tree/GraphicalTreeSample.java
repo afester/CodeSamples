@@ -1,7 +1,5 @@
 package com.example.tree;
 
-import javax.xml.transform.dom.DOMResult;
-
 import javafx.application.Application;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
@@ -11,10 +9,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;

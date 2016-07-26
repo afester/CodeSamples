@@ -2,7 +2,6 @@
 	-fx-background-color: white;
 }
 
-
 .NodeTitle {
 	-fx-font-weight: normal;
 	-fx-fill: red;
@@ -23,7 +22,7 @@
 
 .TreeEdge {
     -fx-stroke: green;
-    -fx-stroke-width: 1;
+    -fx-stroke-width: 2;
 }
 
 .redNode {
