@@ -46,7 +46,7 @@ public class GraphicalTreeSample extends Application {
         TreeNode<String> addtlNode = tree.findNode(new TreeNode[] { new TreeNode<String>("Node.2"),
                 new TreeNode<String>("Node.2.1"), new TreeNode<String>("Node.2.1.2") });
         addtlNode.addChildren(new TreeNode<>("Node.2.1.2.1"));
-        addtlNode.addChildren(new TreeNode<>("Node.2.1.2.2"));
+//        addtlNode.addChildren(new TreeNode<>("Node.2.1.2.2"));
         addtlNode.addChildren(new TreeNode<>("Node.2.1.2.3"));
 
         addtlNode = tree.findNode(new TreeNode[] { new TreeNode<String>("Node.2"), new TreeNode<String>("Node.2.1"),
