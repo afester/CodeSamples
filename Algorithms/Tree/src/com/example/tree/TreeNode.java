@@ -100,26 +100,26 @@ public class TreeNode <T> {
    /**
     * Searches a specific node in the tree through its path.
     * 
-    * @param path  An array of TreeNodes which make up the path to the
+    * @param path  A List of TreeNodes which make up the path to the
     *              node which is searched.
     * @param level The current search level.
     * @return The node which was found at the given level, or <code>null</code> 
     *         if no child node was found
     */
-   private TreeNode<T> searchSubtree(TreeNode<T>[] path, int level) {
-      for (TreeNode<T> node : getChildren()) {
-         if (node.equals(path[level])) {
-            TreeNode<T> result = node;
-            if (level < path.length-1) {
-               result = node.searchSubtree(path, level + 1);
-            }
-            return result; 
-         }
-      }
-      return null;
-   }
+   private TreeNode<T> searchSubtree(List<TreeNode<T>> path, int level) {
+       for (TreeNode<T> node : getChildren()) {
+          if (node.equals(path.get(level))) {
+             TreeNode<T> result = node;
+             if (level < path.size() - 1) {
+                result = node.searchSubtree(path, level + 1);
+             }
+             return result; 
+          }
+       }
+       return null;
+    }
 
-   
+
    /**
     * Searches for a node along a given path.
     * 
@@ -128,9 +128,9 @@ public class TreeNode <T> {
     * 
     * @return The node at the given path.
     */
-   public TreeNode<T> findNode(TreeNode<T>[] path) {
-      return searchSubtree(path, 0);
-   }
+   public TreeNode<T> findNode(List<TreeNode<T>> path) {
+       return searchSubtree(path, 0);
+    }
 
    
    /**
@@ -273,7 +273,7 @@ public class TreeNode <T> {
    }
 
 
-   /*private*/ void setParent(TreeNode<T> parent) {
+   private void setParent(TreeNode<T> parent) {
       this.parent = parent;  
    }
 

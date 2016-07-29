@@ -375,6 +375,8 @@ public class TreeLayout<T> extends Region {
         final float lxTemp = (long) xTopAdjustment + (long) (pThisNodeLayout.flPrelim + flModsum);
         final float lyTemp = (long) yTopAdjustment + (long) (nCurrentLevel * LEVEL_SEPARATION);
 
+//        System.err.printf("%s, %s%n", lxTemp, lyTemp);
+
         //
         // if (CheckExtentsRange(lxTemp, lyTemp)) {
         /* The values are within the allowable range */
@@ -404,7 +406,7 @@ public class TreeLayout<T> extends Region {
         treeFirstWalk(rootNode);
 
         LayoutDataImpl<T> ldRoot = (LayoutDataImpl<T>) rootNode.getLayoutData();
-        xTopAdjustment = ldRoot.xCoordinate;
+        xTopAdjustment = ldRoot.xCoordinate; //  - ldRoot.flPrelim;
         yTopAdjustment = ldRoot.yCoordinate;
 
         // also remember the maximum size of the whole tree

@@ -1,5 +1,7 @@
 package com.example.tree;
 
+import java.util.ArrayList;
+
 import javafx.application.Application;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -17,18 +19,75 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+class NodeData {
+    private String label;
+    private int order;
+
+    public NodeData(String label) {
+        this.label = label;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+    
+    
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((label == null) ? 0 : label.hashCode());
+        return result;
+    }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        NodeData other = (NodeData) obj;
+        if (label == null) {
+            if (other.label != null)
+                return false;
+        } else if (!label.equals(other.label))
+            return false;
+        return true;
+    }
+
+
+    @Override
+    public String toString() {
+        return String.format("NodeData[label=%s, order=%s]", label, order);
+    }
+
+    public void setOrder(int i) {
+       this.order = i;
+    }
+
+    public int getOrder() {
+        return this.order;
+     }
+}
 
 class ControlPanel extends VBox {
-    private TreeNode<String> currentNode;
+    private TreeNode<NodeData> currentNode;
     private final Button modify;
     private final Button remove;
     private final Button addChild;
     private final Button setAsRoot;
+    private final Button postOrder;
+    private final Button preOrder;
 
     private Text nodeLabelLabel = new Text("Current node:");
     private TextField nodeLabel = new TextField();
 
-    public ControlPanel(/*TreeNode<String> root, */ final TreeLayout<String> layout) {
+    private int order = 0;
+    
+    public ControlPanel(final TreeNode<NodeData> root, final TreeLayout<NodeData> layout) {
         GridPane formLayout = new GridPane();
         formLayout.setHgap(10);
 
@@ -61,7 +120,7 @@ class ControlPanel extends VBox {
         addChild.setDisable(true);
         buttons.getChildren().add(addChild);
         addChild.setOnAction(e -> {
-            TreeNode<String> newNode = new TreeNode<>("Child of " + currentNode);
+            TreeNode<NodeData> newNode = new TreeNode<>(new NodeData("Child of " + currentNode));
             currentNode.addChildren(newNode);
             layout.doLayout();
         } );
@@ -76,17 +135,46 @@ class ControlPanel extends VBox {
             layout.doLayout();
         } );
 
+        
+        HBox buttons2 = new HBox();
+        postOrder = new Button("PostOrder");
+        buttons2.getChildren().add(postOrder);
+        postOrder.setOnAction(e -> {
+            order = 0;
+            // Post order traversal
+            TreeTraversal<NodeData> tt2 = new DepthFirstTraversal<>();
+            tt2.traversePostOrder(root, (node) -> {
+                node.getContent().setOrder(order++);
+            });
+
+            layout.doLayout();
+        } );
+
+        preOrder = new Button("PreOrder");
+        buttons2.getChildren().add(preOrder);
+        preOrder.setOnAction(e -> {
+            order = 0;
+            // Post order traversal
+            TreeTraversal<NodeData> tt2 = new DepthFirstTraversal<>();
+            tt2.traversePreOrder(root, (node) -> {
+                node.getContent().setOrder(order++);
+            });
+
+            layout.doLayout();
+        } );
+
         getChildren().add(formLayout);
         getChildren().add(buttons);
+        getChildren().add(buttons2);
         
         setSpacing(10); // spacing between rows
 
         setPadding(new Insets(10));
     }
 
-    public void setSelectedNode(TreeNode<String> node) {
+    public void setSelectedNode(TreeNode<NodeData> node) {
         currentNode = node;
-        nodeLabel.setText(node.getContent());
+        nodeLabel.setText(node.toString()); // .getContent());
         
         //modify.setDisable(false);
         remove.setDisable(false);
@@ -100,10 +188,10 @@ public class GraphicalTreeSample extends Application {
     private Scene theScene;
 
     // TODO: Move to TreeSampleGenerator
-    private void createSubTree(TreeNode<String> parent, int childCount, int levelCount, String label) {
+    private void createSubTree(TreeNode<NodeData> parent, int childCount, int levelCount, String label) {
         for (int cCount = 1; cCount <= childCount; cCount++) {
             String newLabel = label + '.' + cCount;
-            TreeNode<String> child = new TreeNode<>(newLabel);
+            TreeNode<NodeData> child = new TreeNode<>(new NodeData(newLabel));
             parent.addChildren(child);
             if (levelCount > 1) {
                 createSubTree(child, childCount, levelCount - 1, newLabel);
@@ -111,38 +199,48 @@ public class GraphicalTreeSample extends Application {
         }
     }
 
-    private TreeNode<String> createTree(int childCount, int depth) {
-        TreeNode<String> root = new TreeNode<>("Root");
+    private TreeNode<NodeData> createTree(int childCount, int depth) {
+        TreeNode<NodeData> root = new TreeNode<>(new NodeData("Root"));
         createSubTree(root, childCount, depth, "Node");
         return root;
     }
 
+
     @Override
+    @SuppressWarnings("serial")
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("JavaFX Tree viewer example");
 
         BorderPane mainLayout = new BorderPane();
 
-        TreeNode<String> tree = createTree(3, 3);
+        TreeNode<NodeData> tree = createTree(3, 3);
 
-        TreeNode<String> addtlNode = tree.findNode(new TreeNode[] { new TreeNode<String>("Node.2"),
-                new TreeNode<String>("Node.2.1"), new TreeNode<String>("Node.2.1.2") });
-        addtlNode.addChildren(new TreeNode<>("Node.2.1.2.1"));
+        TreeNode<NodeData> addtlNode = 
+                tree.findNode(new ArrayList<TreeNode<NodeData>>() {{ 
+                                add(new TreeNode<NodeData>(new NodeData("Node.2")));
+                                add(new TreeNode<NodeData>(new NodeData("Node.2.1")));
+                                add(new TreeNode<NodeData>(new NodeData("Node.2.1.2")));
+                             }});
+        addtlNode.addChildren(new TreeNode<>(new NodeData("Node.2.1.2.1")));
 //        addtlNode.addChildren(new TreeNode<>("Node.2.1.2.2"));
-        addtlNode.addChildren(new TreeNode<>("Node.2.1.2.3"));
+        addtlNode.addChildren(new TreeNode<>(new NodeData("Node.2.1.2.3")));
 
-        addtlNode = tree.findNode(new TreeNode[] { new TreeNode<String>("Node.2"), new TreeNode<String>("Node.2.1"),
-                new TreeNode<String>("Node.2.1.3") });
-        addtlNode.addChildren(new TreeNode<>("Node.2.1.3.1"));
-        addtlNode.addChildren(new TreeNode<>("Node.2.1.3.2"));
-        addtlNode.addChildren(new TreeNode<>("Node.2.1.3.3"));
+        addtlNode = 
+                tree.findNode(new ArrayList<TreeNode<NodeData>>() {{
+                        add(new TreeNode<NodeData>(new NodeData("Node.2"))); 
+                        add(new TreeNode<NodeData>(new NodeData("Node.2.1")));
+                        add(new TreeNode<NodeData>(new NodeData("Node.2.1.3"))); 
+                }});
+        addtlNode.addChildren(new TreeNode<>(new NodeData("Node.2.1.3.1")));
+        addtlNode.addChildren(new TreeNode<>(new NodeData("Node.2.1.3.2")));
+        addtlNode.addChildren(new TreeNode<>(new NodeData("Node.2.1.3.3")));
 
-        TreeLayout<String> treeLayout = new TreeLayout<>(tree, this::createNode, this::createEdge);
+        TreeLayout<NodeData> treeLayout = new TreeLayout<>(tree, this::createNode, this::createEdge);
 
         ScrollPane s1 = new ScrollPane();
         s1.setContent(treeLayout);
 
-        ControlPanel ctrlPanel = new ControlPanel(/*tree, */treeLayout);
+        ControlPanel ctrlPanel = new ControlPanel(tree, treeLayout);
         treeLayout.setOnNodeSelected(node -> ctrlPanel.setSelectedNode(node));
         mainLayout.setCenter(s1);
         mainLayout.setRight(ctrlPanel);
@@ -155,18 +253,18 @@ public class GraphicalTreeSample extends Application {
 
     
 
-    private Node createNode(TreeNode<String> node) {
+    private Node createNode(TreeNode<NodeData> node) {
         Pane result = new Pane();
         result.getStyleClass().add("TreeNode");
         result.getStyleClass().add(node.getStyleClass());
 
-        Text t = new Text(node.toString());
+        Text t = new Text(node.getContent().getLabel());
         t.getStyleClass().add("NodeTitle");
 
         Line line = new Line();
         line.getStyleClass().add("TreeNode");
 
-        Text line1 = new Text("# Item 1");
+        Text line1 = new Text("Order: " + node.getContent().getOrder()); 
         line1.getStyleClass().add("NodeContent");
         Text line2 = new Text("# Item 2");
         line2.getStyleClass().add("NodeContent");
@@ -237,7 +335,7 @@ public class GraphicalTreeSample extends Application {
 //        return result;
 //    }
 
-    private Node createEdge(TreeNode<String> node) {
+    private Node createEdge(TreeNode<NodeData> node) {
         Node result = new Line();
         result.getStyleClass().add("TreeEdge");
         return result;

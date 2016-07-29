@@ -1,5 +1,7 @@
 package com.example.tree;
 
+import java.util.ArrayList;
+
 public class TreeSample {
     
     
@@ -35,22 +37,25 @@ public class TreeSample {
        return root;
     }
 
+    @SuppressWarnings("serial")
     private void run() {
         // Create a sample tree
         TreeNode<String> tree = createTree(3, 3);
 
-        TreeNode<String> addtlNode = tree.findNode(new TreeNode[] {
-                                      new TreeNode<String>("Node.2"),
-                                      new TreeNode<String>("Node.2.1"),
-                                      new TreeNode<String>("Node.2.1.2") });
+        TreeNode<String> addtlNode = tree.findNode(new ArrayList<TreeNode<String>>() {{
+                                                     add(new TreeNode<String>("Node.2"));
+                                                     add(new TreeNode<String>("Node.2.1"));
+                                                     add(new TreeNode<String>("Node.2.1.2"));
+                                                   }});
         addtlNode.addChildren(new TreeNode<>("Node.2.1.2.1"));
         addtlNode.addChildren(new TreeNode<>("Node.2.1.2.2"));
         addtlNode.addChildren(new TreeNode<>("Node.2.1.2.3"));
 
-        addtlNode = tree.findNode(new TreeNode[] {
-                new TreeNode<String>("Node.2"),
-                new TreeNode<String>("Node.2.1"),
-                new TreeNode<String>("Node.2.1.3") });
+        addtlNode = tree.findNode(new ArrayList<TreeNode<String>>() {{
+                                    add(new TreeNode<String>("Node.2"));
+                                    add(new TreeNode<String>("Node.2.1"));
+                                    add(new TreeNode<String>("Node.2.1.3"));
+                                  }});
         addtlNode.addChildren(new TreeNode<>("Node.2.1.3.1"));
         addtlNode.addChildren(new TreeNode<>("Node.2.1.3.2"));
         addtlNode.addChildren(new TreeNode<>("Node.2.1.3.3"));
