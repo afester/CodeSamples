@@ -59,6 +59,9 @@ public class TreeSample {
         TreeAsciiRenderer tv = new TreeAsciiRenderer(System.err);
         tv.renderHierarchical(tree);
 
+        addtlNode.setAsRoot();
+        tv.renderHierarchical(addtlNode);
+
         TreeTraversal<String> tt2 = new BreadthFirstTraversal<>();
         tt2.traversePreOrder(tree, (node) -> {
             System.err.printf("%s (%s - %s)%n", node, node.getLeftSibling(), node.getRightSibling());

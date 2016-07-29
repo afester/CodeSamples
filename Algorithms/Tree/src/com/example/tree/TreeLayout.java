@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.Pane;
@@ -18,12 +21,13 @@ import javafx.scene.shape.Line;
  *   https://blogs.oracle.com/jfxprg/entry/dynamical_layouts_in_fx
  *   http://www.drdobbs.com/positioning-nodes-for-general-trees/184402320?pgno=2
  *   https://rachel53461.wordpress.com/2014/04/20/algorithm-for-drawing-trees/
+ *   https://de.wikipedia.org/wiki/Algorithmus_von_Walker
  *
  * @param <T>
  */
 public class TreeLayout<T> extends Region {
 
-    private final TreeNode<T> rootNode;
+    private /*final*/ TreeNode<T> rootNode;
     private final Function<TreeNode<T>, Node> createNode;   // factory method to create a Node representation
     private final Function<TreeNode<T>, Node> createEdge;   // factory method to create an Edge representation
 
@@ -62,6 +66,9 @@ public class TreeLayout<T> extends Region {
         getStyleClass().add("TreeLayout");
     }
 
+    public void setRoot(TreeNode<T> newRoot) {
+        rootNode = newRoot;
+    }
 
     private void doCreateLayout() {
         // initialize the graphical artifacts.
@@ -79,7 +86,7 @@ public class TreeLayout<T> extends Region {
 
             // create the node
             Node nodeView = createNode.apply(node);
-            nodeView.setOnMouseClicked(e -> {System.err.println(node); });
+            nodeView.setOnMouseClicked(e -> { onNodeSelectedProperty.get().accept(node); });
             layoutData.nodePanel = (Pane) nodeView;
             nodes.add(nodeView);
 
@@ -500,5 +507,12 @@ public class TreeLayout<T> extends Region {
 
         getChildren().clear();
         doCreateLayout();
+    }
+
+
+    private ObjectProperty<Consumer<TreeNode<T>>> onNodeSelectedProperty = new SimpleObjectProperty<>();
+    // TODO: getters/setters for the property
+    public final void setOnNodeSelected(Consumer<TreeNode<T>> value) {
+        onNodeSelectedProperty.set(value);
     }
 }

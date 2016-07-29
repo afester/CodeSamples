@@ -154,6 +154,11 @@ public class TreeNode <T> {
       return child;
    }
 
+
+   /**
+    * @return The child node with the specified contents, or null
+    *         if no child node with the specified contents was found.
+    */
    public TreeNode<T> getChild(T e) {
        TreeNode<T> n = new TreeNode<>(e);
        int idx = children.indexOf(n);     // TODO: hash table!
@@ -162,6 +167,19 @@ public class TreeNode <T> {
        }
 
        return null;
+   }
+
+
+   /**
+    * Removes the specified node from the children of this node.
+    *
+    * @param currentNode The node to remove.
+    * @return <code>true</code> if the specified node has been removed,
+    *         <code>false</code> otherwise.
+    */
+   public boolean removeChild(TreeNode<T> currentNode) {
+       currentNode.setParent(null);
+       return children.remove(currentNode);
    }
 
 
@@ -199,22 +217,20 @@ public class TreeNode <T> {
 
 
    /**
-    * @return The path to the root node as a array of TreeNode objects.
+    * @return The path to the root node as a List of TreeNode objects.
     */
-   public TreeNode<?>[] getPath() {
-      TreeNode<?>[] result = new TreeNode<?>[getLevel() + 1];
+   public List<TreeNode<T>> getPath() {
+       List<TreeNode<T>> result = new ArrayList<>();
 
-      int i = 0;
-      TreeNode<T> node = this;
-      do {
-         result[i] = node;
-         node = node.getParent();
-         i++;
-      }while(node != null);
+       TreeNode<T> node = this;
+       do {
+          result.add(node);
+          node = node.getParent();
+       }while(node != null);
 
-      return result;
+       return result;
    }
-
+   
 
    /**
     * @return A hash code for this TreeNode. Only the content is regarded
@@ -257,7 +273,7 @@ public class TreeNode <T> {
    }
 
 
-   private void setParent(TreeNode<T> parent) {
+   /*private*/ void setParent(TreeNode<T> parent) {
       this.parent = parent;  
    }
 
@@ -340,5 +356,34 @@ public class TreeNode <T> {
       return children.size() == 0;
    }
 
+
+   /**
+    * Sets this tree node as the new root node.
+    * Note: This method is not reversable - if called again on the original
+    * root node, the order of the children might have changed.
+    */
+   public void setAsRoot() {
+       // get the path to the root node. All edges on the path
+       // need to be inversed. During the reversal process,
+       // the original structure of the node is modified, hence
+       // we need to store the original path and the node parents in separate lists first
+       List<TreeNode<T>> nodes = new ArrayList<>();
+       List<TreeNode<T>> parents = new ArrayList<>();
+       for (TreeNode<T> tn : getPath()) {
+           nodes.add(tn);
+           parents.add(tn.getParent());
+       }
+
+       // reverse all edges on the path from the current root node to the new root node
+       for (int idx = nodes.size() - 1;  idx >= 0;  idx--) {
+           TreeNode<T> node = nodes.get(idx);
+           TreeNode<T> parent = parents.get(idx);
+
+           if (parent != null) {
+               parent.removeChild(node);
+               node.addChildren(parent);
+           }
+       }
+   }
 
 }

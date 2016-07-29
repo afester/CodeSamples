@@ -2,16 +2,98 @@ package com.example.tree;
 
 import javafx.application.Application;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+
+class ControlPanel extends VBox {
+    private TreeNode<String> currentNode;
+    private final Button modify;
+    private final Button remove;
+    private final Button addChild;
+    private final Button setAsRoot;
+
+    private Text nodeLabelLabel = new Text("Current node:");
+    private TextField nodeLabel = new TextField();
+
+    public ControlPanel(/*TreeNode<String> root, */ final TreeLayout<String> layout) {
+        GridPane formLayout = new GridPane();
+        formLayout.setHgap(10);
+
+        nodeLabel.setEditable(false);
+        formLayout.add(nodeLabelLabel, 0, 0);
+        formLayout.add(nodeLabel, 1, 0);
+
+        HBox buttons = new HBox();
+        buttons.setSpacing(10);
+        modify = new Button("Modify");
+        modify.setOnAction(e -> {
+//            TreeNode<String> node = tree.findNode(new TreeNode[] { new TreeNode<String>("Node.1"),
+//                    new TreeNode<String>("Node.1.1"), new TreeNode<String>("Node.1.1.2") });
+//            node.setContent("Hello World, how are you?");
+//            node.setStyleClass("redNode");
+//            treeLayout.doLayout();
+        });
+        modify.setDisable(true);
+        buttons.getChildren().add(modify);
+
+        remove = new Button("Remove");
+        remove.setDisable(true);
+        buttons.getChildren().add(remove);
+        remove.setOnAction(e -> {
+            currentNode.getParent().removeChild(currentNode);
+            layout.doLayout();
+        } );
+
+        addChild = new Button("Add child");
+        addChild.setDisable(true);
+        buttons.getChildren().add(addChild);
+        addChild.setOnAction(e -> {
+            TreeNode<String> newNode = new TreeNode<>("Child of " + currentNode);
+            currentNode.addChildren(newNode);
+            layout.doLayout();
+        } );
+
+        setAsRoot = new Button("Set as root");
+        setAsRoot.setDisable(true);
+        buttons.getChildren().add(setAsRoot);
+        setAsRoot.setOnAction(e -> {
+            currentNode.setAsRoot();
+
+            layout.setRoot(currentNode);
+            layout.doLayout();
+        } );
+
+        getChildren().add(formLayout);
+        getChildren().add(buttons);
+        
+        setSpacing(10); // spacing between rows
+
+        setPadding(new Insets(10));
+    }
+
+    public void setSelectedNode(TreeNode<String> node) {
+        currentNode = node;
+        nodeLabel.setText(node.getContent());
+        
+        //modify.setDisable(false);
+        remove.setDisable(false);
+        addChild.setDisable(false);
+        setAsRoot.setDisable(false);
+    }
+}
 
 public class GraphicalTreeSample extends Application {
 
@@ -57,24 +139,15 @@ public class GraphicalTreeSample extends Application {
 
         TreeLayout<String> treeLayout = new TreeLayout<>(tree, this::createNode, this::createEdge);
 
-        HBox buttons = new HBox();
-        Button modify = new Button("Modify");
-        modify.setOnAction(e -> {
-            TreeNode<String> node = tree.findNode(new TreeNode[] { new TreeNode<String>("Node.1"),
-                    new TreeNode<String>("Node.1.1"), new TreeNode<String>("Node.1.1.2") });
-            node.setContent("Hello World, how are you?");
-            node.setStyleClass("redNode");
-            treeLayout.doLayout();
-        });
-        buttons.getChildren().add(modify);
-
-        mainLayout.setTop(buttons);
-        mainLayout.setCenter(treeLayout);
-
         ScrollPane s1 = new ScrollPane();
-        s1.setContent(mainLayout);
+        s1.setContent(treeLayout);
 
-        theScene = new Scene(s1, 600, 400);
+        ControlPanel ctrlPanel = new ControlPanel(/*tree, */treeLayout);
+        treeLayout.setOnNodeSelected(node -> ctrlPanel.setSelectedNode(node));
+        mainLayout.setCenter(s1);
+        mainLayout.setRight(ctrlPanel);
+
+        theScene = new Scene(mainLayout, 800, 600);
         theScene.getStylesheets().add("/com/example/tree/treelayout.css");
         primaryStage.setScene(theScene);
         primaryStage.show();
