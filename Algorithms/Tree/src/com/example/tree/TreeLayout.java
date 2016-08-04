@@ -12,7 +12,10 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Line;
+import javafx.scene.shape.Circle;
+//import javafx.scene.shape.Line;
+//import javafx.scene.shape.QuadCurve;
+import javafx.scene.shape.CubicCurve;
 
 
 /**
@@ -38,6 +41,7 @@ public class TreeLayout<T> extends Region {
     private boolean needsLayout = true;
     private double maxWidth = 0;
     private double maxHeight = 0;
+    private double minY;                // ?????
 
     private float xTopAdjustment;
     private float yTopAdjustment;
@@ -49,7 +53,7 @@ public class TreeLayout<T> extends Region {
     // so that in a later step the proper node can be assigned as "left neighbor" 
     private Map<Integer, TreeNode<T>> leftNeighbor = new HashMap<>();
 
-    private float flModsum = 0.0F;
+    private double flModsum = 0.0;
 
 
     /**
@@ -71,12 +75,17 @@ public class TreeLayout<T> extends Region {
     }
 
     private void doCreateLayout() {
+        if (rootNode == null) {
+            return;
+        }
+
         // initialize the graphical artifacts.
         // after this traversal, each node has a LayoutData assigned which contains 
         // the node and the parent path.
         
         List<Node> nodes = new ArrayList<>();
         List<Node> edges = new ArrayList<>();
+        //List<Node> helpers = new ArrayList<>();
 
         TreeTraversal<T> tt5 = new DepthFirstTraversal<>();
         tt5.traversePreOrder(rootNode, (node) -> {
@@ -94,20 +103,26 @@ public class TreeLayout<T> extends Region {
             TreeNode<T> parent = node.getParent();
             if (parent != null) {
                 Node edgeView = createEdge.apply(node);
-                layoutData.edgeLine = (Line) edgeView;
+                layoutData.edgeLine = (CubicCurve) edgeView;
                 edges.add(edgeView);
             }
+
+            // create a helper point
+            //layoutData.helperPoint = new Circle(0, 0, 3);
+            //helpers.add(layoutData.helperPoint);
         });
 
 
         // first, add all edges so that they are behind the nodes
         for (Node edge : edges) {
             getChildren().add(edge);
-            
         }
         for (Node node1 : nodes) {
             getChildren().add(node1);
         }
+        //for (Node helper : helpers) {
+        //    getChildren().add(helper);
+        //}
 
         this.applyCss();        // !!!!! Required in order to consider CSS layout properties!!!!
         calculateLayout();
@@ -151,12 +166,12 @@ public class TreeLayout<T> extends Region {
 
         if (pLeftNode != null) {
             LayoutDataImpl<T> pLeftNodeLayout = (LayoutDataImpl<T>) pLeftNode.getLayoutData();
-            result = (float) pLeftNodeLayout.getWidth() / 2;       // !!!!!!!!! seems ok
+            result = (float) pLeftNodeLayout.getWidth() / 2;
         }
 
         if (pRightNode != null) {
             LayoutDataImpl<T> pRightNodeLayout = (LayoutDataImpl<T>) pRightNode.getLayoutData();
-            result = result + (float) pRightNodeLayout.getWidth() / 2;       // !!!!!!!!! seems ok
+            result = result + (float) pRightNodeLayout.getWidth() / 2;
         }
 
         // System.err.println("TreeMeanNodeSize() = " + result);
@@ -203,7 +218,7 @@ public class TreeLayout<T> extends Region {
                 treeFirstWalk(child);
             }
 
-            TreeNode<T> pLeftmost = pThisNode.getFirstChild();
+            TreeNode<T> pLeftmost = pThisNode.getFirstChild();  // leftmost child node
             TreeNode<T> pRightmost = pThisNode.getLastChild();
 
             LayoutDataImpl<T> pLeftmostLayout = (LayoutDataImpl<T>) pLeftmost.getLayoutData();
@@ -221,9 +236,12 @@ public class TreeLayout<T> extends Region {
             if (leftSibling != null) {
                 LayoutDataImpl<T> leftSiblingLayout = (LayoutDataImpl<T>) leftSibling.getLayoutData();
 
-                float flMeanWidth = treeMeanNodeSize(pLeftmost, pThisNode);
+                // TODO: Why was there an obscure calculation of treeMeanNodeSize() before?
+                double flMeanWidth = leftSiblingLayout.getWidth(); // treeMeanNodeSize(pLeftmost, pThisNode);
                 pThisNodeLayout.flPrelim = leftSiblingLayout.flPrelim + HORIZONTAL_SPACING + flMeanWidth;
                 pThisNodeLayout.flModifier = pThisNodeLayout.flPrelim - flMidpoint;
+System.err.println("flModifier: " + pThisNodeLayout.flModifier);        // !!!!! Can be negative!!!
+// pThisNodeLayout.flModifier += 100;
 
                 // move the sub trees of this node to the proper location
                 treeApportion(pThisNode);
@@ -282,8 +300,8 @@ public class TreeLayout<T> extends Region {
 
             // Compute the location of pLeftmost and where it
             // should be with respect to pNeighbor.
-            float flRightModsum = 0.0F;         // sum of ancestral mods
-            float flLeftModsum = 0.0F;          // sum of ancestral mods
+            double flRightModsum = 0.0;         // sum of ancestral mods
+            double flLeftModsum = 0.0;          // sum of ancestral mods
             TreeNode<T> pAncestorLeftmost = pLeftmost;  // ancestor of pLeftmost
             TreeNode<T> pAncestorNeighbor = pNeighbor;  // ancestor of pNeighbor
             for (int i = 0; (i < nCompareDepth); i++) {
@@ -297,10 +315,10 @@ public class TreeLayout<T> extends Region {
             /* it to "pThisNode's" subtree. Apply appropriate */
             /* portions to smaller interior subtrees */
 
-            /* Set the global mean width of these two nodes */
+            // Calculate the mean width of these two nodes
             float flMeanWidth = treeMeanNodeSize(pLeftmost, pNeighbor);
 
-            float flDistance =  // difference between where pNeighbor thinks pLeftmost should be
+            double flDistance =  // difference between where pNeighbor thinks pLeftmost should be
                                 // and where pLeftmost actually is
                     ( ((LayoutDataImpl<T>) pNeighbor.getLayoutData()).flPrelim + flLeftModsum +  
                       SUBTREE_SEPARATION +
@@ -325,11 +343,13 @@ public class TreeLayout<T> extends Region {
                     /* leftsibling subtrees. */
 
                     // proportion of flDistance to be added to each sibling
-                    final float flPortion =  flDistance / (float) nLeftSiblings;
+                    final double flPortion =  flDistance / (float) nLeftSiblings;
 
                     for (pTempPtr = pThisNode; (pTempPtr != pAncestorNeighbor); pTempPtr = pTempPtr.getLeftSibling()) {
                         ((LayoutDataImpl<T>) pTempPtr.getLayoutData()).flPrelim = ((LayoutDataImpl<T>) pTempPtr.getLayoutData()).flPrelim + flDistance;
                         ((LayoutDataImpl<T>) pTempPtr.getLayoutData()).flModifier = ((LayoutDataImpl<T>) pTempPtr.getLayoutData()).flModifier + flDistance;
+                        System.err.println("flModifier (2): " + ((LayoutDataImpl<T>) pTempPtr.getLayoutData()).flModifier);
+
                         flDistance = flDistance - flPortion;
                     }
                 } else {
@@ -370,10 +390,14 @@ public class TreeLayout<T> extends Region {
         int nCurrentLevel = pThisNode.getLevel();
 
         // // if (nCurrentLevel <= MAXIMUM_DEPTH) {
-        float flNewModsum = flModsum;
+        double flNewModsum = flModsum;
+
+        System.err.println("    !!1 " + pThisNodeLayout.flPrelim + "/" + flModsum);
 
         final float lxTemp = (long) xTopAdjustment + (long) (pThisNodeLayout.flPrelim + flModsum);
         final float lyTemp = (long) yTopAdjustment + (long) (nCurrentLevel * LEVEL_SEPARATION);
+
+        System.err.println("    !! " + lxTemp);
 
 //        System.err.printf("%s, %s%n", lxTemp, lyTemp);
 
@@ -387,18 +411,30 @@ public class TreeLayout<T> extends Region {
         maxWidth = Math.max(maxWidth, lxTemp + pThisNodeLayout.getWidth());
         maxHeight = Math.max(maxHeight, lyTemp +pThisNodeLayout.getHeight());
 
+        System.err.println(" >> " + flNewModsum);
+
+
         if (!pThisNode.isLeaf()) {
             // Apply the flModifier value for this node to all its offspring.
+            
+            System.err.println(" >>(1a) " + flNewModsum + "/" + pThisNodeLayout.flModifier);
             flModsum = flNewModsum = flNewModsum + pThisNodeLayout.flModifier;
+            System.err.println(" >>(1) " + flNewModsum);
             treeSecondWalk(pThisNode.getFirstChild());
             flNewModsum = flNewModsum - pThisNodeLayout.flModifier;
+            System.err.println(" >>(2) " + flNewModsum);
         }
+
+        System.err.println(" <<2 " + flNewModsum + "/" + flModsum);
 
         TreeNode<T> rightSibling = pThisNode.getRightSibling();
         if (rightSibling != null) {
             flModsum = flNewModsum;
+            System.err.println(" <<XX " + flNewModsum + "/" + flModsum);
             treeSecondWalk(rightSibling);
         }
+        
+        System.err.println(" << " + flNewModsum);
     }
 
 
@@ -449,14 +485,19 @@ public class TreeLayout<T> extends Region {
     protected void layoutChildren() {
         System.err.printf("layoutChildren()%n");
 
-        // Resizes the children to their preferred sizes. 
-       super.layoutChildren();
+        // Resizes the children to their preferred sizes.
+        super.layoutChildren();
+
+        if (rootNode == null) {
+            return;
+        }
 
         // position the children.
         if (needsLayout) {
             needsLayout = false;
 
-         //   System.err.printf("LAYOUT (%s)%n", ((Pane) getChildren().get(0)).getWidth());
+            // System.err.printf("LAYOUT (%s)%n", ((Pane)
+            // getChildren().get(0)).getWidth());
 
             TreeTraversal<T> tt5 = new DepthFirstTraversal<>();
             tt5.traversePreOrder(rootNode, (node) -> {
@@ -470,19 +511,32 @@ public class TreeLayout<T> extends Region {
                     LayoutDataImpl<T> layoutDataP = (LayoutDataImpl<T>) parent.getLayoutData();
 
                     // connection point in parent
-                    double parentBottom = layoutDataP.yCoordinate + layoutDataP.nodePanel.getHeight();    // lower border
+                    //double parentBottom = layoutDataP.yCoordinate + layoutDataP.nodePanel.getHeight(); // lower
+                    //                                                                                   // border
                     double parentLeft = layoutDataP.xCoordinate;
                     double parentWidth = layoutDataP.getWidth();
                     double space = parentWidth / parent.getChildren().size();
                     int i = parent.getChildren().indexOf(node);
 
-                    layoutData.edgeLine.setStartX(parentLeft + space/2  +  i * space);
-                                               // layoutDataP.xCoordinate + layoutDataP.nodePanel.getWidth() / 2.0);
-                    layoutData.edgeLine.setStartY(parentBottom);
+                    double parentConnectorX = parentLeft + space / 2 + i * space;
+                    double parentConnectorY = layoutDataP.yCoordinate + layoutDataP.nodePanel.getHeight();
+                    double childConnectorX = layoutData.xCoordinate + layoutData.nodePanel.getWidth() / 2.0;
+                    double childConnectorY = layoutData.yCoordinate;
+                    
+                    layoutData.edgeLine.setStartX(parentConnectorX);
+                    layoutData.edgeLine.setStartY(parentConnectorY);
+                    layoutData.edgeLine.setEndX(childConnectorX);
+                    layoutData.edgeLine.setEndY(childConnectorY);
 
-                    // connection point in child
-                    layoutData.edgeLine.setEndX(layoutData.xCoordinate + layoutData.nodePanel.getWidth() / 2.0);
-                    layoutData.edgeLine.setEndY(layoutData.yCoordinate);
+                    double ctrlX = childConnectorX; // (childConnectorX + parentConnectorX) / 2;
+                    double ctrlY = (childConnectorY + parentConnectorY) / 2;
+                    //layoutData.helperPoint.setCenterX(ctrlX);
+                    //layoutData.helperPoint.setCenterY(ctrlY);
+
+                    layoutData.edgeLine.setControlX1(parentConnectorX);
+                    layoutData.edgeLine.setControlY1(ctrlY);    
+                    layoutData.edgeLine.setControlX2(childConnectorX);
+                    layoutData.edgeLine.setControlY2(ctrlY);    
                 }
 
             });
@@ -518,3 +572,4 @@ public class TreeLayout<T> extends Region {
         onNodeSelectedProperty.set(value);
     }
 }
+

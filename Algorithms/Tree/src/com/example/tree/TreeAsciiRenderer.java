@@ -4,7 +4,7 @@ import java.io.PrintStream;
 import java.util.Iterator;
 
 
-public class TreeAsciiRenderer {
+public class TreeAsciiRenderer<T> {
 
    private final static char   BAR         = '|';
    private final static char   NO_BAR      = ' ';
@@ -19,11 +19,11 @@ public class TreeAsciiRenderer {
    }
 
 
-   private void processChildren(TreeNode<?> parent, String prefix) {
+   private void processChildren(TreeNode<T> parent, String prefix) {
 
-      Iterator<?> childs = parent.getChildren().iterator();
+      Iterator<TreeNode<T>> childs = parent.getChildren().iterator();
       while(childs.hasNext()) {
-         TreeNode<?> child = (TreeNode<?>) childs.next();
+         TreeNode<T> child = childs.next();
 
          StringBuilder line = new StringBuilder(prefix);
          StringBuilder newPrefix = new StringBuilder(prefix);
@@ -53,17 +53,17 @@ public class TreeAsciiRenderer {
     *
     * @param tree The tree to render.
     */
-   public void renderHierarchical(TreeNode<?> tree) {
-      //out.println(LAST_NODE + NODE_HANDLE + tree.getContent());
-      //processChildren(tree, "   ");
+   public void renderHierarchical(TreeNode<T> tree) {
       out.println(tree.getContent());
       processChildren(tree, "");
    }
 
 
-   private void printNode(TreeNode<?> node) {
+
+   
+   private void printNode(TreeNode<T> node) {
       out.println(node.getLevel() + " " + node + " (" + node.getPathString() + ")");
-      for (TreeNode<?> child : node.getChildren()) {
+      for (TreeNode<T> child : node.getChildren()) {
          printNode(child);
       }
    }
@@ -74,7 +74,24 @@ public class TreeAsciiRenderer {
     * 
     * @param tree The tree to render.
     */
-   public void renderFlat(TreeNode<?> tree) {
+   public void renderFlat(TreeNode<T> tree) {
       printNode(tree);
    }
+
+
+
+    private String getPrefix(int level) {
+        return new String(new char[level]).replace("\0", "+");
+    }
+
+    /**
+     * Renders a tree as a flat list.
+     * 
+     * @param tree The tree to render.
+     */
+    public void renderExt(TreeNode<T> tree) {
+       DepthFirstTraversal<T> trav = new DepthFirstTraversal<>();
+       trav.traversePreOrder(tree, e -> out.printf("%s%s%n", getPrefix(e.getLevel()), e) ); 
+    }
 }
+

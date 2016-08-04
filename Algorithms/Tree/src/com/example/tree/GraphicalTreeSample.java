@@ -1,6 +1,10 @@
 package com.example.tree;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.util.List;
+import java.util.ListIterator;
 
 import javafx.application.Application;
 import javafx.geometry.Bounds;
@@ -15,20 +19,52 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.QuadCurve;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 class NodeData {
+
     private String label;
     private int order;
+    private String additionalText; 
 
     public NodeData(String label) {
+        this(label, 0, "");
+    }
+
+    public NodeData(String label, int order, String additionalText) {
         this.label = label;
+        this.order = order;
+        this.additionalText = additionalText;
+    }
+
+
+    public void setLabel(String string) {
+        label = string;
     }
 
     public String getLabel() {
         return label;
+    }
+
+    public void setOrder(int i) {
+       this.order = i;
+    }
+
+    public int getOrder() {
+       return this.order;
+    }
+
+    public void setAdditionalText(String value) {
+        additionalText = value;
+    }
+
+    public String getAdditionalText() {
+        return additionalText;
     }
     
     
@@ -36,10 +72,11 @@ class NodeData {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((additionalText == null) ? 0 : additionalText.hashCode());
         result = prime * result + ((label == null) ? 0 : label.hashCode());
+        result = prime * result + order;
         return result;
     }
-
 
     @Override
     public boolean equals(Object obj) {
@@ -50,60 +87,71 @@ class NodeData {
         if (getClass() != obj.getClass())
             return false;
         NodeData other = (NodeData) obj;
+        if (additionalText == null) {
+            if (other.additionalText != null)
+                return false;
+        } else if (!additionalText.equals(other.additionalText))
+            return false;
         if (label == null) {
             if (other.label != null)
                 return false;
         } else if (!label.equals(other.label))
             return false;
+        if (order != other.order)
+            return false;
         return true;
     }
 
-
     @Override
     public String toString() {
-        return String.format("NodeData[label=%s, order=%s]", label, order);
+        return String.format("NodeData[label=%s, order=%s, additionalText=%s]", label, order, additionalText);
     }
-
-    public void setOrder(int i) {
-       this.order = i;
-    }
-
-    public int getOrder() {
-        return this.order;
-     }
 }
 
 class ControlPanel extends VBox {
     private TreeNode<NodeData> currentNode;
+    private TreeNode<NodeData> rootNode;
     private final Button modify;
     private final Button remove;
     private final Button addChild;
     private final Button setAsRoot;
     private final Button postOrder;
     private final Button preOrder;
+    private final Button saveTree;
+    private final Button loadTree;
 
-    private Text nodeLabelLabel = new Text("Current node:");
-    private TextField nodeLabel = new TextField();
+    private Text nodeLabelLabel = new Text("Node:");
+    private Text nodeLabel = new Text();
+    private Text nodeTitleLabel = new Text("Title:");
+    private TextField nodeTitle= new TextField();
+    private Text nodeAdditionalTextLabel= new Text("Text:");
+    private TextField nodeAdditionalText= new TextField();
 
     private int order = 0;
     
-    public ControlPanel(final TreeNode<NodeData> root, final TreeLayout<NodeData> layout) {
+    public ControlPanel(final TreeLayout<NodeData> layout) {
+//        rootNode = theRoot;
+
         GridPane formLayout = new GridPane();
         formLayout.setHgap(10);
 
-        nodeLabel.setEditable(false);
         formLayout.add(nodeLabelLabel, 0, 0);
         formLayout.add(nodeLabel, 1, 0);
 
+        formLayout.add(nodeTitleLabel, 0, 1);
+        formLayout.add(nodeTitle, 1, 1);
+
+        formLayout.add(nodeAdditionalTextLabel, 0, 2);
+        formLayout.add(nodeAdditionalText, 1, 2);
+
         HBox buttons = new HBox();
         buttons.setSpacing(10);
-        modify = new Button("Modify");
+        modify = new Button("Update");
         modify.setOnAction(e -> {
-//            TreeNode<String> node = tree.findNode(new TreeNode[] { new TreeNode<String>("Node.1"),
-//                    new TreeNode<String>("Node.1.1"), new TreeNode<String>("Node.1.1.2") });
-//            node.setContent("Hello World, how are you?");
-//            node.setStyleClass("redNode");
-//            treeLayout.doLayout();
+            NodeData nd = currentNode.getContent();
+            nd.setLabel(nodeTitle.getText());
+            nd.setAdditionalText(nodeAdditionalText.getText());
+            layout.doLayout();
         });
         modify.setDisable(true);
         buttons.getChildren().add(modify);
@@ -130,6 +178,7 @@ class ControlPanel extends VBox {
         buttons.getChildren().add(setAsRoot);
         setAsRoot.setOnAction(e -> {
             currentNode.setAsRoot();
+            rootNode = currentNode;
 
             layout.setRoot(currentNode);
             layout.doLayout();
@@ -143,7 +192,7 @@ class ControlPanel extends VBox {
             order = 0;
             // Post order traversal
             TreeTraversal<NodeData> tt2 = new DepthFirstTraversal<>();
-            tt2.traversePostOrder(root, (node) -> {
+            tt2.traversePostOrder(rootNode, (node) -> {
                 node.getContent().setOrder(order++);
             });
 
@@ -156,16 +205,49 @@ class ControlPanel extends VBox {
             order = 0;
             // Post order traversal
             TreeTraversal<NodeData> tt2 = new DepthFirstTraversal<>();
-            tt2.traversePreOrder(root, (node) -> {
+            tt2.traversePreOrder(rootNode, (node) -> {
                 node.getContent().setOrder(order++);
             });
 
             layout.doLayout();
         } );
 
+        
+
+        HBox buttons3 = new HBox();
+        loadTree = new Button("Load");
+        buttons3.getChildren().add(loadTree);
+        loadTree.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Load tree ...");
+            File selectedFile = fileChooser.showOpenDialog(null); // mainStage);
+            if (selectedFile != null) {
+                rootNode = TreeReader.loadTree(selectedFile);
+                layout.setRoot(rootNode);
+                layout.doLayout();
+            }
+        } );
+        saveTree = new Button("Save");
+        buttons3.getChildren().add(saveTree);
+        saveTree.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save tree ...");
+            File selectedFile = fileChooser.showSaveDialog(null); // mainStage);
+            if (selectedFile != null) {
+                
+                try {
+                    TreeAsciiRenderer<NodeData> ren = new TreeAsciiRenderer<NodeData>(new PrintStream(new FileOutputStream(selectedFile)));
+                    ren.renderExt(rootNode);
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+            }
+        } );
+
         getChildren().add(formLayout);
         getChildren().add(buttons);
         getChildren().add(buttons2);
+        getChildren().add(buttons3);
         
         setSpacing(10); // spacing between rows
 
@@ -174,9 +256,21 @@ class ControlPanel extends VBox {
 
     public void setSelectedNode(TreeNode<NodeData> node) {
         currentNode = node;
-        nodeLabel.setText(node.toString()); // .getContent());
-        
-        //modify.setDisable(false);
+
+        List<TreeNode<NodeData>> path = node.getPath();
+        StringBuilder sb = new StringBuilder();
+        for (ListIterator<TreeNode<NodeData>> it = path.listIterator(path.size()); it.hasPrevious();) {
+            TreeNode<NodeData> element = it.previous();
+            if (sb.length() > 0) {
+                sb.append(" => ");
+            }
+            sb.append(element.getContent().getLabel());
+        }
+
+        nodeLabel.setText(sb.toString());
+        nodeTitle.setText(node.getContent().getLabel());
+        nodeAdditionalText.setText(node.getContent().getAdditionalText());
+        modify.setDisable(false);
         remove.setDisable(false);
         addChild.setDisable(false);
         setAsRoot.setDisable(false);
@@ -187,60 +281,18 @@ public class GraphicalTreeSample extends Application {
 
     private Scene theScene;
 
-    // TODO: Move to TreeSampleGenerator
-    private void createSubTree(TreeNode<NodeData> parent, int childCount, int levelCount, String label) {
-        for (int cCount = 1; cCount <= childCount; cCount++) {
-            String newLabel = label + '.' + cCount;
-            TreeNode<NodeData> child = new TreeNode<>(new NodeData(newLabel));
-            parent.addChildren(child);
-            if (levelCount > 1) {
-                createSubTree(child, childCount, levelCount - 1, newLabel);
-            }
-        }
-    }
-
-    private TreeNode<NodeData> createTree(int childCount, int depth) {
-        TreeNode<NodeData> root = new TreeNode<>(new NodeData("Root"));
-        createSubTree(root, childCount, depth, "Node");
-        return root;
-    }
-
-
     @Override
-    @SuppressWarnings("serial")
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("JavaFX Tree viewer example");
 
         BorderPane mainLayout = new BorderPane();
-
-        TreeNode<NodeData> tree = createTree(3, 3);
-
-        TreeNode<NodeData> addtlNode = 
-                tree.findNode(new ArrayList<TreeNode<NodeData>>() {{ 
-                                add(new TreeNode<NodeData>(new NodeData("Node.2")));
-                                add(new TreeNode<NodeData>(new NodeData("Node.2.1")));
-                                add(new TreeNode<NodeData>(new NodeData("Node.2.1.2")));
-                             }});
-        addtlNode.addChildren(new TreeNode<>(new NodeData("Node.2.1.2.1")));
-//        addtlNode.addChildren(new TreeNode<>("Node.2.1.2.2"));
-        addtlNode.addChildren(new TreeNode<>(new NodeData("Node.2.1.2.3")));
-
-        addtlNode = 
-                tree.findNode(new ArrayList<TreeNode<NodeData>>() {{
-                        add(new TreeNode<NodeData>(new NodeData("Node.2"))); 
-                        add(new TreeNode<NodeData>(new NodeData("Node.2.1")));
-                        add(new TreeNode<NodeData>(new NodeData("Node.2.1.3"))); 
-                }});
-        addtlNode.addChildren(new TreeNode<>(new NodeData("Node.2.1.3.1")));
-        addtlNode.addChildren(new TreeNode<>(new NodeData("Node.2.1.3.2")));
-        addtlNode.addChildren(new TreeNode<>(new NodeData("Node.2.1.3.3")));
-
-        TreeLayout<NodeData> treeLayout = new TreeLayout<>(tree, this::createNode, this::createEdge);
+        
+        TreeLayout<NodeData> treeLayout = new TreeLayout<>(null, this::createNode, this::createEdge);
 
         ScrollPane s1 = new ScrollPane();
         s1.setContent(treeLayout);
 
-        ControlPanel ctrlPanel = new ControlPanel(tree, treeLayout);
+        ControlPanel ctrlPanel = new ControlPanel(treeLayout);
         treeLayout.setOnNodeSelected(node -> ctrlPanel.setSelectedNode(node));
         mainLayout.setCenter(s1);
         mainLayout.setRight(ctrlPanel);
@@ -266,7 +318,7 @@ public class GraphicalTreeSample extends Application {
 
         Text line1 = new Text("Order: " + node.getContent().getOrder()); 
         line1.getStyleClass().add("NodeContent");
-        Text line2 = new Text("# Item 2");
+        Text line2 = new Text(node.getContent().getAdditionalText());
         line2.getStyleClass().add("NodeContent");
 
         result.getChildren().addAll(t, line, line1, line2);
@@ -335,8 +387,10 @@ public class GraphicalTreeSample extends Application {
 //        return result;
 //    }
 
-    private Node createEdge(TreeNode<NodeData> node) {
-        Node result = new Line();
+
+    private Node createEdge(@SuppressWarnings("unused") TreeNode<NodeData> node) {
+        //Node result = new Line();
+        Node result = new CubicCurve();
         result.getStyleClass().add("TreeEdge");
         return result;
     }

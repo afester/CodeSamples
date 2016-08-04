@@ -23,6 +23,7 @@
 .TreeEdge {
     -fx-stroke: green;
     -fx-stroke-width: 2;
+    -fx-fill: None;
 }
 
 .redNode {

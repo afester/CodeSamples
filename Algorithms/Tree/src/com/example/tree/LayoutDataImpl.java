@@ -1,20 +1,25 @@
 package com.example.tree;
 
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Line;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.CubicCurve;
+//import javafx.scene.shape.Line;
+import javafx.scene.shape.QuadCurve;
 
 class LayoutDataImpl<T> implements LayoutData<T> {
     float xCoordinate;  // final X coordinate of the node
     float yCoordinate;  // final Y coordinate of the node
 
-    float flPrelim;     // preliminary X coordinates
-    float flModifier;   // mod
+    double flPrelim;     // preliminary X coordinates
+    double flModifier;   // mod
 
     private TreeNode<T> leftNeighbor; // left neighbor
 
     Pane nodePanel;     // reference of the JavaFX scene node which renders this tree node
-    Line edgeLine;
-    
+    //Line edgeLine;
+    CubicCurve edgeLine;
+    //Circle helperPoint;
+
 
     /**
      * @return The preferred width of this node.
