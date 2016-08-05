@@ -1,5 +1,6 @@
 package com.example.tree;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,11 +12,19 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.ArcTo;
 import javafx.scene.shape.Circle;
 //import javafx.scene.shape.Line;
 //import javafx.scene.shape.QuadCurve;
 import javafx.scene.shape.CubicCurve;
+import javafx.scene.shape.CubicCurveTo;
+import javafx.scene.shape.HLineTo;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
+import javafx.scene.shape.QuadCurveTo;
 
 
 /**
@@ -47,6 +56,8 @@ public class TreeLayout<T> extends Region {
     private float yTopAdjustment;
 
     private boolean flag = true;
+
+    private StraightLineShape line; 
 
     // maintain a list of neighboring nodes on each level
     // this map maintains the left neighbors of the current sub tree
@@ -124,6 +135,61 @@ public class TreeLayout<T> extends Region {
         //    getChildren().add(helper);
         //}
 
+        line = new StraightLineShape(50,  50,  200,  100);
+        getChildren().add(line);
+
+//        MoveTo moveTo = new MoveTo(50, 50);
+//        LineTo a1 = new LineTo(60, 55);
+//        LineTo a2 = new LineTo(60, 45);
+//        LineTo a3 = new LineTo(50, 50);
+//        MoveTo moveTo2 = new MoveTo(60, 50);
+//        curveTo = new CubicCurveTo(125, 50, 125, 100, 200, 100);
+//        
+//        Circle c1 = new Circle(50, 50, 2);
+//        c1.setStroke(Color.RED);
+//        Circle c2 = new Circle(200, 100, 2);
+//        c2.setStroke(Color.GREEN);
+//
+//        Circle c3 = new Circle(125, 50, 2);
+//        c3.setStroke(Color.BLUE);
+//        Circle c4 = new Circle(125, 100, 2);
+//        c4.setStroke(Color.BLUE);
+//
+//        getChildren().addAll(c1, c2, c3, c4);
+///*
+//        
+//        
+//        
+//        
+//        
+//        HLineTo hLineTo = new HLineTo();
+//        hLineTo.setX(70.0f);
+//
+//
+//        LineTo lineTo = new LineTo();
+//        lineTo.setX(175.0f);
+//        lineTo.setY(55.0f);
+//
+//        ArcTo arcTo = new ArcTo();
+//        arcTo.setX(50.0f);
+//        arcTo.setY(50.0f);
+//        arcTo.setRadiusX(50.0f);
+//        arcTo.setRadiusY(50.0f);
+//*/
+//
+//        Path path = new Path();
+//        path.setStroke(Color.RED);  // it is not possible to style each path segment differently. Path is one Shape.
+//
+//        path.getElements().addAll(moveTo, a1, a2, a3, moveTo2, curveTo);
+//        //path.getElements().add(hLineTo);
+//        //path.getElements().add(curveTo);
+//        //path.getElements().add(lineTo);
+//        //path.getElements().add(arcTo);
+//
+//        
+//        getChildren().add(path);
+//        
+        
         this.applyCss();        // !!!!! Required in order to consider CSS layout properties!!!!
         calculateLayout();
         
@@ -133,7 +199,10 @@ public class TreeLayout<T> extends Region {
 //        });
     }
 
-
+    public void modifyShape() {
+        //curveTo.setX(400);
+    }
+    
     /**
      * @param nLevelNbr
      *

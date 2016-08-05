@@ -119,6 +119,7 @@ class ControlPanel extends VBox {
     private final Button preOrder;
     private final Button saveTree;
     private final Button loadTree;
+    private final Button modifyShape;
 
     private Text nodeLabelLabel = new Text("Node:");
     private Text nodeLabel = new Text();
@@ -244,6 +245,12 @@ class ControlPanel extends VBox {
             }
         } );
 
+        modifyShape = new Button("modify shape");
+        buttons3.getChildren().add(modifyShape);
+        modifyShape.setOnAction(e -> {
+            layout.modifyShape();
+        } );
+
         getChildren().add(formLayout);
         getChildren().add(buttons);
         getChildren().add(buttons2);
@@ -287,7 +294,8 @@ public class GraphicalTreeSample extends Application {
 
         BorderPane mainLayout = new BorderPane();
         
-        TreeLayout<NodeData> treeLayout = new TreeLayout<>(null, this::createNode, this::createEdge);
+        TreeNode<NodeData> rootNode = TreeReader.loadTree(new File("C:\\Users\\afester\\Projects\\CodeSamples\\Algorithms\\Tree\\Negative.tree"));
+        TreeLayout<NodeData> treeLayout = new TreeLayout<>(rootNode, this::createNode, this::createEdge);
 
         ScrollPane s1 = new ScrollPane();
         s1.setContent(treeLayout);
