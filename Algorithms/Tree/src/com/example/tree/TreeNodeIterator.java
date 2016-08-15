@@ -8,26 +8,26 @@ import java.util.List;
  * first to last!
  *
  */
-public class TreeNodeIterator {
+public class TreeNodeIterator<T> {
 
-    private List<TreeNode> nodes = new ArrayList<>();
+    private List<TreeNode<T>> nodes = new ArrayList<>();
     private int idx = -1;
 
-    public TreeNodeIterator(TreeNode<String> tree) {
+    public TreeNodeIterator(TreeNode<T> tree) {
         // most simple approach: collect all nodes into a list and use an index
         // into the list
         
-        TreeTraversal tt1 = new DepthFirstTraversal();
-        tt1.traverse(tree, new TreeNodeVisitor() {
+        TreeTraversal<T> tt1 = new DepthFirstTraversal<>();
+        tt1.traversePreOrder(tree, new TreeNodeVisitor<T>() {
 
                 @Override
-                public <T> void visit(TreeNode<T> node) {
+                public void visit(TreeNode<T> node) {
                     nodes.add(node);
                 }
             } );
     }
 
-    public <T> TreeNode<T> next() {
+    public TreeNode<T> next() {
         if (idx == -1) {
             idx = 0;
         } else {
@@ -40,7 +40,7 @@ public class TreeNodeIterator {
         return nodes.get(idx);
     }
 
-    public <T> TreeNode<T> prev() {
+    public TreeNode<T> prev() {
         if (idx == -1) {
             idx = nodes.size() - 1;
         } else {

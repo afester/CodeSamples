@@ -30,6 +30,31 @@ public class TreeNode <T> {
    private TreeNode<T> parent;
    private T content;
 
+   // this is probably the best approach to store the layout data.
+   // it only adds minimal overhead (one additional reference) to
+   // the TreeNode, but allows to store any kind of additional data
+   // on the tree node which is required for the (various) layout algorithms.
+   // It avoids that we have to create a specific sub class or a hash table to map
+   // between the TreeNode and its layout data. 
+   private LayoutData<T> layoutData;
+
+   LayoutData<T> getLayoutData() {
+       return layoutData;
+   }
+
+   void setLayoutData(LayoutData<T> data) {
+       layoutData = data;
+   }
+
+   private String styleClass;
+   
+   public void setStyleClass(String string) {
+       this.styleClass = string;
+   }
+   public String getStyleClass() {
+       return this.styleClass;
+   }
+
    
    /**
     * Creates a new tree node.
@@ -50,6 +75,14 @@ public class TreeNode <T> {
    }
 
 
+   /**
+    * @param content
+    */
+   public void setContent(T content) {
+       this.content = content;
+   }
+
+
    @Override
    public String toString() {
       return content.toString();
@@ -67,26 +100,26 @@ public class TreeNode <T> {
    /**
     * Searches a specific node in the tree through its path.
     * 
-    * @param path  An array of TreeNodes which make up the path to the
+    * @param path  A List of TreeNodes which make up the path to the
     *              node which is searched.
     * @param level The current search level.
     * @return The node which was found at the given level, or <code>null</code> 
     *         if no child node was found
     */
-   private TreeNode<T> searchSubtree(TreeNode<T>[] path, int level) {
-      for (TreeNode<T> node : getChildren()) {
-         if (node.equals(path[level])) {
-            TreeNode<T> result = node;
-            if (level < path.length-1) {
-               result = node.searchSubtree(path, level + 1);
-            }
-            return result; 
-         }
-      }
-      return null;
-   }
+   private TreeNode<T> searchSubtree(List<TreeNode<T>> path, int level) {
+       for (TreeNode<T> node : getChildren()) {
+          if (node.equals(path.get(level))) {
+             TreeNode<T> result = node;
+             if (level < path.size() - 1) {
+                result = node.searchSubtree(path, level + 1);
+             }
+             return result; 
+          }
+       }
+       return null;
+    }
 
-   
+
    /**
     * Searches for a node along a given path.
     * 
@@ -95,9 +128,9 @@ public class TreeNode <T> {
     * 
     * @return The node at the given path.
     */
-   public TreeNode<T> findNode(TreeNode<T>[] path) {
-      return searchSubtree(path, 0);
-   }
+   public TreeNode<T> findNode(List<TreeNode<T>> path) {
+       return searchSubtree(path, 0);
+    }
 
    
    /**
@@ -121,6 +154,11 @@ public class TreeNode <T> {
       return child;
    }
 
+
+   /**
+    * @return The child node with the specified contents, or null
+    *         if no child node with the specified contents was found.
+    */
    public TreeNode<T> getChild(T e) {
        TreeNode<T> n = new TreeNode<>(e);
        int idx = children.indexOf(n);     // TODO: hash table!
@@ -129,6 +167,19 @@ public class TreeNode <T> {
        }
 
        return null;
+   }
+
+
+   /**
+    * Removes the specified node from the children of this node.
+    *
+    * @param currentNode The node to remove.
+    * @return <code>true</code> if the specified node has been removed,
+    *         <code>false</code> otherwise.
+    */
+   public boolean removeChild(TreeNode<T> currentNode) {
+       currentNode.setParent(null);
+       return children.remove(currentNode);
    }
 
 
@@ -166,22 +217,20 @@ public class TreeNode <T> {
 
 
    /**
-    * @return The path to the root node as a array of TreeNode objects.
+    * @return The path to the root node as a List of TreeNode objects.
     */
-   public TreeNode<?>[] getPath() {
-      TreeNode<?>[] result = new TreeNode<?>[getLevel() + 1];
+   public List<TreeNode<T>> getPath() {
+       List<TreeNode<T>> result = new ArrayList<>();
 
-      int i = 0;
-      TreeNode<T> node = this;
-      do {
-         result[i] = node;
-         node = node.getParent();
-         i++;
-      }while(node != null);
+       TreeNode<T> node = this;
+       do {
+          result.add(node);
+          node = node.getParent();
+       }while(node != null);
 
-      return result;
+       return result;
    }
-
+   
 
    /**
     * @return A hash code for this TreeNode. Only the content is regarded
@@ -237,5 +286,104 @@ public class TreeNode <T> {
       return parent;
    }
 
+
+   /**
+    * @return The node left to the current node or <code>null</code> if 
+    *         there is no sibling to the left of the current node.
+    */
+   public TreeNode<T> getLeftSibling() {
+       TreeNode<T> result = null;
+
+       TreeNode<T> parent = getParent();
+       if (parent != null) {
+           int idx = parent.children.indexOf(this);     // TODO: Linear complexity!
+           if (idx > 0) {
+               result = parent.children.get(idx - 1);
+           }
+       }
+
+       return result;
+   }
+
+
+   /**
+    * @return The node right to the current node or <code>null</code> if 
+    *         there is no sibling to the right of the current node.
+    */
+   public TreeNode<T> getRightSibling() {
+       TreeNode<T> result = null;
+
+       TreeNode<T> parent = getParent();
+       if (parent != null) {
+           int idx = parent.children.indexOf(this);     // TODO: Linear complexity!
+           if (idx < parent.children.size() - 1) {
+               result = parent.children.get(idx + 1);
+           }
+       }
+
+       return result;
+   }
+
+
+   /**
+    * @return The leftmost child of this node.
+    */
+   public TreeNode<T> getFirstChild() {
+      if (children.size() > 0) {
+          return children.get(0);
+      }
+
+      return null;
+   }
+
+
+   /**
+    * @return The rightmost child of this node.
+    */
+   public TreeNode<T> getLastChild() {
+      if (children.size() > 0) {
+         return children.get(children.size() - 1);
+      }
+
+      return null;
+   }
+
+
+   /**
+    * @return <code>true</code> if this is a leaf node, <code>false</code> otherwise.
+    */
+   public boolean isLeaf() {
+      return children.size() == 0;
+   }
+
+
+   /**
+    * Sets this tree node as the new root node.
+    * Note: This method is not reversable - if called again on the original
+    * root node, the order of the children might have changed.
+    */
+   public void setAsRoot() {
+       // get the path to the root node. All edges on the path
+       // need to be inversed. During the reversal process,
+       // the original structure of the node is modified, hence
+       // we need to store the original path and the node parents in separate lists first
+       List<TreeNode<T>> nodes = new ArrayList<>();
+       List<TreeNode<T>> parents = new ArrayList<>();
+       for (TreeNode<T> tn : getPath()) {
+           nodes.add(tn);
+           parents.add(tn.getParent());
+       }
+
+       // reverse all edges on the path from the current root node to the new root node
+       for (int idx = nodes.size() - 1;  idx >= 0;  idx--) {
+           TreeNode<T> node = nodes.get(idx);
+           TreeNode<T> parent = parents.get(idx);
+
+           if (parent != null) {
+               parent.removeChild(node);
+               node.addChildren(parent);
+           }
+       }
+   }
 
 }

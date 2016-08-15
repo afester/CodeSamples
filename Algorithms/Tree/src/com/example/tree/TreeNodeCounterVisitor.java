@@ -1,11 +1,11 @@
 package com.example.tree;
 
-public class TreeNodeCounterVisitor extends TreeNodeVisitor {
+public class TreeNodeCounterVisitor<T> implements TreeNodeVisitor<T> {
 
     private int count = 0;
 
     @Override
-    public <T> void visit(TreeNode<T> node) {
+    public void visit(TreeNode<T> node) {
         count++;
     }
 
