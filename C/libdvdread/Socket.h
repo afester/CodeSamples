@@ -32,7 +32,12 @@ public:
 
     std::string checkLine();
 
-    void writeData(const uint8_t* data, int len);
+    int writeData(const uint8_t* data, int len);
+
+    void writeLine(const char* data);
+
+    void writeHeader(const std::string& header);
+
 };
 
 

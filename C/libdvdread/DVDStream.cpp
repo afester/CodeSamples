@@ -1,6 +1,7 @@
 #include <fcntl.h>	// SEEK_SET
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <stdlib.h>
 #include <dvdnav/dvdnav.h>
@@ -10,6 +11,8 @@
 #include <sys/socket.h>
 
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <strings.h>
 
@@ -139,8 +142,8 @@ void DVD::play(int32_t title) {
     }
 
 
-   dvdnav_status_t result = dvdnav_title_play(handle, title);
-//   dvdnav_status_t result = dvdnav_part_play(handle, 0, 1);
+//   dvdnav_status_t result = dvdnav_title_play(handle, title);
+   dvdnav_status_t result = dvdnav_part_play(handle, 1, 1);
    if (result == DVDNAV_STATUS_ERR) {
       cerr << "SEVERE: Could not play (" << getLastError() << ")" << endl;
       exit(2);
@@ -288,6 +291,9 @@ class DVDRemoteApp : public DVDProgressListener {
     string source;
     DVD dvdReader;
     ClientSocket client;
+    long fileOffset;
+    long streamSize;
+    int outfile;
 
 public:
     DVDRemoteApp(const vector<string>& args);
@@ -303,10 +309,14 @@ public:
     void progress(int event);
 
     void sendBlock(uint8_t* data, int len);
+
+    void startStream();
+
+    void sendHttpResponse();
 };
 
 
-DVDRemoteApp::DVDRemoteApp(const vector<string>& args) : argv(args) {
+DVDRemoteApp::DVDRemoteApp(const vector<string>& args) : argv(args), fileOffset(0), streamSize(-1) {
 }
 
 int DVDRemoteApp::run() {
@@ -325,10 +335,23 @@ int DVDRemoteApp::run() {
       string cmd;
       do {
          cmd = client.readLine();
+         cerr << "  " << cmd << endl;
          if (cmd == "START") {
             startPlay();
          } else if (cmd == "STOP") {
             stopPlay();
+         } else if (cmd == "STREAM") {
+            startStream();
+         } else if (cmd == "\r") {
+            sendHttpResponse();
+         } else if (cmd.compare(0, 13, "Range: bytes=") == 0) {
+            string range = cmd.substr(13);
+            size_t pos = range.find('-');
+            string fromStr = range.substr(0, pos);
+            string toStr = range.substr(pos + 1);
+            fileOffset = atol(fromStr.c_str());
+            long to = atol(toStr.c_str());
+            streamSize = to - fileOffset + 1;
          }
       }while(cmd != "");
       client.close();
@@ -342,6 +365,7 @@ int DVDRemoteApp::run() {
 void DVDRemoteApp::startPlay() {
    cerr << "Start stream ..." << endl;
 
+   outfile = open("out.vob", O_WRONLY | O_CREAT, 0777);
    dvdReader.open(source);
    cerr << "Number of titles:" << dvdReader.getNumberOfTitles() << endl;
 
@@ -350,9 +374,94 @@ void DVDRemoteApp::startPlay() {
    dvdReader.close();
 }
 
+void DVDRemoteApp::sendHttpResponse() {
+   cerr << "SEND HTTP RESPONSE ..." << endl;
+
+   struct stat statResult;
+   int result = stat("SampleVideo.mp4", &statResult);
+   if (result == -1) perror("stat");
+
+   char tbuf[100];
+   strftime(tbuf, sizeof(tbuf), "%a, %d %b %Y %H:%M:%S %Z", localtime(&statResult.st_mtime));
+
+   char cbuf[100];
+   time_t now = time(NULL);
+   strftime(cbuf, sizeof(cbuf), "%a, %d %b %Y %H:%M:%S %Z", localtime(&now));
+
+
+   stringstream response;
+
+   if (streamSize == -1) {
+     response << "HTTP/1.1 200 OK\r\n";
+//   response << "Date: " << cbuf << "\r\n";
+     response << "Date: Tue, 22 Mar 2016 07:48:09 GMT\r\n";
+//   response << "Server: DVDServer 0.1\r\n";
+     response << "Server: Apache/2.4.7 (Ubuntu)\r\n";
+//   response << "Last-Modified: " << tbuf << "\r\n";
+     response << "Last-Modified: Mon, 21 Mar 2016 12:10:09 GMT\r\n";
+     response << "ETag: \"a03275-52e8dfa5d4388\"\r\n";
+//     response << "Accept-Ranges: bytes\r\n";
+     response << "Accept-Ranges: none\r\n";	// defines whether the stream supports ranges of data (Seeking)
+//    response << "Transfer-Encoding: chunked\r\n";
+//     response << "Transfer-coding: chunked\r\n";
+     response << "Content-Length: " << statResult.st_size << "\r\n";
+//     response << "Content-Length: " << 0 << "\r\n";
+     response << "Keep-Alive: timeout=5, max=100\r\n";
+     response << "Connection: Keep-Alive\r\n";
+     response << "Content-Type: video/mp4\r\n\r\n";
+   } else {
+     response << "HTTP/1.1 206 Partial Content\r\n";
+//   response << "Date: " << cbuf << "\r\n";
+     response << "Date: Tue, 22 Mar 2016 07:48:09 GMT\r\n";
+//   response << "Server: DVDServer 0.1\r\n";
+     response << "Server: Apache/2.4.7 (Ubuntu)\r\n";
+//   response << "Last-Modified: " << tbuf << "\r\n";
+     response << "Last-Modified: Mon, 21 Mar 2016 12:10:09 GMT\r\n";
+     response << "ETag: \"a03275-52e8dfa5d4388\"\r\n";
+//     response << "Accept-Ranges: bytes\r\n";
+     response << "Accept-Ranges: none\r\n";
+     response << "Content-Length: " << streamSize << "\r\n";
+     response << "Content-Range: bytes " << fileOffset << "-" << fileOffset + streamSize - 1 << "/"<< fileOffset + streamSize << "\r\n";
+     response << "Keep-Alive: timeout=5, max=100\r\n";
+     response << "Connection: Keep-Alive\r\n";
+     response << "Content-Type: video/mp4\r\n\r\n";
+   }
+
+   cerr << response.str() << endl;
+   client.writeData((uint8_t*) response.str().c_str(), response.str().length());
+
+   //startStream();
+   startPlay();
+}
+
+
+
 void DVDRemoteApp::stopPlay() {
    cerr << "Stop stream ..." << endl;
    dvdReader.stop();
+}
+
+void DVDRemoteApp::startStream() {
+   cerr << "Starting to stream ..." << fileOffset << "," << streamSize << endl;
+   int source = open("SampleVideo.mp4", O_RDONLY);
+   if (source < 0) perror("open");
+
+   int error = lseek(source, fileOffset, SEEK_SET);
+   if (error < 0) perror("lseek");
+
+   uint8_t buf[2048];
+   size_t count = 0;
+   int connreset = 0;
+   int numBytes = 0;
+   do {
+     count = read(source, buf, sizeof(buf));
+     connreset = client.writeData(buf, count);
+     numBytes += count;
+   } while(connreset == 0 && 
+           count == sizeof(buf) &&
+           (streamSize == -1 || numBytes < streamSize));
+   close(source);
+   cerr << "Streaming done." << endl;
 }
 
 void DVDRemoteApp::progress(int event) {
@@ -369,7 +478,8 @@ void DVDRemoteApp::progress(int event) {
 
 
 void DVDRemoteApp::sendBlock(uint8_t* data, int len) {
-   client.writeData(data, len);
+   ::write(outfile, data, len);
+//   client.writeData(data, len);
 }
 
 
