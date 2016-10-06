@@ -1,0 +1,9 @@
+
+# Remove CR (\r, 0x0d)
+cat infile | sed ':a;N;$!ba;s/\n//g'
+
+# Remove LF (\n, 0x0a)
+# !! By default, sed strips the newline as the line is placed into the pattern
+#    space. However, the workaround is to read the whole file into a loop first.
+
+cat infile | sed ':a;N;$!ba;s/\n//g'
