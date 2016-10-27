@@ -1,0 +1,73 @@
+#!/bin/bash
+
+# Enables, disables or sets the GIT proxy
+
+
+usage() {
+   echo "$0 enable|disable|set <url>|show"
+   exit 1
+}
+
+enableProxy() {
+   HTTP_PROXY=`cat ~/.gitproxy | grep http.proxy`
+   HTTPS_PROXY=`cat ~/.gitproxy | grep https.proxy`
+   echo "http.proxy=${HTTP_PROXY}"
+   echo "https.proxy=${HTTPS_PROXY}"
+
+   # Set proxy
+   git config --global http.proxy ${HTTP_PROXY}
+   git config --global https.proxy ${HTTPS_PROXY}
+}
+
+disableProxy() {
+   # PENDING: Check if proxy is enabled at all!
+   # E.g. use existence of ~/.gitproxy as flag
+
+   # Save current values
+   HTTP_PROXY=`git config --get http.proxy`
+   HTTPS_PROXY=`git config --get https.proxy`
+   echo "http.proxy=${HTTP_PROXY}" > ~/.gitproxy
+   echo "https.proxy=${HTTPS_PROXY}" >> ~/.gitproxy
+
+   # Unset proxy
+   git config --global --unset http.proxy
+   git config --global --unset https.proxy
+}
+
+showProxy() {
+   HTTP_PROXY=`git config --get http.proxy`
+   HTTPS_PROXY=`git config --get https.proxy`
+   
+   echo "http proxy : ${HTTP_PROXY}"
+   echo "https proxy: ${HTTPS_PROXY}"
+}
+
+setProxy() {
+   PROXY=$1
+   echo "Setting proxy as $PROXY"
+}
+
+if [ $# -lt 1 ] ; then
+   usage
+fi
+COMMAND=$1
+
+case ${COMMAND} in
+   enable) enableProxy
+           ;;
+
+   disable) disableProxy
+            ;;
+
+   set) if [ $# -ne 2 ] ; then 
+           usage
+		fi
+		setProxy $2
+        ;;
+
+   show) showProxy
+         ;;
+
+   *) usage
+      ;;
+esac
