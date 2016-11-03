@@ -20,7 +20,7 @@ public class MemoryProbe {
 
    
    public long getFreeMemoryDelta() {
-      return freeMemoryStop - freeMemoryStart;
+      return freeMemoryStart - freeMemoryStop;
    }
 
    

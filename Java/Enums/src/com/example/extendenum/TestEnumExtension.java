@@ -1,15 +1,13 @@
 package com.example.extendenum;
 
 public class TestEnumExtension {
-    
-    
-    
+
     public static void main(String[] args) {
         new TestEnumExtension().run();
     }
 
     private void printEnum(ExtensibleEnum val) {
-        System.err.printf("%s: %s\n", val.name(), val.ordinal());
+        System.err.printf("%s: %s\n", val.name(), ""); // val.ordinal());
     }
 
     private void run() {

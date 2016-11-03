@@ -190,7 +190,7 @@ class MyVisitor extends MidlBaseVisitor {
 
     public void dumpJava() {
         String destFolder = "target/generated-sources/midl/";
-        String packageName = "com.example.java2com.visio";
+        String packageName = "com.example.java2com.excel";
 
 /*********************/        
         destFolder = destFolder +  packageName.replace('.',  '/') + "/";
@@ -422,7 +422,7 @@ class MyVisitor extends MidlBaseVisitor {
 public class InterfaceVisitor {
 
     public void run() {
-        try (InputStream is = new FileInputStream("visio.idl")) {
+        try (InputStream is = new FileInputStream("Excel.idl")) {
             ANTLRInputStream input = null;
             try {
                 input = new ANTLRInputStream(is);

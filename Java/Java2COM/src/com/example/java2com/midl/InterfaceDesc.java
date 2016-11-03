@@ -79,7 +79,8 @@ public class InterfaceDesc {
 
     public boolean isIterable() {
         return (getMethod("Count") != null && 
-                getMethod("Item") != null);
+                getMethod("Item") != null &&
+                getMethod("Item").getParameters().size() == 1);
     }
 
 }

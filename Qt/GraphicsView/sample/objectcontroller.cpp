@@ -219,8 +219,13 @@ void ObjectControllerPrivate::updateClassProperties(const QMetaObject *metaObjec
     }
 }
 
-void ObjectControllerPrivate::addClassProperties(const QMetaObject *metaObject)
-{
+
+
+/**
+ * Add all properties of a given meta object as sub properties of the class node itself,
+ * recursively traversing the class hierarchy
+ */
+void ObjectControllerPrivate::addClassProperties(const QMetaObject *metaObject) {
     if (!metaObject)
         return;
 
@@ -256,8 +261,8 @@ void ObjectControllerPrivate::addClassProperties(const QMetaObject *metaObject)
                             valueMap[value] = true;
                             flagNames.append(QLatin1String(metaEnum.key(i)));
                         }
-                    subProperty->setAttribute(QLatin1String("flagNames"), flagNames);
-                    subProperty->setValue(flagToInt(metaEnum, metaProperty.read(m_object).toInt()));
+                        subProperty->setAttribute(QLatin1String("flagNames"), flagNames);
+                        subProperty->setValue(flagToInt(metaEnum, metaProperty.read(m_object).toInt()));
                     }
                 } else {
                     subProperty = m_manager->addProperty(QtVariantPropertyManager::enumTypeId(), QLatin1String(metaProperty.name()));
@@ -283,7 +288,10 @@ void ObjectControllerPrivate::addClassProperties(const QMetaObject *metaObject)
                 if (!metaProperty.isDesignable())
                     subProperty = m_readOnlyManager->addProperty(type, QLatin1String(metaProperty.name()) + QLatin1String(" (Non Designable)"));
                 else {
+                    qDebug() << "01 ====================";
+/****************************************/
                     subProperty = m_manager->addProperty(type, QLatin1String(metaProperty.name()));
+/****************************************/
 #if 0
                     if (type == 76) {
                         // Pen
@@ -299,13 +307,15 @@ void ObjectControllerPrivate::addClassProperties(const QMetaObject *metaObject)
                     }
 #endif
                 }
+                qDebug() << "02 ====================";
                 subProperty->setValue(metaProperty.read(m_object));
-
+                qDebug() << "03 ====================";
             } else {
                 subProperty = m_readOnlyManager->addProperty(QVariant::String, QLatin1String(metaProperty.name()));
                 subProperty->setValue(QLatin1String("< Unknown Type >"));
                 subProperty->setEnabled(false);
             }
+            qDebug() << "04 ====================";
 
             classProperty->addSubProperty(subProperty);
             m_propertyToIndex[subProperty] = idx;
@@ -315,8 +325,13 @@ void ObjectControllerPrivate::addClassProperties(const QMetaObject *metaObject)
         updateClassProperties(metaObject, false);
     }
 
+    qDebug() << "====================0 XYZ";
+
     m_topLevelProperties.append(classProperty);
     m_browser->addProperty(classProperty);
+
+    qDebug() << "<<<< ================== ObjectControllerPrivate::addClassProperties";
+
 }
 
 
@@ -329,6 +344,8 @@ void ObjectControllerPrivate::restoreExpandedState() {
 
 
 void ObjectControllerPrivate::slotValueChanged(QtProperty *property, const QVariant &value) {
+    qDebug() << "ObjectControllerPrivate::slotValueChanged" << property->propertyName() << " = " << value;
+
     if (!m_propertyToIndex.contains(property))
         return;
 
@@ -395,6 +412,8 @@ ObjectController::~ObjectController() {
 
 
 void ObjectController::setObject(QObject *object) {
+    qDebug() << ">>>> ObjectController::setObject";
+
     if (d_ptr->m_object == object)
         return;
 
@@ -418,6 +437,7 @@ void ObjectController::setObject(QObject *object) {
 
     connect(object, SIGNAL(propertyChanged()),
             this,   SLOT(slotUpdateProperties()));
+    qDebug() << "<<<< ObjectController::setObject";
 }
 
 

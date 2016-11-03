@@ -1,8 +1,5 @@
 package com.example.java2com;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 public class COMProxy {
     
     static {
@@ -60,10 +57,11 @@ public class COMProxy {
     private final static int DISPATCH_PROPERTYPUTREF = 8;
 
     /**
-     *  Creates a new IDispatch object to delegate to a particular IDispatch 
-     *  COM instance.
+     *  Creates a new COMProxy object to delegate to a particular native
+     *  COM object.
      */
     private COMProxy() {
+        COMScope.add(this);
     }
 
 /*** Public API below ********************************************************/
@@ -75,6 +73,7 @@ public class COMProxy {
      *                  or "Word.Application"
      */
     public COMProxy(String className) {
+        COMScope.add(this);
         Create(className);
     }
 
@@ -107,6 +106,7 @@ public class COMProxy {
 
     public void release() {
         Destroy();
+        dispatchHandle = 0;
     }
     
     public String toString() {
