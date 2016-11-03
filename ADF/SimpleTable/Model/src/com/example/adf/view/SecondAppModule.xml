@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE AppModule SYSTEM "jbo_03_01.dtd">
+<!---->
+<AppModule
+  xmlns="http://xmlns.oracle.com/bc4j"
+  Name="SecondAppModule"
+  Version="12.1.3.10.8"
+  InheritPersonalization="merge"
+  ClearCacheOnRollback="true">
+  <Properties>
+    <SchemaBasedProperties>
+      <LABEL
+        ResId="com.example.adf.view.SecondAppModule_LABEL"/>
+    </SchemaBasedProperties>
+  </Properties>
+  <ViewUsage
+    Name="ViewObj1"
+    ViewObjectName="com.example.adf.view.ViewObj"/>
+  <ResourceBundle>
+    <PropertiesBundle
+      PropertiesFile="com.example.adf.view.ModelBundle"/>
+  </ResourceBundle>
+</AppModule>
