@@ -1,0 +1,7 @@
+NodeData[label=Root, order=0, additionalText=]
++NodeData[label=Node.2, order=0, additionalText=]
++NodeData[label=Node.3, order=0, additionalText=]
+++NodeData[label=Node.3.1, order=0, additionalText=]
+++NodeData[label=Node.3.2, order=0, additionalText=]
+++NodeData[label=Node.3.3, order=0, additionalText=]
+++NodeData[label=Node.3.4, order=0, additionalText=Extra large node at the right]

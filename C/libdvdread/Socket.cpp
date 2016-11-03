@@ -1,9 +1,11 @@
 #include <string>
+#include <string.h>
 #include <stdlib.h>
 #include <errno.h>
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <sys/socket.h>
 #include <poll.h>
 
@@ -115,16 +117,18 @@ string ClientSocket::checkLine() {
 }
 
 
-void ClientSocket::writeData(const uint8_t* data, int len) {
+int ClientSocket::writeData(const uint8_t* data, int len) {
      size_t nleft = len;
      const uint8_t *ptr = data;
 
      while (nleft > 0) {
-         ssize_t nwritten = write(handle, ptr, nleft);
+//         ssize_t nwritten = write(handle, ptr, nleft);
+         ssize_t nwritten = send(handle, ptr, nleft, MSG_MORE);
          if (nwritten <= 0) {
              if (nwritten < 0 && errno == EINTR) {
                  nwritten = 0;   /* and call write() again */
              } else {
+                 if (errno == ECONNRESET) { return 1; }
                  //return (-1);    /* error */
                  perror("write");
              }
@@ -133,7 +137,17 @@ void ClientSocket::writeData(const uint8_t* data, int len) {
           nleft -= nwritten;
           ptr += nwritten;
      }
-//     return (n);
+    return 0;
+}
+
+void ClientSocket::writeLine(const char* data) {
+    writeData((uint8_t*) data, strlen(data));
+    writeData((uint8_t*)"\n", 1);
+}
+
+void ClientSocket::writeHeader(const std::string& data) {
+    writeData((uint8_t*) data.c_str(), data.length());
+    writeData((uint8_t*)"\r\n", 2);
 }
 
 
@@ -174,6 +188,11 @@ ClientSocket ServerSocket::accept() {
    }
 
    cerr << "Connection from " << addrBuf << endl;
+
+   const int enabled = 0;
+   int error = ::setsockopt(handle, IPPROTO_TCP, TCP_CORK, &enabled, sizeof(int));
+   if (error != 0) perror("setsockopt");
+
    return ClientSocket(clientSocket);
 }
 

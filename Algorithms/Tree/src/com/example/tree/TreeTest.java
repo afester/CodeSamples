@@ -1,5 +1,8 @@
 package com.example.tree;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 
 
@@ -63,12 +66,13 @@ public class TreeTest {
       // Create a sample tree
       TreeNode<String> tree = createTree(3, 3);
 
-      @SuppressWarnings("rawtypes")
-      TreeNode[] path = {new TreeNode<String>("Node.2"), 
-                         new TreeNode<String>("Node.2.3"),
-                         new TreeNode<String>("Node.2.3.1")};
+      @SuppressWarnings("serial")
+      List<TreeNode<String>> path = new ArrayList<TreeNode<String>>() {{
+                         add(new TreeNode<String>("Node.2")); 
+                         add(new TreeNode<String>("Node.2.3"));
+                         add(new TreeNode<String>("Node.2.3.1"));
+                      }};
 
-      @SuppressWarnings("unchecked")
       TreeNode<String> node = tree.findNode(path);
 
       System.err.println(node.getPathString());
