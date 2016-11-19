@@ -22,17 +22,18 @@
 #include "MediaPlayer.h"
 
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+MainWindow::MainWindow(QWidget *parent, const QString& theHostName)
+    : QMainWindow(parent), hostName(theHostName) {
 
     setObjectName(QStringLiteral("MainWindow"));
     resize(400, 300);
 
+    QMediaPlaylist* playlist = new QMediaPlaylist;
+    playlist->addMedia(QUrl("http://" + hostName + "/~andreas/out.mpg"));
+//    playlist->addMedia(QUrl("http://" + hostName + ":1234/dvd.mp4"));
 
-//    QMediaPlaylist* playlist = new QMediaPlaylist;
-//    playlist->addMedia(QUrl("file:///SampleVideo.mp4"));
-
-    player = new QMediaPlayer;
-//    player->setPlaylist(playlist);
+    player = new QMediaPlayer(this); // , QMediaPlayer::StreamPlayback);
+    player->setPlaylist(playlist);
 
     QWidget* centralWidget = new QWidget(this);
     QBoxLayout* mainLayout = new QVBoxLayout();
@@ -51,9 +52,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     startPlayButton->setEnabled(false);
     stopPlayButton = new QPushButton("Stop", buttonArea);
     stopPlayButton->setEnabled(false);
+    streamButton = new QPushButton("Stream", buttonArea);
+    streamButton->setEnabled(false);
     buttonLayout->addWidget(connectButton);
     buttonLayout->addWidget(startPlayButton);
     buttonLayout->addWidget(stopPlayButton);
+    buttonLayout->addWidget(streamButton);
 
     tcpSocket = new QTcpSocket(this);
 
@@ -65,6 +69,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
             this,   SLOT(doStartPlay()));
     connect(stopPlayButton, SIGNAL(clicked()),
             this,   SLOT(doStopPlay()));
+    connect(streamButton, SIGNAL(clicked()),
+            this,   SLOT(doStream()));
     connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
             this,      SLOT(socketError(QAbstractSocket::SocketError)));
     connect(tcpSocket, SIGNAL(connected()),
@@ -76,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     player->setVideoOutput(videoWidget);
 
     setCentralWidget(centralWidget);
-//    player->play();
+    player->play();
 }
 
 
@@ -92,13 +98,15 @@ void MainWindow::doConnect() {
 
     connectButton->setEnabled(false);
 
-    if (tcpSocket->state() == QAbstractSocket::ConnectedState) {
-        tcpSocket->abort();
-        tcpSocket->disconnectFromHost();
-    } else {
-        tcpSocket->abort();
-        tcpSocket->connectToHost("server", 1234);
-    }
+//    if (tcpSocket->state() == QAbstractSocket::ConnectedState) {
+//        tcpSocket->abort();
+//        tcpSocket->disconnectFromHost();
+//    } else {
+//        tcpSocket->abort();
+//        tcpSocket->connectToHost(hostName, 1234);
+//    }
+
+    player->play();
 }
 
 
@@ -106,6 +114,7 @@ void MainWindow::socketConnected() {
     qDebug() << "Connected.";
     startPlayButton->setEnabled(true);
     stopPlayButton->setEnabled(true);
+    streamButton->setEnabled(true);
     connectButton->setText("Disconnect");
     connectButton->setEnabled(true);
 }
@@ -115,6 +124,7 @@ void MainWindow::socketDisconnected() {
     qDebug() << "Disconnected.";
     startPlayButton->setEnabled(false);
     stopPlayButton->setEnabled(false);
+    streamButton->setEnabled(false);
     connectButton->setText("Connect");
     connectButton->setEnabled(true);
 }
@@ -144,13 +154,21 @@ void MainWindow::doStartPlay() {
 //    qDebug() << player->media().resources().at(0).videoCodec();
 //    qDebug() << player->media().resources().at(0).videoBitRate();
 
+//    QString command = "START\n";
+//    tcpSocket->write(command.toUtf8().data());
 
-    QString command = "START\n";
-    tcpSocket->write(command.toUtf8().data());
+    player->play();
 
     //QMediaResource mr;
 //    QMediaContent mc(mr);
 
+}
+
+void MainWindow::doStream() {
+    qDebug() << "doStream";
+
+    QString command = "STREAM\n";
+    tcpSocket->write(command.toUtf8().data());
 }
 
 

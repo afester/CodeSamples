@@ -131,10 +131,7 @@ public class JavaFXView extends Application {
             } else {
                 IVPaths paths = s.getPaths();
 
-                //for (Path path : paths) {
-                for (int pi = 1;  pi < paths.getCount();  pi++) {
-                    IVPath path = paths.getItem(pi);
-
+                for (IVPath path : paths) {
                     System.err.println("   " + path);
                     context.beginPath();
 
@@ -206,8 +203,8 @@ public class JavaFXView extends Application {
         String sampleFile = projDir + "/Sample.vsd";
         
         canvas = new Canvas(300, 400);
-        canvas.getTransforms().add(new Shear(-0.2, 0.0));
-        canvas.getTransforms().add(new Scale(2.0, 2.0));
+ //       canvas.getTransforms().add(new Shear(-0.2, 0.0));
+ //       canvas.getTransforms().add(new Scale(2.0, 2.0));
 
         context = canvas.getGraphicsContext2D();
 

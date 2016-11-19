@@ -9,11 +9,11 @@ import javafx.geometry.Point2D;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.example.java2com.COMScope;
 import com.example.java2com.IDispatch;
 import com.example.java2com.COMProxy;
 import com.example.java2com.Variant;
 import com.example.java2com.VariantOut;
-
 import com.example.java2com.visio.IVApplication;
 import com.example.java2com.visio.IVCurve;
 import com.example.java2com.visio.IVDocument;
@@ -126,10 +126,10 @@ public class VisioAPITest {
         int idx = 0;
         boolean first = true;
         for (IVCurve c : path) {
-            double start = c.getStart();
             double end = c.getEnd();
 
             if (first) {
+                double start = c.getStart();
                 first = false;
 
                 VariantOut x = new VariantOut(VariantOut.VT_R8);
@@ -145,7 +145,7 @@ public class VisioAPITest {
 
             VariantOut x = new VariantOut(VariantOut.VT_R8);
             VariantOut y = new VariantOut(VariantOut.VT_R8);
-            c.point(start, x, y);
+            c.point(end, x, y);
             Point2D p2 = new Point2D(x.doubleValue, y.doubleValue);
 
             System.err.printf("LineTo lineTo%d = new LineTo();\n" + 
@@ -170,4 +170,52 @@ public class VisioAPITest {
         docs.release();
         appl.release();
     }
+
+    @Test
+    public void testScope() {
+        COMScope.begin();
+
+        IVApplication appl = IDispatch.create("Visio.Application", IVApplication.class);
+        assertEquals("Microsoft Visio", appl.getName());
+        assertEquals("12,0", appl.getVersion());
+
+        IVDocuments docs = appl.getDocuments();
+        assertEquals(0, docs.getCount());
+
+        IVDocument doc = docs.open(sampleFile);
+        System.err.println(doc.getName());
+        System.err.println(doc.getCompany());
+        System.err.println(doc.getCreator());
+
+        IVPages pages = doc.getPages();
+        assertEquals(4, pages.getCount());
+
+        for (IVPage p : pages) {
+            System.err.println("# " + p.getName());
+        }
+
+        IVPage p = pages.getItem(new Variant("MYPAGE"));
+
+        IVShapes shapes = p.getShapes();
+        //assertEquals(2, shapes.getCount());
+
+        COMScope.begin();
+        for (IVShape s : shapes) {
+            System.err.println("# Shape: " + s.getType() +"/"+ s.getID() + "/" + s.getUniqueID(1)+
+                    "/"+s.getName());
+
+            IVPaths paths = s.getPaths();
+            System.err.println("   # " + paths.getCount());
+            for (IVPath p1 : paths) {
+                System.err.println("   " + p1);
+            }
+
+        }
+        COMScope.end();
+
+        appl.quit();
+
+        COMScope.end();
+    }
+    
 }

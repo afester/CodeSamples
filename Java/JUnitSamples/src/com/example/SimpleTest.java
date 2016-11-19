@@ -3,9 +3,13 @@ package com.example;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hamcrest.CoreMatchers;
+import static org.hamcrest.core.Is.*;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.matchers.JUnitMatchers.*; 
@@ -104,5 +108,18 @@ public class SimpleTest {
         assertThat(planets, CoreMatchers.hasItems(expected));
         // also check that the collection has the same size as the expected array
         assertEquals(expected.length, planets.size());
+    }
+    
+    
+    @Test
+    public void testSetEquals() {
+
+        Set<Number> actualSet = new HashSet<Number>();
+        actualSet.add( 1L );
+
+        Set<Number> expected = new HashSet<Number>();
+        expected.add( 1 );
+
+        Assert.assertThat(actualSet, is(expected));
     }
 }

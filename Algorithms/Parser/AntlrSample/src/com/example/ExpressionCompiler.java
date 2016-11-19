@@ -46,11 +46,14 @@ public class ExpressionCompiler extends ExpressionBaseVisitor<Void> {
       symbolTable.putSymbol("PI", a -> Math.PI);
       symbolTable.putSymbol("e", a -> Math.E);
 
-      symbolTable.putSymbol("sin", x -> Math.sin(x));
-      symbolTable.putSymbol("cos", x -> Math.cos(x));
-      symbolTable.putSymbol("tan", x -> Math.tan(x));
-      symbolTable.putSymbol("log", x -> Math.log(x));
-      symbolTable.putSymbol("sqrt", x -> Math.sqrt(x));
+      // NOTE: The compiler does not need the references to the Math methods -
+      // it uses the symbol name to create an INVOKESTATIC instruction!
+      symbolTable.putSymbol("sin", Math::sin);
+      symbolTable.putSymbol("cos", Math::cos);
+      symbolTable.putSymbol("tan", Math::tan);
+      symbolTable.putSymbol("log", Math::log);
+      symbolTable.putSymbol("sqrt", Math::sqrt);
+
       symbolTable.putSymbol("f1", x -> x*x + 42*x + 19);
       symbolTable.putSymbol("f2", x -> Math.cos(x*x) + 42*x);
    }

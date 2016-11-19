@@ -1,6 +1,23 @@
 -- A collection of stored procedures used for convenience
 
 
+
+-- Copy all columns of a table row and modify individual columns
+-- See http://stackoverflow.com/questions/28278681/oracle-copy-row-while-updating-one-field-for-table-with-many-columns
+DECLARE
+  l_data my_table%rowtype;
+BEGIN
+  -- fetch the row we want to copy
+  SELECT * INTO l_data FROM my_table WHERE pk = 17;
+
+  -- update all fields that need to change
+  l_data.pk := 18;
+
+  -- note the lack of parens around l_data in the next line
+  INSERT INTO my_table VALUES l_data; 
+END;
+/
+
 -- Drops a table, independant of whether it already exists or not.
 --
 -- @param tableName The name of the table to drop.
@@ -34,7 +51,9 @@ END;
 
 
 -- Show tablespaces
-SELECT TABLESPACE_NAME FROM dba_tablespaces;
+SELECT UNIQUE TABLESPACE_NAME 
+FROM dba_tablespaces
+ORDER BY tablespace_name;
 
 SELECT tablespace_name,
        bytes / (1024*1024) as "Bytes (MiB)", blocks, 
@@ -42,6 +61,14 @@ SELECT tablespace_name,
        user_bytes / (1024*1024) as "User Bytes (MiB)", user_blocks,
        substr(file_name, 0, 40)  
 FROM dba_data_files;
+
+select * from dba_tablespaces where tablespace_name not in (select tablespace_name from dba_data_files);
+select * from dba_tablespaces where tablespace_name in (select tablespace_name from dba_data_files);
+
+select unique tablespace_name 
+from dba_data_files
+order by tablespace_name;
+
 
 -- Create user
 -- Oracle Database automatically creates a schema when you create a user.
@@ -87,6 +114,21 @@ FROM user_tables
 WHERE table_name LIKE 'MY_%'
 ORDER BY table_name;
 
+-- Select all invalid Views
+SELECT OBJECT_NAME, OBJECT_TYPE
+FROM DBA_OBJECTS
+WHERE OBJECT_TYPE='VIEW' AND STATUS='INVALID';
+
+-- SELECT VIEW definition of invalid views
+SET HEAD OFF
+SET LINESIZE 8192
+SET TRIMSPOOL ON
+SPOOL views.sql
+SELECT 'CREATE OR REPLACE VIEW ' || OBJECT_NAME || ' AS ', CLOB(TEXT_VC) || ';'
+FROM DBA_OBJECTS
+JOIN DBA_VIEWS ON (OBJECT_NAME=VIEW_NAME)
+WHERE OBJECT_TYPE='VIEW' AND STATUS='INVALID';
+
 -- Select all columns for a table
 SELECT column_name, data_type, data_length, owner
 FROM   all_tab_cols
@@ -94,7 +136,7 @@ WHERE  table_name = 'MY_TABLE'
 ORDER BY column_name;
 
 -- Select view definition for a given view
-SELECT TEXT
+SELECT TEXT_VC
 FROM DBA_VIEWS
 WHERE VIEW_NAME='MY_VIEW';
 
@@ -118,6 +160,11 @@ WHERE CONSTRAINT_NAME = 'constraintName';
 SELECT index_name 
 FROM user_indexes
 WHERE table_name = 'tableName';
+
+-- Retrieve the index definition 
+SELECT DBMS_METADATA.GET_DDL('INDEX','IndexName') 
+FROM DUAL;
+
 
 -- Dump the DDL statement used to create a table
 SELECT DBMS_METADATA.GET_DDL('TABLE','tableName', 'schemaName') 
@@ -170,3 +217,27 @@ WHERE sid=SYS_CONTEXT('USERENV', 'SID');
 SELECT sid, serial# 
 FROM SYS.V_$SESSION
 WHERE SID = (SELECT DISTINCT SID FROM SYS.V_$MYSTAT);
+
+-- Triggers
+COLUMN Owner FORMAT A30
+COLUMN Trigger_Name FORMAT A30
+SELECT OWNER, TRIGGER_NAME, TRIGGER_TYPE, STATUS
+FROM DBA_TRIGGERS
+WHERE TRIGGER_TYPE='AFTER EVENT'
+ORDER BY OWNER;
+
+ALTER TRIGGER triggerName ENABLE;
+ALTER TRIGGER triggerName DISABLE;
+
+
+-- Execution plan
+EXPLAIN PLAN 
+SET statement_id = 'somePlanId' 
+FOR <SQL Statament>;
+
+SELECT lpad(' ',level-1)||operation||' '||options||' '||object_name "Plan",
+		cost, io_cost
+   FROM plan_table
+CONNECT BY prior id = parent_id AND prior statement_id = statement_id
+  START WITH id = 0 AND statement_id = 'somePlanId'
+  ORDER BY id;

@@ -12,7 +12,11 @@ int main(int argc, char ** argv) {
 
     QApplication app( argc, argv );
 
-    MainWindow win(0);
+    QString hostName = "localhost";
+    if (argc > 1) {
+        hostName = argv[1];
+    }
+    MainWindow win(0, hostName);
     win.show(); 
     QObject::connect( &app, &QApplication::lastWindowClosed, &app, &QApplication::quit );
 

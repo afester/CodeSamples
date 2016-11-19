@@ -33,7 +33,7 @@ interfacedecl : 'interface' ID
 def : 'importlib' '(' STR ')' ';'							      # IMPORT
     | interfacedecl ';'								              # INTERFACEDEC
     | properties? 'dispinterface' ID '{' dispBody '}' ';'	      # DISPINTERFACE
-    | properties  'interface'     ID ':' ID '{' method+ '}' ';'	  # INTERFACE
+    | properties  'interface'     ID ':' ID '{' method* '}' ';'	  # INTERFACE
     | properties  'coclass'       ID '{' (properties interfacedecl ';')+ '}' ';'	# COCLASS
     | 'typedef' properties? type  ID ';'						  # TYPEDEF
     ;
