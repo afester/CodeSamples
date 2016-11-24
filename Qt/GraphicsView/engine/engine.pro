@@ -4,6 +4,8 @@
 # Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
 
 TEMPLATE = lib
+DEFINES += EXP_SYMBOLS
+
 QT = gui core widgets
 
 CONFIG += qt warn_on debug console

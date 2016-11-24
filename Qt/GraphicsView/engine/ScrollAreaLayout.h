@@ -8,8 +8,12 @@
 
 #include <QLayout>
 
+#ifdef EXP_SYMBOLS
+class Q_DECL_EXPORT ScrollAreaLayout : public QLayout {
+#else
+class Q_DECL_EXPORT ScrollAreaLayout : public QLayout {
+#endif
 
-class ScrollAreaLayout : public QLayout {
     QLayoutItem* theItem;
 
 public:

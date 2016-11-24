@@ -4,7 +4,12 @@
 #include "EditItemInteractor.h"
 #include "GraphicsItemFactory.h"
 
-class NewItemInteractor : public EditItemInteractor {
+#ifdef EXP_SYMBOLS
+class Q_DECL_EXPORT NewItemInteractor : public EditItemInteractor {
+#else
+class Q_DECL_IMPORT NewItemInteractor : public EditItemInteractor {
+#endif
+
 	Q_OBJECT;
 
 	FACTORY_FUNCTION itemFactory;

@@ -13,7 +13,12 @@ class QPainter;
 typedef unsigned int AbstractEditHandle;
 
 
-class InteractableItem : public QObject {
+#ifdef EXP_SYMBOLS
+class Q_DECL_EXPORT InteractableItem : public QObject {
+#else
+class Q_DECL_IMPORT InteractableItem : public QObject {
+#endif
+
     Q_OBJECT;
 
 public:

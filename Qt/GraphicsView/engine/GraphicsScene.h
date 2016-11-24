@@ -14,7 +14,12 @@ class QXmlStreamReader;
 class QXmlStreamWriter;
 class GraphicsItemFactory;
 
-class GraphicsScene : public QGraphicsScene {
+#ifdef EXP_SYMBOLS
+class Q_DECL_EXPORT GraphicsScene : public QGraphicsScene {
+#else
+class Q_DECL_IMPORT GraphicsScene : public QGraphicsScene {
+#endif
+
 public:
     GraphicsScene();
 

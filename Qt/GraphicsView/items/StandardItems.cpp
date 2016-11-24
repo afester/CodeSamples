@@ -10,7 +10,7 @@
 
 extern "C" {
 
-void ItemsMain(GraphicsItemFactory* itemFactory) {
+void Q_DECL_EXPORT ItemsMain(GraphicsItemFactory* itemFactory) {
    itemFactory->registerItemClass("RectItem", RectItem::create);
    itemFactory->registerItemClass("LineItem", LineItem::create);
    itemFactory->registerItemClass("EllipseItem", EllipseItem::create);

@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QLibrary>
+#include <iostream>
 
 #include "GraphicsSheet.h"
 #include "GraphicsItemFactory.h"
@@ -30,7 +31,11 @@ GraphicsItemFactory::GraphicsItemFactory() {
         itemLibrary.load();
 
         ItemMain itemMain = (ItemMain) itemLibrary.resolve("ItemsMain");
-        itemMain(this);
+        if (itemMain == 0) {
+           std::cerr << "Could not resolve ItemsMain" << std::endl;
+        } else {
+           itemMain(this);
+        }
     }
 }
 
