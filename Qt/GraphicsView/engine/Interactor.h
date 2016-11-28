@@ -9,7 +9,12 @@ class QWheelEvent;
 class RectItem;
 class GraphicsSheet;
 
-class Interactor : public QObject {
+#ifdef EXP_SYMBOLS
+class Q_DECL_EXPORT Interactor : public QObject {
+#else
+class Q_DECL_EXPORT Interactor : public QObject {
+#endif
+
 protected:
 	// the QGraphicsView where the interactor is attached to
 	GraphicsSheet* theView;

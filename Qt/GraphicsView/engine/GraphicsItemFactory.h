@@ -12,7 +12,12 @@
 class QGraphicsItem;
 typedef  QGraphicsItem* (*FACTORY_FUNCTION)();
 
-class GraphicsItemFactory {
+#ifdef EXP_SYMBOLS
+class Q_DECL_EXPORT GraphicsItemFactory {
+#else
+class Q_DECL_IMPORT GraphicsItemFactory {
+#endif
+
     QHash<QString, FACTORY_FUNCTION> factoryFunctions;
 
 public:

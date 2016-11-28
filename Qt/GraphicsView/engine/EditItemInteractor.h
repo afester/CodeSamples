@@ -8,8 +8,12 @@
 #include "Interactor.h"
 #include "InteractableItem.h"
 
+#ifdef EXP_SYMBOLS
+class Q_DECL_EXPORT EditItemInteractor : public Interactor {
+#else
+class Q_DECL_IMPORT EditItemInteractor : public Interactor {
+#endif
 
-class EditItemInteractor : public Interactor {
 protected:
 
 	InteractableItem* theItem;

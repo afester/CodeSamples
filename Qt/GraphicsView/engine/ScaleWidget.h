@@ -9,7 +9,12 @@
 
 class GraphicsSheet;
 
-class ScaleWidget : public QWidget {
+#ifdef EXP_SYMBOLS
+class Q_DECL_EXPORT ScaleWidget : public QWidget {
+#else
+class Q_DECL_IMPORT ScaleWidget : public QWidget {
+#endif
+
     Q_OBJECT;
 
     qreal theScale;

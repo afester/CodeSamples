@@ -15,7 +15,12 @@ class Interactor;
 class InteractableItem;
 class Snapper;
 
-class GraphicsSheet : public QGraphicsView {
+#ifdef EXP_SYMBOLS
+class Q_DECL_EXPORT GraphicsSheet : public QGraphicsView {
+#else
+class Q_DECL_IMPORT GraphicsSheet : public QGraphicsView {
+#endif
+
     Q_OBJECT;
 
     QStringList sizeNames;
