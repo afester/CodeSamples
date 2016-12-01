@@ -1,4 +1,6 @@
+
 CC=avr-gcc
+AS=avr-as
 
 OBJECTS=$(addprefix $(BUILDDIR)/,$(notdir $(SOURCES:.c=.o)))
 ELFFILE=$(addprefix $(BUILDDIR)/,$(TARGET:.hex=.elf))
@@ -6,6 +8,7 @@ HEXFILE=$(addprefix $(BUILDDIR)/,$(TARGET))
 ASMFILES=$(SOURCES:.c=.S)
 CPPFILES=$(SOURCES:.c=.C)
 DEFFILES=$(SOURCES:.c=.DEF)
+ASMLISTFILES=$(SOURCES:.c=.lst)
 
 all: preBuild $(HEXFILE)
 
@@ -55,6 +58,11 @@ assembly: $(ASMFILES)
 %.S: %.c
 	$(CC) -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) $(INCLUDES) -ffunction-sections -fdata-sections -MMD -MP -S $< -o $@
 
+%.lst: %.S
+	$(AS) -mmcu=$(DEVICE) $< -a=$@
+
+asmlist: $(ASMLISTFILES)
+
 disasm:
 	avr-objdump -d $(ELFFILE)
 
@@ -71,6 +79,7 @@ help:
 	@echo "precomp : Creates a pre-processed file for each source file."
 	@echo "defines : Creates a file containing all #define's for each source file."
 	@echo "assembly: Creates the corresponding assembly file for each source file."
+	@echo "asmlist : Creates an assembler listing file for each source file."
 	@echo "disasm  : Creates a disassembly of the target's elf file."
 
 -include $(OBJECTS:.o=.d)
