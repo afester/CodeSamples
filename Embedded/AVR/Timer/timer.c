@@ -1,10 +1,12 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include <avr/sleep.h>
 
 #include "bitsInlineMacro.h"
 
 volatile uint8_t irqCounter;
+volatile uint8_t sleepCounter;
 
 // ISR is called at 61 Hz
 ISR(TIMER0_OVF_vect) {
@@ -30,5 +32,12 @@ int main() {
 
    sei();	// enable interrupts
    while(1) {
+      set_sleep_mode(0); // IDLE mode
+      sleep_mode();
+      bitToggle(PORTB, PB1);
+      if (sleepCounter++ > 15) {
+         sleepCounter = 0;
+         bitToggle(PORTB, PB3);
+      }
    }
 }
