@@ -18,8 +18,8 @@ PGM_PROTO=wiring
 # Source and target definitions
 
 BUILDDIR=build
-SOURCES=ampel.c
-TARGET=ampel.hex
+SOURCES=timer.c
+TARGET=timer.hex
 INCLUDES=-I. -I../Lib
 LIBS=-lm
 
