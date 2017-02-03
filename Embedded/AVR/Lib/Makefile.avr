@@ -32,7 +32,7 @@ clean:
 	rm -rf build
 
 
-upload:
+upload: all
 	# See https://github.com/sudar/Arduino-Makefile/issues/114 - upload requires the -D option on the ArduinoMega2560!
 	avrdude -p $(PGM_DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -v -D -b 115200 -F -U flash:w:$(HEXFILE):i
 
@@ -75,11 +75,14 @@ help:
 	@echo
 	@echo Targets:
 	@echo -----------------------------------------------------------------------------
-	@echo "all     : Default target - creates the target hex file."
-	@echo "precomp : Creates a pre-processed file for each source file."
-	@echo "defines : Creates a file containing all #define's for each source file."
-	@echo "assembly: Creates the corresponding assembly file for each source file."
-	@echo "asmlist : Creates an assembler listing file for each source file."
-	@echo "disasm  : Creates a disassembly of the target's elf file."
+	@echo "all      : Default target - creates the target hex file."
+	@echo "precomp  : Creates a pre-processed file for each source file."
+	@echo "defines  : Creates a file containing all #define's for each source file."
+	@echo "assembly : Creates the corresponding assembly file for each source file."
+	@echo "asmlist  : Creates an assembler listing file for each source file."
+	@echo "disasm   : Creates a disassembly of the target's elf file."
+	@echo "upload   : Uploads the target's hex file to the Arduino board"
+	@echo "readFuses: Downloads and shows the current fuse settings."
+	@echo "readFlash: Downloads the current flash (code) memory into result.hex."
 
 -include $(OBJECTS:.o=.d)
