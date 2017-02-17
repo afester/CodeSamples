@@ -1,6 +1,6 @@
 package com.example;
 
-import javax.jmh.annotations.*;
+//import javax.jmh.annotations.*;
 
 import java.util.Set;
 
@@ -23,14 +23,14 @@ public class SetPerformance {
 	final static Integer[] array = new Integer[] {1230, 1231};
 
 	
-	@Benchmark
-	@Fork(1)
+//	@Benchmark
+//	@Fork(1)
 	public void setOfTwo(){
 		Set<Integer> mySet01 = Set.of(1230, 1231);
 	}
 
-	@Benchmark
-	@Fork(1)
+//	@Benchmark
+//	@Fork(1)
 	public void setOfVarargs(){
 		Set<Integer> mySet02 = Set.of(array);
 	}
