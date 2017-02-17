@@ -20,6 +20,21 @@ ISR(TIMER0_OVF_vect) {
    }
 }
 
+// ISR for serial communication
+
+// Receive complete
+ISR(USART0_RX_vect) {
+}
+
+// Data Register Empty
+ISR(USART0_UDRE_vect) {
+}
+
+// Transmit complete
+ISR(USART0_TX_vect) {
+}
+
+
 // RXD0
 // TXD0
 
