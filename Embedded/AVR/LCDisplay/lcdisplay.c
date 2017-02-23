@@ -2,11 +2,10 @@
  * A simple example how to drive a Crystalfontz LC display.
  */
 
-
+#if 0
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
-#include <avr/sleep.h>
 #include <string.h>
 
 #include "bitsInlineMacro.h"
@@ -156,12 +155,37 @@ static void lcdPrint(const char* text) {
           (0<<TWEA)|(1<<TWSTA)|(0<<TWSTO)|       // Initiate a START condition.
           (0<<TWWC);
 }
+#endif
+
+
+#include <avr/sleep.h>
+#include <stdbool.h>
+#include "twi.h"
+
+
+static void lcdInit() {
+   twi_init();
+}
+
+uint8_t testPkg[] = {0x07, 0x0B, 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x57, 0x6F, 0x72, 0x6C, 0x64, 0x63, 0x79};
+
+static void lcdPrint(const char* text) {
+   twi_writeTo(42, testPkg, 15, true, true);
+}
+
+
 
 
 int main() {
    lcdInit();
    lcdPrint("Hello World");
 
+   while(1) {
+      set_sleep_mode(0); // IDLE mode
+      sleep_mode();
+   }
+
+#if 0
    bitSet(DDRL, DDL1);  // output pin
    bitSet(PORTL, PL1);  // green LED
 
@@ -187,4 +211,5 @@ int main() {
          toggle = !toggle;
       }
    }
+#endif
 }
