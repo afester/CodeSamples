@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include "twi.h"
 #include <avr/interrupt.h>
+#include <string.h>
 
 
 static void lcdInit() {
@@ -19,11 +20,59 @@ uint8_t testPkg[] = {0x07, 0x10, 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x57, 0x6F,
 
 uint8_t buffer[30];
 
-static void lcdPrint(const char* text) {
-   uint8_t result = twi_writeTo(42, testPkg, 20, true, false);
-   uint8_t nbytes = twi_readFrom(42, buffer, 20, true);
-//   result = twi_writeTo(42, pgk, 20, true, false);
-//   nbytes = twi_readFrom(42, buffer, 20, true);
+unsigned short get_crc(unsigned char count,unsigned char *ptr)
+  {
+  unsigned short
+    crc;   //Calculated CRC
+  unsigned char
+    i;     //Loop count, bits in byte
+  unsigned char
+    data;  //Current byte being shifted
+  crc = 0xFFFF; // Preset to all 1's, prevent loss of leading zeros
+  while(count--)
+    {
+    data = *ptr++;
+    i = 8;
+    do
+      {
+      if((crc ^ data) & 0x01)
+        {
+        crc >>= 1;
+        crc ^= 0x8408;
+        }
+      else
+        crc >>= 1;
+      data >>= 1;
+      } while(--i != 0);
+    }
+  return (~crc);
+  }
+
+
+typedef struct {
+   unsigned char command;
+   unsigned char length;
+   char data[20];  // data + CRC
+}CFA533Packet;
+
+
+static void lcdPrint(int line, const char* text) {
+  CFA533Packet pkg;
+   pkg.command = 0x07 + line;
+   pkg.length = 16; // strlen(text);
+   int i = 0;
+   for (i = 0;  i < strlen(text); i++) {
+      pkg.data[i] = text[i];
+   }
+   for (  ;  i < 16; i++) {
+      pkg.data[i] = ' ';
+   }
+   unsigned short CRC = get_crc(2 + pkg.length, (unsigned char*) &pkg);
+   pkg.data[i] = CRC & 0xFF;
+   pkg.data[i + 1] = CRC >> 8;
+
+   uint8_t result = twi_writeTo(42, (uint8_t*) &pkg, pkg.length + 4, true, true);
+//   uint8_t nbytes = twi_readFrom(42, buffer, 20, true);
 }
 
 
@@ -48,7 +97,8 @@ int main() {
 
    lcdInit();
    sei();
-   lcdPrint("Hello World");
+   lcdPrint(0, "Hello 423!");
+   lcdPrint(1, "Hello Moon!");
 
    while(1) {
       set_sleep_mode(0); // IDLE mode
