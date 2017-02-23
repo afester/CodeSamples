@@ -53,6 +53,8 @@ void twi_init(void)
   // activate internal pullups for twi.
 //  digitalWrite(SDA, 1);
 //  digitalWrite(SCL, 1);
+  sbi(PORTD, 0);
+  sbi(PORTD, 1);
 
   // initialize twi prescaler and bit rate
   cbi(TWSR, TWPS0);
@@ -210,6 +212,9 @@ uint8_t twi_writeTo(uint8_t address, uint8_t* data, uint8_t length, uint8_t wait
     return 1;
   }
 
+   while( !(UCSR0A & _BV(UDRE0)));
+   UDR0 = 'A';
+
   // wait until twi is ready, become master transmitter
   while(TWI_READY != twi_state){
     continue;
@@ -235,6 +240,8 @@ uint8_t twi_writeTo(uint8_t address, uint8_t* data, uint8_t length, uint8_t wait
   // if we're in a repeated start, then we've already sent the START
   // in the ISR. Don't do it again.
   //
+   while( !(UCSR0A & _BV(UDRE0)));
+   UDR0 = 'B';
   if (true == twi_inRepStart) {
     // if we're in the repeated start state, then we've already sent the start,
     // (@@@ we hope), and the TWI statemachine is just waiting for the address byte.
@@ -252,11 +259,16 @@ uint8_t twi_writeTo(uint8_t address, uint8_t* data, uint8_t length, uint8_t wait
     // send start condition
     TWCR = _BV(TWINT) | _BV(TWEA) | _BV(TWEN) | _BV(TWIE) | _BV(TWSTA);	// enable INTs
 
+   while( !(UCSR0A & _BV(UDRE0)));
+   UDR0 = 'C';
   // wait for write operation to complete
   while(wait && (TWI_MTX == twi_state)){
     continue;
   }
   
+   while( !(UCSR0A & _BV(UDRE0)));
+   UDR0 = 'D';
+
   if (twi_error == 0xFF)
     return 0;	// success
   else if (twi_error == TW_MT_SLA_NACK)

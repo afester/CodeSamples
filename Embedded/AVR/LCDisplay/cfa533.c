@@ -38,10 +38,10 @@ unsigned short get_crc(unsigned char count,unsigned char *ptr)
   }
 
 int main() {
-   const char* text = "Hello World";
+   const char* text = "Hello Moon      ";
 
    CFA533Packet pkg;
-   pkg.command = 0x07;
+   pkg.command = 0x08;
    pkg.length = strlen(text);
    int i = 0;
    for (i = 0;  i < pkg.length; i++) {
