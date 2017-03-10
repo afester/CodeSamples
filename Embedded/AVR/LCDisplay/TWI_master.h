@@ -28,7 +28,7 @@
 ****************************************************************************/
 // Set this to the largest message size that will be sent including address byte.
 // 7 should be enough for reading 3x 16-bit numbers.
-#define TWI_BUFFER_SIZE     7
+#define TWI_BUFFER_SIZE     30
 
 // TWI Bit rate Register setting.
 // See pages 4 and 5 from "AVR315 - Using the TWI module as I2C master"

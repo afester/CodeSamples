@@ -18,7 +18,7 @@ PGM_PROTO=wiring
 # Source and target definitions
 
 BUILDDIR=build
-SOURCES=lcdisplay.c
+SOURCES=twi.c lcdisplay.c
 TARGET=lcdisplay.hex
 INCLUDES=-I. -I../Lib
 LIBS=-lm
