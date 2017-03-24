@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.reactfx.util.Either;
+import org.reactfx.value.Val;
+import org.reactfx.value.Var;
+
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 
 public class ReactFXSample {
     public static void main(String[] args) {
@@ -54,7 +59,71 @@ public class ReactFXSample {
     }
 
     public void run() {
-        normalerweise();
-        reactFXApproach();
+      //  normalerweise();
+      //  reactFXApproach();
+        valExample();
+        varExample();
+        valExample2();
+    }
+
+
+    // Val - a better ObservableValue
+    private void valExample() {
+
+        DoubleProperty widthProp = new SimpleDoubleProperty(10.0);
+        DoubleProperty heightProp = new SimpleDoubleProperty(5.0);
+
+        // Note: DoubleProperty implements Property<Number>, not Property<Double>
+        Val<Number> width = Val.wrap(widthProp);
+        Val<Number> height = Val.wrap(heightProp);
+        Val<Number> area = Val.combine(width,                                        // if either width 
+                                       height,                                       // or height changes
+                                       (w, h) -> w.doubleValue() * h.doubleValue()); // then execute this function
+                                                                                     // and set the combined value to the result
+
+        System.err.println(area.getValue());
+        widthProp.set(6.0);
+        System.err.println(area.getValue());
+        
+/*****************************************/
+    }
+
+    private void valExample2() {
+        DoubleProperty widthProp = new SimpleDoubleProperty(10.0);
+        DoubleProperty heightProp = new SimpleDoubleProperty(5.0);
+        
+        Val<Number> width = Val.wrap(widthProp);
+        Val<Number> height = Val.wrap(heightProp);
+        Val<String> dim = Val.combine(width,                                    // if either width 
+                                      height,                                   // or height changes
+                                      (w, h) -> String.format("%sx%s",  w, h)); // then execute this function
+
+        System.err.println(dim.getValue()); // 10.0x5.0
+        widthProp.set(6.0);
+        System.err.println(dim.getValue()); // 6.0x5.0
+    }
+
+    // Var - a Val which can be modified
+    private void varExample() {
+        DoubleProperty widthProp = new SimpleDoubleProperty(10.0);
+        DoubleProperty heightProp = new SimpleDoubleProperty(5.0);
+
+        Var<Double> width = Val.constant(10.0).asVar(v -> System.err.println("F:" + v));//  Var.doubleVar(widthProp);
+        Var<Double> height = Var.doubleVar(heightProp);
+
+        Val<Double> area = Val.combine(width,  height, (w, h) -> w * h );
+        System.err.println(area.getValue());
+
+        width.setValue(3.0);
+
+        System.err.println(area.getValue());
+        
+/*********************************************************************/        
+                                                                   //           +---------------+
+        System.err.println("\nAsVar:\n------------------------");  //           v               |
+        Var<Double> var1 = Val.constant(10.0).asVar(v -> System.err.println("F:" + v));//       |
+        System.err.println(var1.getValue());                                           //       |
+        var1.setValue(3.0); // this does NOT change the value, but instead calls this lambda ---+
+        System.err.println(var1.getValue());    // still 10.0
     }
 }
