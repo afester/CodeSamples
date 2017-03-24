@@ -12,20 +12,16 @@ basic:
 
 ; $80e (2062) - start of assembly program
 start:
+	sei
+	lda	#<irq
+	sta	$314
+	lda	#>irq
+	sta	$315
+	cli
+idle:
+	inc	$0401
+	jmp	idle
 
-	jsr	fillScreen
-
-	lda	#65
-loop:
-	sta	53280
-	adc	#1
-	jmp	loop
-
-fillScreen:
-	ldx	#0
-	lda	#65
-loop1:
-	sta	$0400,x
-	inx
-	bne	loop1
-	rts
+irq:
+	inc	$0400
+	rti
