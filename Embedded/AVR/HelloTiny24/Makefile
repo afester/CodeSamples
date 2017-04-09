@@ -1,5 +1,9 @@
 DEVICE=attiny24
-CLOCK=16000000
+CLOCK=8000000
+PGM_DEVICE=attiny24
+PGM_PROTO=stk500v1
+PGM_DEVFILE=/dev/ttyACM0
+HEXFILE=main.hex
 
 all:
 	avr-gcc -Wall -Os -DF_CPU=${CLOCK} -mmcu=${DEVICE} -I. -ffunction-sections -fdata-sections -MMD -MP -c main.c -o main.o
@@ -15,3 +19,9 @@ precomp:
 
 assembly:
 	avr-gcc -Wall -Os -DF_CPU=${CLOCK} -mmcu=${DEVICE} -I. -ffunction-sections -fdata-sections -MMD -MP -S main.c -o main.S
+
+download:
+	avrdude -vvv -p $(PGM_DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -Uflash:r:download.hex:i 
+
+upload:
+	avrdude -vvv -p $(PGM_DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -Uflash:w:$(HEXFILE):i

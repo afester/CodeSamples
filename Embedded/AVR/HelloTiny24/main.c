@@ -6,8 +6,8 @@ int main() {
 
    while(1) {
       PORTA &= ~(1 << PA1);   /* PORTL.1 ON */
-      _delay_ms(1000);        /* busy waiting */
+      _delay_ms(100);        /* busy waiting */
       PORTA |= (1 << PA1);    /* PORTL.1 OFF */
-      _delay_ms(1000);        /* busy waiting */
+      _delay_ms(100);        /* busy waiting */
    }
 }
