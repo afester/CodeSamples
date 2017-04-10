@@ -1,4 +1,6 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
+#include <avr/sleep.h>
 #include <util/delay.h>
 
 // Clock source: internal 8MHz RC oscillator
@@ -27,23 +29,34 @@
 
 // uint8_t states[] = {0x82, 0x8a, 0x06, 0x06, 0x06, 0x0a, 0x82, 0x81, 0x81, 0x81};
 
+ISR(TIM1_COMPA_vect) {
+}
+
 int main() {
    DDRA |= (1 << DDA1);       /* output pin */
    DDRA |= (1 << DDA6);       /* PA6 (OC1A) = output pin */
 
-   TCNT1 = 977;		      /* Compare match after 977 increments */
+   OCR1A = 977;		      /* Compare match after 977 increments */
    TCCR1A = _BV(COM1A0);      /* Toggle OC1A on compare match */
    TCCR1B = _BV(WGM12) | _BV(CS12) | _BV(CS10);   /* Mode=Clear on Compare Match; clk = Clk_IO/1024 = 977 Hz */
    TCCR1C = 0;
+   TIMSK1 = _BV(OCIE1A);
 
 //    uint8_t idx = 0;
+   sei();
    while(1) {
 //       PORTA = states[idx];
 //       idx = (idx + 1) % sizeof(states);
+
+      set_sleep_mode(0); // IDLE mode
+      sleep_mode();
  
-      PORTA &= ~(1 << PA1);   /* PORTL.1 ON */
-      _delay_ms(100);        /* busy waiting */
-      PORTA |= (1 << PA1);    /* PORTL.1 OFF */
-      _delay_ms(100);        /* busy waiting */
+      // the following code is executed once a second
+      PORTA ^= (1 << PA1);   /* toggle PORTA.1 */
+
+//      PORTA &= ~(1 << PA1);   /* PORTL.1 ON */
+//      _delay_ms(100);        /* busy waiting */
+//      PORTA |= (1 << PA1);    /* PORTL.1 OFF */
+//      _delay_ms(100);        /* busy waiting */
    }
 }

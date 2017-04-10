@@ -42,7 +42,7 @@ clean:
 	rm -rf build
 
 upload: all
-	avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -Uflash:w:$(TARGET):i
+	avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -Uflash:w:$(HEXFILE):i
 
 readFuses:
 	avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -F -U lfuse:r:-:i -U hfuse:r:-:i -U efuse:r:-:i
