@@ -9,25 +9,22 @@
 // OC1A: Pin 7 (PA6) 
 // (ATTENTION! PA6 is the MOSI pin!)
 
-//red             yel grn red grn
-//PA7 PA6 PA5 PA4 PA3 PA2 PA1 PA0
-// 1   x   x   x   0   0   1   0	// 0x82
+const uint8_t states[] = {
+//   r---ygrg (red, yellow, green ; red, green)
+// PA76543210
+   0b10000010,	// red/red
+   0b10001010,	// red-yellow/red
+   0b00000110,	// green/red
+   0b00000110,
+   0b00000110,
+   0b00001010,	// yellow/red
+   0b10000010,  // red/red
+   0b10000001,  // red/green
+   0b10000001,
+   0b10000001
+};
 
-// 1   x   x   x   1   0   1   0	// 0x8a
-
-// 0   x   x   x   0   1   1   0	// 0x06
-// 0   x   x   x   0   1   1   0
-// 0   x   x   x   0   1   1   0
-
-// 0   x   x   x   1   0   1   0	// 0x0a
-
-// 1   x   x   x   0   0   1   0	// 0x82
-
-// 1   x   x   x   0   0   0   1	// 0x81
-// 1   x   x   x   0   0   0   1
-// 1   x   x   x   0   0   0   1
-
-// uint8_t states[] = {0x82, 0x8a, 0x06, 0x06, 0x06, 0x0a, 0x82, 0x81, 0x81, 0x81};
+const uint8_t portMask = 0b01110000;
 
 ISR(TIM1_COMPA_vect) {
 }
@@ -42,21 +39,14 @@ int main() {
    TCCR1C = 0;
    TIMSK1 = _BV(OCIE1A);
 
-//    uint8_t idx = 0;
+   uint8_t idx = 0;
    sei();
    while(1) {
-//       PORTA = states[idx];
-//       idx = (idx + 1) % sizeof(states);
-
       set_sleep_mode(0); // IDLE mode
       sleep_mode();
  
       // the following code is executed once a second
-      PORTA ^= (1 << PA1);   /* toggle PORTA.1 */
-
-//      PORTA &= ~(1 << PA1);   /* PORTL.1 ON */
-//      _delay_ms(100);        /* busy waiting */
-//      PORTA |= (1 << PA1);    /* PORTL.1 OFF */
-//      _delay_ms(100);        /* busy waiting */
+      PORTA = (PORTA & portMask) | states[idx];
+      idx = (idx + 1) % sizeof(states);
    }
 }
