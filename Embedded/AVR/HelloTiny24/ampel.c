@@ -12,16 +12,16 @@
 const uint8_t states[] = {
 //   r---ygrg (red, yellow, green ; red, green)
 // PA76543210
-   0b10000010,	// red/red
-   0b10001010,	// red-yellow/red
-   0b00000110,	// green/red
-   0b00000110,
-   0b00000110,
-   0b00001010,	// yellow/red
-   0b10000010,  // red/red
-   0b10000001,  // red/green
-   0b10000001,
-   0b10000001
+   0b00001101,	// red/red
+   0b00000101,	// red-yellow/red
+   0b10001001,	// green/red
+   0b10001001,
+   0b10001001,
+   0b10000101,	// yellow/red
+   0b00001101,  // red/red
+   0b00001110,  // red/green
+   0b00001110,
+   0b00001110
 };
 
 const uint8_t portMask = 0b01110000;
@@ -30,8 +30,7 @@ ISR(TIM1_COMPA_vect) {
 }
 
 int main() {
-   DDRA |= (1 << DDA1);       /* output pin */
-   DDRA |= (1 << DDA6);       /* PA6 (OC1A) = output pin */
+   DDRA = 0b10001111;
 
    OCR1A = 977;		      /* Compare match after 977 increments */
    TCCR1A = _BV(COM1A0);      /* Toggle OC1A on compare match */
