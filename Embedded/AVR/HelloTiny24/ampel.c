@@ -30,8 +30,15 @@ ISR(TIM1_COMPA_vect) {
 }
 
 int main() {
-   DDRA = 0b10001111;
+   DDRB =  0b00000001;
+   PORTB = 0b00000001;
 
+   PORTA = 0b10001111;	// all LEDs off
+   DDRA =  0b10001111;
+
+   // initialize timer.
+   // timer runs at 977 Hz - at 977, an interrupt is generated
+   // to wakeup the device
    OCR1A = 977;		      /* Compare match after 977 increments */
    TCCR1A = _BV(COM1A0);      /* Toggle OC1A on compare match */
    TCCR1B = _BV(WGM12) | _BV(CS12) | _BV(CS10);   /* Mode=Clear on Compare Match; clk = Clk_IO/1024 = 977 Hz */
@@ -39,13 +46,22 @@ int main() {
    TIMSK1 = _BV(OCIE1A);
 
    uint8_t idx = 0;
+   uint8_t loops = 0;
    sei();
    while(1) {
-      set_sleep_mode(0); // IDLE mode
-      sleep_mode();
- 
       // the following code is executed once a second
       PORTA = (PORTA & portMask) | states[idx];
-      idx = (idx + 1) % sizeof(states);
+      idx++;
+      if (idx >= sizeof(states)) {
+         idx = 0;
+         loops++;
+      }
+
+      if (loops > 2) {
+        PORTB = 0;  // turn off power
+      }
+
+      set_sleep_mode(0); // IDLE mode
+      sleep_mode();
    }
 }
