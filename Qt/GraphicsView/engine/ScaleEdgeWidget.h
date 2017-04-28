@@ -7,7 +7,12 @@
 
 #include <QWidget>
 
-class ScaleEdgeWidget : public QWidget {
+#ifdef EXP_SYMBOLS
+class Q_DECL_EXPORT ScaleEdgeWidget : public QWidget {
+#else
+class Q_DECL_IMPORT ScaleEdgeWidget : public QWidget {
+#endif
+
     QString unit;
 
 public:

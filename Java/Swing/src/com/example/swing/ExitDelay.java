@@ -22,6 +22,15 @@ public class ExitDelay {
                 @Override
                 public void windowClosed(WindowEvent e){
                     System.err.println(LocalDateTime.now() + " CLOSE");
+                    
+                    // https://docs.oracle.com/javase/tutorial/uiswing/events/windowlistener.html
+                    // When the last displayable window within the Java virtual machine (VM) is 
+                    // disposed of, the VM may terminate. Note, however, that there can be a delay 
+                    // before the program exits automatically, and that under some circumstances the 
+                    // program might keep running. It is quicker and safer to explicitly exit the 
+                    // program using System.exit(int).
+
+                    System.exit(0);
                 }
             });
             frame.setVisible(true);

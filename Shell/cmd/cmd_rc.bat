@@ -6,7 +6,7 @@ echo Setting native WINxx development environment ...
 SET QT_HOME=d:\cygwin64
 rem SET JAVA_HOME=c:\Program Files\Java\jdk1.6.0_43
 rem SET JAVA_HOME=c:\Program Files\Java\jdk1.7.0_80
-SET JAVA_HOME=c:\Program Files\Java\jdk1.8.0_60
+SET JAVA_HOME=c:\Program Files\Java\jdk1.8.0_101
 rem SET JAVA_HOME=c:\Program Files\Java\jdk-9
 rem SET JAVA_HOME=c:\Program Files (x86)\Java\jdk-9
 SET MVN_HOME=c:\Program Files\apache-maven-3.2.5

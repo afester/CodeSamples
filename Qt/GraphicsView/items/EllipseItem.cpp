@@ -10,7 +10,8 @@
 #include <QTextStream>
 #include <QXmlStreamWriter>
 
-#include <math.h>
+#define _USE_MATH_DEFINES
+#include <math.h> 
 
 #include "EllipseItem.h"
 #include "GraphicsSheet.h"

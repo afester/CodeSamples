@@ -26,7 +26,7 @@ public abstract class IDispatch extends IUnknown {
                              getClass().getSimpleName(), ci.toString());
     }
 
-
+    @SuppressWarnings("unchecked")
     public static <T> T create(String className, Class<T> clazz) {
         
         COMProxy disp = new COMProxy(className);
@@ -50,7 +50,7 @@ public abstract class IDispatch extends IUnknown {
         return null;
     }
     
-    
+    @SuppressWarnings("unchecked")
     public static <T> T get(String objectName, Class<T> clazz) {
         COMProxy disp = COMProxy.get(objectName);
 

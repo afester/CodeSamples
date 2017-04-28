@@ -8,8 +8,13 @@ import javax.swing.JButton;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
+
+class SpecificInternalFrame1 extends JInternalFrame {
+}
+
+class SpecificInternalFrame2 extends JInternalFrame {
+}
 
 public class MdiExample extends JFrame {
 
@@ -17,22 +22,37 @@ public class MdiExample extends JFrame {
     private JDesktopPane Jdpmain;
     private Point loc = new Point(10, 10);
 
-    private void addFrame() {
-        JInternalFrame frm1 = new JInternalFrame();
+    private JInternalFrame createFrame1() {
+        JInternalFrame frm1 = new SpecificInternalFrame1();
         frm1.setVisible(true);
         frm1.setLocation(loc);
         loc.translate(10, 10);
         frm1.setSize(300, 200);
 
-        addToContainer(frm1);
-
-//        Jdpmain.add(frm1);
         try {
             frm1.setSelected(true);
         } catch (PropertyVetoException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        
+        return frm1;
+    }
+
+    private JInternalFrame createFrame2() {
+        JInternalFrame frm1 = new SpecificInternalFrame2();
+        frm1.setVisible(true);
+        frm1.setLocation(loc);
+        loc.translate(10, 10);
+        frm1.setSize(300, 200);
+
+        try {
+            frm1.setSelected(true);
+        } catch (PropertyVetoException e) {
+            e.printStackTrace();
+        }
+        
+        return frm1;
     }
 
     public void addToContainer(JInternalFrame internalframe){
@@ -56,11 +76,15 @@ public class MdiExample extends JFrame {
         Jdpmain = new JDesktopPane();
 
         JButton addBtn = new JButton("Add");
-        addBtn.addActionListener(e -> addFrame());
+        addBtn.addActionListener(e -> {
+            JInternalFrame jif = createFrame2();
+            addToContainer(jif);
+        });
         add(addBtn, BorderLayout.NORTH);
         add(Jdpmain, BorderLayout.CENTER);
 
-        addFrame();
+        JInternalFrame jif = createFrame1();
+        Jdpmain.add(jif);
 
         setSize(640,  400);
         setLocation(200,  200);

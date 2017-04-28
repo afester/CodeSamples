@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.stream.Stream;
 
 public class CollectionSample {
     public static void main(String[] args) {
@@ -13,7 +14,9 @@ public class CollectionSample {
     
     public void run() {
         //nestedIteration();
-        elementAddition();
+        //elementAddition();
+        //elementAddition2();
+        elementAddition2Stream();
     }
 
 
@@ -71,6 +74,32 @@ public class CollectionSample {
         while(it4.hasNext()) {
             System.err.println(it4.next());
         }
-        
     }
+    
+    
+    public void elementAddition2() {
+        List<String> list = new ArrayList<>();
+        list.add("milk");
+        list.add("bread");
+        list.add("sausage");
+        list = list.subList(0,  2);
+
+        Iterator<String> it = list.iterator();  // this is the "snapshot point"
+        list.add("eggs, don't forget eggs!");
+        while(it.hasNext()) {
+            System.err.println(it.next());      // CME
+        }
+    }
+    
+    public void elementAddition2Stream() {
+        List<String> list = new ArrayList<>();
+        list.add("milk");
+        list.add("bread");
+        list.add("sausage");
+        list = list.subList(0,  2);
+        Stream<String> stream = list.stream();
+        list.add("eggs, don't forget eggs!");
+        stream.forEach(System.out::println);
+    }
+
 }

@@ -8,6 +8,7 @@
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
 
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 #include "DefaultFrame.h"

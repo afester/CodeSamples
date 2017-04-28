@@ -1,0 +1,16 @@
+INPUT(
+./release\ScrollAreaLayout.o
+./release\ScaleWidget.o
+./release\ScaleEdgeWidget.o
+./release\GraphicsSheet.o
+./release\GraphicsScene.o
+./release\GraphicsItemFactory.o
+./release\Interactor.o
+./release\EditItemInteractor.o
+./release\NewItemInteractor.o
+./release\Snapper.o
+./release\moc_ScaleWidget.o
+./release\moc_GraphicsSheet.o
+./release\moc_InteractableItem.o
+./release\moc_NewItemInteractor.o
+);

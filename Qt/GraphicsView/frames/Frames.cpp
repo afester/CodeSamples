@@ -5,7 +5,7 @@
 
 extern "C" {
 
-void ItemsMain(GraphicsItemFactory* itemFactory) {
+void Q_DECL_EXPORT ItemsMain(GraphicsItemFactory* itemFactory) {
    itemFactory->registerItemClass("DefaultFrame", DefaultFrame::create);
 }
 

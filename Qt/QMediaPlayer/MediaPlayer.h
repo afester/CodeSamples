@@ -20,11 +20,13 @@ class MainWindow : public QMainWindow {
     QPushButton* connectButton;
     QPushButton* startPlayButton;
     QPushButton* stopPlayButton;
+    QPushButton* streamButton;
     QMediaPlayer* player;
+    QString hostName;
 
 public:
 
-    MainWindow(QWidget* parent);
+    MainWindow(QWidget* parent, const QString &theHostName);
 
     ~MainWindow();
 
@@ -33,6 +35,7 @@ public slots:
     virtual void doConnect();
     virtual void doStartPlay();
     virtual void doStopPlay();
+    virtual void doStream();
     virtual void socketError(QAbstractSocket::SocketError socketError);
     virtual void socketConnected();
     virtual void socketDisconnected();

@@ -33,3 +33,8 @@ void Canvas::drawEllipse(int x, int y, int w, int h) {
     thePainter->drawEllipse(x, y, w, h);
     update();
 }
+
+void Canvas::drawRectangle(int x, int y, int w, int h) {
+    thePainter->drawRect(x, y, w, h);
+    update();
+}
