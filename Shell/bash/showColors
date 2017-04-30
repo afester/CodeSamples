@@ -1,0 +1,31 @@
+#!/bin/bash
+
+start=1
+end=8
+echo "               1    2    3    4    5    6    7    8"
+for bg in `seq -w $start $end`; do
+   echo -n "$bg (normal)   |"
+   for fg in `seq $start $end`; do
+      tput setab $bg ; tput setaf $fg ; echo -n "COL  "; tput sgr0
+   done
+   echo "|"
+
+   echo -n "  (bold)     |"
+   for fg in `seq $start $end`; do
+      tput bold ; tput setab $bg ; tput setaf $fg ; echo -n "COL  "; tput sgr0
+   done
+   echo "|"
+
+   echo -n "  (reverse)  |"
+   for fg in `seq $start $end`; do
+      tput rev ; tput setab $bg ; tput setaf $fg ; echo -n "COL  "; tput sgr0
+   done
+   echo "|"
+
+   echo -n "  (rev/bold) |"
+   for fg in `seq $start $end`; do
+      tput rev ; tput bold ; tput setab $bg ; tput setaf $fg ; echo -n "COL  "; tput sgr0
+   done
+   echo "|"
+done
+

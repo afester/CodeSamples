@@ -14,15 +14,15 @@ class MainWindow : public QMainWindow {
         Q_OBJECT
 
 public:
+    MainWindow(QWidget* parent);
+    ~MainWindow();
 
-        MainWindow(QWidget* parent);
-        ~MainWindow();
-
-        Ui_MainWindow* ui;
-        Canvas* canvas;
+    Ui_MainWindow* ui;
+    Canvas* canvas;
 
 public slots:
-	void actionLine();
+    void actionPrint();
+    void actionLine();
 	void actionCircle();
-
+    void actionRectangle();
 };

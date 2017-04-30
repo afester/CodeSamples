@@ -25,6 +25,22 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionPrint"/>
+   </widget>
+   <widget class="QMenu" name="menuObjects">
+    <property name="title">
+     <string>Objects</string>
+    </property>
+    <addaction name="actionLine2"/>
+    <addaction name="actionCircle2"/>
+    <addaction name="actionRectangle2"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuObjects"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -48,6 +64,26 @@
   <action name="actionCircle">
    <property name="text">
     <string>Circle</string>
+   </property>
+  </action>
+  <action name="actionLine2">
+   <property name="text">
+    <string>Line</string>
+   </property>
+  </action>
+  <action name="actionCircle2">
+   <property name="text">
+    <string>Circle</string>
+   </property>
+  </action>
+  <action name="actionRectangle2">
+   <property name="text">
+    <string>Rectangle</string>
+   </property>
+  </action>
+  <action name="actionPrint">
+   <property name="text">
+    <string>Print</string>
    </property>
   </action>
  </widget>
