@@ -51,37 +51,66 @@ int main() {
    TCCR1C = 0;
    TIMSK1 = _BV(OCIE1A);
 
-   // initialize pin change interrupt
-   // PIN change interrupts are not useful when reading non-debounced keys
-//   PCMSK1 = _BV(PCINT10);	// PIN5
- //  GIMSK = _BV(PCIE1);		// enable PC1 interrupts
-
    // set first state of LEDs
    uint8_t idx = 0;
    PORTA = (PORTA & portMask) | states[idx];
    idx++;
 
    uint8_t loops = 0;
+   uint8_t wakeup = 0;
+   uint8_t mode = 0;
+   int keyOld = 1;  // assume pressed - from the "power on" step
+
    sei();
    while(1) {
       set_sleep_mode(0); // IDLE mode
       sleep_mode();
 
-//      if (pcint1) {	// port change interrupt
-//         pcint1 = 0;
-//         PORTA ^= 0b00000001;
-//      } else {		// timer interrupt
-         // the following code is executed once a second
-         PORTA = (PORTA & portMask) | states[idx];
-         idx++;
-         if (idx >= sizeof(states)) {
-            idx = 0;
-            loops++;
-         }
+      // called every 100ms
 
-         if (loops > 2) {
-           PORTB = 0;  // turn off power
-         }
-//      }
+      // read key and check if it has been pressed since the last scan
+      int key = !(PINB & _BV(PORTB2));
+      if (key && !keyOld) {
+         mode = mode + 1;
+         if (mode > 2) {
+            mode = 0;
+        }
+      }
+      keyOld = key;
+
+      wakeup++;
+      switch(mode) {
+         case 0 :
+            if (wakeup > 10) {
+               wakeup = 0;
+
+               // called every 1s
+               PORTA = (PORTA & portMask) | states[idx];
+               idx++;
+               if (idx >= sizeof(states)) {
+                  idx = 0;
+               }
+               loops++;
+            }
+            break;
+
+         case 1 : 
+            if (wakeup > 5) {
+               wakeup = 0;
+
+               // called every 500ms
+	       PORTA = (PORTA ^ 0b00001000) | 0b10000111;
+               loops++;
+            }
+            break;
+
+         case 2 :
+            PORTB = 0;  // turn off power
+            break;
+      }
+
+      if (loops > 20) {
+        PORTB = 0;  // turn off power
+      }
    }
 }
