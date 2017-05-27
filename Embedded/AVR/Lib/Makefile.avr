@@ -18,7 +18,7 @@ preBuild:
 	fi
 
 $(BUILDDIR)/%.o: %.c
-	$(CC) -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) $(INCLUDES) -ffunction-sections -fdata-sections -MMD -MP -c $< -o $@
+	$(CC) -std=c99 -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) $(INCLUDES) -ffunction-sections -fdata-sections -MMD -MP -c $< -o $@
 
 $(ELFFILE): $(OBJECTS)
 	$(CC) -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) $(INCLUDES) -ffunction-sections -fdata-sections -o $(ELFFILE) $(OBJECTS) $(LIBS) -Wl,--gc-sections

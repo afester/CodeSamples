@@ -31,15 +31,3 @@ void MCP48xx_SetValue(uint16_t value) {
    bitSet(PORTB, PB0);
 }
 
-
-int main() {
-   SPI_MasterInit();
-   MCP48xx_SetValue(512);
-   _delay_ms(1000);
-   MCP48xx_SetValue(1024);
-   _delay_ms(1000);
-   MCP48xx_SetValue(2048);
-   _delay_ms(1000);
-
-   while(1);
-}
