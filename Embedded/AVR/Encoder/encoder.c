@@ -13,10 +13,15 @@ volatile uint8_t encoderVal;
 uint8_t prevEncoder = 3;
 
 // ISR is called at 61 Hz
-ISR(TIMER0_OVF_vect) {
+//ISR(TIMER0_OVF_vect) {
+//   encoderVal = PINL & 0b00000011;
+//}
+   
+ISR(TIMER1_COMPA_vect) {
    encoderVal = PINL & 0b00000011;
 }
-   
+
+
 
 static char line[] = "                ";
 
@@ -32,9 +37,16 @@ int main() {
    DDRL =  0b00000000;  /* PL0 .. PL7 input */
    PORTL = 0b11111111;  /* PL0 .. PL7 pullup enable */
 
-   TCCR0A = 0;
-   TCCR0B = _BV(CS02) | _BV(CS00);      // start timer with clk/1024 (15,625 kHz)
-   TIMSK0 = _BV(TOIE0);                 // enable timer0 overflow interrupt
+   // initialize timer.
+   OCR1A = 2;                /* Compare match after 2 increments (976 Hz) */
+   TCCR1A = _BV(COM1A0);      /* Toggle OC1A on compare match */
+   TCCR1B = _BV(WGM12) | _BV(CS12) | _BV(CS10);   /* Mode=Clear on Compare Match; clk = Clk_IO/1024 = 1953 Hz */
+   TCCR1C = 0;
+   TIMSK1 = _BV(OCIE1A);
+
+   //TCCR0A = 0;
+   //TCCR0B = _BV(CS02) | _BV(CS00);      // start timer with clk/1024 (15,625 kHz)
+   //TIMSK0 = _BV(TOIE0);                 // enable timer0 overflow interrupt
 
 SPI_MasterInit();
    int value = 0;
