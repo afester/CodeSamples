@@ -9,8 +9,8 @@
 #include "mcp4811.h"
 
 
-volatile uint8_t encoderVal;
-uint8_t prevEncoder = 3;
+volatile int8_t encDelta;
+int8_t lastStep = 3;
 
 // ISR is called at 61 Hz
 //ISR(TIMER0_OVF_vect) {
@@ -18,7 +18,44 @@ uint8_t prevEncoder = 3;
 //}
    
 ISR(TIMER1_COMPA_vect) {
-   encoderVal = PINL & 0b00000011;
+   // read current state as gray code
+   //                                BA
+   uint8_t pinValue = PINL & 0b00000011;
+// cw value sequence (gray code)
+// BA            step
+// 11(R) 00 11  10  2 => -1
+// 10    00 00  01  1 => -1
+// 00    00 00  00  0 => -1
+// 01    00 11  11  3 => 3
+
+   // convert to binary code
+   int8_t step = 0;
+   if (pinValue & 0x01) {
+      step = 3;
+   }
+   if (pinValue & 0x02) {
+      step ^= 0x01;
+   }
+
+   diff = lastStep - step;  // only -3, -1, 1 or 3 possible (assumed that no step has been skipped)
+                            // (or 0 if no rotation)
+   // -1: 0b11111111	cw
+   //  3: 0b00000011	cw
+   //  1: 0b00000001	ccw
+   // -3: 0b11111101	ccw
+
+   //  0: 0b00000000	none
+   // -2: 0b11111110    skipped
+   //  2: 0b00000010    skipped
+
+   // only diff & 1 == 1 is a valid rotation
+   // diff & 2 == 0 is ccw, diff & 2 == 1 is cw
+   if (diff & 1) {
+      lastStep = step;
+      //diff & 2 => 0 (ccw) or 2 (cw)
+      //(diff & 2) - 1 => -1 (ccw) or 1 (cw)
+      encDelta += (diff & 2) - 1;
+   }
 }
 
 

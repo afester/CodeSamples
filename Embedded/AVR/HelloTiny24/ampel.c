@@ -105,7 +105,7 @@ int main() {
             break;
 
          case 2 :
-            PORTB = 0;  // turn off power
+            PORTB = 0b00000100;	// keep PB2 pullup enable, disable power (PB0)
             break;
       }
 
