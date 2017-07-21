@@ -140,16 +140,19 @@ void tftInit() {
   Lcd_Write_Com(0xC5);  // Frame_rate_and_inversion_control
   Lcd_Write_Data(0x03); // 0000 0011 - Frame rate 72 Hz
 
+// This is the most important register, since it sets the 
+// way how the frame memory is set when it is written,
+// and how the frame memory is mapped to the display panel
   Lcd_Write_Com(0x36);  // Set_address_mode
-  Lcd_Write_Data(0x0A); // 0000 1010
-                        // |||| |||+-- No vertical flip
-                        // |||| ||+--- Horizontal flip
-                        // |||| |+---- 0
-                        // |||| +----- Pixels sent in BGR order
-                        // |||+------- LCD refresh top to bottom
-                        // ||+-------- Normal Page/Column order (!!!!!)
-                        // |+--------- Column address order left to right
-                        // +---------- Page address order top to bottom
+  Lcd_Write_Data(0b00101000);
+                // |||||||+-- Vertical flip
+                // ||||||+--- Horizontal flip
+                // |||||+---- 0
+                // ||||+----- Pixels sent in BGR order
+                // |||+------ LCD refresh top to bottom
+                // ||+------- Page/Column order
+                // |+-------- Column address order left to right
+                // +--------- Page address order top to bottom
 
   Lcd_Write_Com(0x3A);  // Set_pixel_format
   Lcd_Write_Data(0x55); // x101 x101 - 16 bit per pixel (65536 colors)
@@ -230,7 +233,7 @@ void tftHLine(uint16_t x, uint16_t y, uint16_t l, uint16_t col) {
 void tftVLine(uint16_t x, uint16_t y, uint16_t l, uint16_t col) {
   CS_LOW;
 
-  Address_set(x, y, x, x+l-1);
+  Address_set(x, y, x, y+l-1);
   for(int i = 0; i <= l; i++) {
       Lcd_Write_Data(col>>8);
       Lcd_Write_Data(col);
@@ -248,12 +251,13 @@ void tftRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col) {
 }
 
 
-void tftBlt(const uint16_t* source, uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
+void tftBlt(const uint8_t* source, uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
   CS_LOW;
 
-  Address_set(x, y, x+w-1, y+h-1); // 319, 479); // 320,480);
+  Address_set(x, y, x+w-1, y+h-1);
   for(int i = 0; i < h; i++) {
-    for(int m = 0; m < w; m++) {
+    for(int m = 0; m < w; m++) { // x direction
+      Lcd_Write_Data(*source++);
       Lcd_Write_Data(*source++);
     }
   }
