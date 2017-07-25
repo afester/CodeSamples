@@ -317,11 +317,17 @@ extern const unsigned char font[];
 //00010010
 //01111100
 
-static uint16_t xpos=10;
-static uint16_t ypos=180;
+static uint16_t xpos=0;
+static uint16_t ypos=0;
 
 void tftDrawChar(char c) {
-   const uint8_t *glyph = &font[(int) c * 5];
+   if (c == '\n') {
+     xpos = 0;
+     ypos += 9;
+     return;
+   }
+
+   const uint8_t *glyph = &font[(int) ((unsigned char) c) * 5];
 
   CS_LOW;
 
@@ -333,8 +339,8 @@ void tftDrawChar(char c) {
 
     for(int m = 0; m < 5; m++) { // x direction
       if (glyph[m] & mask) {
-         Lcd_Write_Data(RED>>8);
-         Lcd_Write_Data(RED);
+         Lcd_Write_Data(WHITE>>8);
+         Lcd_Write_Data(WHITE);
       } else {
          Lcd_Write_Data(BLACK>>8);
          Lcd_Write_Data(BLACK);
@@ -349,6 +355,10 @@ void tftDrawChar(char c) {
   CS_HIGH;
 
   xpos += 6;
+  if (xpos > 474) {
+     xpos = 0;
+     ypos += 9;
+  }
 }
 
 void tftDrawText(const char* str) {
