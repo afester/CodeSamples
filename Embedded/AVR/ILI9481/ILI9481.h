@@ -23,6 +23,8 @@ void tftDrawChar(char c);
 
 void tftDrawText(const char* str);
 
+void tftDeviceCodeRead();
+
 
 /**
  * Draws a horizontal line.

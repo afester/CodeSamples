@@ -80,10 +80,12 @@ void Lcd_Write_Data(uint8_t data) {
  * @return The data byte which has been read from the device.
  */
 uint8_t Lcd_Read_Data() {
+  DDRL = 0b00000000;
   RS_HIGH;
   RD_LOW;
-  uint8_t result = PORTL;
   RD_HIGH;
+  uint8_t result = PINL;
+  DDRL = 0b11111111;
   return result;
 }
 
@@ -196,6 +198,28 @@ void Address_set(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int
   Lcd_Write_Data(y2);       // LSB
 
   Lcd_Write_Com(0x2c);      // Write_memory_start
+}
+
+static const char hex[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+void tftDeviceCodeRead() {
+   CS_LOW;
+
+   Lcd_Write_Com(0xbf);
+
+   Lcd_Read_Data();
+   Lcd_Read_Data();
+   Lcd_Read_Data();
+   uint8_t v1 = Lcd_Read_Data();
+   uint8_t v2 = Lcd_Read_Data();
+   Lcd_Read_Data();
+
+   CS_HIGH;
+
+   tftDrawChar(hex[v1 >> 4]);   
+   tftDrawChar(hex[v1 & 0x0f]);   
+   tftDrawChar(hex[v2 >> 4]);   
+   tftDrawChar(hex[v2 & 0x0f]);   
 }
 
 
@@ -318,13 +342,14 @@ void tftDrawChar(char c) {
   }
 
   CS_HIGH;
+
+  xpos += 6;
 }
 
 void tftDrawText(const char* str) {
    while(*str) {
       tftDrawChar(*str);
       str++;
-      xpos += 6;
    }
 }
 

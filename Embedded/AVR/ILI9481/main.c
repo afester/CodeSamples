@@ -23,6 +23,7 @@ int main() {
 //   }
 
    tftDrawText("Hello World");
+   tftDeviceCodeRead();
 
    while(1);
 }
