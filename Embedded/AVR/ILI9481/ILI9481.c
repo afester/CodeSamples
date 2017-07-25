@@ -208,14 +208,18 @@ void tftDeviceCodeRead() {
    Lcd_Write_Com(0xbf);
 
    Lcd_Read_Data();
-   Lcd_Read_Data();
-   Lcd_Read_Data();
+   uint8_t mpi1 = Lcd_Read_Data();
+   uint8_t mpi2 = Lcd_Read_Data();
    uint8_t v1 = Lcd_Read_Data();
    uint8_t v2 = Lcd_Read_Data();
    Lcd_Read_Data();
 
    CS_HIGH;
 
+   tftDrawChar(hex[mpi1 >> 4]);   
+   tftDrawChar(hex[mpi1 & 0x0f]);   
+   tftDrawChar(hex[mpi2 >> 4]);   
+   tftDrawChar(hex[mpi2 & 0x0f]);   
    tftDrawChar(hex[v1 >> 4]);   
    tftDrawChar(hex[v1 & 0x0f]);   
    tftDrawChar(hex[v2 >> 4]);   
@@ -226,7 +230,7 @@ void tftDeviceCodeRead() {
 void tftFillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col) {
   CS_LOW;
 
-  Address_set(x, y, x+w-1, y+h-1); // 319, 479); // 320,480);
+  Address_set(x, y, x+w-1, y+h-1);
   for(int i = 0; i < h; i++) {
     for(int m = 0; m < w; m++) {
       Lcd_Write_Data(col>>8);
@@ -239,7 +243,7 @@ void tftFillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col) {
 
 
 void tftClear(uint8_t col) {
-  tftFillRect(0, 0, 479, 319, col);
+  tftFillRect(0, 0, 480, 320, col);
 }
 
 
@@ -321,13 +325,12 @@ void tftDrawChar(char c) {
 
   CS_LOW;
 
-  Address_set(xpos, ypos, xpos+4, ypos+6);
+  Address_set(xpos, ypos, xpos+5, ypos+6);
 
   uint8_t mask = 0x01;
 
   for(int i = 0; i < 7; i++) {
 
-    // uint8_t row = *glyph;
     for(int m = 0; m < 5; m++) { // x direction
       if (glyph[m] & mask) {
          Lcd_Write_Data(RED>>8);
@@ -337,6 +340,8 @@ void tftDrawChar(char c) {
          Lcd_Write_Data(BLACK);
       }
     }
+    Lcd_Write_Data(BLACK>>8);
+    Lcd_Write_Data(BLACK);
 
     mask <<= 1;
   }
