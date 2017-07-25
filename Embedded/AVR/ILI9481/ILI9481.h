@@ -17,6 +17,13 @@
 void tftInit();
 
 
+void tftDrawPixel(uint16_t x, uint16_t y, uint16_t col);
+
+void tftDrawChar(char c);
+
+void tftDrawText(const char* str);
+
+
 /**
  * Draws a horizontal line.
  *

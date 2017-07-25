@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <util/delay.h>
+#include "ILI9481.h"
 
 /*****************************************************************************/
 /* Low level hardware access functions */
@@ -146,9 +147,9 @@ void tftInit() {
   Lcd_Write_Com(0x36);  // Set_address_mode
   Lcd_Write_Data(0b00101000);
                 // |||||||+-- Vertical flip
-                // ||||||+--- Horizontal flip
-                // |||||+---- 0
-                // ||||+----- Pixels sent in BGR order
+                        // |||| ||+--- Horizontal flip
+                        // |||| |+---- 0
+                        // |||| +----- Pixels sent in BGR order
                 // |||+------ LCD refresh top to bottom
                 // ||+------- Page/Column order
                 // |+-------- Column address order left to right
@@ -222,7 +223,7 @@ void tftHLine(uint16_t x, uint16_t y, uint16_t l, uint16_t col) {
   CS_LOW;
 
   Address_set(x, y, x+l-1, y);
-  for(int i=0; i <= l; i++) {
+  for(int i=0; i < l; i++) {
       Lcd_Write_Data(col>>8);
       Lcd_Write_Data(col);
   }
@@ -234,7 +235,7 @@ void tftVLine(uint16_t x, uint16_t y, uint16_t l, uint16_t col) {
   CS_LOW;
 
   Address_set(x, y, x, y+l-1);
-  for(int i = 0; i <= l; i++) {
+  for(int i = 0; i < l; i++) {
       Lcd_Write_Data(col>>8);
       Lcd_Write_Data(col);
   }
@@ -266,10 +267,64 @@ void tftBlt(const uint8_t* source, uint16_t x, uint16_t y, uint16_t w, uint16_t 
 }
 
 
-#if 0
+void tftDrawPixel(uint16_t x, uint16_t y, uint16_t col) {
+  CS_LOW;
 
-//int RGB(int r,int g,int b)
-//{
-//  return r << 16 | g << 8 | b;
-//}
-#endif
+  Address_set(x, y, x, y);
+  Lcd_Write_Data(col>>8);
+  Lcd_Write_Data(col);
+
+  CS_HIGH;
+}
+
+#include <avr/pgmspace.h>
+
+// extern const unsigned char font[] PROGMEM;
+// static const unsigned char font[] PROGMEM = {0x7C, 0x12, 0x11, 0x12, 0x7C};
+extern const unsigned char font[];
+//static const unsigned char font[] = {0x7C, 0x12, 0x11, 0x12, 0x7C};
+//01111100
+//00010010
+//00010001
+//00010010
+//01111100
+
+static uint16_t xpos=10;
+static uint16_t ypos=180;
+
+void tftDrawChar(char c) {
+   const uint8_t *glyph = &font[(int) c * 5];
+
+  CS_LOW;
+
+  Address_set(xpos, ypos, xpos+4, ypos+6);
+
+  uint8_t mask = 0x01;
+
+  for(int i = 0; i < 7; i++) {
+
+    // uint8_t row = *glyph;
+    for(int m = 0; m < 5; m++) { // x direction
+      if (glyph[m] & mask) {
+         Lcd_Write_Data(RED>>8);
+         Lcd_Write_Data(RED);
+      } else {
+         Lcd_Write_Data(BLACK>>8);
+         Lcd_Write_Data(BLACK);
+      }
+    }
+
+    mask <<= 1;
+  }
+
+  CS_HIGH;
+}
+
+void tftDrawText(const char* str) {
+   while(*str) {
+      tftDrawChar(*str);
+      str++;
+      xpos += 6;
+   }
+}
+
