@@ -147,11 +147,11 @@ void tftInit() {
 // way how the frame memory is set when it is written,
 // and how the frame memory is mapped to the display panel
   Lcd_Write_Com(0x36);  // Set_address_mode
-  Lcd_Write_Data(0b00101000);
+  Lcd_Write_Data(0b00100000);
                 // |||||||+-- Vertical flip
-                        // |||| ||+--- Horizontal flip
-                        // |||| |+---- 0
-                        // |||| +----- Pixels sent in BGR order
+                // ||||||+--- Horizontal flip
+                // |||||+---- 0
+                // ||||+----- Pixels sent in BGR order
                 // |||+------ LCD refresh top to bottom
                 // ||+------- Page/Column order
                 // |+-------- Column address order left to right

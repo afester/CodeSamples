@@ -1,5 +1,6 @@
 #include "ILI9481.h"
-#include "small.h"
+//#include "small.h"
+#include "lcd.h"
 
 
 int main() {
@@ -16,7 +17,8 @@ int main() {
 
 //   tftRect(220, 140, 40, 40, RED);
 
-//   tftBlt(small_gray, 50, 50, 32, 32);
+   tftBlt(small_gray, 50, 50, 53, 64);
+   tftBlt(small_gray, 105, 50, 53, 64);
 
  //  for (int x = 10;  x < 200; x+=2) {
 //      tftDrawPixel(x, 200, RED);
@@ -24,10 +26,10 @@ int main() {
 
    tftDrawText("Display controller: ");
    tftDeviceCodeRead();
-   tftDrawChar('\n'); 
-   for (unsigned short c = 0;  c <= 255;  c++) {
-       tftDrawChar(c); 
-   }
+//   tftDrawChar('\n'); 
+//   for (unsigned short c = 0;  c <= 255;  c++) {
+//       tftDrawChar(c); 
+//   }
 
    while(1);
 }
