@@ -4,16 +4,31 @@
   -fx-font-family: serif;
 }
 
-/* Header 1 paragraph */
-.h1 {
-  -fx-font-size: 18pt;
-  -fx-padding: 0px 0px 12px 0px;
-}
 
 /* normal paragraph */
 .p {
-  -fx-padding: 0px 0px 12px 10px;
+  -fx-font: 12pt "Sans";
+  /* -fx-padding: 0px 0px 12px 10px; */
 }
+
+/* Header 1 paragraph */
+.h1 {
+  -fx-font: 20pt "Sans";
+  /*-fx-fill: green;*/
+  /*-fx-padding: 0px 0px 12px 0px;*/
+}
+
+.h2 {
+  -fx-font: 16pt "Sans"; 
+}
+
+.java {
+  -fx-font: 10pt "Courier New";
+  -fx-background-color: #f0f0f0;
+}
+
+
+/* Inline styles */
 
 .em {
   -fx-font-weight: bold;
@@ -23,4 +38,9 @@
   -fx-fill: yellow;
   -fx-backgrund-color: blue;
   -fx-stroke: green;
+}
+
+
+.keyword {
+  -fx-fill: red;
 }

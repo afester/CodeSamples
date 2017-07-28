@@ -42,7 +42,7 @@ MainWindow::~MainWindow() {
 void MainWindow::actionPrint() {
     // dump screen properties
 
-    SetProcessDPIAware();
+  //  SetProcessDPIAware();
     QGuiApplication* gApp = dynamic_cast<QGuiApplication*>(QGuiApplication::instance());
     QList<QScreen*> screens = gApp->screens();
 

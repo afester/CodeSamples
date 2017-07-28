@@ -10,3 +10,4 @@ CONFIG += qt warn_on
 FORMS = Canvas.ui
 HEADERS = Canvas.h MainWindow.h
 SOURCES = Canvas.cpp MainWindow.cpp main.cpp
+# LIBS += user32.dll

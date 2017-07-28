@@ -18,6 +18,7 @@ public class LambdaExpression {
       
 
       Function<Double, Double> sinsquare = x -> Math.sin(Math.pow(x, 2.0));
+      System.err.printf("sinsquare: %s%n", sinsquare);
       System.err.println(sinsquare.apply(3.4));            //  -0.844895
    }
 }

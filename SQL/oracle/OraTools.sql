@@ -241,3 +241,10 @@ SELECT lpad(' ',level-1)||operation||' '||options||' '||object_name "Plan",
 CONNECT BY prior id = parent_id AND prior statement_id = statement_id
   START WITH id = 0 AND statement_id = 'somePlanId'
   ORDER BY id;
+
+
+CREATE OR REPLACE FUNCTION getRowId(theRowId IN VARCHAR2) RETURN VARCHAR2 IS
+BEGIN
+   RETURN SUBSTR(theRowId, 1, 6)||'-'||SUBSTR(theRowId, 7, 3)||'-'||SUBSTR(theRowId, 10, 6)||'-'||SUBSTR(theRowId, 16, 3);
+END;
+/

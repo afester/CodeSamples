@@ -1,27 +1,16 @@
 package com.example.javafx;
 
-import com.example.javafx.components.Meter;
-import com.example.javafx.components.SevenSegmentPanel;
-
+import afester.javafx.components.Meter;
+import afester.javafx.components.MultiSegmentPanel;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
-import javafx.scene.image.Image;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderImage;
-import javafx.scene.layout.BorderRepeat;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.transform.Scale;
 
 public class ControlPanelSample {
@@ -39,7 +28,7 @@ public class ControlPanelSample {
         Region r = new Button("Hello World");
         r.setId("hello");
 
-        SevenSegmentPanel s7Panel = new SevenSegmentPanel(10, 0);
+        MultiSegmentPanel s7Panel = new MultiSegmentPanel("7segment", 10, 0);
         s7Panel.setId("current");
         s7Panel.getTransforms().add(new Scale(0.6, 0.6));
         // s7Panel.setValue(0);
@@ -78,7 +67,7 @@ public class ControlPanelSample {
 
 /*************************/
 
-        SevenSegmentPanel vPanel = new SevenSegmentPanel(4, 2);
+        MultiSegmentPanel vPanel = new MultiSegmentPanel("7segment", 4, 2);
         vPanel.setId("voltage");
         vPanel.getTransforms().add(new Scale(0.6, 0.6));
         vPanel.setValue(0);
@@ -88,7 +77,7 @@ public class ControlPanelSample {
 
         Slider vSlider = new Slider(0.0, 1.5, 0.0);
         Meter vMeter = new Meter();
-        vMeter.setUnit("V");
+        vMeter.setUnitText("V");
 
         vSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
                 double val = newValue.doubleValue();

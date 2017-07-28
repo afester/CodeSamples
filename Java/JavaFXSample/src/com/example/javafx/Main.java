@@ -1,9 +1,8 @@
 package com.example.javafx;
 
-import com.example.javafx.components.Meter;
-import com.example.javafx.components.SevenSegmentPanel;
-import com.example.svg.SVGLoader;
 
+import afester.javafx.components.Meter;
+import afester.javafx.components.MultiSegmentPanel;
 import javafx.animation.Interpolator;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
@@ -85,7 +84,19 @@ public class Main extends Application {
         grid.setAlignment(Pos.TOP_LEFT);
         // grid.setGridLinesVisible(true);
        
-        addRow(new Text("Screens:"), new Text(Integer.toString(Screen.getScreens().size())));
+        Text st1 = new Text("Sample Text1");
+        st1.getStyleClass().add("SampleStyle");
+        Text st2 = new Text("Sample Text2");
+        st2.getStyleClass().add("SampleStyle");
+        Text st3 = new Text("Sample Text3");
+        st3.getStyleClass().add("SampleStyle");
+
+        
+        
+        
+        addRow(st1, st2, st3);
+        
+        addRow(new Text("Screens"), new Text(Integer.toString(Screen.getScreens().size())));
         Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
         addRow(new Text("Primary Screen:"), new Text(String.format("%f x %f", screenBounds.getWidth(), screenBounds.getHeight())));
 
@@ -151,7 +162,7 @@ public class Main extends Application {
 
         addRow(new Text("Shapes:"), r1, e1, a1, cyl1);
 
-        SevenSegmentPanel s7Panel = new SevenSegmentPanel(4, 2);
+        MultiSegmentPanel s7Panel = new MultiSegmentPanel("7segment", 4, 2);
         s7Panel.setOnColor(new Color(0.95, 0.0, 0.0, 1.0));
         s7Panel.setOffColor(new Color(0.3, 0.0, 0.0, 1.0));
         // s7Panel.setDisplayBackground(new Color(0.35, 0.0, 0.0, 1.0));
@@ -278,6 +289,7 @@ public class Main extends Application {
         //SceneGraphTree tree = new SceneGraphTree();
         //tree.setSceneTree(scene);
         //tree.show();
+
 
         primaryStage.setScene(scene);
         primaryStage.show();

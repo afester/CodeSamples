@@ -10,6 +10,9 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
 
 typedef struct _HexDump HexDump;
 
@@ -19,20 +22,24 @@ typedef enum _BlockMode BlockMode;
 
 HexDump* new_HexDump(const uint8_t* data, size_t length);
 
-void HexDump_reset(HexDump* this, const uint8_t* data, size_t length);
+void HexDump_reset(HexDump* _this, const uint8_t* data, size_t length);
 
-void HexDump_dumpAscii(HexDump* this, int flag);
+void HexDump_dumpAscii(HexDump* _this, int flag);
 
-void HexDump_setBytesPerLine(HexDump* this, int bytesPerLine);
+void HexDump_setBytesPerLine(HexDump* _this, int bytesPerLine);
 
-void HexDump_setBlockSize(HexDump* this, int blockSize);
+void HexDump_setBlockSize(HexDump* _this, int blockSize);
 
-void HexDump_setBlockMode(HexDump* this, BlockMode mode);
+void HexDump_setBlockMode(HexDump* _this, BlockMode mode);
 
-char* HexDump_headerLine(HexDump* this);
+char* HexDump_headerLine(HexDump* _this);
 
-int HexDump_hasNext(HexDump* this);
+int HexDump_hasNext(HexDump* _this);
 
-char* HexDump_nextLine(HexDump* this);
+char* HexDump_nextLine(HexDump* _this);
 
-void HexDump_dumpAll(HexDump* this);
+void HexDump_dumpAll(HexDump* _this);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

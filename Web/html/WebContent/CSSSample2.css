@@ -1,0 +1,20 @@
+@CHARSET "ISO-8859-1";
+
+:root {
+  --myColor: cyan;
+}
+
+body {
+}
+
+#page > p {          /* Selects immediate <p> children of #page */
+  color: green;
+}
+
+#page p {            /* Selects all <p> nodes inside #page */
+  background-color: var(--myColor);
+}
+
+#page+p {            /* Selects all <p> nodes immediately following #page */
+  background-color: yellow;
+}

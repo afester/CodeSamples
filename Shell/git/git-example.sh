@@ -114,13 +114,13 @@ showGraph ${WORKDIR}
 
 # Replay commits from the experimental branch on top of develop
 # so that experimental is now based on develop
-git rebase -v develop
+#git rebase -v develop
 
 # git reset --hard develop
 
-echo
-echo "Final Result"
-echo "-------------------------------------"
-showGraph ${REPODIR}
-showGraph ${WORKDIR}
+#echo
+#echo "Final Result"
+#echo "-------------------------------------"
+#showGraph ${REPODIR}
+#showGraph ${WORKDIR}
 

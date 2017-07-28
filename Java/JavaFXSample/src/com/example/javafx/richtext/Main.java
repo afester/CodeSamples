@@ -1,51 +1,34 @@
 package com.example.javafx.richtext;
 
-import java.util.Optional;
-
-import org.fxmisc.richtext.InlineStyleTextArea;
-import org.fxmisc.richtext.Paragraph;
-import org.fxmisc.richtext.StyledDocument;
-import org.fxmisc.richtext.StyledText;
-import org.fxmisc.richtext.StyledTextArea;
-import org.fxmisc.richtext.demo.richtext.ParStyle;
-import org.fxmisc.richtext.demo.richtext.TextStyle;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import javafx.application.Application;
 import javafx.event.Event;
 import javafx.geometry.Orientation;
-import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
-import javafx.scene.web.HTMLEditor;
 import javafx.stage.Stage;
+
+import org.fxmisc.richtext.EditableStyledDocument;
+import org.fxmisc.richtext.Paragraph;
+import org.fxmisc.richtext.StyleClassedTextArea;
+import org.fxmisc.richtext.StyledDocument;
+import org.fxmisc.richtext.StyledText;
 
 public class Main extends Application {
 
-    private final InlineStyleTextArea<TextStyle, ParStyle> area =
-            new InlineStyleTextArea<>(
-                    TextStyle.EMPTY.updateFontSize(12).updateFontFamily("Serif").updateTextColor(Color.BLACK),
-                    TextStyle::toCss,
-                    ParStyle.EMPTY,
-                    ParStyle::toCss);
-    {
-        area.setWrapText(true);
-        area.setStyleCodec(TextStyle.CODEC);
-    }
-
+    private final StyleClassedTextArea area = new StyleClassedTextArea();
 
     private final TextArea structureView = new TextArea();
     private final TextArea xmlView = new TextArea();
@@ -68,10 +51,20 @@ public class Main extends Application {
         Tab tab = (Tab) e.getSource();
         if (tab.isSelected()) {
             structureView.setText("StyledDocument\n");
-            StyledDocument<TextStyle, ParStyle> document = area.getDocument();
-            for (Paragraph p : document.getParagraphs()) {
-                structureView.appendText("   Paragraph: " + p + "\n");
+            
+            structureView.clear();
+            StyledDocument<Collection<String>, Collection<String>> doc = area.getDocument();
+            for (Paragraph<Collection<String>, Collection<String>> p : doc.getParagraphs()) {
+                structureView.appendText(p.toString() + "\n");
+                for (StyledText<Collection<String>> t : p.getSegments()) {
+                    structureView.appendText("   " + t.toString() + "\n");
+                }
             }
+
+//            StyledDocument<TextStyle, ParStyle> document = area.getDocument();
+//            for (Paragraph p : document.getParagraphs()) {
+//                structureView.appendText("   Paragraph: " + p + "\n");
+//            }
         }
     }
 
@@ -117,7 +110,25 @@ public class Main extends Application {
         Tab tab = new Tab();
         tab.setText("Edit");
         tab.setClosable(false);
-        tab.setContent(area);
+        tab.setOnSelectionChanged(e -> { System.err.println("EDIT"); area.requestFocus(); } );
+
+        StatusBar statusBar = new StatusBar();
+        Text paraStatus = new Text("0");
+        Text posStatus = new Text("0");
+        Text columnStatus = new Text("0");
+        Text charactersStatus = new Text("0");
+        statusBar.getChildren().addAll(new Text("Paragraph: "), paraStatus);
+        statusBar.getChildren().addAll(new Text("   Abs Pos: "), posStatus);
+        statusBar.getChildren().addAll(new Text("   Column: "), columnStatus);
+        statusBar.getChildren().addAll(new Text("   Characters: "), charactersStatus);
+        VBox editArea = new VBox();
+        editArea.getChildren().addAll(area, statusBar);
+        VBox.setVgrow(area, Priority.ALWAYS);
+        area.currentParagraphProperty().addListener((obs, oldVal, newVal) -> paraStatus.setText(newVal.toString()) );
+        area.caretPositionProperty().addListener((obs, oldVal, newVal) -> posStatus.setText(newVal.toString()) );
+        area.caretColumnProperty().addListener((obs, oldVal, newVal) -> columnStatus.setText(newVal.toString()) );
+        area.lengthProperty().addListener((obs, oldVal, newVal) -> charactersStatus.setText(newVal.toString()) );
+        tab.setContent(editArea);
 
         Tab tab2 = new Tab();
         tab2.setText("View Web");
@@ -187,26 +198,118 @@ public class Main extends Application {
 
         mainPane.getItems().add(leftPane);
         mainPane.getItems().add(tabPane);
+        mainPane.setDividerPosition(0, 0.3);
 
-        
-        
+        List<String> h1 = new ArrayList<>();
+        h1.add("h1");
+
+        List<String> h2 = new ArrayList<>();
+        h2.add("h2");
+
+        List<String> h3 = new ArrayList<>();
+        h3.add("h3");
+
+        List<String> p = new ArrayList<>();
+        p.add("p");
+
+        List<String> java = new ArrayList<>();
+        java.add("java");
+
+        List<String> bold = new ArrayList<>();
+        bold.add("em");
+
+        List<String> keyword = new ArrayList<>();
+        keyword.add("keyword");
+        keyword.add("em");
+
+        area.setWrapText(true);
+        area.replaceText("");
+
+        // Create StyledDocument
+        List<String> PS = new ArrayList<>();
+        PS.add("p");
+        List<String> S = new ArrayList<>();
+
+        EditableStyledDocument<Collection<String>, Collection<String>> doc = 
+                new EditableStyledDocument<>(S, PS, true);
+
+        StyledText<Collection<String>> seg0 = new StyledText<>("Title 1", S);
+        Paragraph<Collection<String>, Collection<String>> par0 = 
+                new Paragraph<>(h1, seg0);
+        doc.addParagraph(par0);
+
+        StyledText<Collection<String>> seg1 = new StyledText<>("Hello ", S);
+        StyledText<Collection<String>> seg2 = new StyledText<>("World", bold);
+        Paragraph<Collection<String>, Collection<String>> par1 = 
+                new Paragraph<>(PS, seg1, seg2);
+        doc.addParagraph(par1);
+
+        StyledText<Collection<String>> seg3 = new StyledText<>("public class Test {\n   public static void ", S);
+        StyledText<Collection<String>> seg4 = new StyledText<>("main", keyword);
+        StyledText<Collection<String>> seg5 = new StyledText<>("(String[] args) {\n      System.err.println(\"Hello World\");\n   }\n}", S);
+        Paragraph<Collection<String>, Collection<String>> par2 = 
+                new Paragraph<>(java, seg3, seg4, seg5);
+        doc.addParagraph(par2);
+
+        area.setDocument(doc);
+//        List<String> PS = new ArrayList<>();
+//        List<String> S = new ArrayList<>();
+//        List<String> S1 = new ArrayList<>();
+//        S1.add("bold");
+//        ReadOnlyStyledDocument<Collection<String>, Collection<String>> document =
+//                ReadOnlyStyledDocument.fromString("Hello",  PS, S);
+//        area.append(document);
+//        ReadOnlyStyledDocument<Collection<String>, Collection<String>> document2 = ReadOnlyStyledDocument.fromString("World",  PS, S1);
+//        area.append(document2);
+
+/*        List<Paragraph<String, String>> paragraphs = new ArrayList<>();
+        StyledDocument document = ReadOnlyStyledDocument.fromString("", "", "");
+        document.concat(latter);
+        document.getParagraphs();
+        area.append(document);*/
+/*
         DocbookImporter di = new DocbookImporter("C:\\Users\\afester\\Projects\\CodeSamples\\Python\\PyQt5\\MynPad\\S", "Sample%20Page.xml");
-        di.importDocument();
+        di.importDocument(new DocbookHandler() {
 
-//        StyledDocument<TextStyle, ParStyle> sample = new StyledDocument<>("Hello World", new TextStyle());
-        // area.getDocument();
-        area.appendText("Hello World");
-        
-        
+            @Override
+            public void addTitle(int level, String title) {
+                area.appendText(title);
+                area.setParagraphStyle(area.currentParagraphProperty().getValue(), h1);
+                area.appendText("\n");
+            }
 
-        StyledDocument<TextStyle, ParStyle> document = area.getDocument();
-        StyledText<TextStyle> t1 = new StyledText<>("Hello", new TextStyle(Optional.of(Boolean.TRUE), null, null, null, null, null, null, null));
-        StyledText<TextStyle> t2 = new StyledText<>("World", new TextStyle(null, Optional.of(Boolean.TRUE), null, null, null, null, null, null));
-        Paragraph<TextStyle, ParStyle> p = new Paragraph<TextStyle, ParStyle>(new ParStyle(null, null), t1, t2);
+            @Override
+            public void addParagraph(String content) {
+                area.appendText(content);
+                area.setParagraphStyle(area.currentParagraphProperty().getValue(), p);
+                area.appendText("\n");
+            }
 
-        // area.getParagraphs().add(new Paragraph<TextStyle, ParStyle>("Hello", null, null));
-        // .getParagraphs().add(new Paragraph<TextStyle, ParStyle>("Hello", null, null));
+            @Override
+            public void addCode(String content) {
+                content = content.replace('\n', 'X');
+                area.appendText(content);
+                area.setParagraphStyle(area.currentParagraphProperty().getValue(), java);
+                area.appendText("\n");
+            }
+            
+        });
+*/
+/*
+        area.setParagraphStyle(0, h1);
 
+       area.appendText("\nLorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.");
+       area.setParagraphStyle(1, p);
+
+       area.appendText("\nTitle 2");
+       area.setParagraphStyle(2, h2);
+
+       area.appendText("\nLorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.");
+       area.setParagraphStyle(3, p);
+
+       area.appendText("\npublic class Test { public static void main(String[] args) {} }");
+       area.setParagraphStyle(4, java);
+*/
         Scene scene = new Scene(mainPane, 800, 600);
         scene.getStylesheets().add("/richtextsample.css");
 

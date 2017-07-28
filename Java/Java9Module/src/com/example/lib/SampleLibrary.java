@@ -9,4 +9,8 @@ public class SampleLibrary {
 	public void sayHelloTo(String name) {
 		System.err.printf("Hello %s!%n", name);
 	}
+	
+	protected void protectedSayHello() {
+		sayHelloTo("Protected");
+	}
 }

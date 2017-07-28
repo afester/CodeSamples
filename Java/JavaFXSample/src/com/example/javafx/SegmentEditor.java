@@ -10,9 +10,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import com.example.javafx.components.FourteenSegment;
-import com.example.javafx.components.SevenSegmentPanel;
-
+import afester.javafx.components.MultiSegmentPanel;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -24,6 +22,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
@@ -67,7 +66,7 @@ public class SegmentEditor {
         // create panel digit
         Label label = new Label("00000000000000");
 
-        SevenSegmentPanel s7Panel = new SevenSegmentPanel(1);
+        MultiSegmentPanel s7Panel = new MultiSegmentPanel("7segment", 1);
         s7Panel.setId("current");
         s7Panel.setText("");
 

@@ -22,8 +22,10 @@ class Handler extends DefaultHandler { //(xml.sax.handler.ContentHandler):
     
     private String content = "";    // TODO: use StringBuffer?
     private int sectionLevel = 0;
+    private DocbookHandler handler;
 
-    public Handler(String contentPath) {
+    public Handler(String contentPath, DocbookHandler handler) {
+        this.handler = handler;
     }
 
 
@@ -85,7 +87,7 @@ class Handler extends DefaultHandler { //(xml.sax.handler.ContentHandler):
             //self.currentStyle = None    # no specific style currently
         }
         else if (name.equals("programlisting")) {    //  # a program listing contains verbatim text only
-            //language = attrs.getValue('language')
+            String language = attributes.getValue("language");
             //para = Paragraph(0, ('programlisting', 'language', language))
             //parent = self.nodeStack[-1]                    # top()
             //self.nodeStack.append(para)   # push()
@@ -235,6 +237,7 @@ class Handler extends DefaultHandler { //(xml.sax.handler.ContentHandler):
             //    frag.setText(self.content)
             //    parent.add(frag)
                 System.err.println("TITLE:" + content);
+                handler.addTitle(0, content);
             }
             content = null;
         }
@@ -245,6 +248,7 @@ class Handler extends DefaultHandler { //(xml.sax.handler.ContentHandler):
              //   frag = TextFragment(self.currentStyle)
             //    frag.setText(self.content)
                 System.err.println("FRAG:" + content);
+                handler.addParagraph(content);
                 content = null;
 
             //    parent.add(frag)
@@ -257,6 +261,7 @@ class Handler extends DefaultHandler { //(xml.sax.handler.ContentHandler):
         else if (name.equals("programlisting")) {
             if (!content.isEmpty()) {
                 System.err.println("CODE:" + content);
+                handler.addCode(content);
             //    parent = self.nodeStack[-1]
 
             //    frag = TextFragment(self.currentStyle)
@@ -354,6 +359,7 @@ public class DocbookImporter {
     
     private final String contentPath;
     private final String contentFile;
+    private DocbookHandler docHandler;
 
     /**
      * 
@@ -366,7 +372,8 @@ public class DocbookImporter {
         // this.formatManager = formatManager
     }
 
-    public void importDocument() {
+    public void importDocument(DocbookHandler docbookHandler) {
+        this.docHandler = docbookHandler;
         String contentFilePath = Paths.get(contentPath, contentFile).toString();
         try (InputStream is = new FileInputStream(contentFilePath)) {   // TODO: Encoding??
             importFromFile(is);
@@ -384,7 +391,7 @@ public class DocbookImporter {
         try {
             SAXParser parser = parserFactory.newSAXParser();
             System.err.println("Using " + parser.getClass());
-            DefaultHandler handler = new Handler(contentPath);
+            DefaultHandler handler = new Handler(contentPath, docHandler);
             parser.parse(is, handler);
         } catch (ParserConfigurationException | SAXException e) {
             e.printStackTrace();
