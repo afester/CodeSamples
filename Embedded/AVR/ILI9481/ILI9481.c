@@ -242,7 +242,7 @@ void tftFillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col) {
 }
 
 
-void tftClear(uint8_t col) {
+void tftClear(uint16_t col) {
   tftFillRect(0, 0, 480, 320, col);
 }
 
@@ -288,6 +288,71 @@ void tftBlt(const uint8_t* source, uint16_t x, uint16_t y, uint16_t w, uint16_t 
     for(int m = 0; m < w; m++) { // x direction
       Lcd_Write_Data(*source++);
       Lcd_Write_Data(*source++);
+    }
+  }
+
+  CS_HIGH;
+}
+
+
+void tftBltMask(const uint8_t* source, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col) {
+    CS_LOW;
+
+    const uint16_t* source16 = (const uint16_t*) source;
+
+    Address_set(x, y, x+w-1, y+h-1);
+    for(int i = 0; i < h; i++) {
+      for(int m = 0; m < w; m++) { // x direction
+        if (*source16++) {  // white pixel in mask gets background color
+
+
+
+            Lcd_Write_Data(BLACK>>8);
+            Lcd_Write_Data(BLACK);
+        } else {            // non-white pixels in mask get given color
+            Lcd_Write_Data(col>>8);
+            Lcd_Write_Data(col);
+        }
+      }
+    }
+
+    CS_HIGH;
+}
+
+// vertically mirrored
+void tftBltMask2(const uint8_t* source, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col) {
+    CS_LOW;
+
+//    const uint16_t* source16 = (const uint16_t*) source;
+
+    Address_set(x, y, x+w-1, y+h-1);
+    for(int i = 0; i < h; i++) {    // y direction
+      const uint16_t* source16 = ((const uint16_t*) source) + ((i+1) * w)-1;    // row end index
+
+      for(int m = 0; m < w; m++) { // x direction
+        if (*source16--) {  // white pixel in mask gets background color
+            Lcd_Write_Data(BLACK>>8);
+            Lcd_Write_Data(BLACK);
+        } else {            // non-white pixels in mask get given color
+            Lcd_Write_Data(col>>8);
+            Lcd_Write_Data(col);
+        }
+      }
+    }
+
+    CS_HIGH;
+}
+
+
+void tftBlt2(const Bitmap16* source, uint16_t x, uint16_t y) {
+  CS_LOW;
+
+  uint8_t* reader = source->bitmap;
+  Address_set(x, y, x + source->width - 1, y + source->height - 1);
+  for(int i = 0; i < source->height; i++) {
+    for(int m = 0; m < source->width; m++) { // x direction
+      Lcd_Write_Data(*reader++);
+      Lcd_Write_Data(*reader++);
     }
   }
 
