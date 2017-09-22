@@ -1,3 +1,5 @@
+echo Setting Unix development environment ...
+
 # Set sort order for e.g. ls - directories first
 export LC_COLLATE=C
 
@@ -25,3 +27,42 @@ man() {
         man "$@"
 }
 
+
+export ANDROID_SDK_HOME=/opt/Android/SDK
+#export QT_HOME=
+export JAVA_HOME=/opt/jdk1.8.0_102
+export MVN_HOME=/opt/apache-maven-3.5.0
+#export ANT_HOME=
+export GRADLE_HOME=/opt/gradle-3.1
+#export GROOVY_HOME=
+#export CMAKE_HOME=
+#export HG_HOME=
+
+export PATH=${JAVA_HOME}/bin:${GRADLE_HOME}/bin:${MVN_HOME}/bin:${ANDROID_SDK_HOME}/platform-tools:${PATH}
+
+echo
+echo ==========================================================================
+which mvn
+echo
+which java
+echo
+#which ant
+#echo
+#which bash
+#echo
+#which cmake
+#echo
+#which cl
+#echo
+#which qmake
+#echo
+which gradle
+echo
+#which nasm
+#echo
+#which hg
+#echo
+#which groovy
+echo ==========================================================================
+
+alias hdump="hexdump -e '\"%08.8_ax: \" 8/1 \"%02X \" \"  \" 8/1 \"%02X \" \"  \" ' -e '\"|\" 16/1 \"%_p\"\"|\n\"'"

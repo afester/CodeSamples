@@ -11,6 +11,19 @@
 #define BLACK 0x0000
 
 
+typedef struct _Bitmap16 {
+    uint16_t width;
+    uint16_t height;
+    uint16_t bitmap[];
+}Bitmap16;
+
+typedef struct _Bitmap8 {
+    uint16_t width;
+    uint16_t height;
+    uint8_t bitmap[];
+}Bitmap8;
+
+
 /**
  * Initializes the tft display.
  */
@@ -70,7 +83,7 @@ void tftFillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col);
  *
  * @param col The color to use for clearing the display.
  */
-void tftClear(uint8_t col);
+void tftClear(uint16_t col);
 
 
 /**
@@ -79,5 +92,9 @@ void tftClear(uint8_t col);
  * @param source A poiner to the source data. Must contain w*h*2 bytes.
  */
 void tftBlt(const uint8_t* source, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+
+void tftBlt2(const Bitmap16* source, uint16_t x, uint16_t y);
+
+void tftBltMask(const uint8_t* source, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col);
 
 #endif
