@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# NOTE: declare -n was introduced with Bash 4.3's Namerefs.
+# http://mywiki.wooledge.org/BashFAQ/006
+
 someFunction() {
     declare -n __resultVar=$1
     local someValue="Hello World"
