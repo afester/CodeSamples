@@ -11,6 +11,21 @@
 apply plugin: 'application'
 mainClassName = "afester.example.Main"
 
+def currentJvm = org.gradle.api.JavaVersion.current()
+sourceSets {
+    main {
+        java {
+            if (currentJvm.isJava8()) {
+               srcDirs 'src/main/java8'
+            } else if (currentJvm.isJava9()) {
+               srcDirs 'src/main/java9'
+            } else {
+               throw new GradleException('error occurred')
+            }
+        }
+    }
+ }
+
 // In this section you declare where to find the dependencies of your project
 /*
 repositories {

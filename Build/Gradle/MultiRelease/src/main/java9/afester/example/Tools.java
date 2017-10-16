@@ -2,7 +2,8 @@ package afester.example;
 
 public class Tools {
    public static long getCurrentPid() {
-      return -1;
+      ProcessHandle self = ProcessHandle.current();
+      return self.pid();
    }
 }
 
