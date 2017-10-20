@@ -16,7 +16,7 @@ void bitBlt(const Bitmap16* source, Bitmap16* dest, uint16_t x, uint16_t y) {
 
       for(int m = 0; m < source->width; m++) { // x direction
 
-        if (*source16 != WHITE) {  // white pixel in mask gets background color
+        if (*source16 != BLACK) {  // black pixel in mask gets background color
             *dst = *source16;
         }
         dst++;
@@ -35,7 +35,7 @@ void bltMask2(const Bitmap16* source, Bitmap16* dest, const uint16_t x, const ui
       uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
       for(int m = 0; m < source->width; m++) { // x direction
 
-          if (*source16 != WHITE) {  // white pixel in mask gets background color
+          if (*source16 != BLACK) {  // white pixel in mask gets background color
               *dst = *source16;
           }
           dst++;
@@ -53,7 +53,7 @@ void bitBlt3(const Bitmap16* source, Bitmap16* dest, const uint16_t x, const uin
       uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
       for(int m = 0; m < source->width; m++) { // x direction
 
-          if (*source16 != WHITE) {  // white pixel in mask gets background color
+          if (*source16 != BLACK) {  // white pixel in mask gets background color
               *dst = *source16;
           }
           dst++;
@@ -72,7 +72,7 @@ void bitBlt4(const Bitmap16* source, Bitmap16* dest, const uint16_t x, const uin
       uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
       for(int m = 0; m < source->width; m++) { // x direction
 
-          if (*source16 != WHITE) {  // white pixel in mask gets background color
+          if (*source16 != BLACK) {  // white pixel in mask gets background color
               *dst = *source16;
           }
           dst++;
@@ -108,37 +108,50 @@ const uint8_t segments[] = {
 
 void createSegment(uint8_t value) {
     uint8_t mask = segments[value];
-    clearBitmap(bitmap, WHITE);
+    clearBitmap(bitmap, BLACK);
 
     if (mask & 0b00000001) {
         bitBlt(&adSegment, bitmap, 4, 0);      // a
     }
 
     if (mask & 0b00000010) {
-        bitBlt(&bcefSegment, bitmap, 34, 2);   // b
+        bltMask2(&bcefSegment, bitmap, 34, 2);   // b
     }
     if (mask & 0b00000100) {
-        bitBlt3(&bcefSegment, bitmap, 34, 31); // c
+        bitBlt4(&bcefSegment, bitmap, 34, 31); // c
     }
     if (mask & 0b00001000) {
         bitBlt3(&adSegment, bitmap, 4, 55);    // d
     }
     if (mask & 0b00010000) {
-        bitBlt4(&bcefSegment, bitmap, 0, 31);  // e
+        bitBlt3(&bcefSegment, bitmap, 0, 31);  // e
     }
     if (mask & 0b00100000) {
-        bltMask2(&bcefSegment, bitmap, 0, 2);  // f
+        bitBlt(&bcefSegment, bitmap, 0, 2);  // f
     }
     if (mask & 0b01000000) {
         bitBlt(&gSegment, bitmap, 6, 27);      // g
     }
 }
 
+displayValue(int x) {
+   createSegment(x % 10);
+   tftBlt2(bitmap, 110, 130);
+   x = x / 10;
+
+   createSegment(x % 10);
+   tftBlt2(bitmap, 60, 130);
+   x = x / 10;
+
+   createSegment(x % 10);
+   tftBlt2(bitmap, 10, 130);
+}
+
 
 int main() {
    tftInit();
 
-   tftClear(WHITE);
+   tftClear(BLACK);
 
 //   tftFillRect(0, 0, 479, 319, WHITE);
 //   tftFillRect(1, 1, 477, 317, BLACK);
@@ -172,6 +185,12 @@ int main() {
    tftBlt2(bitmap, 360, 50);
    createSegment(9);
    tftBlt2(bitmap, 405, 50);
+
+   int value = 0;
+   while(1) {
+   displayValue(value);
+   value++;
+   }
 
  //  for (int x = 10;  x < 200; x+=2) {
 //      tftDrawPixel(x, 200, RED);
