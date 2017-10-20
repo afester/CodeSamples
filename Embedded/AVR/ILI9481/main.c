@@ -134,17 +134,17 @@ void createSegment(uint8_t value) {
     }
 }
 
-displayValue(int x) {
-   createSegment(x % 10);
-   tftBlt2(bitmap, 110, 130);
-   x = x / 10;
+void displayValue(int y, int value) {
+   createSegment(value % 10);
+   tftBlt2(bitmap, 110, y);
+   value = value / 10;
 
-   createSegment(x % 10);
-   tftBlt2(bitmap, 60, 130);
-   x = x / 10;
+   createSegment(value % 10);
+   tftBlt2(bitmap, 60, y);
+   value = value / 10;
 
-   createSegment(x % 10);
-   tftBlt2(bitmap, 10, 130);
+   createSegment(value % 10);
+   tftBlt2(bitmap, 10, y);
 }
 
 
@@ -165,30 +165,32 @@ int main() {
    bitmap->width = 42;
    bitmap->height = 63;
 
-   createSegment(0);
-   tftBlt2(bitmap, 0, 50);
-   createSegment(1);
-   tftBlt2(bitmap, 45, 50);
-   createSegment(2);
-   tftBlt2(bitmap, 90, 50);
-   createSegment(3);
-   tftBlt2(bitmap, 135, 50);
-   createSegment(4);
-   tftBlt2(bitmap, 180, 50);
-   createSegment(5);
-   tftBlt2(bitmap, 225, 50);
-   createSegment(6);
-   tftBlt2(bitmap, 270, 50);
-   createSegment(7);
-   tftBlt2(bitmap, 315, 50);
-   createSegment(8);
-   tftBlt2(bitmap, 360, 50);
-   createSegment(9);
-   tftBlt2(bitmap, 405, 50);
+//   createSegment(0);
+//   tftBlt2(bitmap, 0, 50);
+//   createSegment(1);
+//   tftBlt2(bitmap, 45, 50);
+//   createSegment(2);
+//   tftBlt2(bitmap, 90, 50);
+//   createSegment(3);
+//   tftBlt2(bitmap, 135, 50);
+//   createSegment(4);
+//   tftBlt2(bitmap, 180, 50);
+//   createSegment(5);
+//   tftBlt2(bitmap, 225, 50);
+//   createSegment(6);
+//   tftBlt2(bitmap, 270, 50);
+//   createSegment(7);
+//   tftBlt2(bitmap, 315, 50);
+//   createSegment(8);
+//   tftBlt2(bitmap, 360, 50);
+//   createSegment(9);
+//   tftBlt2(bitmap, 405, 50);
 
+   displayValue(50, 125);
+   displayValue(210, 6);
    int value = 0;
    while(1) {
-   displayValue(value);
+   displayValue(130, value);
    value++;
    }
 
