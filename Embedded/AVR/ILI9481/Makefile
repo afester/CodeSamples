@@ -10,7 +10,7 @@ PGM_PROTO=wiring
 
 # Source and target definitions
 BUILDDIR=build
-SOURCES=ILI9481.c main.c glcdfont.c
+SOURCES=ILI9481.c main.c glcdfont.c 7seg.c
 TARGET=tftsample.hex
 INCLUDES=-I. -I../Lib
 

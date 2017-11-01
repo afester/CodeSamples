@@ -1,9 +1,11 @@
 #include "ILI9481.h"
 //#include "small.h"
 #include "lcd.h"
+#include "7seg.h"
 
+// NOTE: it currently takes approx. 48 seconds to count from 0 to 999 using three digits!
 
-
+// NOTE: 5296 bytes RAM!!!!
 uint16_t digitImage[42 * 63 + 2];
 Bitmap16* bitmap = &digitImage;
 
@@ -13,7 +15,6 @@ void bitBlt(const Bitmap16* source, Bitmap16* dest, uint16_t x, uint16_t y) {
     for(int i = 0; i < source->height; i++) {
 
       uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
-
       for(int m = 0; m < source->width; m++) { // x direction
 
         if (*source16 != BLACK) {  // black pixel in mask gets background color
@@ -27,7 +28,7 @@ void bitBlt(const Bitmap16* source, Bitmap16* dest, uint16_t x, uint16_t y) {
 
 
 // vertically mirrored
-void bltMask2(const Bitmap16* source, Bitmap16* dest, const uint16_t x, const uint16_t y) {
+void bitBltVM(const Bitmap16* source, Bitmap16* dest, const uint16_t x, const uint16_t y) {
 
     for(int i = 0; i < source->height; i++) {    // y direction
       const uint16_t* source16 = source->bitmap + (((i+1) * source->width)-1);    // row end index
@@ -45,7 +46,7 @@ void bltMask2(const Bitmap16* source, Bitmap16* dest, const uint16_t x, const ui
 }
 
 // horizontally mirrored
-void bitBlt3(const Bitmap16* source, Bitmap16* dest, const uint16_t x, const uint16_t y) {
+void bitBltHM(const Bitmap16* source, Bitmap16* dest, const uint16_t x, const uint16_t y) {
 
     for(int i = 0;  i < source->height; i++) {    // y direction
       const uint16_t* source16 = source->bitmap + (source->height - i - 1) * source->width;    // row start index
@@ -64,7 +65,7 @@ void bitBlt3(const Bitmap16* source, Bitmap16* dest, const uint16_t x, const uin
 
 
 // horizontally and vertically mirrored
-void bitBlt4(const Bitmap16* source, Bitmap16* dest, const uint16_t x, const uint16_t y) {
+void bitBltHVM(const Bitmap16* source, Bitmap16* dest, const uint16_t x, const uint16_t y) {
 
     for(int i = 0; i < source->height; i++) {    // y direction
       const uint16_t* source16 = source->bitmap + (((source->height - i) * source->width)-1);    // row end index
@@ -112,45 +113,51 @@ void createSegment(uint8_t value) {
 
     if (mask & 0b00000001) {
         bitBlt(&adSegment, bitmap, 4, 0);      // a
+        //tftBlt(&adSegment, 4, 0);      // a
     }
 
     if (mask & 0b00000010) {
-        bltMask2(&bcefSegment, bitmap, 34, 2);   // b
+        bitBltVM(&bcefSegment, bitmap, 34, 2);   // b
+        //tftBltVM(&bcefSegment, 34, 2);   // b
     }
     if (mask & 0b00000100) {
-        bitBlt4(&bcefSegment, bitmap, 34, 31); // c
+        bitBltHVM(&bcefSegment, bitmap, 34, 31); // c
+        //tftBltHVM(&bcefSegment, 34, 31); // c
     }
     if (mask & 0b00001000) {
-        bitBlt3(&adSegment, bitmap, 4, 55);    // d
+        bitBltHM(&adSegment, bitmap, 4, 55);    // d
+        //tftBltHM(&adSegment, 4, 55);    // d
     }
     if (mask & 0b00010000) {
-        bitBlt3(&bcefSegment, bitmap, 0, 31);  // e
+        bitBltHM(&bcefSegment, bitmap, 0, 31);  // e
+        //tftBltHM(&bcefSegment, 0, 31);  // e
     }
     if (mask & 0b00100000) {
         bitBlt(&bcefSegment, bitmap, 0, 2);  // f
+        //tftBlt(&bcefSegment, 0, 2);  // f
     }
     if (mask & 0b01000000) {
         bitBlt(&gSegment, bitmap, 6, 27);      // g
+        //tftBlt(&gSegment, 6, 27);      // g
     }
 }
 
 void displayValue(int y, int value) {
    createSegment(value % 10);
-   tftBlt2(bitmap, 110, y);
+   tftBlt(bitmap, 110, y);
    value = value / 10;
 
    createSegment(value % 10);
-   tftBlt2(bitmap, 60, y);
+   tftBlt(bitmap, 60, y);
    value = value / 10;
 
    createSegment(value % 10);
-   tftBlt2(bitmap, 10, y);
+   tftBlt(bitmap, 10, y);
 }
 
 
 int main() {
    tftInit();
-
    tftClear(BLACK);
 
 //   tftFillRect(0, 0, 479, 319, WHITE);
@@ -162,44 +169,24 @@ int main() {
 
 //   tftRect(220, 140, 40, 40, RED);
 
+   tftDrawText("Display controller: ");
+   tftDeviceCodeRead();
+
    bitmap->width = 42;
    bitmap->height = 63;
-
-//   createSegment(0);
-//   tftBlt2(bitmap, 0, 50);
-//   createSegment(1);
-//   tftBlt2(bitmap, 45, 50);
-//   createSegment(2);
-//   tftBlt2(bitmap, 90, 50);
-//   createSegment(3);
-//   tftBlt2(bitmap, 135, 50);
-//   createSegment(4);
-//   tftBlt2(bitmap, 180, 50);
-//   createSegment(5);
-//   tftBlt2(bitmap, 225, 50);
-//   createSegment(6);
-//   tftBlt2(bitmap, 270, 50);
-//   createSegment(7);
-//   tftBlt2(bitmap, 315, 50);
-//   createSegment(8);
-//   tftBlt2(bitmap, 360, 50);
-//   createSegment(9);
-//   tftBlt2(bitmap, 405, 50);
 
    displayValue(50, 125);
    displayValue(210, 6);
    int value = 0;
    while(1) {
-   displayValue(130, value);
-   value++;
+      displayValue(130, value);
+      value++;
    }
 
  //  for (int x = 10;  x < 200; x+=2) {
 //      tftDrawPixel(x, 200, RED);
 //   }
 
-   tftDrawText("Display controller: ");
-   tftDeviceCodeRead();
 //   tftDrawChar('\n'); 
 //   for (unsigned short c = 0;  c <= 255;  c++) {
 //       tftDrawChar(c); 

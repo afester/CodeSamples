@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+#define WRITE_MEMORY_START 0x2C		// resets CR/PR to SC/SP
+#define READ_MEMORY_START 0x2E		// resets CR/PR to SC/SP
+#define WRITE_MEMORY_CONTINUE 0x3C	// does NOT reset CR/PR to SC/SP
+#define READ_MEMORY_CONTINUE 0x3E	// does NOT reset CR/PR to SC/SP
+
 // 16 bpp (red/blue=5 bit, green=6 bit)
 #define WHITE 0xffff
 #define RED   0xf800
@@ -89,11 +94,14 @@ void tftClear(uint16_t col);
 /**
  * Copies image data into the tft display.
  *
- * @param source A poiner to the source data. Must contain w*h*2 bytes.
+ * @param source A pointer to the source bitmap.
  */
-void tftBlt(const uint8_t* source, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+void tftBlt(const Bitmap16* source, uint16_t x, uint16_t y);
+void tftBltVM(const Bitmap16* source, uint16_t x, uint16_t y);
+void tftBltHM(const Bitmap16* source, uint16_t x, uint16_t y);
+void tftBltHVM(const Bitmap16* source, uint16_t x, uint16_t y);
 
-void tftBlt2(const Bitmap16* source, uint16_t x, uint16_t y);
+
 
 void tftBltMask(const uint8_t* source, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col);
 
