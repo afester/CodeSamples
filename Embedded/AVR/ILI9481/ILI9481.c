@@ -313,8 +313,8 @@ void tftBlt(const Bitmap16* source, uint16_t x, uint16_t y) {
   Address_set(x, y, x + source->width - 1, y + source->height - 1);
   for(int i = 0; i < source->height; i++) {
     for(int m = 0; m < source->width; m++) { // x direction
-      Lcd_Write_Data(*reader++);
-      Lcd_Write_Data(*reader++);
+      Lcd_Write_Data(*reader++); // High byte!!
+      Lcd_Write_Data(*reader++); // Low byte!!
     }
   }
 
