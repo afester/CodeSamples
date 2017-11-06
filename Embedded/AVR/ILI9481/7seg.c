@@ -64,6 +64,7 @@ static uint16_t greenPalette[] = {0x0000, 0x4702, 0xfb07, 0xed03, 0x0000};
 uint16_t digitImage[42 * 63 + 2];
 Bitmap16* bitmap = &digitImage;
 static const uint16_t* palette = grayPalette;
+static const uint16_t* colorPalette = redPalette;
 
 void bitBltIdx(const Bitmap8* source, Bitmap16* dest, uint16_t x, uint16_t y) {
     const uint8_t* source8 = source->bitmap;
@@ -245,48 +246,54 @@ void createSegment(uint8_t value) {
 
     palette = grayPalette;
     if (mask & 0b00000001) {
-       palette = greenPalette;
+       palette = colorPalette;
     }
     bitBltIdx(&adRedBlack, bitmap, 3, 0);      // a
 
     palette = grayPalette;
     if (mask & 0b00000010) {
-       palette = greenPalette;
+       palette = colorPalette;
     }
     bitBltIdxVM(&bcefRedBlack, bitmap, 32, 3);   // b
 
     palette = grayPalette;
     if (mask & 0b00000100) {
-       palette = greenPalette;
+       palette = colorPalette;
     }
     bitBltIdxHVM(&bcefRedBlack, bitmap, 32, 32); // c
 
     palette = grayPalette;
     if (mask & 0b00001000) {
-       palette = greenPalette;
+       palette = colorPalette;
     }
     bitBltIdxHM(&adRedBlack, bitmap, 3, 56);    // d
 
     palette = grayPalette;
     if (mask & 0b00010000) {
-       palette = greenPalette;
+       palette = colorPalette;
     }
     bitBltIdxHM(&bcefRedBlack, bitmap, 0, 32);  // e
 
     palette = grayPalette;
     if (mask & 0b00100000) {
-       palette = greenPalette;
+       palette = colorPalette;
     }
     bitBltIdx(&bcefRedBlack, bitmap, 0, 3);  // f
 
     palette = grayPalette;
     if (mask & 0b01000000) {
-       palette = greenPalette;
+       palette = colorPalette;
     }
     bitBltIdx(&gRedBlack, bitmap, 5, 28);      // g
 }
 
-void renderDigit(int x, int y, int value) {
+void renderDigit(int x, int y, int value, int color) {
+   if (color == GREEN) {
+      colorPalette = greenPalette;
+   } else {
+      colorPalette = redPalette;
+   }
+
    bitmap->width = 42;
    bitmap->height = 63;
 

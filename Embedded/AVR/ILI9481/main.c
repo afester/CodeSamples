@@ -1,14 +1,14 @@
 #include "ILI9481.h"
 #include "7seg.h"
 
-void displayValue(int y, int value) {
-   renderDigit(110, y, value % 10);
+void displayValue(int y, int value, int color) {
+   renderDigit(110, y, value % 10, color);
    value = value / 10;
 
-   renderDigit(60, y, value % 10);
+   renderDigit(60, y, value % 10, color);
    value = value / 10;
 
-   renderDigit(10, y, value % 10);
+   renderDigit(10, y, value % 10, color);
 }
 
 
@@ -28,11 +28,11 @@ int main() {
    tftDrawText("Display controller: ");
    tftDeviceCodeRead();
 
-   displayValue(50, 125);
-   displayValue(210, 6);
+   displayValue(50, 125, RED);
+   displayValue(210, 6, RED);
    int value = 0;
    while(1) {
-      displayValue(130, value);
+      displayValue(130, value, GREEN);
       value++;
    }
 
