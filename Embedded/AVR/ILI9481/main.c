@@ -1,6 +1,6 @@
 #include "ILI9481.h"
 //#include "small.h"
-#include "lcd.h"
+//#include "lcd.h"
 #include "7seg.h"
 
 // NOTE: it currently takes approx. 48 seconds to count from 0 to 999 using three digits!
@@ -8,9 +8,85 @@
 // NOTE: 5296 bytes RAM!!!!
 uint16_t digitImage[42 * 63 + 2];
 Bitmap16* bitmap = &digitImage;
+static const uint16_t* palette = grayPalette;
+
+void bitBltIdx(const Bitmap8* source, Bitmap16* dest, uint16_t x, uint16_t y) {
+    const uint8_t* source8 = source->bitmap;
+
+    for(int i = 0; i < source->height; i++) {
+
+      uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
+      for(int m = 0; m < source->width; m++) { // x direction
+
+        if (*source8 != 0) {  // index 0 is transparent pixel
+            *dst = palette[*source8];
+        }
+        dst++;
+        source8++;
+      }
+    }
+}
+
+
+// vertically mirrored
+void bitBltIdxVM(const Bitmap8* source, Bitmap16* dest, const uint16_t x, const uint16_t y) {
+
+    for(int i = 0; i < source->height; i++) {    // y direction
+      const uint8_t* source8 = source->bitmap + (((i+1) * source->width)-1);    // row end index
+
+      uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
+      for(int m = 0; m < source->width; m++) { // x direction
+
+          if (*source8 != 0) {  // index 0 is transparent pixel
+            *dst = palette[*source8];
+          }
+          dst++;
+          source8--;
+      }
+    }
+}
+
+// horizontally mirrored
+void bitBltIdxHM(const Bitmap8* source, Bitmap16* dest, const uint16_t x, const uint16_t y) {
+
+    for(int i = 0;  i < source->height; i++) {    // y direction
+      const uint8_t* source8 = source->bitmap + (source->height - i - 1) * source->width;    // row start index
+
+      uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
+      for(int m = 0; m < source->width; m++) { // x direction
+
+          if (*source8 != 0) {  // index 0 is transparent pixel
+            *dst = palette[*source8];
+          }
+          dst++;
+          source8++;
+      }
+    }
+}
+
+
+// horizontally and vertically mirrored
+void bitBltIdxHVM(const Bitmap8* source, Bitmap16* dest, const uint16_t x, const uint16_t y) {
+
+    for(int i = 0; i < source->height; i++) {    // y direction
+      const uint8_t* source8 = source->bitmap + (((source->height - i) * source->width)-1);    // row end index
+
+      uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
+      for(int m = 0; m < source->width; m++) { // x direction
+
+          if (*source8 != 0) {  // index 0 is transparent pixel
+            *dst = palette[*source8];
+          }
+          dst++;
+          source8--;
+      }
+    }
+}
+
+/****************************************************************************/
 
 void bitBlt(const Bitmap16* source, Bitmap16* dest, uint16_t x, uint16_t y) {
-    uint16_t* source16 = source->bitmap;
+    const uint16_t* source16 = source->bitmap;
 
     for(int i = 0; i < source->height; i++) {
 
@@ -111,35 +187,63 @@ void createSegment(uint8_t value) {
     uint8_t mask = segments[value];
     clearBitmap(bitmap, BLACK);
 
+    palette = grayPalette;
     if (mask & 0b00000001) {
-        bitBlt(&adSegment, bitmap, 4, 0);      // a
+       palette = greenPalette;
+    }
+        bitBltIdx(&adRedBlack, bitmap, 4, 0);      // a
+        //bitBlt(&adSegment, bitmap, 4, 0);      // a
         //tftBlt(&adSegment, 4, 0);      // a
-    }
+    //}
 
+    palette = grayPalette;
     if (mask & 0b00000010) {
-        bitBltVM(&bcefSegment, bitmap, 34, 2);   // b
+       palette = greenPalette;
+    }
+        bitBltIdxVM(&bcefRedBlack, bitmap, 34, 2);   // b
+        //bitBltVM(&bcefSegment, bitmap, 34, 2);   // b
         //tftBltVM(&bcefSegment, 34, 2);   // b
-    }
+    //}
+    palette = grayPalette;
     if (mask & 0b00000100) {
-        bitBltHVM(&bcefSegment, bitmap, 34, 31); // c
+       palette = greenPalette;
+    }
+        bitBltIdxHVM(&bcefRedBlack, bitmap, 34, 31); // c
+        //bitBltHVM(&bcefSegment, bitmap, 34, 31); // c
         //tftBltHVM(&bcefSegment, 34, 31); // c
-    }
+    //}
+    palette = grayPalette;
     if (mask & 0b00001000) {
-        bitBltHM(&adSegment, bitmap, 4, 55);    // d
+       palette = greenPalette;
+    }
+        bitBltIdxHM(&adRedBlack, bitmap, 4, 55);    // d
+        //bitBltHM(&adSegment, bitmap, 4, 55);    // d
         //tftBltHM(&adSegment, 4, 55);    // d
-    }
+    //}
+    palette = grayPalette;
     if (mask & 0b00010000) {
-        bitBltHM(&bcefSegment, bitmap, 0, 31);  // e
+       palette = greenPalette;
+    }
+        bitBltIdxHM(&bcefRedBlack, bitmap, 0, 31);  // e
+        //bitBltHM(&bcefSegment, bitmap, 0, 31);  // e
         //tftBltHM(&bcefSegment, 0, 31);  // e
-    }
+    //}
+    palette = grayPalette;
     if (mask & 0b00100000) {
-        bitBlt(&bcefSegment, bitmap, 0, 2);  // f
+       palette = greenPalette;
+    }
+        bitBltIdx(&bcefRedBlack, bitmap, 0, 2);  // f
+        //bitBlt(&bcefSegment, bitmap, 0, 2);  // f
         //tftBlt(&bcefSegment, 0, 2);  // f
-    }
+    //}
+    palette = grayPalette;
     if (mask & 0b01000000) {
-        bitBlt(&gSegment, bitmap, 6, 27);      // g
-        //tftBlt(&gSegment, 6, 27);      // g
+       palette = greenPalette;
     }
+        bitBltIdx(&gRedBlack, bitmap, 6, 27);      // g
+        //bitBlt(&gSegment, bitmap, 6, 27);      // g
+        //tftBlt(&gSegment, 6, 27);      // g
+    //}
 }
 
 void displayValue(int y, int value) {
