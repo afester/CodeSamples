@@ -1,6 +1,6 @@
 #include <ILI9481.h>
 
-Bitmap8 adRedBlack = {34, 8,
+static Bitmap8 adRedBlack = {34, 8,
   {0x00, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03, 0x00, 
    0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03, 
    0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03, 
@@ -10,7 +10,7 @@ Bitmap8 adRedBlack = {34, 8,
    0x00, 0x00, 0x00, 0x04, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00, 
    0x00, 0x00, 0x00, 0x00, 0x04, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00}};
 
-Bitmap8 bcefRedBlack = {8, 29,
+static Bitmap8 bcefRedBlack = {8, 29,
   {0x00, 0x04, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 
    0x04, 0x02, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00, 
    0x02, 0x02, 0x02, 0x02, 0x03, 0x00, 0x00, 0x00, 
@@ -41,7 +41,7 @@ Bitmap8 bcefRedBlack = {8, 29,
    0x02, 0x02, 0x02, 0x02, 0x03, 0x00, 0x00, 0x00, 
    0x04, 0x04, 0x04, 0x04, 0x00, 0x00, 0x00, 0x00}};
 
-Bitmap8 gRedBlack = {30, 8,
+static Bitmap8 gRedBlack = {30, 8,
   {0x00, 0x00, 0x00, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03, 0x00, 0x00, 0x00, 
    0x00, 0x00, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03, 0x00, 0x00, 
    0x00, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03, 0x00, 
@@ -51,6 +51,245 @@ Bitmap8 gRedBlack = {30, 8,
    0x00, 0x00, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03, 0x00, 0x00, 
    0x00, 0x00, 0x00, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03, 0x00, 0x00, 0x00}};
 
-uint16_t redPalette[]   = {0x0000, 0x2900, 0x1f00, 0x1000, 0x0200};
-uint16_t grayPalette[]  = {0x0000, 0x8210, 0xa210, 0x6108, 0x0000};
-uint16_t greenPalette[] = {0x0000, 0x4702, 0xfb07, 0xed03, 0x0000};
+static uint16_t redPalette[]   = {0x0000, 0x2900, 0x1f00, 0x1000, 0x0200};
+static uint16_t grayPalette[]  = {0x0000, 0x8210, 0xa210, 0x6108, 0x0000};
+static uint16_t greenPalette[] = {0x0000, 0x4702, 0xfb07, 0xed03, 0x0000};
+
+
+// NOTE: it currently takes approx. 48 seconds to count from 0 to 999 using three digits!
+// NOTE: After switching to the approach where disabled segments are rendered in dark gray,
+//       it takes approx. 54 seconds to count from 0 to 999.
+
+// NOTE: 5296 bytes RAM!!!!
+uint16_t digitImage[42 * 63 + 2];
+Bitmap16* bitmap = &digitImage;
+static const uint16_t* palette = grayPalette;
+
+void bitBltIdx(const Bitmap8* source, Bitmap16* dest, uint16_t x, uint16_t y) {
+    const uint8_t* source8 = source->bitmap;
+
+    for(int i = 0; i < source->height; i++) {
+
+      uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
+      for(int m = 0; m < source->width; m++) { // x direction
+
+        if (*source8 != 0) {  // index 0 is transparent pixel
+            *dst = palette[*source8];
+        }
+        dst++;
+        source8++;
+      }
+    }
+}
+
+
+// vertically mirrored
+void bitBltIdxVM(const Bitmap8* source, Bitmap16* dest, const uint16_t x, const uint16_t y) {
+
+    for(int i = 0; i < source->height; i++) {    // y direction
+      const uint8_t* source8 = source->bitmap + (((i+1) * source->width)-1);    // row end index
+
+      uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
+      for(int m = 0; m < source->width; m++) { // x direction
+
+          if (*source8 != 0) {  // index 0 is transparent pixel
+            *dst = palette[*source8];
+          }
+          dst++;
+          source8--;
+      }
+    }
+}
+
+// horizontally mirrored
+void bitBltIdxHM(const Bitmap8* source, Bitmap16* dest, const uint16_t x, const uint16_t y) {
+
+    for(int i = 0;  i < source->height; i++) {    // y direction
+      const uint8_t* source8 = source->bitmap + (source->height - i - 1) * source->width;    // row start index
+
+      uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
+      for(int m = 0; m < source->width; m++) { // x direction
+
+          if (*source8 != 0) {  // index 0 is transparent pixel
+            *dst = palette[*source8];
+          }
+          dst++;
+          source8++;
+      }
+    }
+}
+
+
+// horizontally and vertically mirrored
+void bitBltIdxHVM(const Bitmap8* source, Bitmap16* dest, const uint16_t x, const uint16_t y) {
+
+    for(int i = 0; i < source->height; i++) {    // y direction
+      const uint8_t* source8 = source->bitmap + (((source->height - i) * source->width)-1);    // row end index
+
+      uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
+      for(int m = 0; m < source->width; m++) { // x direction
+
+          if (*source8 != 0) {  // index 0 is transparent pixel
+            *dst = palette[*source8];
+          }
+          dst++;
+          source8--;
+      }
+    }
+}
+
+/****************************************************************************/
+
+//void bitBlt(const Bitmap16* source, Bitmap16* dest, uint16_t x, uint16_t y) {
+//    const uint16_t* source16 = source->bitmap;
+//
+//    for(int i = 0; i < source->height; i++) {
+//
+//      uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
+//      for(int m = 0; m < source->width; m++) { // x direction
+//
+//        if (*source16 != BLACK) {  // black pixel in mask gets background color
+//            *dst = *source16;
+//        }
+//        dst++;
+//        source16++;
+//      }
+//    }
+//}
+//
+//
+//// vertically mirrored
+//void bitBltVM(const Bitmap16* source, Bitmap16* dest, const uint16_t x, const uint16_t y) {
+//
+//    for(int i = 0; i < source->height; i++) {    // y direction
+//      const uint16_t* source16 = source->bitmap + (((i+1) * source->width)-1);    // row end index
+//
+//      uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
+//      for(int m = 0; m < source->width; m++) { // x direction
+//
+//          if (*source16 != BLACK) {  // white pixel in mask gets background color
+//              *dst = *source16;
+//          }
+//          dst++;
+//          source16--;
+//      }
+//    }
+//}
+//
+//// horizontally mirrored
+//void bitBltHM(const Bitmap16* source, Bitmap16* dest, const uint16_t x, const uint16_t y) {
+//
+//    for(int i = 0;  i < source->height; i++) {    // y direction
+//      const uint16_t* source16 = source->bitmap + (source->height - i - 1) * source->width;    // row start index
+//
+//      uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
+//      for(int m = 0; m < source->width; m++) { // x direction
+//
+//          if (*source16 != BLACK) {  // white pixel in mask gets background color
+//              *dst = *source16;
+//          }
+//          dst++;
+//          source16++;
+//      }
+//    }
+//}
+//
+//
+//// horizontally and vertically mirrored
+//void bitBltHVM(const Bitmap16* source, Bitmap16* dest, const uint16_t x, const uint16_t y) {
+//
+//    for(int i = 0; i < source->height; i++) {    // y direction
+//      const uint16_t* source16 = source->bitmap + (((source->height - i) * source->width)-1);    // row end index
+//
+//      uint16_t* dst = dest->bitmap + ((dest->width*(y+i))+x);
+//      for(int m = 0; m < source->width; m++) { // x direction
+//
+//          if (*source16 != BLACK) {  // white pixel in mask gets background color
+//              *dst = *source16;
+//          }
+//          dst++;
+//          source16--;
+//      }
+//    }
+//}
+//
+
+void clearBitmap(Bitmap16* dest, uint16_t color) {
+    uint16_t* writer = dest->bitmap;
+    for(int i = 0; i < dest->height; i++) {
+      for(int m = 0; m < dest->width; m++) {
+        *writer++ = color;
+      }
+    }
+
+}
+
+const uint8_t segments[] = {
+    // gfedcba
+    0b00111111, // 0
+    0b00000110, // 1
+    0b01011011, // 2
+    0b01001111, // 3
+    0b01100110, // 4
+    0b01101101, // 5
+    0b01111101, // 6
+    0b00000111, // 7
+    0b11111111, // 8
+    0b01101111, // 9
+};
+
+
+void createSegment(uint8_t value) {
+    uint8_t mask = segments[value];
+    clearBitmap(bitmap, BLACK);
+
+    palette = grayPalette;
+    if (mask & 0b00000001) {
+       palette = greenPalette;
+    }
+    bitBltIdx(&adRedBlack, bitmap, 3, 0);      // a
+
+    palette = grayPalette;
+    if (mask & 0b00000010) {
+       palette = greenPalette;
+    }
+    bitBltIdxVM(&bcefRedBlack, bitmap, 32, 3);   // b
+
+    palette = grayPalette;
+    if (mask & 0b00000100) {
+       palette = greenPalette;
+    }
+    bitBltIdxHVM(&bcefRedBlack, bitmap, 32, 32); // c
+
+    palette = grayPalette;
+    if (mask & 0b00001000) {
+       palette = greenPalette;
+    }
+    bitBltIdxHM(&adRedBlack, bitmap, 3, 56);    // d
+
+    palette = grayPalette;
+    if (mask & 0b00010000) {
+       palette = greenPalette;
+    }
+    bitBltIdxHM(&bcefRedBlack, bitmap, 0, 32);  // e
+
+    palette = grayPalette;
+    if (mask & 0b00100000) {
+       palette = greenPalette;
+    }
+    bitBltIdx(&bcefRedBlack, bitmap, 0, 3);  // f
+
+    palette = grayPalette;
+    if (mask & 0b01000000) {
+       palette = greenPalette;
+    }
+    bitBltIdx(&gRedBlack, bitmap, 5, 28);      // g
+}
+
+void renderDigit(int x, int y, int value) {
+   bitmap->width = 42;
+   bitmap->height = 63;
+
+   createSegment(value);
+   tftBlt(bitmap, x, y);
+}
