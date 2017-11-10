@@ -487,7 +487,9 @@ void tftDrawChar(char c) {
   for(int i = 0; i < 7; i++) {
 
     for(int m = 0; m < 5; m++) { // x direction
-      if (glyph[m] & mask) {
+      
+      uint8_t data = pgm_read_byte(&(glyph[m]));
+      if (data & mask) {
          Lcd_Write_Data(WHITE>>8);
          Lcd_Write_Data(WHITE);
       } else {
