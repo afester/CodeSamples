@@ -59,10 +59,12 @@ static uint16_t greenPalette[] = {0x0000, 0x4702, 0xfb07, 0xed03, 0x0000};
 // NOTE: it currently takes approx. 48 seconds to count from 0 to 999 using three digits!
 // NOTE: After switching to the approach where disabled segments are rendered in dark gray,
 //       it takes approx. 54 seconds to count from 0 to 999.
+// NOTE: (!!!) After switching to the RLE approach and simply store the whole bitmap in program memory,
+//       it takes approx. 42 (!!!!!!) seconds to count from 0 to 999 using three digits!!!!
 
 // NOTE: 5296 bytes RAM!!!!
-uint16_t digitImage[42 * 63 + 2];
-Bitmap16* bitmap = &digitImage;
+static uint16_t digitImage[42 * 63 + 2];
+static Bitmap16* bitmap = &digitImage;
 static const uint16_t* palette = grayPalette;
 static const uint16_t* colorPalette = redPalette;
 
