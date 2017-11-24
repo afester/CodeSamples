@@ -321,6 +321,58 @@ void tftBlt(const Bitmap16* source, uint16_t x, uint16_t y) {
   CS_HIGH;
 }
 
+#include <avr/pgmspace.h>
+
+void tftBltPalette(const Bitmap8* source, const uint16_t* palette, uint16_t x, uint16_t y) {
+  CS_LOW;
+
+  uint8_t* reader = (uint8_t*) source->bitmap;
+  const uint16_t width = pgm_read_byte(&source->width);
+  const uint16_t height = pgm_read_byte(&source->height);
+  Address_set(x, y, x + width - 1, y + height - 1);
+  for(int i = 0; i < height; i++) {
+    for(int m = 0; m < width; m++) { // x direction
+      uint8_t idx = pgm_read_byte(&(*reader++));
+      uint16_t data = palette[idx];
+
+      Lcd_Write_Data(data & 0xff); // High byte!!
+      Lcd_Write_Data(data >> 8);   // Low byte!!
+    }
+  }
+
+  CS_HIGH;
+}
+
+void tftBltPaletteRle(const Bitmap8* source, const uint16_t* palette, uint16_t x, uint16_t y) {
+  CS_LOW;
+
+  uint8_t* reader = (uint8_t*) source->bitmap;
+  const uint16_t width = pgm_read_byte(&source->width);
+  const uint16_t height = pgm_read_byte(&source->height);
+  Address_set(x, y, x + width - 1, y + height - 1);
+
+  uint8_t idx = 0;
+  uint8_t count = 0;
+  uint16_t color = 0;
+  for(int i = 0; i < height; i++) {
+    for(int m = 0; m < width; m++) { // x direction
+
+      if (count == 0) {
+        idx = pgm_read_byte(&(*reader++));
+        count = idx >> 4;
+        color = palette[idx & 0x0f];
+      }
+
+      Lcd_Write_Data(color & 0xff); // High byte!!
+      Lcd_Write_Data(color >> 8);   // Low byte!!
+      count--;
+    }
+  }
+
+  CS_HIGH;
+}
+
+
 //// vertically mirrored
 //void tftBltVM(const Bitmap16* source, uint16_t x, uint16_t y) {
 //  CS_LOW;
@@ -435,7 +487,9 @@ void tftDrawChar(char c) {
   for(int i = 0; i < 7; i++) {
 
     for(int m = 0; m < 5; m++) { // x direction
-      if (glyph[m] & mask) {
+      
+      uint8_t data = pgm_read_byte(&(glyph[m]));
+      if (data & mask) {
          Lcd_Write_Data(WHITE>>8);
          Lcd_Write_Data(WHITE);
       } else {

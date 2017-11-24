@@ -2,10 +2,10 @@
 #include "7seg.h"
 
 void displayValue(int y, int value, int color) {
-   renderDigit(110, y, value % 10, color);
+   renderDigit(130, y, value % 10, color);
    value = value / 10;
 
-   renderDigit(60, y, value % 10, color);
+   renderDigit(70, y, value % 10, color);
    value = value / 10;
 
    renderDigit(10, y, value % 10, color);
