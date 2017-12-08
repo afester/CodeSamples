@@ -1,5 +1,5 @@
 DEVICE=atmega1284p
-CLOCK=8000000
+CLOCK=20000000
 
 PGM_PROTO=stk500v1
 PGM_DEVFILE=/dev/ttyACM0
@@ -45,7 +45,7 @@ upload: all
 	avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -Uflash:w:$(HEXFILE):i
 
 setFuses:
-	avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -U lfuse:w:0xe2:m -U hfuse:w:0x99:m -U efuse:w:0xff:m
+	avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -U lfuse:w:0xf7:m -U hfuse:w:0x99:m -U efuse:w:0xff:m
 
 readFuses:
 	avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -U lfuse:r:-:i -U hfuse:r:-:i -U efuse:r:-:i
