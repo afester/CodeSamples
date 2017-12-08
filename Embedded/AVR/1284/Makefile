@@ -44,8 +44,11 @@ clean:
 upload: all
 	avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -Uflash:w:$(HEXFILE):i
 
+setFuses:
+	avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -U lfuse:w:0xe2:m -U hfuse:w:0x99:m -U efuse:w:0xff:m
+
 readFuses:
-	avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -F -U lfuse:r:-:i -U hfuse:r:-:i -U efuse:r:-:i
+	avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -U lfuse:r:-:i -U hfuse:r:-:i -U efuse:r:-:i
 
 readFlash:
 	avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -Uflash:r:result.hex:i 
