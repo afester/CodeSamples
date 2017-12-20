@@ -1,12 +1,13 @@
 
 # Device definitions
-DEVICE=atmega2560
-CLOCK=16000000
+DEVICE=atmega1284p
+CLOCK=2000000
 
 # Programmer definitions
 PGM_DEVICE=$(DEVICE)
+
+PGM_PROTO=stk500v1
 PGM_DEVFILE=/dev/ttyACM0
-PGM_PROTO=wiring
 
 # Source and target definitions
 BUILDDIR=build
