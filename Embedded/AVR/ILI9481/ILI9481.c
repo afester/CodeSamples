@@ -5,31 +5,37 @@
 /*****************************************************************************/
 /* Low level hardware access functions */
 
-#define RD_MASK  0b00001000
-#define RD_LOW  PORTB &= ~RD_MASK
-#define RD_HIGH PORTB |=  RD_MASK
+/* Pin configuration */
+#define CTRL_PORT PORTD
+#define CTRL_PORT_DIR DDRD
 
-#define WR_MASK  0b00000100
-#define WR_LOW  PORTB &= ~WR_MASK
-#define WR_HIGH PORTB |=  WR_MASK
+#define RD_MASK  0b10000000
+#define RD_LOW  CTRL_PORT &= ~RD_MASK
+#define RD_HIGH CTRL_PORT |=  RD_MASK
 
-#define RS_MASK  0b00000010
-#define RS_LOW  PORTB &= ~RS_MASK
-#define RS_HIGH PORTB |=  RS_MASK
+#define WR_MASK  0b01000000
+#define WR_LOW  CTRL_PORT &= ~WR_MASK
+#define WR_HIGH CTRL_PORT |=  WR_MASK
 
-#define CS_MASK  0b00000001
-#define CS_LOW  PORTB &= ~CS_MASK
-#define CS_HIGH PORTB |=  CS_MASK
+#define RS_MASK  0b00100000
+#define RS_LOW  CTRL_PORT &= ~RS_MASK
+#define RS_HIGH CTRL_PORT |=  RS_MASK
 
-#define RST_MASK 0b00000001
-#define RST_LOW  PORTF &= ~RST_MASK
-#define RST_HIGH PORTF |=  RST_MASK
+#define CS_MASK  0b00010000
+#define CS_LOW  CTRL_PORT &= ~CS_MASK
+#define CS_HIGH CTRL_PORT |=  CS_MASK
 
+#define RST_MASK 0b00001000
+#define RST_LOW  CTRL_PORT &= ~RST_MASK
+#define RST_HIGH CTRL_PORT |=  RST_MASK
+
+#define DATA_DIR DDRC
+#define DATA_OUT PORTC
+#define DATA_IN PINC
 
 void configurePorts() {
-  DDRL = 0b11111111;
-  DDRB = 0b00001111;
-  DDRF = 0b00000001;
+  DATA_DIR = 0b11111111;
+  CTRL_PORT_DIR = 0b11111000;
 
   RD_HIGH;
   WR_HIGH;
@@ -38,6 +44,8 @@ void configurePorts() {
   RST_HIGH;
 }
 
+/*********************************************************************************/
+
 
 /**
  * Write one byte into the device.
@@ -45,7 +53,7 @@ void configurePorts() {
  * @param data The data byte to write.
  */
 void Lcd_Writ_Bus(uint8_t data) {
-  PORTL = data;
+  DATA_OUT = data;
   WR_LOW;
   WR_HIGH;
 }
@@ -80,20 +88,15 @@ void Lcd_Write_Data(uint8_t data) {
  * @return The data byte which has been read from the device.
  */
 uint8_t Lcd_Read_Data() {
-  DDRL = 0b00000000;
+  DATA_DIR = 0b00000000;
   RS_HIGH;
   RD_LOW;
   RD_HIGH;
-  uint8_t result = PINL;
-  DDRL = 0b11111111;
+  uint8_t result = DATA_IN;
+  DATA_DIR = 0b11111111;
   return result;
 }
 
-
-//void Lcd_Write_Com_Data(unsigned char com,unsigned char dat) {
-//  Lcd_Write_Com(com);
-//  Lcd_Write_Data(dat);
-//}
 
 
 /**************************************************************************/
