@@ -1,10 +1,18 @@
 #include <avr/interrupt.h>
+#include <avr/sleep.h>
 
 #include "ILI9481.h"
 #include "7seg.h"
 #include "encoder.h"
 
 void displayValue(int y, int value, int color) {
+   if (value < 0) {
+      tftFillRect(200, y, 20, 10, RED);
+      value = -value;
+   } else {
+      tftFillRect(200, y, 20, 10, BLACK);
+   }
+
    renderDigit(130, y, value % 10, color);
    value = value / 10;
 
@@ -14,6 +22,7 @@ void displayValue(int y, int value, int color) {
    renderDigit(10, y, value % 10, color);
 }
 
+extern volatile int8_t globalStep;
 
 int main() {
    tftInit();
@@ -34,22 +43,47 @@ int main() {
    tftDeviceCodeRead();
 
    sei();
-   displayValue(50, 125, RED);
-   displayValue(210, 6, RED);
-   int value = 0;
+   displayValue(50, 0, RED);
+   displayValue(130, 0, GREEN);
+   displayValue(210, 0, RED);
+
+   int value1 = 0;
+   int value2 = 0;
    while(1) {
-      displayValue(130, value, GREEN);
-      value++;
+      set_sleep_mode(0); // IDLE mode
+      sleep_mode();
+
+      // voltage
+      int8_t diff = encoderRead1();
+      if (diff != 0) {
+
+         // If the diff is bigger than 1, then accelerate
+         if (diff > 1) {
+            diff = 10;
+         }
+         if (diff < -1) {
+            diff = -10;
+         }
+
+         value1 += diff;
+         if (value1 < 0) {
+            value1 = 0;
+         } else if (value1 > 350) {
+            value1 = 350;
+         }
+         displayValue(130, value1, GREEN);
+      }
+
+      // maximum current
+      diff = encoderRead2();
+      if (diff != 0) {
+         value2 += diff;
+         if (value2 < 0) {
+            value2 = 0;
+         } else if (value2 > 300) {
+            value2 = 300;
+         }
+         displayValue(210, value2, RED);
+      }
    }
-
- //  for (int x = 10;  x < 200; x+=2) {
-//      tftDrawPixel(x, 200, RED);
-//   }
-
-//   tftDrawChar('\n'); 
-//   for (unsigned short c = 0;  c <= 255;  c++) {
-//       tftDrawChar(c); 
-//   }
-
-   while(1);
 }
