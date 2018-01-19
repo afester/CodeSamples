@@ -4,6 +4,7 @@
 #include "ILI9481.h"
 #include "7seg.h"
 #include "encoder.h"
+#include "mcp4811.h"
 
 void displayValue(int y, int value, int color) {
    if (value < 0) {
@@ -29,15 +30,7 @@ int main() {
    tftClear(BLACK);
 
    encoderInit();
-
-//   tftFillRect(0, 0, 479, 319, WHITE);
-//   tftFillRect(1, 1, 477, 317, BLACK);
-//   tftFillRect(2, 2, 475, 315, BLUE);
-
-//   tftHLine(0, 160, 480, WHITE);
-//   tftVLine(240, 0, 320, WHITE);
-
-//   tftRect(220, 140, 40, 40, RED);
+   MCP48xx_Init();
 
    tftDrawText("Display controller: ");
    tftDeviceCodeRead();
@@ -72,6 +65,7 @@ int main() {
             value1 = 350;
          }
          displayValue(130, value1, GREEN);
+         MCP48xx_SetValue(value1 * 10);
       }
 
       // maximum current
