@@ -5,6 +5,7 @@
 #include "7seg.h"
 #include "encoder.h"
 #include "mcp4811.h"
+#include "adc.h"
 
 void displayValue(int y, int value, int color) {
    if (value < 0) {
@@ -24,13 +25,19 @@ void displayValue(int y, int value, int color) {
 }
 
 extern volatile int8_t globalStep;
+static uint16_t values[] = {0, 0, 0, 0};
+static int valuePtr = 0;
 
 int main() {
+   // CLKPR = 0b10000000; // Enable clock prescaler change
+   // CLKPR = 0b00000100; // slow down a bit ....
+
    tftInit();
    tftClear(BLACK);
 
    encoderInit();
    MCP48xx_Init();
+   adcInit();
 
    tftDrawText("Display controller: ");
    tftDeviceCodeRead();
@@ -77,7 +84,12 @@ int main() {
          } else if (value2 > 300) {
             value2 = 300;
          }
-         displayValue(210, value2, RED);
       }
+
+      //values[valuePtr++] = adcRead();
+      //valuePtr &= 0x03;
+      //uint16_t current = (values[0] + values[1] + values[2] + values[3]) >> 2;
+      uint16_t current = adcRead();
+      displayValue(210, current, RED);
    }
 }
