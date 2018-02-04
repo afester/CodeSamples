@@ -5,7 +5,7 @@
 
 
 void adcInit() {
-   ADMUX = /*_BV(REFS1) |*/ _BV(REFS0);	// 2.56V reference, select ADC0
+   ADMUX = _BV(REFS1) | _BV(REFS0);	// 2.56V reference, select ADC0
 
    ADCSRA = _BV(ADEN) | 			   // Enable ADC
             _BV(ADPS2) | _BV(ADPS1) | _BV(ADPS0);  // 156 kHz ADC clock
