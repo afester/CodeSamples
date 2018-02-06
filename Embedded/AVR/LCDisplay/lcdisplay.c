@@ -8,8 +8,9 @@
 #include "twi.h"
 #include <avr/interrupt.h>
 #include <string.h>
+#include <stdlib.h>
 #include "bitsInlineMacro.h"
-
+#include "adc.h"
 
 
 static void lcdInit() {
@@ -67,24 +68,26 @@ static void lcdSendReceive(CFA533Packet* pkg) {
    pkg->data[pkg->length] = CRC & 0xFF;
    pkg->data[pkg->length + 1] = CRC >> 8;
 
-   uint8_t result = twi_writeTo(42, (uint8_t*) pkg, pkg->length + 4, true, true);
+   uint8_t result = twi_writeTo(42, (uint8_t*) pkg, pkg->length + 4, false, true);
    uint8_t nbytes = twi_readFrom(42, buffer, 20, true);
 }
 
 static void lcdPrint(int row, const char* text) {
    CFA533Packet pkg;
 
-//   pkg.command = 0x1f;
-//   pkg.length = 18; // strlen(text);
-//   pkg.data[0] = 0;
-//   pkg.data[1] = row;
-//   int i = 0;
-//   for (i = 0;  i < strlen(text); i++) {
-//      pkg.data[2 + i] = text[i];
-//   }
-//   for (  ;  i < 16; i++) {
-//      pkg.data[2 + i] = ' ';
-//   }
+#if 0
+   pkg.command = 0x1f;
+   pkg.length = 18; // strlen(text);
+   pkg.data[0] = 0;
+   pkg.data[1] = row;
+   int i = 0;
+   for (i = 0;  i < strlen(text); i++) {
+      pkg.data[2 + i] = text[i];
+   }
+   for (  ;  i < 16; i++) {
+      pkg.data[2 + i] = ' ';
+   }
+#endif
 
    pkg.command = 0x07 + row;
    pkg.length = 16; // strlen(text);
@@ -164,6 +167,53 @@ static void enableTempDisplay() {
    uint8_t nbytes = twi_readFrom(42, buffer, 20, true);
 }
 
+static volatile uint8_t irqCounter = 0;
+static volatile uint8_t timerEvent = 0;
+
+// ISR is called at 38 Hz
+ISR(TIMER0_OVF_vect) {
+   irqCounter++;
+   if (irqCounter >= 30) {
+      irqCounter = 0;
+//      bitToggle(PORTD, PD0);
+      timerEvent = 1;
+   }
+}
+
+
+int main() {
+   CLKPR = 0b10000000; // Enable clock prescaler change
+   CLKPR = 0b00000001; // slow down a bit ....
+
+   DDRD = 0b00001001;
+   PORTD = 0b00000000;
+
+   TCCR0A = 0;
+   TCCR0B = _BV(CS02) | _BV(CS00);      // start timer with clk/1024 (9,765 kHz)
+   TIMSK0 = _BV(TOIE0);                 // enable timer0 overflow interrupt
+
+   adcInit();
+   lcdInit();
+   sei();
+   lcdPrint(0, "Hello Arduino!");
+   lcdPrint(1, "Hello World!");
+
+   while(1) {
+      set_sleep_mode(0); // IDLE mode
+      sleep_mode();
+      if (timerEvent) {
+         bitToggle(PORTD, PD3);
+         uint16_t value = adcRead();
+         utoa(value, byte, 10);
+         lcdPrint(1, byte);
+         timerEvent = 0;
+      }
+   }
+}
+
+
+#ifdef COMPLEX_SAMPLE
+
 #define BAUD 9600
 #define MYUBRR (F_CPU/16/BAUD-1)
 
@@ -237,3 +287,5 @@ int main() {
       }
    }
 }
+#endif
+
