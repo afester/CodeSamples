@@ -22,7 +22,7 @@ PGM_DEVFILE=/dev/ttyACM0
 # Source and target definitions
 
 BUILDDIR=build
-SOURCES=twi.c lcdisplay.c adc.c
+SOURCES=tools.c twi.c cfa533.c adc.c lcdisplay.c
 TARGET=lcdisplay.hex
 INCLUDES=-I. -I../Lib
 LIBS=-lm
