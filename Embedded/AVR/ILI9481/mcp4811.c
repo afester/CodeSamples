@@ -18,11 +18,13 @@ void MCP48xx_Init() {
 
 
 void MCP48xx_SetValue(uint16_t value) {
+   value = value & 0b0000111111111111; // always use 12 bit - the lowest 2 or 4 bits are ignored for 8 and 10 bit devices
+
    // CS=0
    bitClear(PORTB, PB4);
 
    // high byte
-   SPDR = (value >> 8) | 0b00010000;
+   SPDR = (value >> 8) | 0b00010000; // 0 .. 4.096V
    while(!(SPSR & (1<<SPIF))) ;
 
    // low byte
