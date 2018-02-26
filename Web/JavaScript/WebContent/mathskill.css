@@ -1,0 +1,126 @@
+@CHARSET "ISO-8859-1";
+
+/**
+ * This work is licensed under the Creative Commons Attribution 3.0 Unported
+ * License. To view a copy of this license, visit
+ * http://creativecommons.org/licenses/by/3.0/ or send a letter to Creative
+ * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
+ */
+
+body {
+	background-color: #f0f0f0;
+	font: 10pt sans-serif;
+}
+
+.aufgabe {
+    font-size: 28pt;
+	display: block;
+
+	border-style: solid;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    border-color: orange;
+    border-width: 1px;
+}
+
+.aufgabeText {
+    font-size: 28pt;
+}
+
+.correct {
+	color: green;
+    font-size: 28pt;
+}
+
+.incorrect {
+	color: red;
+    font-size: 28pt;
+}
+
+.loesung {
+    font-size: 28pt;
+
+	border-style: solid;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    border-color: orange;
+    border-width: 1px;
+}
+
+#counterValue {
+    font-size: 28pt;
+    color: black;
+    display: block;
+    text-align: center;
+}
+
+.counterCell {
+	padding-left: 50px;
+}
+
+h1 {
+    color: white;
+    font-size: 14pt;
+}
+
+noscript div {
+	background-color: #ff0000;
+	font: bold 12pt sans-serif;
+	color: white;
+	padding: 4px;
+}
+
+textarea {
+    background-color: black;
+    color: green;
+    
+    border-style: inset;
+    border-width: 3px;
+}
+
+button {
+    background-image: -webkit-linear-gradient(#fff3e2 0%, #ffac38 100%);
+    background-image: -moz-linear-gradient(#fff3e2 0%, #ffac38 100%);
+
+    border-style: solid;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    border-color: orange;
+    border-width: 1px;
+}
+
+button:HOVER {
+    background-image: none;
+    background-color: #fff3e2;
+}
+
+.hidden {
+	display: none;
+} 
+
+.visible {
+}
+
+
+
+/*
+table {
+	padding: 10px;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+}
+th {
+	padding: 10px;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+}
+td {
+	padding: 10px;
+	border-style: solid;
+    border-color: black;
+    border-width: 1px;
+}
+
+*/
