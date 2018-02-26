@@ -5,167 +5,17 @@
 
 #include <avr/sleep.h>
 #include <stdbool.h>
-#include "twi.h"
 #include <avr/interrupt.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include "bitsInlineMacro.h"
 #include "adc.h"
+#include "cfa533.h"
+#include "tools.h"
 
 
-static void lcdInit() {
-   twi_init();
-}
-
-
-uint8_t buffer[30];
-
-unsigned short get_crc(unsigned char count,unsigned char *ptr)
-  {
-  unsigned short
-    crc;   //Calculated CRC
-  unsigned char
-    i;     //Loop count, bits in byte
-  unsigned char
-    data;  //Current byte being shifted
-  crc = 0xFFFF; // Preset to all 1's, prevent loss of leading zeros
-  while(count--)
-    {
-    data = *ptr++;
-    i = 8;
-    do
-      {
-      if((crc ^ data) & 0x01)
-        {
-        crc >>= 1;
-        crc ^= 0x8408;
-        }
-      else
-        crc >>= 1;
-      data >>= 1;
-      } while(--i != 0);
-    }
-  return (~crc);
-  }
-
-
-typedef struct {
-   unsigned char command;
-   unsigned char length;
-   char data[20];  // data + CRC
-}CFA533Packet;
-
-
-#define KP_UP 0x01
-#define KP_ENTER 0x02
-#define KP_CANCEL 0x04
-#define KP_LEFT 0x08
-#define KP_RIGHT 0x10
-#define KP_DOWN 0x20
-
-static void lcdSendReceive(CFA533Packet* pkg) {
-   unsigned short CRC = get_crc(2 + pkg->length, (unsigned char*) pkg);
-   pkg->data[pkg->length] = CRC & 0xFF;
-   pkg->data[pkg->length + 1] = CRC >> 8;
-
-   uint8_t result = twi_writeTo(42, (uint8_t*) pkg, pkg->length + 4, false, true);
-   uint8_t nbytes = twi_readFrom(42, buffer, 20, true);
-}
-
-static void lcdPrint(int row, const char* text) {
-   CFA533Packet pkg;
-
-#if 0
-   pkg.command = 0x1f;
-   pkg.length = 18; // strlen(text);
-   pkg.data[0] = 0;
-   pkg.data[1] = row;
-   int i = 0;
-   for (i = 0;  i < strlen(text); i++) {
-      pkg.data[2 + i] = text[i];
-   }
-   for (  ;  i < 16; i++) {
-      pkg.data[2 + i] = ' ';
-   }
-#endif
-
-   pkg.command = 0x07 + row;
-   pkg.length = 16; // strlen(text);
-   int i = 0;
-   for (i = 0;  i < strlen(text); i++) {
-      pkg.data[i] = text[i];
-   }
-   for (  ;  i < 16; i++) {
-      pkg.data[i] = ' ';
-   }
-
-   lcdSendReceive(&pkg);
-}
-
-static char byte[] = "xxxxxxxx";
-
-static uint8_t cfa533ReadKeys() {
-   CFA533Packet pkg;
-   pkg.command = 0x18;
-   pkg.length = 0;
-   unsigned short CRC = get_crc(2 + pkg.length, (unsigned char*) &pkg);
-   pkg.data[0] = CRC & 0xFF;
-   pkg.data[0 + 1] = CRC >> 8;
-
-   uint8_t result = twi_writeTo(42, (uint8_t*) &pkg, pkg.length + 4, true, true);
-   uint8_t nbytes = twi_readFrom(42, buffer, 20, true);
-
-   return buffer[2];
-}
-
-
-static void lcdSetCursor() {
-   CFA533Packet pkg;
-   pkg.command = 0x0C;
-   pkg.length = 1;
-   pkg.data[0] = 3; // blinking underscore
-   unsigned short CRC = get_crc(2 + pkg.length, (unsigned char*) &pkg);
-   pkg.data[pkg.length] = CRC & 0xFF;
-   pkg.data[pkg.length + 1] = CRC >> 8;
-
-   uint8_t result = twi_writeTo(42, (uint8_t*) &pkg, pkg.length + 4, true, true);
-   uint8_t nbytes = twi_readFrom(42, buffer, 20, true);
-
-}
-
-static void lcdSetCursorPos(uint8_t column, uint8_t row) {
-   CFA533Packet pkg;
-   pkg.command = 0x0B;
-   pkg.length = 2;
-   pkg.data[0] = column;
-   pkg.data[1] = row;
-   unsigned short CRC = get_crc(2 + pkg.length, (unsigned char*) &pkg);
-   pkg.data[pkg.length] = CRC & 0xFF;
-   pkg.data[pkg.length + 1] = CRC >> 8;
-
-   uint8_t result = twi_writeTo(42, (uint8_t*) &pkg, pkg.length + 4, true, true);
-   uint8_t nbytes = twi_readFrom(42, buffer, 20, true);
-}
-
-// NOTE: Requires externally connected temperatur sensors
-static void enableTempDisplay() {
-   CFA533Packet pkg;
-   pkg.command = 0x15;
-   pkg.length = 7;
-   pkg.data[0] = 0;
-   pkg.data[1] = 2;
-   pkg.data[2] = 0;
-   pkg.data[3] = 3;
-   pkg.data[4] = 0;
-   pkg.data[5] = 1;
-   pkg.data[6] = 0;
-   unsigned short CRC = get_crc(2 + pkg.length, (unsigned char*) &pkg);
-   pkg.data[pkg.length] = CRC & 0xFF;
-   pkg.data[pkg.length + 1] = CRC >> 8;
-
-   uint8_t result = twi_writeTo(42, (uint8_t*) &pkg, pkg.length + 4, true, true);
-   uint8_t nbytes = twi_readFrom(42, buffer, 20, true);
-}
+char buffer[30];
 
 static volatile uint8_t irqCounter = 0;
 static volatile uint8_t timerEvent = 0;
@@ -193,10 +43,11 @@ int main() {
    TIMSK0 = _BV(TOIE0);                 // enable timer0 overflow interrupt
 
    adcInit();
-   lcdInit();
+   cfa533Init();
    sei();
-   lcdPrint(0, "Hello Arduino!");
-   lcdPrint(1, "Hello World!");
+   cfa533GetVersion(buffer);
+   cfa533SetContent(0, buffer);
+   cfa533SetContent(1, "Hello World!");
 
    while(1) {
       set_sleep_mode(0); // IDLE mode
@@ -204,8 +55,9 @@ int main() {
       if (timerEvent) {
          bitToggle(PORTD, PD3);
          uint16_t value = adcRead();
-         utoa(value, byte, 10);
-         lcdPrint(1, byte);
+         utoa(value, buffer, 10);
+         strcat(buffer, "mA");
+         cfa533SetContent(1, buffer);
          timerEvent = 0;
       }
    }

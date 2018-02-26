@@ -16,6 +16,7 @@ static volatile int8_t encDelta2 = 0;
 #define ENCODER_PORT PINA
 
 
+// 1kHz 
 ISR(TIMER1_COMPA_vect) {
 
    // read current encoder states as gray code

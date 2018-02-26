@@ -34,14 +34,31 @@ clean:
 
 upload: all
 	# See https://github.com/sudar/Arduino-Makefile/issues/114 - upload requires the -D option on the ArduinoMega2560!
-	avrdude -p $(PGM_DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -v -D -b 115200 -F -U flash:w:$(HEXFILE):i
-
-readFuses:
-	avrdude -p $(PGM_DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -v -F -U lfuse:r:-:i -U hfuse:r:-:i -U efuse:r:-:i
+	# avrdude -p $(PGM_DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -v -D -b 9600 -F -Uflash:w:$(HEXFILE):i
+	avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -Uflash:w:$(HEXFILE):i
 
 readFlash:
-	avrdude -p $(PGM_DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -v -F -U flash:r:result.hex:i
+	# avrdude -p $(PGM_DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -v -F -U flash:r:result.hex:i
+	avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -Uflash:r:result.hex:i 
 
+readFuses:
+	avrdude -v -p $(PGM_DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -F -U lfuse:r:-:i -U hfuse:r:-:i -U efuse:r:-:i
+
+setFuses:
+	@# avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -U lfuse:w:0xf7:m -U hfuse:w:0x99:m -U efuse:w:0xff:m
+	@cecho on-red Attention: PLEASE VERIFY FUSE VALUES AND THE COMMAND LINE:
+	@echo
+	@cecho yellow lfuse=${LFUSE}
+	@cecho yellow hfuse=${HFUSE}
+	@cecho yellow efuse=${EFUSE}
+	@echo
+	@cecho i-yellow avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -U lfuse:w:${LFUSE}:m -U hfuse:w:${HFUSE}:m -U efuse:w:${EFUSE}:m
+	@echo
+	@cecho red "Are you sure (y/n)?"
+	@read reply 		       ; \
+	if [ "$${reply}" = "y" ] ; then \
+	   avrdude -vvv -p $(DEVICE) -c $(PGM_PROTO) -P $(PGM_DEVFILE) -b9600 -U lfuse:w:${LFUSE}:m -U hfuse:w:${HFUSE}:m -U efuse:w:${EFUSE}:m ; \
+	fi							 \
 
 precomp: $(CPPFILES)
 
@@ -56,7 +73,7 @@ defines: $(DEFFILES)
 assembly: $(ASMFILES)
 
 %.S: %.c
-	$(CC) -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) $(INCLUDES) -ffunction-sections -fdata-sections -MMD -MP -S $< -o $@
+	$(CC) -std=c99 -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) $(INCLUDES) -ffunction-sections -fdata-sections -MMD -MP -S $< -o $@
 
 %.lst: %.S
 	$(AS) -mmcu=$(DEVICE) $< -a=$@
@@ -82,7 +99,8 @@ help:
 	@echo "asmlist  : Creates an assembler listing file for each source file."
 	@echo "disasm   : Creates a disassembly of the target's elf file."
 	@echo "upload   : Uploads the target's hex file to the Arduino board"
-	@echo "readFuses: Downloads and shows the current fuse settings."
 	@echo "readFlash: Downloads the current flash (code) memory into result.hex."
+	@echo "readFuses: Downloads and shows the current fuse settings."
+	@echo "setFuses : Sets new fuse values. This requires manual confirmation by the user."
 
 -include $(OBJECTS:.o=.d)
