@@ -1,5 +1,6 @@
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
+#include <string.h>
 
 // #include "ILI9481.h"
 // #include "7seg.h"
@@ -29,6 +30,7 @@ extern volatile int8_t globalStep;
 static uint16_t values[] = {0, 0, 0, 0};
 static int valuePtr = 0;
 static char buffer[30];
+static char convert[10];
 static int wakeup = 0;
 
 int main() {
@@ -99,8 +101,28 @@ int main() {
          //values[valuePtr++] = adcRead();
          //valuePtr &= 0x03;
          //uint16_t current = (values[0] + values[1] + values[2] + values[3]) >> 2;
-         uint16_t current = adcRead();
-         itoa(current, buffer, 10);
+         uint16_t voltage = adcRead();
+         voltage = (voltage * 11) >> 5; // / 2,9 => 0 .. 352
+         itoa(voltage, convert, 10);    // "x", "xx", "xxx"
+         int len = strlen(convert);      // 1, 2, 3
+         if (len == 1) {
+           buffer[0] = ' ';
+           buffer[1] = '0';
+           buffer[2] = ',';
+           buffer[3] = convert[0];
+         } else if (len == 2) {
+           buffer[0] = ' ';
+           buffer[1] = convert[0];
+           buffer[2] = ',';
+           buffer[3] = convert[1];
+         } else if (len == 3) {
+           buffer[0] = convert[0];
+           buffer[1] = convert[1];
+           buffer[2] = ',';
+           buffer[3] = convert[2];
+         }
+         buffer[4] = 0;
+         strcat(buffer, " V");
          // displayValue(210, current, RED);
          cfa533SetContent(1, buffer);
       }
