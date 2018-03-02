@@ -1,0 +1,27 @@
+#!/usr/bin/env python2.7.10
+
+from __future__ import print_function
+
+import sys
+import os
+import subprocess
+import re
+
+unbuffered = os.fdopen(sys.stdout.fileno(), 'w', 0)
+
+clock = '/-\|'
+
+result = []
+idx = 0
+for f in os.listdir('.'):
+   unbuffered.write(clock[idx] + '\b')
+   idx = (idx + 1) % 4
+   out = subprocess.check_output(['du', '-s', '-k', f])
+   info = re.match('(\d*)\s*(.*)', out.strip())
+   info = ( (int(info.group(1)), info.group(2)) )
+   result.append(info)
+
+result = sorted(result, key = lambda x : x[0])
+
+for line in result:
+   print('{:8}K {}'.format(line[0], line[1]))
