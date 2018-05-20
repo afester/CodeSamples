@@ -31,7 +31,7 @@ EFUSE=0xff
 # Source and target definitions
 BUILDDIR=build
 # SOURCES=ILI9481.c main.c glcdfont.c 7segFont.c encoder.c mcp4811.c adc.c
-SOURCES=cfa533.c twi.c main.c glcdfont.c 7segFont.c encoder.c mcp4811.c adc.c
+SOURCES=ILI9481.c cfa533.c twi.c main.c glcdfont.c 7segFont.c encoder.c mcp4811.c adc.c
 TARGET=tftsample.hex
 INCLUDES=-I. -I../Lib
 

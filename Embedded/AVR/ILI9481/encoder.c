@@ -9,18 +9,20 @@ static volatile int8_t encDelta1 = 0;
 static int8_t lastStep2 = 3;
 static volatile int8_t encDelta2 = 0;
 
-#define ENC1_A_MASK 0x80
-#define ENC1_B_MASK 0x40
-#define ENC2_A_MASK 0x20
-#define ENC2_B_MASK 0x10
-#define ENCODER_PORT PINA
+#define ENC1_A_MASK 0x01
+#define ENC1_B_MASK 0x02
+#define ENC1_PORT PINB
+
+#define ENC2_A_MASK 0x01
+#define ENC2_B_MASK 0x02
+#define ENC2_PORT PIND
 
 
 // 1kHz 
 ISR(TIMER1_COMPA_vect) {
 
    // read current encoder states as gray code
-   uint8_t pinValue = ENCODER_PORT;
+   uint8_t pinValue = ENC1_PORT;
 
    // convert to binary code (cw sequence: 2, 1, 0, 3)
    // AB    step
@@ -58,6 +60,7 @@ ISR(TIMER1_COMPA_vect) {
    }
 
    // Encoder 2
+   pinValue = ENC2_PORT;
    step = 0;
    if (pinValue & ENC2_A_MASK) {
       step = 3;
@@ -86,7 +89,8 @@ void encoderInit() {
    TIMSK1 = _BV(OCIE1A);
 
    // enable pull ups
-   PORTA = 0b11110000;
+   PORTB |= 0b00000011;
+   PORTD |= 0b00000011;
 }
 
 
