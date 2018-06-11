@@ -1,6 +1,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "ILI9481.h"
+#include <avr/pgmspace.h>
 
 /*****************************************************************************/
 /* Low level hardware access functions */
@@ -313,11 +314,16 @@ void tftBlt(const Bitmap16* source, uint16_t x, uint16_t y) {
   CS_LOW;
 
   uint8_t* reader = (uint8_t*) source->bitmap;
-  Address_set(x, y, x + source->width - 1, y + source->height - 1);
-  for(int i = 0; i < source->height; i++) {
-    for(int m = 0; m < source->width; m++) { // x direction
-      Lcd_Write_Data(*reader++); // High byte!!
-      Lcd_Write_Data(*reader++); // Low byte!!
+  const uint16_t width = pgm_read_byte(&source->width);
+  const uint16_t height = pgm_read_byte(&source->height);
+  Address_set(x, y, x + width - 1, y + height - 1);
+
+  for(int i = 0; i < height; i++) {
+    for(int m = 0; m < width; m++) { // x direction
+      uint8_t upper = pgm_read_byte(&(*reader++));
+      uint8_t lower = pgm_read_byte(&(*reader++));
+      Lcd_Write_Data(upper); // High byte!!
+      Lcd_Write_Data(lower); // Low byte!!
     }
   }
 
@@ -333,6 +339,7 @@ void tftBltPalette(const Bitmap8* source, const uint16_t* palette, uint16_t x, u
   const uint16_t width = pgm_read_byte(&source->width);
   const uint16_t height = pgm_read_byte(&source->height);
   Address_set(x, y, x + width - 1, y + height - 1);
+
   for(int i = 0; i < height; i++) {
     for(int m = 0; m < width; m++) { // x direction
       uint8_t idx = pgm_read_byte(&(*reader++));
