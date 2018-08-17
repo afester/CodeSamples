@@ -114,6 +114,12 @@ FROM user_tables
 WHERE table_name LIKE 'MY_%'
 ORDER BY table_name;
 
+-- Select all objects and their type
+SELECT OBJECT_NAME, OBJECT_TYPE
+FROM DBA_OBJECTS
+WHERE OBJECT_NAME LIKE ...
+ORDER BY OBJECT_NAME;
+
 -- Select all invalid Views
 SELECT OBJECT_NAME, OBJECT_TYPE
 FROM DBA_OBJECTS
