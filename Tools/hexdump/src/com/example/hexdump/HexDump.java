@@ -10,29 +10,98 @@ import java.io.PrintStream;
  */
 public class HexDump {
 
-    private byte[] data;
+    private final byte[] data;
+    private final int[] intData;
+
     private int offset = 0;
     private int bytesPerLine = 16;
     private String prefix = "";
 
     public HexDump(byte[] data) {
         this.data = data;
+        this.intData = null;
+        bytesPerLine = 16;
     }
 
     
+    public HexDump(int[] intBuffer) {
+        this.data = null;
+        this.intData = intBuffer;
+        bytesPerLine = 4;   // words
+    }
+
+
     public void setPrefix(String prefix) {
         this.prefix = prefix;
     }
 
 
     public boolean hasNext() {
-        if (offset < data.length) {
+        if (data != null && offset < data.length) {
             return true;
         }
+        if (intData != null && offset < intData.length) {
+            return true;
+        }
+
         return false;
     }
 
+
     public String nextLine() {
+        if (intData != null) {
+            return nextIntLine();
+        }
+        if (data != null) {
+            return nextByteLine();
+        }
+
+        return "";
+    }
+
+    private String nextIntLine() {
+        StringBuffer result = new StringBuffer(80);
+
+        // prefix
+        result.append(prefix);
+
+        // address
+        result.append(String.format("%04X:", offset));
+
+        // hex dump
+        int hexIdx = 0;
+        for (hexIdx = offset; hexIdx < offset + bytesPerLine
+                && hexIdx < intData.length; hexIdx++) {
+            result.append(String.format(" %08X", intData[hexIdx] & 0xFFFFFFFFL));
+        }
+
+        // spacer
+        for (; hexIdx < offset + bytesPerLine; hexIdx++) {
+            result.append("   ");
+        }
+
+        // ascii dump
+//        result.append("  ");
+//        //result.append(" |");
+//        int idx = 0;
+//        for (idx = offset; idx < offset + bytesPerLine && idx < data.length; idx++) {
+//            int c = (int) data[idx] & 0xFF;
+//            if (c < 32) { // c == '\n' || c == '\t') {
+//                c = '.';
+//            }
+//            result.append(String.format("%c", c));
+//        }
+        // spacer
+        //for (; idx < offset + bytesPerLine; idx++) {
+        //    result.append(" ");
+        //}
+        //result.append("|");
+
+        offset += bytesPerLine;
+        return result.toString();
+    }
+
+    private String nextByteLine() {
         StringBuffer result = new StringBuffer(80);
 
         // prefix
