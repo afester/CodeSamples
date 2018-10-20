@@ -370,7 +370,7 @@ void tftBltPaletteRle(const Bitmap8* source, const uint16_t* palette, uint16_t x
       if (count == 0) {
         idx = pgm_read_byte(&(*reader++));
         count = idx >> 4;
-        color = palette[idx & 0x0f];
+        color = 0xffff; // palette[idx & 0x0f];
       }
 
       Lcd_Write_Data(color & 0xff); // High byte!!
