@@ -353,7 +353,7 @@ void tftBltPalette(const Bitmap8* source, const uint16_t* palette, uint16_t x, u
   CS_HIGH;
 }
 
-void tftBltPaletteRle(const Bitmap8* source, const uint16_t* palette, uint16_t x, uint16_t y) {
+uint16_t tftBltPaletteRle(const Bitmap8* source, const uint16_t* palette, uint16_t x, uint16_t y) {
   CS_LOW;
 
   uint8_t* reader = (uint8_t*) source->bitmap;
@@ -370,7 +370,9 @@ void tftBltPaletteRle(const Bitmap8* source, const uint16_t* palette, uint16_t x
       if (count == 0) {
         idx = pgm_read_byte(&(*reader++));
         count = idx >> 4;
-        color = 0xffff; // palette[idx & 0x0f];
+        uint8_t colorIdx = idx & 0x0f;
+        // color = pgm_read_word(&(* (palette + colorIdx)));
+        color = palette[colorIdx];
       }
 
       Lcd_Write_Data(color & 0xff); // High byte!!
@@ -380,80 +382,10 @@ void tftBltPaletteRle(const Bitmap8* source, const uint16_t* palette, uint16_t x
   }
 
   CS_HIGH;
+  return width;
 }
 
 
-//// vertically mirrored
-//void tftBltVM(const Bitmap16* source, uint16_t x, uint16_t y) {
-//  CS_LOW;
-//
-//  Address_set(x, y, x + source->width - 1, y + source->height - 1);
-//
-//  for(int i = 0; i < source->height; i++) {  // y direction
-//    const uint8_t* reader = (uint8_t*) (source->bitmap + (((i+1) * source->width)-1));    // row end index
-//
-//    for(int m = 0; m < source->width; m++) { // x direction
-//   We need transparency, but this does not seem easily possible with auto increment of pixel address
-//      if (*reader == 0 && *(reader+1) == 0) {
-//        Lcd_Write_Com(0x3e);
-//        uint8_t b1 = Lcd_Read_Data();
-//        uint8_t b2 = Lcd_Read_Data();
-//        uint8_t b3 = Lcd_Read_Data();
-////        Lcd_Read_Data();
-// //       Lcd_Read_Data();
-//  //      Lcd_Read_Data();
-//   //     Lcd_Read_Data();
-//    //    Lcd_Read_Data();
-//     //   Lcd_Read_Data();
-//      //  Lcd_Read_Data();
-//        Lcd_Write_Com(0x3c);
-//        Lcd_Write_Data(b1);
-//        Lcd_Write_Data(b2);
-//      } else {
-//        Lcd_Write_Data(*reader);
-//        Lcd_Write_Data(*(reader+1));
-//      }
-//      reader -= 2;
-//    }
-//  }
-//
-//  CS_HIGH;
-//}
-//
-//void tftBltHM(const Bitmap16* source, uint16_t x, uint16_t y) {
-//  CS_LOW;
-//
-//  Address_set(x, y, x + source->width - 1, y + source->height - 1);
-//  for(int i = 0; i < source->height; i++) {
-//    const uint8_t* reader = (uint8_t*) (source->bitmap + (source->height - i - 1) * source->width);    // row start index
-//
-//    for(int m = 0; m < source->width; m++) { // x direction
-//      Lcd_Write_Data(*reader);
-//      Lcd_Write_Data(*(reader+1));
-//      reader += 2;
-//    }
-//  }
-//
-//  CS_HIGH;
-//}
-//
-//void tftBltHVM(const Bitmap16* source, uint16_t x, uint16_t y) {
-//  CS_LOW;
-//
-//  Address_set(x, y, x + source->width - 1, y + source->height - 1);
-//  for(int i = 0; i < source->height; i++) {
-//    const uint8_t* reader = (uint8_t*) (source->bitmap + (((source->height - i) * source->width)-1));    // row end index
-//
-//    for(int m = 0; m < source->width; m++) { // x direction
-//      Lcd_Write_Data(*reader);
-//      Lcd_Write_Data(*(reader+1));
-//      reader -= 2;
-//    }
-//  }
-//
-//  CS_HIGH;
-//}
-//
 void tftDrawPixel(uint16_t x, uint16_t y, uint16_t col) {
   CS_LOW;
 

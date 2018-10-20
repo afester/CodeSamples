@@ -38,13 +38,24 @@ static char buffer[30];
 static char convert[10];
 static int wakeup = 0;
 
-extern const Bitmap8 g0 PROGMEM;
-extern const uint16_t* palette;
+uint16_t thePalette[] = {0x0000, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800};
 
-//uint16_t redPalette[]   = {0x0000, 0x1500, 0x1f00, 0x4d00, 0x2600, 0x2a00, 0xc210};
-//uint16_t greenPalette[] = {0x0000, 0x7606, 0xfb07, 0x3105, 0xc310, 0xea02, 0x8501};
+extern const Bitmap8* const charSet[224] PROGMEM;
 
-//uint16_t palette[] = {0xffff, 0x718c, 0xf37b, 0x3663, 0xf65a, 0xd75a, 0x3563, 0x3284, 0x34a5, 0x0000, 0x0900, 0x1400, 0x1e00, 0x1f00, 0x1b00, 0x1200, 0x0600, 0x8631, 0x0a00, 0x1800, 0x0200, 0x1600, 0x1100, 0x0300, 0x1700, 0x0100, 0x1c00, 0x1900, 0x0e00, 0x0800, 0x1000, 0x1300, 0x0c00, 0x0500, 0x0f00, 0x0d00, 0x0b00, 0x0400, 0x1d00, 0x1500, 0x0700, 0x1a00, 0xdfff};
+uint16_t drawChar(uint16_t x, uint16_t y, char c) {
+   Bitmap8* glyph = pgm_read_ptr(charSet + (unsigned char) c - 32);
+   if (glyph != NULL) {
+      return tftBltPaletteRle(glyph, thePalette, x, y);
+   }
+   return 5;
+}
+
+void drawText(uint16_t x, uint16_t y, const char* str) {
+   while(*str) {
+      x += drawChar(x, y, *str);
+      str++;
+   }
+}
 
 int main() {
 //   CLKPR = 0b10000000; // Enable clock prescaler change
@@ -59,13 +70,23 @@ int main() {
 //   MCP48xx_Init();
 //   adcInit();
 
-   tftDrawText("123Display controller: ");
-   tftFillRect(20, 20, 100, 100, WHITE);
-   tftFillRect(20, 120, 100, 100, RED);
+//   tftDrawText("Display controller: ");
 //   tftDeviceCodeRead();
 
-//   tftBltPaletteRle(&g0, palette, 100, 50);
-
+   int ypos = 10;
+   drawText(5, ypos, "U: 18,5 V");
+   ypos += 50;
+   drawText(5, ypos, "U5: 4,9 V");
+   ypos += 50;
+   drawText(5, ypos, "U12: 12,1 V");
+   ypos += 50;
+   drawText(5, ypos, "I: 0,05 A");
+   drawText(260, ypos, "I: 0,05 A");
+   ypos += 50;
+   drawText(5, ypos, "I5: 0,01 A");
+   ypos += 50;
+   drawText(5, ypos, "I12: 0,02 A");
+   drawText(260, ypos, "T: 42 °C");
    while(1);
 
 

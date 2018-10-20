@@ -99,12 +99,13 @@ void tftClear(uint16_t col);
 void tftBlt(const Bitmap16* source, uint16_t x, uint16_t y);
 
 
-void tftBltVM(const Bitmap16* source, uint16_t x, uint16_t y);
-void tftBltHM(const Bitmap16* source, uint16_t x, uint16_t y);
-void tftBltHVM(const Bitmap16* source, uint16_t x, uint16_t y);
+//void tftBltVM(const Bitmap16* source, uint16_t x, uint16_t y);
+//void tftBltHM(const Bitmap16* source, uint16_t x, uint16_t y);
+//void tftBltHVM(const Bitmap16* source, uint16_t x, uint16_t y);
 
 void tftBltPalette(const Bitmap8* source, const uint16_t* palette, uint16_t x, uint16_t y);
-void tftBltPaletteRle(const Bitmap8* source, const uint16_t* palette, uint16_t x, uint16_t y);
+
+uint16_t tftBltPaletteRle(const Bitmap8* source, const uint16_t* palette, uint16_t x, uint16_t y);
 
 void tftBltMask(const uint8_t* source, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col);
 
