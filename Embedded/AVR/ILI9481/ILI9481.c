@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include <avr/io.h>
 #include <util/delay.h>
 #include "ILI9481.h"
@@ -151,11 +153,11 @@ void tftInit() {
 // way how the frame memory is set when it is written,
 // and how the frame memory is mapped to the display panel
   Lcd_Write_Com(0x36);  // Set_address_mode
-  Lcd_Write_Data(0b00100000);
+  Lcd_Write_Data(0b00101000);
                 // |||||||+-- Vertical flip
                 // ||||||+--- Horizontal flip
                 // |||||+---- 0
-                // ||||+----- Pixels sent in BGR order
+                // ||||+----- Pixels sent in RGB order
                 // |||+------ LCD refresh top to bottom
                 // ||+------- Page/Column order
                 // |+-------- Column address order left to right
@@ -206,7 +208,7 @@ void Address_set(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int
 }
 
 static const char hex[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-
+#if 0
 void tftDeviceCodeRead() {
    CS_LOW;
 
@@ -230,6 +232,7 @@ void tftDeviceCodeRead() {
    tftDrawChar(hex[v2 >> 4]);   
    tftDrawChar(hex[v2 & 0x0f]);   
 }
+#endif
 
 
 void tftFillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col) {
@@ -371,12 +374,11 @@ uint16_t tftBltPaletteRle(const Bitmap8* source, const uint16_t* palette, uint16
         idx = pgm_read_byte(&(*reader++));
         count = idx >> 4;
         uint8_t colorIdx = idx & 0x0f;
-        // color = pgm_read_word(&(* (palette + colorIdx)));
-        color = palette[colorIdx];
+        color = pgm_read_word(&(* (palette + colorIdx)));
       }
 
-      Lcd_Write_Data(color & 0xff); // High byte!!
       Lcd_Write_Data(color >> 8);   // Low byte!!
+      Lcd_Write_Data(color & 0xff); // High byte!!
       count--;
     }
   }
@@ -396,68 +398,21 @@ void tftDrawPixel(uint16_t x, uint16_t y, uint16_t col) {
   CS_HIGH;
 }
 
-#include <avr/pgmspace.h>
 
-// extern const unsigned char font[] PROGMEM;
-// static const unsigned char font[] PROGMEM = {0x7C, 0x12, 0x11, 0x12, 0x7C};
-extern const unsigned char font[];
-//static const unsigned char font[] = {0x7C, 0x12, 0x11, 0x12, 0x7C};
-//01111100
-//00010010
-//00010001
-//00010010
-//01111100
+extern const Bitmap8* const charSet[224] PROGMEM;
+extern const uint16_t thePalette[] PROGMEM;
 
-static uint16_t xpos=0;
-static uint16_t ypos=0;
-
-void tftDrawChar(char c) {
-   if (c == '\n') {
-     xpos = 0;
-     ypos += 9;
-     return;
+uint16_t tftDrawChar(uint16_t x, uint16_t y, char c) {
+   Bitmap8* glyph = pgm_read_ptr(charSet + (unsigned char) c - 32);
+   if (glyph != NULL) {
+      return tftBltPaletteRle(glyph, thePalette, x, y);
    }
-
-   const uint8_t *glyph = &font[(int) ((unsigned char) c) * 5];
-
-  CS_LOW;
-
-  Address_set(xpos, ypos, xpos+5, ypos+6);
-
-  uint8_t mask = 0x01;
-
-  for(int i = 0; i < 7; i++) {
-
-    for(int m = 0; m < 5; m++) { // x direction
-      
-      uint8_t data = pgm_read_byte(&(glyph[m]));
-      if (data & mask) {
-         Lcd_Write_Data(WHITE>>8);
-         Lcd_Write_Data(WHITE);
-      } else {
-         Lcd_Write_Data(BLACK>>8);
-         Lcd_Write_Data(BLACK);
-      }
-    }
-    Lcd_Write_Data(BLACK>>8);
-    Lcd_Write_Data(BLACK);
-
-    mask <<= 1;
-  }
-
-  CS_HIGH;
-
-  xpos += 6;
-  if (xpos > 474) {
-     xpos = 0;
-     ypos += 9;
-  }
+   return 5;
 }
 
-void tftDrawText(const char* str) {
+void tftDrawText(uint16_t x, uint16_t y, const char* str) {
    while(*str) {
-      tftDrawChar(*str);
+      x += tftDrawChar(x, y, *str);
       str++;
    }
 }
-

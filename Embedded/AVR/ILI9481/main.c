@@ -10,8 +10,6 @@
 #include "../LCDisplay/cfa533.h"
 #include <avr/pgmspace.h>
 
-//extern const Bitmap8* DejaVuSans[224];
-
 #if 0
 void displayValue(int y, int value, int color) {
    if (value < 0) {
@@ -38,25 +36,6 @@ static char buffer[30];
 static char convert[10];
 static int wakeup = 0;
 
-uint16_t thePalette[] = {0x0000, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800, 0xf800};
-
-extern const Bitmap8* const charSet[224] PROGMEM;
-
-uint16_t drawChar(uint16_t x, uint16_t y, char c) {
-   Bitmap8* glyph = pgm_read_ptr(charSet + (unsigned char) c - 32);
-   if (glyph != NULL) {
-      return tftBltPaletteRle(glyph, thePalette, x, y);
-   }
-   return 5;
-}
-
-void drawText(uint16_t x, uint16_t y, const char* str) {
-   while(*str) {
-      x += drawChar(x, y, *str);
-      str++;
-   }
-}
-
 int main() {
 //   CLKPR = 0b10000000; // Enable clock prescaler change
    // CLKPR = 0b00000100; // slow down a bit ....
@@ -74,19 +53,25 @@ int main() {
 //   tftDeviceCodeRead();
 
    int ypos = 10;
-   drawText(5, ypos, "U: 18,5 V");
+   tftDrawText(5, ypos, "U");
+   tftDrawText(80, ypos, ": 18,5 V");
    ypos += 50;
-   drawText(5, ypos, "U5: 4,9 V");
+   tftDrawText(5, ypos, "U5");
+   tftDrawText(80, ypos, ": 4,9 V");
    ypos += 50;
-   drawText(5, ypos, "U12: 12,1 V");
+   tftDrawText(5, ypos, "U12");
+   tftDrawText(80, ypos, ": 12,1 V");
    ypos += 50;
-   drawText(5, ypos, "I: 0,05 A");
-   drawText(260, ypos, "I: 0,05 A");
+   tftDrawText(5, ypos, "I");
+   tftDrawText(80, ypos, ": 0,05 A");
+   tftDrawText(260, ypos, "I: 0,05 A");
    ypos += 50;
-   drawText(5, ypos, "I5: 0,01 A");
+   tftDrawText(5, ypos, "I5");
+   tftDrawText(80, ypos, ": 0,01 A");
    ypos += 50;
-   drawText(5, ypos, "I12: 0,02 A");
-   drawText(260, ypos, "T: 42 °C");
+   tftDrawText(5, ypos, "I12");
+   tftDrawText(80, ypos, ": 0,02 A");
+   tftDrawText(260, ypos, "T: 42 °C");
    while(1);
 
 
