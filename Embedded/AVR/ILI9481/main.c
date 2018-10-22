@@ -1,6 +1,7 @@
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "ILI9481.h"
 // #include "7seg.h"
@@ -45,7 +46,7 @@ int main() {
    tftClear(BLACK);
 
 //   cfa533Init();
-//   encoderInit();
+   encoderInit();
 //   MCP48xx_Init();
 //   adcInit();
 
@@ -72,15 +73,11 @@ int main() {
    tftDrawText(5, ypos, "I12");
    tftDrawText(80, ypos, ": 0,02 A");
    tftDrawText(260, ypos, "T: 42 °C");
-   while(1);
-
-
-#if 0
 
    sei();
-   displayValue(50, 0, RED);
-   displayValue(130, 0, GREEN);
-   displayValue(210, 0, RED);
+//   displayValue(50, 0, RED);
+//   displayValue(130, 0, GREEN);
+//   displayValue(210, 0, RED);
 
    int value1 = 0;
    int value2 = 0;
@@ -99,7 +96,7 @@ int main() {
          if (diff < -1) {
             diff = -10;
          }
-
+#endif
          value1 += diff;
          if (value1 < 0) {
             value1 = 0;
@@ -107,11 +104,9 @@ int main() {
             value1 = 350;
          }
 
-//         displayValue(130, value1, GREEN);
-//         itoa(value1 * 10, buffer, 10);
-//         cfa533SetContent(0, buffer);
-         MCP48xx_SetValue(value1 * 10);
-#endif
+         itoa(value1, convert, 10);    // "x", "xx", "xxx"
+         tftDrawText(240, 10, convert);
+//         MCP48xx_SetValue(value1 * 10);
       }
 
       // maximum current
@@ -123,9 +118,11 @@ int main() {
          } else if (value2 > 300) {
             value2 = 300;
          }
-         displayValue(130, value2, GREEN);
-         MCP48xx_SetValue(value2 * 10);
+         itoa(value2, convert, 10);    // "x", "xx", "xxx"
+         tftDrawText(240, 60, convert);
+//         MCP48xx_SetValue(value2 * 10);
       }
+
 #if 0
       wakeup++;
       if (wakeup > 100) {
@@ -163,5 +160,4 @@ int main() {
       }
 #endif
    }
-#endif
 }
