@@ -39,7 +39,7 @@ void tftDrawPixel(uint16_t x, uint16_t y, uint16_t col);
 
 uint16_t tftDrawChar(uint16_t x, uint16_t y, char c);
 
-void tftDrawText(uint16_t x, uint16_t y, const char* str);
+uint16_t tftDrawText(uint16_t x, uint16_t y, const char* str);
  
 void tftDeviceCodeRead();
 

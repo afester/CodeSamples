@@ -13,8 +13,8 @@ static volatile int8_t encDelta2 = 0;
 #define ENC1_B_MASK 0x02
 #define ENC1_PORT PINB
 
-#define ENC2_A_MASK 0x01
-#define ENC2_B_MASK 0x02
+#define ENC2_A_MASK 0x02
+#define ENC2_B_MASK 0x01
 #define ENC2_PORT PIND
 
 
