@@ -37,11 +37,29 @@ void tftInit();
 
 void tftDrawPixel(uint16_t x, uint16_t y, uint16_t col);
 
+/**
+ * Renders a single character.
+ *
+ * @param x The x coordinate of the starting point
+ * @param y The y coordinate of the starting point
+ * @param c The character to render
+ */
 uint16_t tftDrawChar(uint16_t x, uint16_t y, char c);
 
+/**
+ * Draws a text string.
+ *
+ * @param x The x coordinate of the starting point
+ * @param y The y coordinate of the starting point
+ * @param str  The string to draw
+ */
 void tftDrawText(uint16_t x, uint16_t y, const char* str);
- 
-void tftDeviceCodeRead();
+
+/**
+ * Reads the device code
+ *
+ */ 
+void tftDeviceCodeRead(uint8_t rsult[4]);
 
 
 /**
@@ -67,6 +85,13 @@ void tftVLine(uint16_t x, uint16_t y, uint16_t l, uint16_t col);
 
 
 /**
+ * Draws an outline rectangle.
+ *
+ * @param x The x coordinate of the upper left corner
+ * @param y The y coordinate of the upper left corner
+ * @param w The width of the rectangle
+ * @param h The height of the rectangle
+ * @param col The color of the rectangle
  */
 void tftRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col);
 
@@ -97,11 +122,6 @@ void tftClear(uint16_t col);
  * @param source A pointer to the source bitmap.
  */
 void tftBlt(const Bitmap16* source, uint16_t x, uint16_t y);
-
-
-//void tftBltVM(const Bitmap16* source, uint16_t x, uint16_t y);
-//void tftBltHM(const Bitmap16* source, uint16_t x, uint16_t y);
-//void tftBltHVM(const Bitmap16* source, uint16_t x, uint16_t y);
 
 void tftBltPalette(const Bitmap8* source, const uint16_t* palette, uint16_t x, uint16_t y);
 

@@ -207,32 +207,20 @@ void Address_set(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int
   Lcd_Write_Com(0x2c);      // Write_memory_start
 }
 
-static const char hex[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-#if 0
-void tftDeviceCodeRead() {
+void tftDeviceCodeRead(uint8_t result[4]) {
    CS_LOW;
 
    Lcd_Write_Com(0xbf);
 
-   Lcd_Read_Data();
-   uint8_t mpi1 = Lcd_Read_Data();
-   uint8_t mpi2 = Lcd_Read_Data();
-   uint8_t v1 = Lcd_Read_Data();
-   uint8_t v2 = Lcd_Read_Data();
-   Lcd_Read_Data();
+   Lcd_Read_Data();			// dummy read
+   result[0] = Lcd_Read_Data();		// MIPI Alliance code
+   result[1] = Lcd_Read_Data();		// MIPI Alliance code
+   result[2] = Lcd_Read_Data();		// Device ID code
+   result[3] = Lcd_Read_Data();		// Device ID code
+   Lcd_Read_Data();			// Exit code (0xff)
 
    CS_HIGH;
-
-   tftDrawChar(hex[mpi1 >> 4]);   
-   tftDrawChar(hex[mpi1 & 0x0f]);   
-   tftDrawChar(hex[mpi2 >> 4]);   
-   tftDrawChar(hex[mpi2 & 0x0f]);   
-   tftDrawChar(hex[v1 >> 4]);   
-   tftDrawChar(hex[v1 & 0x0f]);   
-   tftDrawChar(hex[v2 >> 4]);   
-   tftDrawChar(hex[v2 & 0x0f]);   
 }
-#endif
 
 
 void tftFillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col) {
@@ -277,6 +265,23 @@ void tftVLine(uint16_t x, uint16_t y, uint16_t l, uint16_t col) {
   }
 
   CS_HIGH;
+}
+
+
+void tftLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t col) {
+  CS_LOW;
+
+//  Address_set(x, y, x+l-1, y);
+//  for(int i=0; i < l; i++) {
+//      Lcd_Write_Data(col>>8);
+//      Lcd_Write_Data(col);
+//  }
+
+  CS_HIGH;
+}
+
+
+void tftCircle(uint16_t cx, uint16_t cy, uint16_t r) {
 }
 
 
