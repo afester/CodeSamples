@@ -31,11 +31,40 @@ void displayValue(int y, int value, int color) {
 #endif
 
 extern volatile int8_t globalStep;
-static uint16_t values[] = {0, 0, 0, 0};
-static int valuePtr = 0;
+// static uint16_t values[] = {0, 0, 0, 0};
+// static int valuePtr = 0;
 static char buffer[30];
-static char convert[10];
-static int wakeup = 0;
+// static int wakeup = 0;
+
+/**
+ * Format a value from 0 .. 999 into a string in the format
+ * "nn,n"
+ */
+void format(int value, char* result) { // , int decimals) {
+    static char convert[10];
+    itoa(value, convert, 10);    // "x", "xx", "xxx"
+    int len = strlen(convert);      // 1, 2, 3
+
+    int idx = 0;
+    if (len == 1) {
+        result[idx++] = ' ';
+        result[idx++] = '0';
+        result[idx++] = ',';
+        result[idx++] = convert[0];
+    } else if (len == 2) {
+        result[idx++] = ' ';
+        result[idx++] = convert[0];
+        result[idx++] = ',';
+        result[idx++] = convert[1];
+    } else if (len == 3) {
+        result[idx++] = convert[0];
+        result[idx++] = convert[1];
+        result[idx++] = ',';
+        result[idx++] = convert[2];
+    }
+    buffer[4] = 0;
+}
+
 
 int main() {
 //   CLKPR = 0b10000000; // Enable clock prescaler change
@@ -55,7 +84,7 @@ int main() {
 
    int ypos = 10;
    tftDrawText(5, ypos, "U");
-   tftDrawText(80, ypos, ": 18,5 V");
+   tftDrawText(80, ypos, ":"); //  18,5 V");
    ypos += 50;
    tftDrawText(5, ypos, "U5");
    tftDrawText(80, ypos, ": 4,9 V");
@@ -65,7 +94,7 @@ int main() {
    ypos += 50;
    tftDrawText(5, ypos, "I");
    tftDrawText(80, ypos, ": 0,05 A");
-   tftDrawText(260, ypos, "I: 0,05 A");
+   tftDrawText(260, ypos, "I: ");
    ypos += 50;
    tftDrawText(5, ypos, "I5");
    tftDrawText(80, ypos, ": 0,01 A");
@@ -104,8 +133,10 @@ int main() {
             value1 = 350;
          }
 
-         itoa(value1, convert, 10);    // "x", "xx", "xxx"
-         tftDrawText(240, 10, convert);
+         format(value1, buffer);
+         strcat(buffer, " V    ");
+         uint16_t xEnd = tftDrawText(98, 10, buffer);
+         tftFillRect(xEnd, 10, 300-xEnd, 45, RED);
 //         MCP48xx_SetValue(value1 * 10);
       }
 
@@ -118,8 +149,10 @@ int main() {
          } else if (value2 > 300) {
             value2 = 300;
          }
-         itoa(value2, convert, 10);    // "x", "xx", "xxx"
-         tftDrawText(240, 60, convert);
+
+         format(value2, buffer);
+         strcat(buffer, " A    ");
+         tftDrawText(290, 160, buffer);
 //         MCP48xx_SetValue(value2 * 10);
       }
 
@@ -134,29 +167,10 @@ int main() {
 
 #if 0
          voltage = (voltage * 11) >> 5; // / 2,9 => 0 .. 352
-         itoa(voltage, convert, 10);    // "x", "xx", "xxx"
-         int len = strlen(convert);      // 1, 2, 3
-         if (len == 1) {
-           buffer[0] = ' ';
-           buffer[1] = '0';
-           buffer[2] = ',';
-           buffer[3] = convert[0];
-         } else if (len == 2) {
-           buffer[0] = ' ';
-           buffer[1] = convert[0];
-           buffer[2] = ',';
-           buffer[3] = convert[1];
-         } else if (len == 3) {
-           buffer[0] = convert[0];
-           buffer[1] = convert[1];
-           buffer[2] = ',';
-           buffer[3] = convert[2];
-         }
-         buffer[4] = 0;
+         format(voltage, buffer);
          strcat(buffer, " V");
 #endif
          displayValue(210, voltage, RED);
-         //cfa533SetContent(1, buffer);
       }
 #endif
    }

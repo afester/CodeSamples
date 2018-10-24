@@ -415,9 +415,10 @@ uint16_t tftDrawChar(uint16_t x, uint16_t y, char c) {
    return 5;
 }
 
-void tftDrawText(uint16_t x, uint16_t y, const char* str) {
+uint16_t tftDrawText(uint16_t x, uint16_t y, const char* str) {
    while(*str) {
       x += tftDrawChar(x, y, *str);
       str++;
    }
+   return x;
 }
