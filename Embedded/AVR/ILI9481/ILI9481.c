@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include <avr/io.h>
 #include <util/delay.h>
@@ -223,73 +224,177 @@ void tftDeviceCodeRead(uint8_t result[4]) {
 }
 
 
-void tftFillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col) {
+static uint16_t strokeColor = WHITE;
+static bool stroke = true;
+
+static uint16_t fillColor = WHITE;
+static bool fill = false;
+
+void tftSetFill(uint16_t color) {
+   fillColor = color;
+   fill =  true;
+}
+
+void tftSetNoFill() {
+   fill = false;
+}
+
+void tftSetStroke(uint16_t color) {
+   strokeColor = color;
+   stroke = true;
+}
+
+void tftSetNoStroke() {
+   stroke = false;
+}
+
+
+void tftDrawPixel(uint16_t x, uint16_t y) {
   CS_LOW;
 
-  Address_set(x, y, x+w-1, y+h-1);
-  for(int i = 0; i < h; i++) {
-    for(int m = 0; m < w; m++) {
-      Lcd_Write_Data(col>>8);
-      Lcd_Write_Data(col);
-    }
-  }
+  Address_set(x, y, x, y);
+  Lcd_Write_Data(strokeColor >> 8);
+  Lcd_Write_Data(strokeColor);
 
   CS_HIGH;
 }
 
 
-void tftClear(uint16_t col) {
-  tftFillRect(0, 0, 480, 320, col);
-}
 
 
-void tftHLine(uint16_t x, uint16_t y, uint16_t l, uint16_t col) {
+void tftHLine(uint16_t x, uint16_t y, uint16_t l) {
   CS_LOW;
 
   Address_set(x, y, x+l-1, y);
   for(int i=0; i < l; i++) {
-      Lcd_Write_Data(col>>8);
-      Lcd_Write_Data(col);
+      Lcd_Write_Data(strokeColor >> 8);
+      Lcd_Write_Data(strokeColor);
   }
 
   CS_HIGH;
 }
 
-void tftVLine(uint16_t x, uint16_t y, uint16_t l, uint16_t col) {
+void tftVLine(uint16_t x, uint16_t y, uint16_t l) {
   CS_LOW;
 
   Address_set(x, y, x, y+l-1);
   for(int i = 0; i < l; i++) {
-      Lcd_Write_Data(col>>8);
-      Lcd_Write_Data(col);
+      Lcd_Write_Data(strokeColor >> 8);
+      Lcd_Write_Data(strokeColor);
   }
 
   CS_HIGH;
 }
 
 
-void tftLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t col) {
-  CS_LOW;
+void tftLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
+  int dx = x2 - x1; // dx = abs(x2 - x1)
+  if (dx < 0) {
+     dx = -dx;
+  }
+  int dy = y2 - y1; // dy = abs(y2 - y1)
+  if (dy < 0) {
+     dy = -dy;
+  }
+  int sx = x1 < x2 ? 1 : -1; // sx = sgn(x2 - x1)
+  int sy = y1 < y2 ? 1 : -1; // sy = sgn(y2 - y1)
 
-//  Address_set(x, y, x+l-1, y);
-//  for(int i=0; i < l; i++) {
-//      Lcd_Write_Data(col>>8);
-//      Lcd_Write_Data(col);
-//  }
+  int err = dx - dy;
+  while (1) {
+     tftDrawPixel(x1, y1);
 
-  CS_HIGH;
+     if (x1 == x2 && y1 == y2)
+        break;
+
+     int e2 = 2 * err;
+     if (e2 > -dy) {
+        err -= dy;
+        x1 += sx;
+     }
+     if (e2 < dx) {
+        err += dx;
+        y1 += sy;
+     }
+  }
 }
 
 
-void tftCircle(uint16_t cx, uint16_t cy, uint16_t r) {
+void tftCircle(uint16_t x0, uint16_t y0, uint16_t radius) {
+   int f = 1 - radius;
+   int ddF_x = 0;
+   int ddF_y = -2 * radius;
+   int x = 0;
+   int y = radius;
+
+   if (fill) {
+      uint16_t oldColor = strokeColor;
+      strokeColor = fillColor;
+      tftLine(x0 - radius, y0, x0 + radius, y0);
+      strokeColor = oldColor;
+   }
+
+   if (stroke) {
+       tftDrawPixel(x0, y0 + radius);
+       tftDrawPixel(x0, y0 - radius);
+       tftDrawPixel(x0 + radius, y0);
+       tftDrawPixel(x0 - radius, y0);
+   }
+
+    while (x < y) {
+       if (f >= 0) {
+          y--;
+          ddF_y += 2;
+          f += ddF_y;
+       }
+       x++;
+       ddF_x += 2;
+       f += ddF_x + 1;
+
+       if (fill) {
+          uint16_t oldColor = strokeColor;
+          strokeColor = fillColor;
+          tftLine(x0 + x, y0 - y, x0 - x, y0 - y);
+          tftLine(x0 + y, y0 - x, x0 - y, y0 - x);
+          tftLine(x0 + y, y0 + x, x0 - y, y0 + x);
+          tftLine(x0 + x, y0 + y, x0 - x, y0 + y);
+          strokeColor = oldColor;
+       }
+
+       if (stroke) {
+          tftDrawPixel(x0 + x, y0 - y); // 1
+          tftDrawPixel(x0 + y, y0 - x); // 2
+          tftDrawPixel(x0 + y, y0 + x); // 3
+          tftDrawPixel(x0 + x, y0 + y); // 4
+
+          tftDrawPixel(x0 - x, y0 + y); // 5
+          tftDrawPixel(x0 - y, y0 + x); // 6
+          tftDrawPixel(x0 - y, y0 - x); // 7
+          tftDrawPixel(x0 - x, y0 - y); // 8
+       }
+   }
+
 }
 
 
-void tftRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col) {
-  tftHLine(x    , y    , w, col);
-  tftHLine(x    , y+h-1, w, col);
-  tftVLine(x    , y    , h, col);
-  tftVLine(x+w-1, y    , h, col);
+void tftRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
+  if (fill) {
+     CS_LOW;
+     Address_set(x, y, x+w-1, y+h-1);
+     for(int i = 0; i < h; i++) {
+       for(int m = 0; m < w; m++) {
+         Lcd_Write_Data(fillColor >> 8);
+         Lcd_Write_Data(fillColor);
+       }
+     }
+     CS_LOW;
+  }
+
+  if (stroke) {
+     tftHLine(x    , y    , w);
+     tftHLine(x    , y+h-1, w);
+     tftVLine(x    , y    , h);
+     tftVLine(x+w-1, y    , h);
+  }
 }
 
 
@@ -393,17 +498,6 @@ uint16_t tftBltPaletteRle(const Bitmap8* source, const uint16_t* palette, uint16
 }
 
 
-void tftDrawPixel(uint16_t x, uint16_t y, uint16_t col) {
-  CS_LOW;
-
-  Address_set(x, y, x, y);
-  Lcd_Write_Data(col>>8);
-  Lcd_Write_Data(col);
-
-  CS_HIGH;
-}
-
-
 extern const Bitmap8* const charSet[224] PROGMEM;
 extern const uint16_t thePalette[] PROGMEM;
 
@@ -412,7 +506,20 @@ uint16_t tftDrawChar(uint16_t x, uint16_t y, char c) {
    if (glyph != NULL) {
       return tftBltPaletteRle(glyph, thePalette, x, y);
    }
-   return 5;
+
+   uint16_t oldFillColor = fillColor;
+   bool oldFill = fill;
+   bool oldStroke = stroke;
+   stroke = false;
+   fillColor = BLACK;
+   fill = true;
+
+   tftRect(x, y, 10, 30);  // todo: font height!!!!
+
+   stroke = oldStroke;
+   fillColor = oldFillColor;
+   fill = oldFill;
+   return 10;
 }
 
 uint16_t tftDrawText(uint16_t x, uint16_t y, const char* str) {
@@ -421,4 +528,18 @@ uint16_t tftDrawText(uint16_t x, uint16_t y, const char* str) {
       str++;
    }
    return x;
+}
+
+void tftClear(uint16_t col) {
+  CS_LOW;
+
+  Address_set(0, 0, 479, 319);
+  for(int i = 0; i < 320; i++) {
+    for(int m = 0; m < 480; m++) {
+      Lcd_Write_Data(col >> 8);
+      Lcd_Write_Data(col);
+    }
+  }
+
+  CS_HIGH;
 }

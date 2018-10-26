@@ -35,7 +35,14 @@ typedef struct _Bitmap8 {
 void tftInit();
 
 
-void tftDrawPixel(uint16_t x, uint16_t y, uint16_t col);
+void tftSetFill(uint16_t color);
+void tftSetNoFill();
+
+void tftSetStroke(uint16_t color);
+void tftSetNoStroke();
+
+
+void tftDrawPixel(uint16_t x, uint16_t y);
 
 /**
  * Renders a single character.
@@ -54,7 +61,7 @@ uint16_t tftDrawChar(uint16_t x, uint16_t y, char c);
  * @param y The y coordinate of the starting point
  * @param str  The string to draw
  */
-void tftDrawText(uint16_t x, uint16_t y, const char* str);
+uint16_t tftDrawText(uint16_t x, uint16_t y, const char* str);
 
 
 /**
@@ -70,9 +77,8 @@ void tftDeviceCodeRead(uint8_t rsult[4]);
  * @param x The x coordinate of the starting point.
  * @param y The y coordinate of the starting point.
  * @param l The length of the line
- * @param col The color of the line
  */
-void tftHLine(uint16_t x, uint16_t y, uint16_t l, uint16_t col);
+void tftHLine(uint16_t x, uint16_t y, uint16_t l);
 
 
 /**
@@ -81,9 +87,13 @@ void tftHLine(uint16_t x, uint16_t y, uint16_t l, uint16_t col);
  * @param x The x coordinate of the starting point.
  * @param y The y coordinate of the starting point.
  * @param l The length of the line
- * @param col The color of the line
  */
-void tftVLine(uint16_t x, uint16_t y, uint16_t l, uint16_t col);
+void tftVLine(uint16_t x, uint16_t y, uint16_t l);
+
+void tftLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
+
+void tftCircle(uint16_t cx, uint16_t cy, uint16_t r);
+
 
 
 /**
@@ -93,21 +103,8 @@ void tftVLine(uint16_t x, uint16_t y, uint16_t l, uint16_t col);
  * @param y The y coordinate of the upper left corner
  * @param w The width of the rectangle
  * @param h The height of the rectangle
- * @param col The color of the rectangle
  */
-void tftRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col);
-
-
-/**
- * Draws a filled rectangle.
- *
- * @param x The x coordinate of the upper left corner
- * @param y The y coordinate of the upper left corner
- * @param w The width of the rectangle
- * @param h The height of the rectangle
- * @param col The color of the rectangle
- */
-void tftFillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t col);
+void tftRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 
 
 /**

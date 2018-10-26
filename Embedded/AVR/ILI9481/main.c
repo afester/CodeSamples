@@ -37,32 +37,50 @@ static char buffer[30];
 // static int wakeup = 0;
 
 /**
- * Format a value from 0 .. 999 into a string in the format
- * "nn,n"
+ * Formats a numeric value into a string using a specified number of decimal places.
+ *
+ * @param value
+ * @param decimals
+ * @param result
  */
-void format(int value, char* result) { // , int decimals) {
-    static char convert[10];
-    itoa(value, convert, 10);    // "x", "xx", "xxx"
-    int len = strlen(convert);      // 1, 2, 3
+void strFormat(unsigned int value, int decimals, char* result) {
+    // convert value to string
+    static char buffer[10];
+    itoa(value, buffer, 10);    // n, nn, nnn, ...
+    size_t digitCount = strlen(buffer);
 
-    int idx = 0;
-    if (len == 1) {
-        result[idx++] = ' ';
-        result[idx++] = '0';
-        result[idx++] = ',';
-        result[idx++] = convert[0];
-    } else if (len == 2) {
-        result[idx++] = ' ';
-        result[idx++] = convert[0];
-        result[idx++] = ',';
-        result[idx++] = convert[1];
-    } else if (len == 3) {
-        result[idx++] = convert[0];
-        result[idx++] = convert[1];
-        result[idx++] = ',';
-        result[idx++] = convert[2];
+    // calculate decimal point position.
+    // A value < 1 shows that at least one leading zero needs to be prepended.
+    int decPos = digitCount - decimals;
+
+    // calculate number of leading zeroes
+    size_t zeroes = 0;
+    if (decPos < 1) {
+        zeroes = 1 - decPos;
+        decPos = 1;
     }
-    buffer[4] = 0;
+
+    // digitCount: number of digits in the original number
+    // zeroes: number of leading zeroes in result
+    // decPos: index of decimal point in result
+    // zeroes + digitCount:  // overall number of digits in result (excl. decimal point)
+
+    // create final result - fill with zeroes, add decimal point, add original digits
+    int dest = 0;
+    int idx = 0;
+    while(digitCount > 0) {
+        if (zeroes > 0) {
+            result[dest++] = '0';
+            zeroes--;
+        } else{
+            result[dest++] = buffer[idx++];
+            digitCount--;
+        }
+        if (dest == decPos && digitCount > 0) {
+            result[dest++] = ',';
+        }
+    }
+    result[dest] = 0;
 }
 
 
@@ -81,6 +99,30 @@ int main() {
 
 //   tftDrawText("Display controller: ");
 //   tftDeviceCodeRead();
+//
+//    tftSetNoStroke();
+//    tftSetFill(BLUE);
+//    tftRect(50, 50, 300, 200);
+//
+//    tftSetStroke(BLACK);
+//    tftSetFill(GREEN);
+//    tftRect(60, 60, 280, 180);
+//    while(1);
+//
+//    tftSetNoStroke();
+//    uint16_t red = 0b11111;
+//    for (int r = 150; r > 10; r -= 5, red--) {
+//       tftSetFill(red << 11);
+//       tftCircle(240, 160, r);
+//    }
+//    while(1);
+//
+//   for (int x = 10; x < 479; x += 10) {
+//      tftLine(240, 310, x, 10);
+//   }
+//
+//   while(1);
+
 
    int ypos = 10;
    tftDrawText(5, ypos, "U");
@@ -133,10 +175,10 @@ int main() {
             value1 = 350;
          }
 
-         format(value1, buffer);
+         strFormat(value1, 1, buffer);
          strcat(buffer, " V    ");
          uint16_t xEnd = tftDrawText(98, 10, buffer);
-         tftFillRect(xEnd, 10, 300-xEnd, 45, RED);
+//         tftFillRect(xEnd, 10, 300-xEnd, 45, RED);
 //         MCP48xx_SetValue(value1 * 10);
       }
 
@@ -150,7 +192,7 @@ int main() {
             value2 = 300;
          }
 
-         format(value2, buffer);
+         strFormat(value2, 2, buffer);
          strcat(buffer, " A    ");
          tftDrawText(290, 160, buffer);
 //         MCP48xx_SetValue(value2 * 10);
