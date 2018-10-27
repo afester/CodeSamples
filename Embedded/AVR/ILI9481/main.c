@@ -134,7 +134,7 @@ int main() {
    tftDrawText(80, ypos, ":"); //  18,5 V");
    tftDrawText(290, ypos, "1,25 A");
    ypos += 60;
-   tftDrawText(200, ypos, "I: ");
+   tftDrawText(200, ypos, "Max: ");
 
    ypos += 60;
    tftDrawText(5, ypos, "U5");
