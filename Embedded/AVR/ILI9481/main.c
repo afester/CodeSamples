@@ -1,7 +1,9 @@
-#include <avr/interrupt.h>
-#include <avr/sleep.h>
+#include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include <avr/interrupt.h>
+#include <avr/sleep.h>
 
 #include "ILI9481.h"
 // #include "7seg.h"
@@ -10,6 +12,9 @@
 #include "adc.h"
 #include "../LCDisplay/cfa533.h"
 #include <avr/pgmspace.h>
+
+//extern volatile int16_t timeItTook;
+extern volatile bool accel;
 
 #if 0
 void displayValue(int y, int value, int color) {
@@ -127,22 +132,21 @@ int main() {
    int ypos = 10;
    tftDrawText(5, ypos, "U");
    tftDrawText(80, ypos, ":"); //  18,5 V");
-   ypos += 50;
+   tftDrawText(290, ypos, "1,25 A");
+   ypos += 60;
+   tftDrawText(200, ypos, "I: ");
+
+   ypos += 60;
    tftDrawText(5, ypos, "U5");
    tftDrawText(80, ypos, ": 4,9 V");
-   ypos += 50;
+   tftDrawText(290, ypos, "0,01 A");
+
+   ypos += 60;
    tftDrawText(5, ypos, "U12");
    tftDrawText(80, ypos, ": 12,1 V");
-   ypos += 50;
-   tftDrawText(5, ypos, "I");
-   tftDrawText(80, ypos, ": 0,05 A");
-   tftDrawText(260, ypos, "I: ");
-   ypos += 50;
-   tftDrawText(5, ypos, "I5");
-   tftDrawText(80, ypos, ": 0,01 A");
-   ypos += 50;
-   tftDrawText(5, ypos, "I12");
-   tftDrawText(80, ypos, ": 0,02 A");
+   tftDrawText(290, ypos, "0,02 A");
+
+   ypos += 60;
    tftDrawText(260, ypos, "T: 42 °C");
 
    sei();
@@ -150,8 +154,8 @@ int main() {
 //   displayValue(130, 0, GREEN);
 //   displayValue(210, 0, RED);
 
-   int value1 = 0;
-   int value2 = 0;
+   int voltage = 0;
+   int current = 0;
    while(1) {
       set_sleep_mode(0); // IDLE mode
       sleep_mode();
@@ -159,43 +163,33 @@ int main() {
       // voltage
       int8_t diff = encoderRead1();
       if (diff != 0) {
-#if 0
-         // If the diff is bigger than 1, then accelerate
-         if (diff > 1) {
-            diff = 10;
-         }
-         if (diff < -1) {
-            diff = -10;
-         }
-#endif
-         value1 += diff;
-         if (value1 < 0) {
-            value1 = 0;
-         } else if (value1 > 350) {
-            value1 = 350;
+         voltage += diff;
+         if (voltage < 0) {
+            voltage = 0;
+         } else if (voltage > 350) {
+            voltage = 350;
          }
 
-         strFormat(value1, 1, buffer);
+         strFormat(voltage, 1, buffer);
          strcat(buffer, " V    ");
-         uint16_t xEnd = tftDrawText(98, 10, buffer);
-//         tftFillRect(xEnd, 10, 300-xEnd, 45, RED);
-//         MCP48xx_SetValue(value1 * 10);
+         tftDrawText(98, 10, buffer);
+//         MCP48xx_SetValue(voltage * 10);
       }
 
       // maximum current
       diff = encoderRead2();
       if (diff != 0) {
-         value2 += diff;
-         if (value2 < 0) {
-            value2 = 0;
-         } else if (value2 > 300) {
-            value2 = 300;
+         current += diff;
+         if (current < 0) {
+            current = 0;
+         } else if (current > 300) {
+            current = 300;
          }
 
-         strFormat(value2, 2, buffer);
+         strFormat(current, 2, buffer);
          strcat(buffer, " A    ");
-         tftDrawText(290, 160, buffer);
-//         MCP48xx_SetValue(value2 * 10);
+         tftDrawText(290, 70, buffer);
+//         MCP48xx_SetValue(current * 10);
       }
 
 #if 0

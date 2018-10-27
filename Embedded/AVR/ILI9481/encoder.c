@@ -1,11 +1,20 @@
+#include <stdbool.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
 #include "encoder.h"
 
+const uint8_t ACCEL_THRESHOLD = 20;
+
+// channel 1
+static volatile uint8_t ticks1 = 0;
+volatile bool accel1 = false;
 static int8_t lastStep1 = 3;
 static volatile int8_t encDelta1 = 0;
 
+// channel 2
+static volatile uint8_t ticks2 = 0;
+volatile bool accel2 = false;
 static int8_t lastStep2 = 3;
 static volatile int8_t encDelta2 = 0;
 
@@ -20,6 +29,14 @@ static volatile int8_t encDelta2 = 0;
 
 // 1kHz 
 ISR(TIMER1_COMPA_vect) {
+   ticks1++;
+   if (ticks1 > 100) {  // TODO: is this correct?
+       ticks1 = 0;
+   }
+   ticks2++;
+   if (ticks2 > 100) {  // TODO: is this correct?
+       ticks2 = 0;
+   }
 
    // read current encoder states as gray code
    uint8_t pinValue = ENC1_PORT;
@@ -39,7 +56,7 @@ ISR(TIMER1_COMPA_vect) {
    }
 
    int8_t diff = lastStep1 - step;  // only -3, -1, 1 or 3 possible (assumed that no step has been skipped)
-                                   // (or 0 if no rotation)
+                                    // (or 0 if no rotation)
 
    // -1: 0b11111111 ccw
    //  3: 0b00000011 ccw
@@ -53,11 +70,21 @@ ISR(TIMER1_COMPA_vect) {
    // only diff & 1 == 1 is a valid rotation
    // diff & 2 == 0 is ccw, diff & 2 == 1 is cw
    if (diff & 1) {
+      // consider time it took for the rotation
+      if (ticks1 < ACCEL_THRESHOLD) {
+          accel1 = true;
+      } else {
+          accel1 = false;
+      }
+      ticks1 = 0;      
+
       lastStep1 = step;
-      //diff & 2 => 0 (cw) or 2 (ccw)
+      // diff & 2 => 0 (cw) or 2 (ccw)
       //(diff & 2) - 1 => -1 (cw) or 1 (ccw) (!!!)
       encDelta1 -= (diff & 2) - 1;
    }
+
+//#########################################################
 
    // Encoder 2
    pinValue = ENC2_PORT;
@@ -70,8 +97,16 @@ ISR(TIMER1_COMPA_vect) {
    }
    diff = lastStep2 - step;
    if (diff & 1) {
+      // consider time it took for the rotation
+      if (ticks2 < ACCEL_THRESHOLD) {
+          accel2 = true;
+      } else {
+          accel2 = false;
+      }
+      ticks2 = 0;      
+
       lastStep2 = step;
-      //diff & 2 => 0 (cw) or 2 (ccw)
+      // diff & 2 => 0 (cw) or 2 (ccw)
       //(diff & 2) - 1 => -1 (cw) or 1 (ccw) (!!!)
       encDelta2 -= (diff & 2) - 1;
    }
@@ -99,7 +134,12 @@ int8_t encoderRead1() {
    int8_t diff = encDelta1;
    encDelta1 = diff & 3;
    sei();
-   return diff >> 2;
+   diff = diff >> 2;
+
+   if (accel1) {
+       diff = diff * 10;
+   }
+   return diff;
 }
 
 int8_t encoderRead2() {
@@ -107,5 +147,10 @@ int8_t encoderRead2() {
    int8_t diff = encDelta2;
    encDelta2 = diff & 3;
    sei();
-   return diff >> 2;
+   diff = diff >> 2;
+
+   if (accel2) {
+       diff = diff * 10;
+   }
+   return diff;
 }
