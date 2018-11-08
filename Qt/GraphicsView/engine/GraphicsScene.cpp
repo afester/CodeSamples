@@ -116,3 +116,13 @@ void GraphicsScene::loadFromFile(const QString& fileName) {
     readExternal(stream);
     srcFile.close();
 }
+
+
+QList<QString> GraphicsScene::getSupportedItemClasses() {
+    return itemFactory->getItemClasses();
+}
+
+
+FACTORY_FUNCTION GraphicsScene::getFactoryFunction(const QString& itemClass) {
+    return itemFactory->getFactoryFunction(itemClass);
+}

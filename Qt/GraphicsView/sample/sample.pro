@@ -16,6 +16,7 @@ SOURCES = LabelledComboBox.cpp Log.cpp main.cpp objectcontroller.cpp
 
 INCLUDEPATH += ../engine
 INCLUDEPATH += ../../../../qt-solutions/qtpropertybrowser/src
-LIBS += -L../bin -lengine -L../../../../qt-solutions/qtpropertybrowser/lib -lQtSolutions_PropertyBrowser-headd
+# LIBS += -L../bin -lengine -L../../../../qt-solutions/qtpropertybrowser/lib -lQtSolutions_PropertyBrowser-headd
+LIBS += -L../bin -lengine -L../../../../qt-solutions/qtpropertybrowser/lib -lQtSolutions_PropertyBrowser-head
 
 RESOURCES += GraphicsView.qrc

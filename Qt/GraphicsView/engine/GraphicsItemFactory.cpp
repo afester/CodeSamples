@@ -55,3 +55,20 @@ QGraphicsItem* GraphicsItemFactory::createItem(const QString& className) {
 
     return result;
 }
+
+
+QList<QString> GraphicsItemFactory::getItemClasses() {
+    QList<QString> result;
+
+    for (QHash<QString, FACTORY_FUNCTION>::const_iterator iter = factoryFunctions.cbegin();
+         iter != factoryFunctions.cend();
+         iter++) {
+        result.append(iter.key());
+    }
+
+    return result;
+}
+
+FACTORY_FUNCTION GraphicsItemFactory::getFactoryFunction(const QString& className) {
+    return factoryFunctions.value(className);
+}
