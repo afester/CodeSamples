@@ -16,7 +16,7 @@ class Q_DECL_IMPORT NewItemInteractor : public EditItemInteractor {
 	// AbstractEditHandle editHandle;
 
 public:
-	NewItemInteractor(FACTORY_FUNCTION factory, AbstractEditHandle editHandle);
+    NewItemInteractor(FACTORY_FUNCTION factory); // , AbstractEditHandle editHandle);
 
 	virtual ~NewItemInteractor();
 

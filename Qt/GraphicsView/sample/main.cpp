@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     resize(1024, 768);
 
     graphicsSheet = new GraphicsSheet(this);
+
     QList<QString> itemClasses = graphicsSheet->getSupportedItemClasses();
     qDebug() << "Item classes supported by the graphics sheet:";
     qDebug() << itemClasses;
@@ -242,17 +243,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 
     selectInteractor = new EditItemInteractor();
 
-    newLineItemInteractor = graphicsSheet->createNewItemInteractor("LineItem"); //  LineItem::P2Handle);
+    newLineItemInteractor = graphicsSheet->createNewItemInteractor("LineItem");
     QObject::connect(newLineItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
-    newRectItemInteractor = graphicsSheet->createNewItemInteractor("RectItem"); // RectItem::BottomRightHandle);
+    newRectItemInteractor = graphicsSheet->createNewItemInteractor("RectItem");
     QObject::connect(newRectItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
-    newTextItemInteractor = graphicsSheet->createNewItemInteractor("TextItem"); // TextItem::BottomRightHandle);
+    newTextItemInteractor = graphicsSheet->createNewItemInteractor("TextItem");
     QObject::connect(newTextItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
-    newCircleItemInteractor = graphicsSheet->createNewItemInteractor("CircleItem"); // CircleItem::RadHandle);
+    newCircleItemInteractor = graphicsSheet->createNewItemInteractor("CircleItem");
     QObject::connect(newCircleItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
-    newEllipseItemInteractor = graphicsSheet->createNewItemInteractor("EllipseItem"); // EllipseItem::BottomRightHandle);
+    newEllipseItemInteractor = graphicsSheet->createNewItemInteractor("EllipseItem");
     QObject::connect(newEllipseItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
-    newBezierItemInteractor = graphicsSheet->createNewItemInteractor("BezierItem");     // BezierItem::P2Handle);
+    newBezierItemInteractor = graphicsSheet->createNewItemInteractor("BezierItem");
     QObject::connect(newBezierItemInteractor, SIGNAL(editDone()), this, SLOT(toggleActionSelect()));
 
     graphicsSheet->setInteractor(selectInteractor);
@@ -398,8 +399,14 @@ void MainWindow::doActionUndo(){
 }
 
 void MainWindow::selectionChanged(){
-    InteractableItem* item = dynamic_cast<InteractableItem*>(graphicsSheet->scene()->selectedItems().at(0));
-    propertyEditor->setObject(item);
+    QList<QGraphicsItem*> selected = graphicsSheet->scene()->selectedItems();
+    if (selected.size() > 0) {
+        InteractableItem* item = dynamic_cast<InteractableItem*>(selected.at(0));
+        qDebug() << "Item selected:" << item;
+        propertyEditor->setObject(item);
+    } else {
+        propertyEditor->setObject(0);
+    }
 }
 
 

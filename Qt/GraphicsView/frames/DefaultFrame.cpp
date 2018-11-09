@@ -182,6 +182,10 @@ AbstractEditHandle DefaultFrame::getEditHandle(GraphicsSheet* view, const QPoint
 }
 
 
+AbstractEditHandle DefaultFrame::getNewHandle() {
+    return BottomRightHandle;
+}
+
 void DefaultFrame::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) {
     Q_UNUSED(view);
 

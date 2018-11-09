@@ -99,6 +99,8 @@ public:
     // @Override
     virtual AbstractEditHandle getEditHandle(GraphicsSheet* view, const QPointF& pos, AbstractEditHandle enabledHandles = AllHandlesMask);
 
+    virtual AbstractEditHandle getNewHandle();
+
     // @Override
     virtual void paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles = AllHandlesMask);
 

@@ -110,6 +110,8 @@ protected:
     // @Override
     virtual AbstractEditHandle getEditHandle(GraphicsSheet* view, const QPointF& pos, AbstractEditHandle enabledHandles = AllHandlesMask);
 
+    virtual AbstractEditHandle getNewHandle();
+
     // @Override
     virtual void moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos);
 

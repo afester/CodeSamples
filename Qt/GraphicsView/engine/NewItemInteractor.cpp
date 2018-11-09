@@ -4,9 +4,7 @@
 #include "GraphicsSheet.h"
 #include "NewItemInteractor.h"
 
-NewItemInteractor::NewItemInteractor(FACTORY_FUNCTION factory, AbstractEditHandle handle) :
-itemFactory(factory) {
-    editHandle = handle;
+NewItemInteractor::NewItemInteractor(FACTORY_FUNCTION factory) : itemFactory(factory) {
 }
 
 
@@ -21,7 +19,8 @@ void NewItemInteractor::mousePressEvent ( QMouseEvent * event ) {
 
 	QPointF scenePos = theView->mapToScene(event->pos());
 
-	QGraphicsItem* newItem = itemFactory();
+    QGraphicsItem* newItem = itemFactory();
+    editHandle = dynamic_cast<InteractableItem*>(newItem)->getNewHandle();
 	newItem->setPos(scenePos);
     theView->scene()->clearSelection();
     theItem = dynamic_cast<InteractableItem*>(newItem);
@@ -35,6 +34,7 @@ void NewItemInteractor::mousePressEvent ( QMouseEvent * event ) {
 void NewItemInteractor::mouseReleaseEvent ( QMouseEvent* ) {
 
 	if (theItem) {
+
 #if 0
 		KollageGraphicsScene* theScene = dynamic_cast<KollageGraphicsScene*>(theView->scene());
 
@@ -42,6 +42,7 @@ void NewItemInteractor::mouseReleaseEvent ( QMouseEvent* ) {
         theScene->getUndoStack()->push(undo);
         theFrame->setSelected(true);
 #endif
+
 		theItem = 0;
         emit editDone();
 	}

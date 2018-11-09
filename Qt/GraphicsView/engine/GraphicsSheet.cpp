@@ -483,6 +483,5 @@ QList<QString> GraphicsSheet::getSupportedItemClasses() {
 
 NewItemInteractor* GraphicsSheet::createNewItemInteractor(const QString& itemClass) {
     GraphicsScene* graphicsScene = dynamic_cast<GraphicsScene*> (scene());
-
-    return new NewItemInteractor(graphicsScene->getFactoryFunction(itemClass), 2);
+    return new NewItemInteractor(graphicsScene->getFactoryFunction(itemClass));
 }
