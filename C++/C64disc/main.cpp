@@ -1,12 +1,23 @@
+#include <assert.h>
+
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <string>
 #include <stdlib.h>
 #include <string.h>
 #include "HexDump.h"
 
 using namespace std;
-
+#if 0
+#ifdef _MSC_VER
+#  define BEGINPACK _Pragma pack(push, 1)
+#  define ENDPACK _Pragma pack(pop)
+#elif defined(__GNUC__)
+#  define BEGINPACK
+#  define ENDPACK __attribute__((packed));
+#endif
+#endif
 
 typedef struct Sector {
     uint8_t nextTrack;
@@ -14,10 +25,12 @@ typedef struct Sector {
     uint8_t data[254];
 }_Sector;
 
+#pragma pack (push, 1)
+
 typedef struct AllocationMap {
     uint8_t freeSectors;
     uint8_t allocMap[3];
-}__attribute__((packed)) _AllocationMap;
+}_AllocationMap;
 
 typedef struct Bam {
     uint8_t nextTrack;
@@ -36,8 +49,10 @@ typedef struct Bam {
     uint8_t driveMode2[4];
     uint8_t driveMode3;
     uint8_t unused[76];
-}__attribute__((packed)) _Bam2;
+}_Bam2;
+#pragma pack (pop)
 
+// 32 bytes
 typedef struct FileEntry {
     uint8_t fileType;
     uint8_t firstTrack;
@@ -53,6 +68,7 @@ typedef struct DirEntry {
     FileEntry file;
 }_DirEntry;
 
+// one sector of Dirs (256 bytes)
 typedef struct Dir {
     DirEntry entry[8];
 }_Dir;
@@ -331,6 +347,33 @@ FileEntry* createEntry(const string& fileName) {
     return 0;
 }
 
+
+void setTrackSector(const string& fileName, uint8_t track, uint8_t sector) {
+    Bam* bam = (Bam*) readSector(18, 0);
+    uint8_t nextTrack = bam->nextTrack;
+    uint8_t nextSector = bam->nextSector;
+    free(bam);
+
+    while(nextTrack != 0 && nextSector != 255) {
+        Dir* dir = (Dir*) readSector(nextTrack, nextSector);
+        for (int idx = 0;  idx < 8;  idx++) {
+            FileEntry* fileEntry = &dir->entry[idx].file;
+            if (fileEntry->fileType != 0) {
+                string entryName = getName(fileEntry->fileName);
+                entryName = rtrim(entryName);
+                if (entryName == fileName) {
+                    fileEntry->firstTrack = track;
+                    fileEntry->firstSector = sector;
+                    writeSector((Sector*) dir, nextTrack, nextSector);
+                }
+            }
+        }
+        nextTrack = dir->entry[0].nextTrack;
+        nextSector = dir->entry[0].nextSector;
+    }
+}
+
+
 void dumpFile(FileEntry* entry) {
     uint8_t nextTrack = entry->firstTrack;
     uint8_t nextSector = entry->firstSector;
@@ -430,8 +473,8 @@ void allocateBlock(uint8_t& trackResult, uint8_t& sectorResult) {
 
     trackResult = track + 1;
     sectorResult = sector;
-    cout << "Using Track :" << (int) trackResult << endl;
-    cout << "Using Sector:" << (int) sectorResult << endl;
+    // cout << "Using Track :" << (int) trackResult << endl;
+    cout << "Using Sector " << (int) trackResult << "," << (int) sectorResult << endl;
 }
 
 // Algorithm:
@@ -443,7 +486,8 @@ void allocateBlock(uint8_t& trackResult, uint8_t& sectorResult) {
 //      then read track/sector
 //      else calloc sector (sector->nextTrack=0, sector->nextSector = 0)
 
-//   - read next bunch of bytes (1..254) into sector->data
+//   - read next bunch of bytes (1..254) into sector->data
+
 // Link to next sector(!!)
 //   - last block? Then set sector->nextTrack=0, sector->nextSector=number of bytes
 //   - else: if sector->nextTrack = 0 then allocate new sector, set sector->nextTrack/sector->nextSector
@@ -487,15 +531,29 @@ void copyIn(const string& srcFile, const string& dstFile) {
     uint8_t nextSector = entry->firstSector;
     uint8_t track, sector;
 
+    bool first = true;
     Sector* sect = 0;
     while(blockCount-- > 0) {
         cout << "  ----\nBlock count: " << blockCount << " blocks" << endl;
+
         if (nextTrack == 0) {
             cout << " Allocating new sector ..." << endl;
-            allocateBlock(track, sector);
+            allocateBlock(nextTrack, nextSector);
 
-            sect->nextSector = sector;
-            sect->nextTrack = track;
+            if (first) {
+                setTrackSector(dstFile, nextTrack, nextSector);
+                first = false;
+            } else {
+                sect->nextTrack = nextTrack;
+                sect->nextSector = nextSector;
+                writeSector(sect, track, sector);
+            }
+            track = nextTrack;
+            sector = nextSector;
+
+            //sect->nextSector = sector;
+            //sect->nextTrack = track;
+
 //             writeSector(sect, track, sector);
 
             sect = (Sector*) calloc(sizeof(Sector), 1);
@@ -517,25 +575,30 @@ void copyIn(const string& srcFile, const string& dstFile) {
            cout << " Using existing sector ..." << endl;
            track = nextTrack;
            sector = nextSector;
+
            sect = readSector(nextTrack, nextSector);
+
            nextTrack = sect->nextTrack;
            nextSector = sect->nextSector;
         }
 
-        cout << "Sector: " << (int) track << "," << (int) sector << endl;
+        cout << "Got: " << (int) track << "," << (int) sector << endl;
 
+        
+        
+        
+        
         // initialize a fresh block (as if it was the last one)
-        memset(sect->data, 0, sizeof(Sector));
+        memset(sect->data, 0, sizeof(sect->data));
         size_t readCount = fread(sect->data, 1, 254, src);
-        if (blockCount == 0) {
-            sect->nextTrack = 0;
-            sect->nextSector = readCount + 1;
-        }
+//        if (blockCount == 0) {
+//            sect->nextTrack = 0;
+//            sect->nextSector = readCount + 1;
+//        }
         writeSector(sect, track, sector);
 
-        cout << "Next Sector: " << (int) nextTrack << "," << (int) nextSector << endl;
+//        cout << "Next Sector: " << (int) nextTrack << "," << (int) nextSector << endl;
     }
-
 
     // TODO: deallocate remaining unused blocks!
 }
@@ -687,6 +750,10 @@ void createFile(const string& name) {
 }
 
 int main() {
+    //printf("sizeof(Sector): %d\n", sizeof(Sector));
+    assert(sizeof(Sector) == 256);
+    //printf("sizeof(Bam): %d\n", sizeof(Bam));
+    assert(sizeof(Bam) == 256);
 
     mount("C:\\Users\\afester\\Documents\\Andreas\\test.d64");
 
