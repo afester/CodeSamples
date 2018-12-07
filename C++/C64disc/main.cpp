@@ -8,6 +8,17 @@
 #include <string.h>
 #include "HexDump.h"
 
+
+
+/**
+  Directory header at t18 s0
+  BAM starts at t18 s0  (pointer to start of directory at bytes 0 & 1)
+  BAM takes up 1 sector
+  Directory starts at t18 s1
+  Directory takes up 18 sectors
+*/
+
+
 using namespace std;
 #if 0
 #ifdef _MSC_VER
@@ -52,7 +63,7 @@ typedef struct Bam {
 }_Bam2;
 #pragma pack (pop)
 
-// 32 bytes
+// 30 bytes
 typedef struct FileEntry {
     uint8_t fileType;
     uint8_t firstTrack;
@@ -62,6 +73,7 @@ typedef struct FileEntry {
     uint16_t blockCount;
 }_FileEntry;
 
+// 32 bytes
 typedef struct DirEntry {
     uint8_t nextTrack;  // only used in first entry!
     uint8_t nextSector; // only used in first entry!
@@ -109,7 +121,7 @@ static inline string rtrim(std::string &s) {
 
 string toBinary(uint8_t value) {
     static char result[9];
-    uint8_t mask = 0x01;
+    uint8_t mask = 0x80;
 
     for (int idx = 0;  idx < 8;  idx++) {
         if (value & mask) {
@@ -117,12 +129,14 @@ string toBinary(uint8_t value) {
         } else {
             result[idx] = '0';
         }
-        mask = mask << 1;
+        mask = mask >> 1;
     }
     result[8] = 0;
     return result;
 }
 
+// Track
+// ----------------------------------------------
 //  1..17 => 17 tracks * 21 sectors = 357 blocks
 // 18..24 =>  7 tracks * 19 sectors = 133 blocks (Track 18 is directory/bam)
 // 25..30 =>  6 tracks * 18 sectors = 108 blocks
@@ -188,6 +202,64 @@ void writeSector(Sector* sect, int track, int sector) {
     fflush(imageFile);
 }
 
+
+// see above - writeSector calculates an "absolute" sector anyway ...
+uint16_t toBlock(uint8_t track, uint8_t sector) {
+    if (track < 18) {
+        // zone 1
+        return (track - 1) * 21 + sector;
+    } else if (track < 25) {
+        // zone 2
+        return (17 * 21) + (track - 18) * 19 + sector;
+    } else if (track < 31) {
+        // zone 3
+        return (17 * 21) + (7 * 19) + (track - 25) * 18 + sector;
+    } else {
+        // zone 4
+        return (17 * 21) + (7 * 19) + (6 * 18) + (track - 31) * 17 + sector;
+    }
+
+    return 0;
+}
+
+
+void toTrackSector(uint16_t block, uint8_t& track, uint8_t& sector) {
+    // Track
+// ----------------------------------------------
+//  1..17 => 17 tracks * 21 sectors = 357 blocks
+// 18..24 =>  7 tracks * 19 sectors = 133 blocks (Track 18 is directory/bam)
+// 25..30 =>  6 tracks * 18 sectors = 108 blocks
+// 31..25 =>  5 tracks * 17 sectors = 85 blocks
+    track = 0;
+    sector = 0;
+    if (block < 357) {
+        track = 1 + (block / 21);
+        sector = block % 21;
+        return;
+    }
+
+    block -= 357;
+    if (block < 133) {
+        track = 18 + block / 19;
+        sector = block % 19;
+        return;
+    }
+
+    block -= 133;
+    if (block < 108) {
+        track = 25 + block / 18;
+        sector = block % 18;
+        return;
+    }
+    
+    block -= 108;
+    if (block < 85) {
+        track = 31 + block / 17;
+        sector = block % 17;
+    }
+}
+
+
 void dumpSector(Sector* sector) {
     HexDump* dump = new_HexDump((uint8_t*)sector, sizeof(Sector));
     HexDump_dumpAll(dump);
@@ -207,11 +279,14 @@ void dumpBam(Bam* bam) {
     printf("Format id copy   : %d\n", bam->formatIdCopy);
     printf("Drive mode       : %d/%d/%d\n", bam->driveMode1[0], bam->driveMode2[0], bam->driveMode3);
 
+    printf("            [2]      [1]      [0]\n");
+    printf("            21111 111111\n");
+    printf("Trk Free ---09876 54321098 76543210\n");
     for (int idx = 0;  idx < 35;  idx++) {
         printf("%2d.  %d  %s %s %s\n", idx + 1, bam->allocationMap[idx].freeSectors,
-               toBinary(bam->allocationMap[idx].allocMap[0]).c_str(),
+               toBinary(bam->allocationMap[idx].allocMap[2]).c_str(),
                toBinary(bam->allocationMap[idx].allocMap[1]).c_str(),
-               toBinary(bam->allocationMap[idx].allocMap[2]).c_str());
+               toBinary(bam->allocationMap[idx].allocMap[0]).c_str());
     }
 }
 
@@ -289,6 +364,8 @@ FileEntry* searchFile(const char* fileName) {
     return 0;
 }
 
+uint8_t dirTrack = 0;
+uint8_t dirSector = 0;
 
 Dir* searchFile(const string& fileName, uint8_t& idx) {
     Bam* bam = (Bam*) readSector(18, 0);
@@ -304,6 +381,8 @@ Dir* searchFile(const string& fileName, uint8_t& idx) {
                 string entryName = getName(fileEntry->fileName);
                 entryName = rtrim(entryName);
                 if (entryName == fileName) {
+                    dirTrack = nextTrack;
+                    dirSector = nextSector;
                     return dir;
                 }
             }
@@ -433,7 +512,7 @@ void mount(const string& fileName) {
 
 void allocateBlock(uint8_t& trackResult, uint8_t& sectorResult) {
     Bam* bam = (Bam*) readSector(18, 0);
- //   dumpBam(bam);
+    // dumpBam(bam);
 
     int track = -1;
     int sector = -1;
@@ -467,13 +546,12 @@ void allocateBlock(uint8_t& trackResult, uint8_t& sectorResult) {
 //        }
 //    }
 
- //   dumpBam(bam);
+    // dumpBam(bam);
 
     writeSector((Sector*) bam, 18, 0);
 
     trackResult = track + 1;
     sectorResult = sector;
-    // cout << "Using Track :" << (int) trackResult << endl;
     cout << "Using Sector " << (int) trackResult << "," << (int) sectorResult << endl;
 }
 
@@ -495,7 +573,7 @@ void allocateBlock(uint8_t& trackResult, uint8_t& sectorResult) {
 
 //   - track = sector->nextTrack, sector=sector->nextSector
 
-void copyIn(const string& srcFile, const string& dstFile) {
+void copyIn1(const string& srcFile, const string& dstFile) {
     // hack: look up the destination file
     // make sure at least one block is allocated
     // set the first sector of the destination file to the
@@ -604,6 +682,82 @@ void copyIn(const string& srcFile, const string& dstFile) {
 }
 
 
+
+void copyIn(const string& srcFile, const string& dstFile) {
+    // hack: look up the destination file
+    // make sure at least one block is allocated
+    // set the first sector of the destination file to the
+    // first 254 bytes of the source file
+
+    uint8_t entryIdx = 0;
+    Dir* dir = searchFile(dstFile, entryIdx);
+    if (dir == 0) {
+        cout << "Destination file \"" << dstFile << "\" not found." << endl;
+        return;
+    }
+    FileEntry* entry = &dir->entry[entryIdx].file;
+
+    FILE* src = fopen(srcFile.c_str(), "rb");
+    if (src == 0) {
+        cout << "Source file \"" << srcFile << "\" not found." << endl;
+        return;
+    }
+
+    // obtain the file size
+    fseek(src, 0L, SEEK_END);
+    long fileSize = ftell(src);
+    fseek(src, 0L, SEEK_SET);
+    long blockCount = 0;
+    if (fileSize > 0) {
+        blockCount = ((fileSize - 1) / 254) + 1;
+    }
+
+    cout << "File Size: " << fileSize << " bytes."  << endl;
+    cout << "Block count: " << blockCount << " blocks" << endl;
+
+/******************************************************************************/
+
+    if (entry->firstTrack  == 0) {
+        cout << " Allocating new sector ..." << endl;
+        allocateBlock(entry->firstTrack, entry->firstSector);
+    }
+    entry->blockCount = blockCount;
+    writeSector((Sector*) dir, dirTrack, dirSector);
+
+    uint8_t track = entry->firstTrack;
+    uint8_t sector = entry->firstSector;
+    printf("---------------------------%d %d", track, sector);
+
+    // TODO: What if old data is stored in that track (nextTrack/nextSector)?
+    // probably that "reusage" approach does not make sense at all ...
+    while(blockCount > 0) {
+        blockCount--;
+
+        Sector* sect = readSector(track, sector);
+        size_t readCount = fread(sect->data, 1, 254, src);
+        //track = sect->nextTrack;
+        //sector = sect->nextSector;
+        if (blockCount == 0) {
+            sect->nextTrack = 0;
+            sect->nextSector = 0;
+        } else {
+            if (sect->nextTrack == 0) {
+                cout << " Allocating new sector ..." << endl;
+                allocateBlock(sect->nextTrack, sect->nextSector);
+            }
+        }
+        writeSector(sect, track, sector);
+        track = sect->nextTrack;
+        sector = sect->nextSector;
+    }
+
+/*****************************************************************************/
+
+    fclose(src);
+}
+
+
+
 void dir() {
     if (imageFile == 0) {
         cout << "No image mounted." << endl;
@@ -612,7 +766,7 @@ void dir() {
 
     Bam* bam = (Bam*) readSector(18, 0);
 
-    printf("\n0 \"%16s\" %c%c %c\n", getName(bam->discName), bam->discId[0], bam->discId[1], bam->dosVersion);
+    printf("\n0 \"%16s\" %c%c %c%c\n", getName(bam->discName), bam->discId[0], bam->discId[1], bam->dosVersion, bam->formatIdCopy);
     printf("--------------------------\n");
 
     uint8_t nextTrack = bam->nextTrack;
@@ -749,13 +903,93 @@ void createFile(const string& name) {
     createEntry(name.c_str());
 }
 
+
+void createImage(const string& fileName) {
+    Sector* nix = (Sector*) calloc(sizeof(Sector), 1);
+    imageFile = fopen(fileName.c_str(), "wb");
+    for (uint16_t block = 0;  block < 683;  block++) {
+        uint8_t track = 0;
+        uint8_t sector = 0;
+        toTrackSector(block, track, sector);
+        writeSector(nix, track, sector);
+    }
+    
+    Bam* bam = (Bam*) nix;
+    strcpy((char*) bam->discName, "                ");
+    strcpy((char*) bam->discName, "TEST");
+    bam->discName[strlen((char*) bam->discName)] = ' ';
+    bam->nextTrack = 18;
+    bam->nextSector = 1;
+    bam->discId[0] = '0';
+    bam->discId[1] = '0';
+    bam->dosVersion = '2';
+    bam->formatIdCopy = 'A';
+
+    //  1..17 => 17 tracks * 21 sectors = 357 blocks
+    // 18..24 =>  7 tracks * 19 sectors = 133 blocks (Track 18 is directory/bam)
+    // 25..30 =>  6 tracks * 18 sectors = 108 blocks
+    // 31..35 =>  5 tracks * 17 sectors = 85 blocks
+    for (uint8_t track = 0;  track < 17;  track++) {
+        bam->allocationMap[track].freeSectors = 21;
+        bam->allocationMap[track].allocMap [0] = 0xff;
+        bam->allocationMap[track].allocMap [1] = 0xff;
+        bam->allocationMap[track].allocMap [2] = 0x1f;
+    }
+    for (uint8_t track = 17;  track < 24;  track++) {
+        bam->allocationMap[track].freeSectors = 19;
+        bam->allocationMap[track].allocMap [0] = 0xff;
+        bam->allocationMap[track].allocMap [1] = 0xff;
+        bam->allocationMap[track].allocMap [2] = 0x07;
+    }
+    for (uint8_t track = 24;  track < 30;  track++) {
+        bam->allocationMap[track].freeSectors = 18;
+        bam->allocationMap[track].allocMap [0] = 0xff;
+        bam->allocationMap[track].allocMap [1] = 0xff;
+        bam->allocationMap[track].allocMap [2] = 0x03;
+    }
+    for (uint8_t track = 30;  track < 35;  track++) {
+        bam->allocationMap[track].freeSectors = 17;
+        bam->allocationMap[track].allocMap [0] = 0xff;
+        bam->allocationMap[track].allocMap [1] = 0xff;
+        bam->allocationMap[track].allocMap [2] = 0x01;
+    }
+    writeSector((Sector*) bam, 18, 0);
+    fclose(imageFile);
+}
+
+
 int main() {
+#if 0    
+    for (uint16_t block = 0;  block < 683;  block++) {
+        uint8_t track = 0;
+        uint8_t sector = 0;
+        toTrackSector(block, track, sector);
+        uint16_t checkBlock = toBlock(track, sector);
+        printf("%d: %d,%d (%d)\n", block, track, sector, checkBlock);
+        if (block != checkBlock) {
+        printf("FAIIL!!!");
+        return 42;
+        }
+        
+    }
+    return 0;
+
+    
+    for (uint8_t track = 0;  track < 40;  track++) {
+        for (uint8_t sector = 0;  sector < 20;  sector++) {
+            uint16_t block = toBlock(track, sector);
+            printf("%d\n", block);
+        }
+    }
+    return 0;
+#endif
+
     //printf("sizeof(Sector): %d\n", sizeof(Sector));
     assert(sizeof(Sector) == 256);
     //printf("sizeof(Bam): %d\n", sizeof(Bam));
     assert(sizeof(Bam) == 256);
 
-    mount("C:\\Users\\afester\\Documents\\Andreas\\test.d64");
+//    mount("C:\\Users\\afester\\Documents\\Andreas\\test.d64");
 
     string line;
     while(1) {
@@ -787,8 +1021,13 @@ int main() {
                     imageFile = 0;
                     prompt = "> ";
                 }
-            }
-            else if (command == "dir") {
+            } else if (command == "format") {
+                if (tokens.size() != 2) {
+                    cout << "Usage: format imgFile" << endl;
+                } else {
+                    createImage(tokens[1]);
+                }
+            } else if (command == "dir") {
                 dir();
             }
             else if (command == "dumpSector") {
@@ -797,6 +1036,9 @@ int main() {
                 } else {
                     dumpSector(atoi(tokens[1].c_str()), atoi(tokens[2].c_str()));
                 }
+            } else if (command == "dumpBam") {
+                Bam* bam = (Bam*) readSector(18, 0);
+                dumpBam(bam);
             } else if (command == "dump") {
                 if (tokens.size() != 2) {
                     cout << "Usage: dump fileName" << endl;
@@ -838,8 +1080,9 @@ int main() {
             }
             else if (command == "help") {
                 cout << "exit" << endl;
-                cout << "mount" << endl;
-                cout << "umount" << endl;
+                cout << "format imageFile" << endl;
+                cout << "mount imageFile" << endl;
+                cout << "umount imageFile" << endl;
                 cout << "create" << endl;
                 cout << "dump fileName" << endl;
                 cout << "dumpSector track sector" << endl;
