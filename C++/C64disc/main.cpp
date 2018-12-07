@@ -167,7 +167,7 @@ Sector* readSector(int track, int sector) {
     int sectorOffset = 256 * absoluteSector;
 //    printf("Sector offset  : %d (%x)\n", sectorOffset, sectorOffset);
 
-    cout << "R " << track<<","<<sector<<endl;
+    cout << "\rR " << track << "," << sector;
     Sector* result = (Sector*) calloc(1, sizeof(Sector));
     fseek(imageFile, sectorOffset, SEEK_SET);
     fread(result, sizeof(Sector), 1, imageFile);
@@ -196,7 +196,7 @@ void writeSector(Sector* sect, int track, int sector) {
 //    printf("Sector offset  : %d (%x)\n", sectorOffset, sectorOffset);
 
 //    cerr << "W:" << sectorOffset << endl;
-    cout << "W " << track<<","<<sector<<endl;
+    cout << "\rW " << track << "," << sector;
     fseek(imageFile, sectorOffset, SEEK_SET);
     fwrite(sect, sizeof(Sector), 1, imageFile);
     fflush(imageFile);
@@ -317,6 +317,7 @@ void dumpDir(Dir* dir) {
 
 
 void listContents() {
+    cerr << endl;
     Bam* bam = (Bam*) readSector(18, 0);
 
     printf("\"%16s\"\n", getName(bam->discName));
@@ -325,6 +326,7 @@ void listContents() {
     uint8_t nextTrack = bam->nextTrack;
     uint8_t nextSector = bam->nextSector;
     while(nextTrack != 0 && nextSector != 255) {
+        cerr << endl;
         Dir* dir = (Dir*) readSector(nextTrack, nextSector);
         for (int idx = 0;  idx < 8;  idx++) {
             FileEntry* fileEntry = &dir->entry[idx].file;
@@ -340,12 +342,14 @@ void listContents() {
 
 
 FileEntry* searchFile(const char* fileName) {
+    cerr << endl;
     Bam* bam = (Bam*) readSector(18, 0);
     uint8_t nextTrack = bam->nextTrack;
     uint8_t nextSector = bam->nextSector;
     free(bam);
 
     while(nextTrack != 0 && nextSector != 255) {
+        cerr << endl;
         Dir* dir = (Dir*) readSector(nextTrack, nextSector);
         for (int idx = 0;  idx < 8;  idx++) {
             FileEntry* fileEntry = &dir->entry[idx].file;
@@ -368,6 +372,7 @@ uint8_t dirTrack = 0;
 uint8_t dirSector = 0;
 
 Dir* searchFile(const string& fileName, uint8_t& idx) {
+    cerr << endl;
     Bam* bam = (Bam*) readSector(18, 0);
     uint8_t nextTrack = bam->nextTrack;
     uint8_t nextSector = bam->nextSector;
@@ -396,10 +401,12 @@ Dir* searchFile(const string& fileName, uint8_t& idx) {
 }
 
 FileEntry* createEntry(const string& fileName) {
+    cerr << endl;
     Bam* bam = (Bam*) readSector(18, 0);
     uint8_t nextTrack = bam->nextTrack;
     uint8_t nextSector = bam->nextSector;
     while(nextTrack != 0 && nextSector != 255) {
+        cerr << endl;
         Dir* dir = (Dir*) readSector(nextTrack, nextSector);
         for (int idx = 0;  idx < 8;  idx++) {
             FileEntry* fileEntry = &dir->entry[idx].file;
@@ -415,6 +422,7 @@ FileEntry* createEntry(const string& fileName) {
 
                 //cout << "WRITING ..." << (int) nextTrack  << "," << (int) nextSector << endl;
                 //dumpDir(dir);
+                cerr << endl;
                 writeSector((Sector*) dir, nextTrack, nextSector);
                 return fileEntry;
             }
@@ -427,37 +435,11 @@ FileEntry* createEntry(const string& fileName) {
 }
 
 
-void setTrackSector(const string& fileName, uint8_t track, uint8_t sector) {
-    Bam* bam = (Bam*) readSector(18, 0);
-    uint8_t nextTrack = bam->nextTrack;
-    uint8_t nextSector = bam->nextSector;
-    free(bam);
-
-    while(nextTrack != 0 && nextSector != 255) {
-        Dir* dir = (Dir*) readSector(nextTrack, nextSector);
-        for (int idx = 0;  idx < 8;  idx++) {
-            FileEntry* fileEntry = &dir->entry[idx].file;
-            if (fileEntry->fileType != 0) {
-                string entryName = getName(fileEntry->fileName);
-                entryName = rtrim(entryName);
-                if (entryName == fileName) {
-                    fileEntry->firstTrack = track;
-                    fileEntry->firstSector = sector;
-                    writeSector((Sector*) dir, nextTrack, nextSector);
-                }
-            }
-        }
-        nextTrack = dir->entry[0].nextTrack;
-        nextSector = dir->entry[0].nextSector;
-    }
-}
-
-
 void dumpFile(FileEntry* entry) {
     uint8_t nextTrack = entry->firstTrack;
     uint8_t nextSector = entry->firstSector;
     while(nextTrack != 0) {
-
+        cerr << endl;
         Sector* sec = readSector(nextTrack, nextSector);
         nextTrack = sec->nextTrack;
         nextSector = sec->nextSector;
@@ -511,6 +493,7 @@ void mount(const string& fileName) {
 }
 
 void allocateBlock(uint8_t& trackResult, uint8_t& sectorResult) {
+    cerr << endl;
     Bam* bam = (Bam*) readSector(18, 0);
     // dumpBam(bam);
 
@@ -547,7 +530,7 @@ void allocateBlock(uint8_t& trackResult, uint8_t& sectorResult) {
 //    }
 
     // dumpBam(bam);
-
+    cerr << endl;
     writeSector((Sector*) bam, 18, 0);
 
     trackResult = track + 1;
@@ -555,140 +538,9 @@ void allocateBlock(uint8_t& trackResult, uint8_t& sectorResult) {
     cout << "Using Sector " << (int) trackResult << "," << (int) sectorResult << endl;
 }
 
-// Algorithm:
-// - calculate number of blocks
-// - track=entry->firstTrack, sector=entry->firstSector
-
-// - loop number of blocks
-//   - does track/sector already exist? (track != 0)?
-//      then read track/sector
-//      else calloc sector (sector->nextTrack=0, sector->nextSector = 0)
-
-//   - read next bunch of bytes (1..254) into sector->data
-
-// Link to next sector(!!)
-//   - last block? Then set sector->nextTrack=0, sector->nextSector=number of bytes
-//   - else: if sector->nextTrack = 0 then allocate new sector, set sector->nextTrack/sector->nextSector
-//   - write sector
-
-//   - track = sector->nextTrack, sector=sector->nextSector
-
-void copyIn1(const string& srcFile, const string& dstFile) {
-    // hack: look up the destination file
-    // make sure at least one block is allocated
-    // set the first sector of the destination file to the
-    // first 254 bytes of the source file
-
-    uint8_t entryIdx = 0;
-    Dir* dir = searchFile(dstFile, entryIdx);
-    if (dir == 0) {
-        cout << "Destination file \"" << dstFile << "\" not found." << endl;
-        return;
-    }
-    FileEntry* entry = &dir->entry[entryIdx].file;
-
-    FILE* src = fopen(srcFile.c_str(), "rb");
-    if (src == 0) {
-        cout << "Source file \"" << srcFile << "\" not found." << endl;
-        return;
-    }
-
-    // obtain the file size
-    fseek(src, 0L, SEEK_END);
-    long fileSize = ftell(src);
-    fseek(src, 0L, SEEK_SET);
-    long blockCount = 0;
-    if (fileSize > 0) {
-        blockCount = ((fileSize - 1) / 254) + 1;
-    }
-
-    cout << "File Size: " << fileSize << " bytes."  << endl;
-    cout << "Block count: " << blockCount << " blocks" << endl;
-
-    uint8_t nextTrack = entry->firstTrack;
-    uint8_t nextSector = entry->firstSector;
-    uint8_t track, sector;
-
-    bool first = true;
-    Sector* sect = 0;
-    while(blockCount-- > 0) {
-        cout << "  ----\nBlock count: " << blockCount << " blocks" << endl;
-
-        if (nextTrack == 0) {
-            cout << " Allocating new sector ..." << endl;
-            allocateBlock(nextTrack, nextSector);
-
-            if (first) {
-                setTrackSector(dstFile, nextTrack, nextSector);
-                first = false;
-            } else {
-                sect->nextTrack = nextTrack;
-                sect->nextSector = nextSector;
-                writeSector(sect, track, sector);
-            }
-            track = nextTrack;
-            sector = nextSector;
-
-            //sect->nextSector = sector;
-            //sect->nextTrack = track;
-
-//             writeSector(sect, track, sector);
-
-            sect = (Sector*) calloc(sizeof(Sector), 1);
-
-    // TODO: add track/sector to previous block!!
-//             writeSector(sect, track, sector);
-            // does not work - there might not even be a previous/current sector!
-
-    // TODO: properly set the FIRST block!
-            // if (first) {
-            // entry->firstTrack = track;
-            // entry->firstSector = sector;
-            // first = false;
-            // }
-
-            nextTrack = 0;
-            nextSector = 0;
-        } else {
-           cout << " Using existing sector ..." << endl;
-           track = nextTrack;
-           sector = nextSector;
-
-           sect = readSector(nextTrack, nextSector);
-
-           nextTrack = sect->nextTrack;
-           nextSector = sect->nextSector;
-        }
-
-        cout << "Got: " << (int) track << "," << (int) sector << endl;
-
-        
-        
-        
-        
-        // initialize a fresh block (as if it was the last one)
-        memset(sect->data, 0, sizeof(sect->data));
-        size_t readCount = fread(sect->data, 1, 254, src);
-//        if (blockCount == 0) {
-//            sect->nextTrack = 0;
-//            sect->nextSector = readCount + 1;
-//        }
-        writeSector(sect, track, sector);
-
-//        cout << "Next Sector: " << (int) nextTrack << "," << (int) nextSector << endl;
-    }
-
-    // TODO: deallocate remaining unused blocks!
-}
-
 
 
 void copyIn(const string& srcFile, const string& dstFile) {
-    // hack: look up the destination file
-    // make sure at least one block is allocated
-    // set the first sector of the destination file to the
-    // first 254 bytes of the source file
-
     uint8_t entryIdx = 0;
     Dir* dir = searchFile(dstFile, entryIdx);
     if (dir == 0) {
@@ -722,6 +574,7 @@ void copyIn(const string& srcFile, const string& dstFile) {
         allocateBlock(entry->firstTrack, entry->firstSector);
     }
     entry->blockCount = blockCount;
+    cerr << endl;
     writeSector((Sector*) dir, dirTrack, dirSector);
 
     uint8_t track = entry->firstTrack;
@@ -732,20 +585,21 @@ void copyIn(const string& srcFile, const string& dstFile) {
     // probably that "reusage" approach does not make sense at all ...
     while(blockCount > 0) {
         blockCount--;
-
+        cerr << endl;
         Sector* sect = readSector(track, sector);
         size_t readCount = fread(sect->data, 1, 254, src);
         //track = sect->nextTrack;
         //sector = sect->nextSector;
         if (blockCount == 0) {
             sect->nextTrack = 0;
-            sect->nextSector = 0;
+            sect->nextSector = 0x1C; // 0;
         } else {
             if (sect->nextTrack == 0) {
                 cout << " Allocating new sector ..." << endl;
                 allocateBlock(sect->nextTrack, sect->nextSector);
             }
         }
+        cerr << endl;
         writeSector(sect, track, sector);
         track = sect->nextTrack;
         sector = sect->nextSector;
@@ -763,7 +617,7 @@ void dir() {
         cout << "No image mounted." << endl;
         return;
     }
-
+    cerr << endl;
     Bam* bam = (Bam*) readSector(18, 0);
 
     printf("\n0 \"%16s\" %c%c %c%c\n", getName(bam->discName), bam->discId[0], bam->discId[1], bam->dosVersion, bam->formatIdCopy);
@@ -772,6 +626,7 @@ void dir() {
     uint8_t nextTrack = bam->nextTrack;
     uint8_t nextSector = bam->nextSector;
     while(nextTrack != 0 && nextSector != 255) {
+        cerr << endl;
         Dir* dir = (Dir*) readSector(nextTrack, nextSector);
         for (int idx = 0;  idx < 8;  idx++) {
             FileEntry* fileEntry = &dir->entry[idx].file;
@@ -809,6 +664,7 @@ void dump(const string& name) {
 
 
 void dumpSector(uint8_t track, uint8_t sector) {
+    cerr << endl;
     Sector* sect = readSector(track, sector);
 
     HexDump* dump = new_HexDump((uint8_t*) sect, sizeof(Sector));
@@ -830,6 +686,7 @@ uint16_t readWord() {
         if (sec == 0) {
             free(sec);
         }
+        cerr << endl;
         sec = readSector(nextTrack, nextSector);
         nextTrack = sec->nextTrack;
         nextSector = sec->nextSector;
@@ -847,6 +704,7 @@ uint8_t readChar() {
         if (sec == 0) {
             free(sec);
         }
+        cerr << endl;
         sec = readSector(nextTrack, nextSector);
         nextTrack = sec->nextTrack;
         nextSector = sec->nextSector;
@@ -913,17 +771,28 @@ void createImage(const string& fileName) {
         toTrackSector(block, track, sector);
         writeSector(nix, track, sector);
     }
-    
+
     Bam* bam = (Bam*) nix;
-    strcpy((char*) bam->discName, "                ");
+    
     strcpy((char*) bam->discName, "TEST");
-    bam->discName[strlen((char*) bam->discName)] = ' ';
+    for (int idx = strlen((char*) bam->discName);  idx < 16;  idx++) {
+        bam->discName[idx] = 0xA0;
+    }
+
     bam->nextTrack = 18;
     bam->nextSector = 1;
-    bam->discId[0] = '0';
-    bam->discId[1] = '0';
+    bam->formatId = 'A';
+    bam->fill1[0] = 0xA0;
+    bam->fill1[1] = 0xA0;
+    bam->discId[0] = '1';
+    bam->discId[1] = 'A';
+    bam->fill2 = 0xA0;
     bam->dosVersion = '2';
     bam->formatIdCopy = 'A';
+    bam->fill3[0] = 0xA0;
+    bam->fill3[1] = 0xA0;
+    bam->fill3[2] = 0xA0;
+    bam->fill3[3] = 0xA0;
 
     //  1..17 => 17 tracks * 21 sectors = 357 blocks
     // 18..24 =>  7 tracks * 19 sectors = 133 blocks (Track 18 is directory/bam)
@@ -953,6 +822,9 @@ void createImage(const string& fileName) {
         bam->allocationMap[track].allocMap [1] = 0xff;
         bam->allocationMap[track].allocMap [2] = 0x01;
     }
+    // two sectors on track 18 already allocated!
+    bam->allocationMap[18 - 1].allocMap[0] = 0xfc;
+    cerr << endl;
     writeSector((Sector*) bam, 18, 0);
     fclose(imageFile);
 }
@@ -1037,6 +909,7 @@ int main() {
                     dumpSector(atoi(tokens[1].c_str()), atoi(tokens[2].c_str()));
                 }
             } else if (command == "dumpBam") {
+                cerr << endl;
                 Bam* bam = (Bam*) readSector(18, 0);
                 dumpBam(bam);
             } else if (command == "dump") {
@@ -1094,6 +967,7 @@ int main() {
     }
 
     imageFile = fopen("c:\\Users\\afester\\Documents\\Andreas\\Test.d64", "rb");
+    cerr << endl;
     Bam* bam = (Bam*) readSector(18, 0);
     dumpBam(bam);
 
