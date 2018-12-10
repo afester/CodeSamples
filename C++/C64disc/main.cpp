@@ -588,11 +588,11 @@ void copyIn(const string& srcFile, const string& dstFile) {
         cerr << endl;
         Sector* sect = readSector(track, sector);
         size_t readCount = fread(sect->data, 1, 254, src);
-        //track = sect->nextTrack;
-        //sector = sect->nextSector;
+
         if (blockCount == 0) {
-            sect->nextTrack = 0;
-            sect->nextSector = 0x1C; // 0;
+            // last sector
+            sect->nextTrack = 0;                 // last sector indicator
+            sect->nextSector = readCount + 1;    // byte count of last sector (index of last byte - including the first two meta data bytes)
         } else {
             if (sect->nextTrack == 0) {
                 cout << " Allocating new sector ..." << endl;
