@@ -36,10 +36,10 @@ void displayValue(int y, int value, int color) {
 #endif
 
 extern volatile int8_t globalStep;
-// static uint16_t values[] = {0, 0, 0, 0};
-// static int valuePtr = 0;
+static uint16_t values[] = {0, 0, 0, 0};
+static int valuePtr = 0;
 static char buffer[30];
-// static int wakeup = 0;
+static int wakeup = 0;
 
 /**
  * Formats a numeric value into a string using a specified number of decimal places.
@@ -100,7 +100,7 @@ int main() {
 //   cfa533Init();
    encoderInit();
 //   MCP48xx_Init();
-//   adcInit();
+   adcInit();
 
 //   tftDrawText("Display controller: ");
 //   tftDeviceCodeRead();
@@ -170,9 +170,9 @@ int main() {
             voltage = 350;
          }
 
-         strFormat(voltage, 1, buffer);
-         strcat(buffer, " V    ");
-         tftDrawText(98, 10, buffer);
+         //strFormat(voltage, 1, buffer);
+         //strcat(buffer, " V    ");
+         //tftDrawText(98, 10, buffer);
 //         MCP48xx_SetValue(voltage * 10);
       }
 
@@ -192,22 +192,23 @@ int main() {
 //         MCP48xx_SetValue(current * 10);
       }
 
-#if 0
       wakeup++;
       if (wakeup > 100) {
          wakeup = 0;
-         //values[valuePtr++] = adcRead();
-         //valuePtr &= 0x03;
-         //uint16_t current = (values[0] + values[1] + values[2] + values[3]) >> 2;
-         uint16_t voltage = adcRead();
+         values[valuePtr++] = adcReadChannel(3);
+         if (valuePtr == 4) {
+            valuePtr = 0;
+            uint16_t value = (values[0] + values[1] + values[2] + values[3]) >> 2;
+            value = (value * 11) >> 5;          // / 2,9 => 0 .. 352 => 0..35,2 V or 0..3,52 A
 
-#if 0
-         voltage = (voltage * 11) >> 5; // / 2,9 => 0 .. 352
-         format(voltage, buffer);
-         strcat(buffer, " V");
-#endif
-         displayValue(210, voltage, RED);
+            // strFormat(value, 1, buffer);
+            // strcat(buffer, " V    ");
+
+            strFormat(value, 2, buffer);
+            strcat(buffer, " A    ");
+
+            tftDrawText(98, 10, buffer);
+         }
       }
-#endif
    }
 }
