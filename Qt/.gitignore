@@ -4,6 +4,7 @@ Makefile*
 # Generated Qt files
 ui_*.h
 moc_*.cpp
+moc_predefs.h
 qrc_*.cpp
 *.o
 

@@ -143,6 +143,10 @@ AbstractEditHandle EllipseItem::getEditHandle(GraphicsSheet* view, const QPointF
     return NoHandle;
 }
 
+AbstractEditHandle EllipseItem::getNewHandle() {
+    return BottomRightHandle;
+}
+
 #if 0
 static QString formatFloat(qreal number, int dec) {
     QString result;

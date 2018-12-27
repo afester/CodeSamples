@@ -70,6 +70,11 @@ AbstractEditHandle BezierItem::getEditHandle(GraphicsSheet* view, const QPointF&
 }
 
 
+AbstractEditHandle BezierItem::getNewHandle() {
+    return P2Handle;
+}
+
+
 void BezierItem::paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles){
     if (isSelected()) {
         QSizeF handleSize = view->getHandleSize();

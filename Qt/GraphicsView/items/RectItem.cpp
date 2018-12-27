@@ -181,6 +181,9 @@ AbstractEditHandle RectItem::getEditHandle(GraphicsSheet* view, const QPointF& s
     return NoHandle;
 }
 
+AbstractEditHandle RectItem::getNewHandle() {
+    return BottomRightHandle;
+}
 
 void RectItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) {
     Q_UNUSED(view);

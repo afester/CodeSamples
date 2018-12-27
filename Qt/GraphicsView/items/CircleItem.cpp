@@ -111,6 +111,11 @@ AbstractEditHandle CircleItem::getEditHandle(GraphicsSheet* view, const QPointF&
 }
 
 
+AbstractEditHandle CircleItem::getNewHandle() {
+    return RadHandle;
+}
+
+
 void CircleItem::paintSelectedBorder(GraphicsSheet* view, QPainter * painter) {
     Q_UNUSED(view);
 

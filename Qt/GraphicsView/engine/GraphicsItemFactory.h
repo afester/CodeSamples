@@ -26,6 +26,10 @@ public:
     void registerItemClass(const QString& className, FACTORY_FUNCTION fac);
 
     QGraphicsItem* createItem(const QString& className);
+
+    QList<QString> getItemClasses();
+
+    FACTORY_FUNCTION getFactoryFunction(const QString& className);
 };
 
 #endif

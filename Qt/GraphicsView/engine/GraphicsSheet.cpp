@@ -23,6 +23,7 @@
 #include "ScaleWidget.h"
 #include "ScaleEdgeWidget.h"
 #include "Interactor.h"
+#include "NewItemInteractor.h"
 #include "InteractableItem.h"
 #include "Snapper.h"
 
@@ -471,4 +472,16 @@ void GraphicsSheet::deleteSelectedItems() {
         scene()->removeItem(item);
         delete item;
     }
+}
+
+
+QList<QString> GraphicsSheet::getSupportedItemClasses() {
+    GraphicsScene* graphicsScene = dynamic_cast<GraphicsScene*> (scene());
+    return graphicsScene->getSupportedItemClasses();
+}
+
+
+NewItemInteractor* GraphicsSheet::createNewItemInteractor(const QString& itemClass) {
+    GraphicsScene* graphicsScene = dynamic_cast<GraphicsScene*> (scene());
+    return new NewItemInteractor(graphicsScene->getFactoryFunction(itemClass));
 }

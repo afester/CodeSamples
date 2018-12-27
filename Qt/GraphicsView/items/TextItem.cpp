@@ -183,6 +183,9 @@ AbstractEditHandle TextItem::getEditHandle(GraphicsSheet* view, const QPointF& p
     return RectItem::getEditHandle(view, pos, enabledHandles);
 }
 
+AbstractEditHandle TextItem::getNewHandle() {
+    return BottomRightHandle;
+}
 
 void TextItem::moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos) {
     RectItem::moveHandle(editHandle, scenePos);

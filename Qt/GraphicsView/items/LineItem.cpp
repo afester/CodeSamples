@@ -57,6 +57,9 @@ AbstractEditHandle LineItem::getEditHandle(GraphicsSheet* view, const QPointF& s
     return NoHandle;
 }
 
+AbstractEditHandle LineItem::getNewHandle() {
+    return P2Handle;
+}
 
 void LineItem::paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles){
     if (isSelected()) {

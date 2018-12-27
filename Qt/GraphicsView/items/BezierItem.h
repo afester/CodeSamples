@@ -41,6 +41,8 @@ public:
 
     AbstractEditHandle getEditHandle(GraphicsSheet* view, const QPointF& pos, AbstractEditHandle enabledHandles = AllHandlesMask);
 
+    virtual AbstractEditHandle getNewHandle();
+
     void paintHandles(GraphicsSheet* view, QPainter * painter, AbstractEditHandle enabledHandles = AllHandlesMask);
 
     QPointF getHandleOffset(AbstractEditHandle editHandle, const QPointF& scenePos);

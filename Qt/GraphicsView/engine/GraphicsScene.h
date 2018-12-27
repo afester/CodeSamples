@@ -13,6 +13,7 @@ class QGraphicsItem;
 class QXmlStreamReader;
 class QXmlStreamWriter;
 class GraphicsItemFactory;
+typedef  QGraphicsItem* (*FACTORY_FUNCTION)();
 
 #ifdef EXP_SYMBOLS
 class Q_DECL_EXPORT GraphicsScene : public QGraphicsScene {
@@ -32,6 +33,10 @@ public:
     void saveToFile(const QString& fileName);
 
     void loadFromFile(const QString& fileName);
+
+    QList<QString> getSupportedItemClasses();
+
+    FACTORY_FUNCTION getFactoryFunction(const QString& itemClass);
 
 private:
     GraphicsItemFactory* itemFactory;

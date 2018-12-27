@@ -12,6 +12,7 @@
 class ScaleWidget;
 class ScaleEdgeWidget;
 class Interactor;
+class NewItemInteractor;
 class InteractableItem;
 class Snapper;
 
@@ -57,7 +58,9 @@ public:
     void addSize(const QString& name, const QSizeF& size);
 
     void addPoint(const QString& name, const QPointF& point);
+
     void drawCoordinateSystem(QPainter* painter, const QTransform& t = QTransform(), const QColor& c = Qt::black);
+
     void drawPoints(QPainter* painter, const QHash<QString, QPointF>& points);
 
     QStringList getSizeNames() const;
@@ -98,6 +101,10 @@ public:
      * @return The size of a handle for an interactable item.
      */
     QSizeF getHandleSize();
+
+    NewItemInteractor* createNewItemInteractor(const QString& itemClass);
+
+    QList<QString> getSupportedItemClasses();
 
 public slots:
     void setScale(int idx);
