@@ -12,7 +12,7 @@
 class QGraphicsItem;
 typedef  QGraphicsItem* (*FACTORY_FUNCTION)();
 
-#ifdef EXP_SYMBOLS
+#ifdef ENGINE_LIBRARY
 class Q_DECL_EXPORT GraphicsItemFactory {
 #else
 class Q_DECL_IMPORT GraphicsItemFactory {

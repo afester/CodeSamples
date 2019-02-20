@@ -19,6 +19,11 @@ GraphicsItemFactory::GraphicsItemFactory() {
 
     // search all shared libraries below the bin directory where the
     // base name ends with "items":
+
+    // QCoreApplication::addLibraryPath(const QString &path);
+    // QPluginLoader
+
+
     QDir itemsDir("bin");
     QStringList names;
     names << "*items.dll" << "*items.so";  // TODO: better approach?

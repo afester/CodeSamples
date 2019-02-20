@@ -8,7 +8,7 @@
 #include "Interactor.h"
 #include "InteractableItem.h"
 
-#ifdef EXP_SYMBOLS
+#ifdef ENGINE_LIBRARY
 class Q_DECL_EXPORT EditItemInteractor : public Interactor {
 #else
 class Q_DECL_IMPORT EditItemInteractor : public Interactor {

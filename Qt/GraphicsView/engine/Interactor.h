@@ -9,7 +9,7 @@ class QWheelEvent;
 class RectItem;
 class GraphicsSheet;
 
-#ifdef EXP_SYMBOLS
+#ifdef ENGINE_LIBRARY
 class Q_DECL_EXPORT Interactor : public QObject {
 #else
 class Q_DECL_EXPORT Interactor : public QObject {

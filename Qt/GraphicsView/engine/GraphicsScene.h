@@ -15,7 +15,7 @@ class QXmlStreamWriter;
 class GraphicsItemFactory;
 typedef  QGraphicsItem* (*FACTORY_FUNCTION)();
 
-#ifdef EXP_SYMBOLS
+#ifdef ENGINE_LIBRARY
 class Q_DECL_EXPORT GraphicsScene : public QGraphicsScene {
 #else
 class Q_DECL_IMPORT GraphicsScene : public QGraphicsScene {
