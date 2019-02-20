@@ -11,4 +11,6 @@ void adcInit();
  */
 uint16_t adcRead();
 
+uint16_t adcReadChannel(uint8_t channel);
+
 #endif

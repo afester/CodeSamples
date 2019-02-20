@@ -20,3 +20,11 @@ uint16_t adcRead() {
    while(ADCSRA & _BV(ADSC));   // wait until conversion is complete
    return ADC;
 }
+
+uint16_t adcReadChannel(uint8_t channel) {
+   ADMUX = _BV(REFS1) | _BV(REFS0) | (channel & 0x07);	// 2.56V reference, select ADCx
+   PRR0 &= ~_BV(PRADC);
+   ADCSRA |= _BV(ADSC);		// start single conversion
+   while(ADCSRA & _BV(ADSC));   // wait until conversion is complete
+   return ADC;
+}
