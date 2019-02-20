@@ -1,0 +1,39 @@
+00400000-00407000 r-xp 00000000 08:01 1705803                            /sbin/getty
+00606000-00607000 r--p 00006000 08:01 1705803                            /sbin/getty
+00607000-00608000 rw-p 00007000 08:01 1705803                            /sbin/getty
+00608000-0060a000 rw-p 00000000 00:00 0 
+0157d000-0159e000 rw-p 00000000 00:00 0                                  [heap]
+7ff37cbb5000-7ff37cfed000 r--p 00000000 08:01 5243093                    /usr/lib/locale/locale-archive
+7ff37cfed000-7ff37cff8000 r-xp 00000000 08:01 1587238                    /lib/x86_64-linux-gnu/libnss_files-2.19.so
+7ff37cff8000-7ff37d1f7000 ---p 0000b000 08:01 1587238                    /lib/x86_64-linux-gnu/libnss_files-2.19.so
+7ff37d1f7000-7ff37d1f8000 r--p 0000a000 08:01 1587238                    /lib/x86_64-linux-gnu/libnss_files-2.19.so
+7ff37d1f8000-7ff37d1f9000 rw-p 0000b000 08:01 1587238                    /lib/x86_64-linux-gnu/libnss_files-2.19.so
+7ff37d1f9000-7ff37d204000 r-xp 00000000 08:01 1587258                    /lib/x86_64-linux-gnu/libnss_nis-2.19.so
+7ff37d204000-7ff37d403000 ---p 0000b000 08:01 1587258                    /lib/x86_64-linux-gnu/libnss_nis-2.19.so
+7ff37d403000-7ff37d404000 r--p 0000a000 08:01 1587258                    /lib/x86_64-linux-gnu/libnss_nis-2.19.so
+7ff37d404000-7ff37d405000 rw-p 0000b000 08:01 1587258                    /lib/x86_64-linux-gnu/libnss_nis-2.19.so
+7ff37d405000-7ff37d41c000 r-xp 00000000 08:01 1587247                    /lib/x86_64-linux-gnu/libnsl-2.19.so
+7ff37d41c000-7ff37d61b000 ---p 00017000 08:01 1587247                    /lib/x86_64-linux-gnu/libnsl-2.19.so
+7ff37d61b000-7ff37d61c000 r--p 00016000 08:01 1587247                    /lib/x86_64-linux-gnu/libnsl-2.19.so
+7ff37d61c000-7ff37d61d000 rw-p 00017000 08:01 1587247                    /lib/x86_64-linux-gnu/libnsl-2.19.so
+7ff37d61d000-7ff37d61f000 rw-p 00000000 00:00 0 
+7ff37d61f000-7ff37d628000 r-xp 00000000 08:01 1587246                    /lib/x86_64-linux-gnu/libnss_compat-2.19.so
+7ff37d628000-7ff37d827000 ---p 00009000 08:01 1587246                    /lib/x86_64-linux-gnu/libnss_compat-2.19.so
+7ff37d827000-7ff37d828000 r--p 00008000 08:01 1587246                    /lib/x86_64-linux-gnu/libnss_compat-2.19.so
+7ff37d828000-7ff37d829000 rw-p 00009000 08:01 1587246                    /lib/x86_64-linux-gnu/libnss_compat-2.19.so
+7ff37d829000-7ff37d9e4000 r-xp 00000000 08:01 1587252                    /lib/x86_64-linux-gnu/libc-2.19.so
+7ff37d9e4000-7ff37dbe3000 ---p 001bb000 08:01 1587252                    /lib/x86_64-linux-gnu/libc-2.19.so
+7ff37dbe3000-7ff37dbe7000 r--p 001ba000 08:01 1587252                    /lib/x86_64-linux-gnu/libc-2.19.so
+7ff37dbe7000-7ff37dbe9000 rw-p 001be000 08:01 1587252                    /lib/x86_64-linux-gnu/libc-2.19.so
+7ff37dbe9000-7ff37dbee000 rw-p 00000000 00:00 0 
+7ff37dbee000-7ff37dc11000 r-xp 00000000 08:01 1587249                    /lib/x86_64-linux-gnu/ld-2.19.so
+7ff37ddc0000-7ff37dde6000 r--p 00000000 08:01 5374024                    /usr/lib/locale/C.UTF-8/LC_CTYPE
+7ff37dde6000-7ff37dde9000 rw-p 00000000 00:00 0 
+7ff37de07000-7ff37de0e000 r--s 00000000 08:01 5522798                    /usr/lib/x86_64-linux-gnu/gconv/gconv-modules.cache
+7ff37de0e000-7ff37de10000 rw-p 00000000 00:00 0 
+7ff37de10000-7ff37de11000 r--p 00022000 08:01 1587249                    /lib/x86_64-linux-gnu/ld-2.19.so
+7ff37de11000-7ff37de12000 rw-p 00023000 08:01 1587249                    /lib/x86_64-linux-gnu/ld-2.19.so
+7ff37de12000-7ff37de13000 rw-p 00000000 00:00 0 
+7fff6f1c5000-7fff6f1e6000 rw-p 00000000 00:00 0                          [stack]
+7fff6f1f9000-7fff6f1fb000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]

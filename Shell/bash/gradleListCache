@@ -1,0 +1,8 @@
+#!/bin/bash
+
+pushd ~/.gradle/caches/modules-2/files-2.1
+for f in $(find . -name "*.jar"); do
+   modDate=$(date +"%d-%b-%Y %H:%M:%S" -d @$(stat -c "%Y" $f))
+   echo "$(basename $f) ($modDate)"
+done
+popd

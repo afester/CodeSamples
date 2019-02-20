@@ -72,6 +72,7 @@ LONG __stdcall handler( EXCEPTION_POINTERS* pep ) {
 
    if (!opcodeValid) {
         printf("UNKNOWN OPCODE: %02X %02X %02X %02X %02X %02X\n", pc[0], pc[1], pc[2], pc[3], pc[4], pc[5]);
+        exit(1);
    }
 
    // Unprotect the memory area

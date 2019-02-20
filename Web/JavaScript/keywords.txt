@@ -1,0 +1,94 @@
+Non-reserved words with special meaning:
+========================================
+undefined
+NaN
+Infinity
+
+JavaScript reserved words:
+==========================
+void
+var     Defines a function's private (local) variables
+
+instanceof 
+typeof
+this 
+
+function
+
+false 
+true 
+null
+
+switch 
+case
+default 
+break
+if 
+else 
+do 
+while 
+continue
+for 
+in 
+with
+return
+throw 
+try 
+catch 
+finally 
+
+debugger 
+
+new 
+delete 
+
+Operators
+=========
+. [] ()	                    Refinement and invocation
+delete new typeof + - !	    Unary operators
+* / %	                    Multiplication, division, remainder
++ -	                        Addition/concatenation, subtraction
+>= <= > <	                Inequality
+=== !==	                    Equality
+&&	                        Logical and
+||	                        Logical or
+?:	                        Ternary
+
+The simple types of JavaScript are numbers, strings, booleans(true and false), null, and undefined.
+
+Objects in JavaScript are class-free. There is no constraint on the names of new properties or on the values of properties. Objects are useful for collecting and organizing data. Objects can contain other objects, so they can easily represent tree or graph structures.
+
+Reserved for future use:
+========================
+(export)
+(import)
+(boolean)
+(byte)
+(short)
+(int)
+(long)
+(char)
+(double)
+(float)
+(interface)
+(let)
+(class)
+(enum)
+(package)
+(synchronized)
+(native)
+(volatile)
+(implements)
+(extends)
+(final)
+(abstract)
+(const)
+(static)
+(public)
+(private)
+(protected)
+(throws)
+(transient)
+(super)
+(goto)
+(yield)

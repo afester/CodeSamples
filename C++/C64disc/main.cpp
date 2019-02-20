@@ -167,14 +167,14 @@ Sector* readSector(int track, int sector) {
     int sectorOffset = 256 * absoluteSector;
 //    printf("Sector offset  : %d (%x)\n", sectorOffset, sectorOffset);
 
-    cout << "\rR " << track << "," << sector;
+//    cout << "\rR " << track << "," << sector;
     Sector* result = (Sector*) calloc(1, sizeof(Sector));
     fseek(imageFile, sectorOffset, SEEK_SET);
     fread(result, sizeof(Sector), 1, imageFile);
     return result;
 }
 
-void writeSector(Sector* sect, int track, int sector) {
+void writeSectorEx(Sector* sect, int track, int sector, bool dump) {
     // calculate the sector number
     int absoluteSector = 0;
 
@@ -195,13 +195,17 @@ void writeSector(Sector* sect, int track, int sector) {
     int sectorOffset = 256 * absoluteSector;
 //    printf("Sector offset  : %d (%x)\n", sectorOffset, sectorOffset);
 
-//    cerr << "W:" << sectorOffset << endl;
-    cout << "\rW " << track << "," << sector;
+    if (dump) {
+        cout << "\rW " << track << "," << sector;
+    }
     fseek(imageFile, sectorOffset, SEEK_SET);
     fwrite(sect, sizeof(Sector), 1, imageFile);
     fflush(imageFile);
 }
 
+void writeSector(Sector* sect, int track, int sector) {
+    writeSectorEx(sect, track, sector, false);
+}
 
 // see above - writeSector calculates an "absolute" sector anyway ...
 uint16_t toBlock(uint8_t track, uint8_t sector) {
@@ -479,6 +483,7 @@ void mount(const string& fileName) {
     imageFile = fopen(fileName.c_str(), "r+b");
     if (imageFile == 0) {
         cout << "Could not mount " << fileName << endl;
+        exit(0);
     } else {
         size_t pos = fileName.rfind("\\");
         if (pos == string::npos) {
@@ -491,6 +496,16 @@ void mount(const string& fileName) {
         }
     }
 }
+
+
+void umount() {
+    if (imageFile != 0) {
+        fclose(imageFile);
+        imageFile = 0;
+        prompt = "> ";
+    }
+}
+
 
 void allocateBlock(uint8_t& trackResult, uint8_t& sectorResult) {
     cerr << endl;
@@ -626,7 +641,6 @@ void dir() {
     uint8_t nextTrack = bam->nextTrack;
     uint8_t nextSector = bam->nextSector;
     while(nextTrack != 0 && nextSector != 255) {
-        cerr << endl;
         Dir* dir = (Dir*) readSector(nextTrack, nextSector);
         for (int idx = 0;  idx < 8;  idx++) {
             FileEntry* fileEntry = &dir->entry[idx].file;
@@ -769,7 +783,7 @@ void createImage(const string& fileName) {
         uint8_t track = 0;
         uint8_t sector = 0;
         toTrackSector(block, track, sector);
-        writeSector(nix, track, sector);
+        writeSectorEx(nix, track, sector, true);
     }
 
     Bam* bam = (Bam*) nix;
@@ -830,32 +844,8 @@ void createImage(const string& fileName) {
 }
 
 
-int main() {
-#if 0    
-    for (uint16_t block = 0;  block < 683;  block++) {
-        uint8_t track = 0;
-        uint8_t sector = 0;
-        toTrackSector(block, track, sector);
-        uint16_t checkBlock = toBlock(track, sector);
-        printf("%d: %d,%d (%d)\n", block, track, sector, checkBlock);
-        if (block != checkBlock) {
-        printf("FAIIL!!!");
-        return 42;
-        }
-        
-    }
-    return 0;
 
-    
-    for (uint8_t track = 0;  track < 40;  track++) {
-        for (uint8_t sector = 0;  sector < 20;  sector++) {
-            uint16_t block = toBlock(track, sector);
-            printf("%d\n", block);
-        }
-    }
-    return 0;
-#endif
-
+void repl() {
     //printf("sizeof(Sector): %d\n", sizeof(Sector));
     assert(sizeof(Sector) == 256);
     //printf("sizeof(Bam): %d\n", sizeof(Bam));
@@ -878,7 +868,7 @@ int main() {
 
             string command = tokens[0];
             if (command == "exit") {
-                return 0;
+                return;
             }
             else if (command == "mount") {
                 if (tokens.size() != 2) {
@@ -889,9 +879,7 @@ int main() {
             }
             else if (command == "umount") {
                 if (imageFile != 0) {
-                    fclose(imageFile);
-                    imageFile = 0;
-                    prompt = "> ";
+                    umount();
                 }
             } else if (command == "format") {
                 if (tokens.size() != 2) {
@@ -965,40 +953,86 @@ int main() {
             }
         }
     }
-
-    imageFile = fopen("c:\\Users\\afester\\Documents\\Andreas\\Test.d64", "rb");
-    cerr << endl;
-    Bam* bam = (Bam*) readSector(18, 0);
-    dumpBam(bam);
+}
 
 
-//    Sector* bam = readSector(18, 0);
-//    dumpSector(bam);
+void usage() {
+    cout << "Usage: c64disc command parameters" << endl;
+    cout << "   createImage imageName" << endl;
+    cout << "   copyin imageName srcFile destFile" << endl;
+    cout << "   dir" << endl;
+}
 
-//    Dir* dir = (Dir*) readSector(bam->nextTrack, bam->nextSector);
-//    dumpDir(dir);
 
-//    free(dir);
-//    free(bam);
-
-//    listContents();
-//    printf("Dump which file?");
-//    char input[255];
-//    scanf("%s", input);
-//    char fileName[20];
-//    sprintf(fileName, "%-16s", input);
-//    printf("Searching \"%s\"...\n", fileName);
-//
-//    FileEntry* entry = searchFile(fileName);
-//    if (entry == 0) {
-//        printf("File not found.\n");
-//    } else {
-//        dumpFile(entry);
+void copyInBatch(vector<string>& args) {
+//    for (vector<string>::const_iterator iter = args.begin(); iter != args.end();  iter++) {
+//        cout << *iter << endl;
 //    }
 
+    if (args.size() != 3) {
+        usage();
+        return;
+    }
+    
+    const string image = args[0];
+    const string src = args[1];
+    const string dest = args[2];
+    
+    mount(image);
+
+    //Bam* bam = (Bam*) readSector(18, 0);
+    //dumpBam(bam);
+
+    // dir();
+    
+    copyIn(src, dest);
+
+    umount();
+}
 
 
-    fclose(imageFile);
+void dirBatch(vector<string>& args) {
+    if (args.size() != 1) {
+        usage();
+        return;
+    }
+    
+    const string image = args[0];
+    
+    mount(image);
+    dir();
+    umount();
+}
+
+
+void batch(vector<string>& args) {
+//    for (vector<string>::const_iterator iter = args.begin(); iter != args.end();  iter++) {
+//        cout << "|" << *iter << "|" << endl;
+//    }
+
+    if (args[0] == "copyin") {
+        copyInBatch(vector<string>(args.begin() + 1, args.end()));
+    } else if (args[0] == "dir") {
+        dirBatch(vector<string>(args.begin() + 1, args.end()));
+    } else if (args[0] == "createImage") {
+        createImage(args[1]);        
+    } else {
+        usage();
+    }
+}
+
+
+int main(int argc, char* argv[]) {
+
+    if (argc < 2) {
+        repl();
+    } else {
+        vector<string> args = vector<string>();
+        for (int i = 1;  i < argc;  i++) {
+            args.push_back(argv[i]);
+        }
+        batch(args);
+    }
 
     return 0;
 }
