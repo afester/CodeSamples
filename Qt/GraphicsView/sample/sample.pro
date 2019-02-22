@@ -41,9 +41,9 @@ FORMS +=
 RESOURCES += \
     GraphicsView.qrc
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../qt-solutions/qtpropertybrowser/lib/ -lQtSolutions_PropertyBrowser-hea
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../qt-solutions/qtpropertybrowser/lib/ -lQtSolutions_PropertyBrowser-head
-else:unix: LIBS += -L$$PWD/../../../../qt-solutions/qtpropertybrowser/lib/ -lQtSolutions_PropertyBrowser-hea
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../qt-solutions/qtpropertybrowser/lib/ -lQtSolutions_PropertyBrowser-head
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../qt-solutions/qtpropertybrowser/lib/ -lQtSolutions_PropertyBrowser-headd
+else:unix: LIBS += -L$$PWD/../../../../qt-solutions/qtpropertybrowser/lib/ -lQtSolutions_PropertyBrowser-head
 
 INCLUDEPATH += $$PWD/../../../../qt-solutions/qtpropertybrowser/src
 DEPENDPATH += $$PWD/../../../../qt-solutions/qtpropertybrowser
