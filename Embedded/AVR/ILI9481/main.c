@@ -99,7 +99,7 @@ int main() {
 
 //   cfa533Init();
    encoderInit();
-//   MCP48xx_Init();
+   MCP48xx_Init();
    adcInit();
 
 //   tftDrawText("Display controller: ");
@@ -170,10 +170,10 @@ int main() {
             voltage = 350;
          }
 
-         //strFormat(voltage, 1, buffer);
-         //strcat(buffer, " V    ");
-         //tftDrawText(98, 10, buffer);
-//         MCP48xx_SetValue(voltage * 10);
+         strFormat(voltage, 1, buffer);
+         strcat(buffer, " V    ");
+         tftDrawText(98, 10, buffer);
+         MCP48xx_SetValue(1, voltage * 11);
       }
 
       // maximum current
@@ -189,7 +189,7 @@ int main() {
          strFormat(current, 2, buffer);
          strcat(buffer, " A    ");
          tftDrawText(290, 70, buffer);
-//         MCP48xx_SetValue(current * 10);
+         MCP48xx_SetValue(0, current * 13);
       }
 
       wakeup++;
@@ -207,7 +207,7 @@ int main() {
             strFormat(value, 2, buffer);
             strcat(buffer, " A    ");
 
-            tftDrawText(98, 10, buffer);
+            tftDrawText(10, 70, buffer);
          }
       }
    }

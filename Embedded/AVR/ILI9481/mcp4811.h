@@ -5,7 +5,7 @@
 void MCP48xx_Init();
 
 
-void MCP48xx_SetValue(uint16_t value);
+void MCP48xx_SetValue(uint8_t channel, uint16_t value);
 
 
 #endif
