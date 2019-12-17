@@ -7,7 +7,8 @@
       <a href="info.php">PHP Installation information</a><br/>
       <a href="database.php">Database sample</a><br/>
       <a href="redirected/a/b/c">mod_rewrite sample</a><br/>
-      <a href="hexdump.php">hex dump sample</a>
+      <a href="hexdump.php">hex dump sample</a><br/>
+      <a href="filewrite.php">Write to File</a>
    </body>
 
 </html>
