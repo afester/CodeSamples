@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="com/example/svg/|com/example/javafx/SegmentEditor.java|com/example/javafx/components/SceneGraphTree.java|com/example/javafx/richtext/Main.java" kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="C:/Users/afester/.gradle/caches/modules-2/files-2.1/org.reactfx/reactfx/2.0-M4u1/c48f5055fc1295a90edbe753a8c9fc3869fd046f/reactfx-2.0-M4u1.jar" sourcepath="C:/Users/afester/.gradle/caches/modules-2/files-2.1/org.reactfx/reactfx/2.0-M4u1/ae4b9a8bbebf49ba183514600f56e77fc512af4a/reactfx-2.0-M4u1-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/AntlrSample"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/batik-1.8"/>
-	<classpathentry kind="lib" path="C:/Users/afester/Projects/batik-1.8/lib/fop-transcoder-allinone-1.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/afester/Projects/batik-1.8/lib/js.jar"/>
-	<classpathentry kind="lib" path="C:/Users/afester/Projects/batik-1.8/lib/xalan-2.7.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/afester/Projects/batik-1.8/lib/xerces_2_5_0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/afester/Projects/batik-1.8/lib/xml-apis-1.3.04.jar"/>
-	<classpathentry kind="lib" path="C:/Users/afester/Projects/batik-1.8/lib/xml-apis-ext-1.3.04.jar"/>
-	<classpathentry kind="lib" path="C:/Users/afester/Projects/batik-1.8/lib/xmlgraphics-commons-2.0.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/RichTextFX"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/FranzXaver"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

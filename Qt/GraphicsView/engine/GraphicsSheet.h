@@ -16,7 +16,7 @@ class NewItemInteractor;
 class InteractableItem;
 class Snapper;
 
-#ifdef EXP_SYMBOLS
+#ifdef ENGINE_LIBRARY
 class Q_DECL_EXPORT GraphicsSheet : public QGraphicsView {
 #else
 class Q_DECL_IMPORT GraphicsSheet : public QGraphicsView {

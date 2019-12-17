@@ -1,11 +1,9 @@
-		.586				; Pentium Processor Instruction Set
+		.686
+		.mmx
+		.xmm
 		.model flat	; , stdcall		; Flat memory model and stdcall method
 
 		.data
-
-		Messag		dw 12
-					db 'Hello Moon!', 10
-;MsgLen		equ     $-Message
 
 HelloStr	dw	5
 		db	"Hello"
@@ -15,8 +13,19 @@ MoonStr	db	"Hello Moon!", 0
 
 		.data?
 
-result		db	100 DUP(?)
-buffer		db	100 DUP(?)
+result	db	100 DUP(?)
+buffer	db	100 DUP(?)
+
+ebxReg	dq	?
+ecxReg	dq	?
+edxReg	dq	?
+
+startHigh	dq	?
+startLow	dq	?
+stopHigh	dq	?
+stopLow		dq	?
+diffHigh	dq	?
+diffLow		dq	?
 
 		.code
 
@@ -29,12 +38,180 @@ buffer		db	100 DUP(?)
 		extern	toDec : PROC
 		extern	toDecSigned : PROC
 
-		extrn  _GetStdHandle@4 : PROC
-		extrn  _WriteFile@20 : PROC
 		extrn  _ExitProcess@4 : PROC
 
 		public	main
 main	PROC
+
+		xor	eax, eax
+		cpuid
+
+		mov	word ptr [result], 12	; length of result string = 0
+		mov	dword ptr [result + 2], EBX
+		mov	dword ptr [result + 6], EDX
+		mov	dword ptr [result + 10], ECX
+
+		lea	edi, [buffer]
+		call	toHex			; EAX to buffer
+
+		mov	al, 10
+		lea	edi, [result]		; destination string
+		call	StringAppendChar
+
+		lea	esi, [result]		; source string
+		call	printString
+
+		mov	al, 10
+		lea	edi, [buffer]		; destination string
+		call	StringAppendChar
+
+		lea	esi, [buffer]		; source string
+		call	printString
+
+		mov		eax, 1
+		cpuid
+		mov		dword ptr [ebxReg], ebx
+		mov		dword ptr [ecxReg], ecx
+		mov		dword ptr [edxReg], edx
+
+		lea	edi, [buffer]
+		call	toHex			; EAX to buffer
+		mov	al, 10
+		lea	edi, [buffer]		; destination string
+		call	StringAppendChar
+		lea	esi, [buffer]		; source string
+		call	printString
+
+		lea	edi, [buffer]
+		mov	eax, dword ptr [ebxReg]
+		call	toHex
+		mov	al, 10
+		lea	edi, [buffer]		; destination string
+		call	StringAppendChar
+		lea	esi, [buffer]		; source string
+		call	printString
+
+				lea	edi, [buffer]
+		mov	eax, dword ptr [ecxReg]
+		call	toHex
+		mov	al, 10
+		lea	edi, [buffer]		; destination string
+		call	StringAppendChar
+		lea	esi, [buffer]		; source string
+		call	printString
+
+		lea	edi, [buffer]
+		mov	eax, dword ptr [edxReg]
+		call	toHex
+		mov	al, 10
+		lea	edi, [buffer]		; destination string
+		call	StringAppendChar
+		lea	esi, [buffer]		; source string
+		call	printString
+
+; ****************************************************************************
+
+
+		lea	eax,[result]
+		clflush	[eax]
+
+		mov		ecx, dword ptr [result]
+
+		lfence
+		rdtsc
+		mov		dword ptr [startLow], eax
+		mov		dword ptr [startHigh], edx
+
+		mov		ebx, dword ptr [result]
+		
+		lfence
+		rdtsc
+		mov		dword ptr [stopLow], eax
+		mov		dword ptr [stopHigh], edx
+
+		mov	eax, dword ptr [startHigh]
+		lea	edi, [result]
+		call	toHex
+		mov	al, ':'
+		lea	edi, [result]		; destination string
+		call	StringAppendChar
+		lea	edi, [buffer]
+		mov	eax, dword ptr [startLow]
+		call	toHex
+		lea	edi, [result]		; destination string
+		lea	esi, [buffer]		; source string
+		call	StringAppend
+		mov	al, 10
+		lea	edi, [result]		; destination string
+		call	StringAppendChar
+
+		mov	eax, dword ptr [stopHigh]
+		lea	edi, [buffer]
+		call	toHex
+		lea	edi, [result]		; destination string
+		lea	esi, [buffer]		; source string
+		call	StringAppend
+		mov	al, ':'
+		lea	edi, [result]		; destination string
+		call	StringAppendChar
+		lea	edi, [buffer]
+		mov	eax, dword ptr [stopLow]
+		call	toHex
+		lea	edi, [result]		; destination string
+		lea	esi, [buffer]		; source string
+		call	StringAppend
+
+		mov		eax, dword ptr [stopLow]
+		sub		eax, dword ptr [startLow]
+		mov		dword ptr [diffLow], eax
+		mov		eax, dword ptr [stopHigh]
+		sbb		eax, dword ptr [startHigh]
+		mov		dword ptr [diffHigh], eax
+
+;		mov	al, ' '
+;		lea	edi, [result]		; destination string
+;		call	StringAppendChar
+;		mov	eax, dword ptr [diffHigh]
+;		lea	edi, [buffer]
+;		call	toHex
+;		lea	edi, [result]		; destination string
+;		lea	esi, [buffer]		; source string
+;		call	StringAppend
+;		mov	al, ':'
+;		lea	edi, [result]		; destination string
+;		call	StringAppendChar
+;		lea	edi, [buffer]
+;		mov	eax, dword ptr [diffLow]
+;		call	toHex
+;		lea	edi, [result]		; destination string
+;		lea	esi, [buffer]		; source string
+;		call	StringAppend
+
+		mov	al, ' '
+		lea	edi, [result]		; destination string
+		call	StringAppendChar
+		mov	al, '('
+		lea	edi, [result]		; destination string
+		call	StringAppendChar
+
+		mov	eax, dword ptr [diffLow]
+		lea	edi, [buffer]
+		call	toDec
+		lea	edi, [result]		; destination string
+		lea	esi, [buffer]		; source string
+		call	StringAppend
+		mov	al, ')'
+		lea	edi, [result]		; destination string
+		call	StringAppendChar
+
+		mov	al, 10
+		lea	edi, [result]		; destination string
+		call	StringAppendChar
+
+		lea	esi, [result]		; source string
+		call	printString
+
+;*************************************************************************
 
 		mov	word ptr [result], 0	; length of result string = 0
 

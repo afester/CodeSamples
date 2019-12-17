@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<project name="JavaScript" default="functions" basedir=".">
+
+  <target name="functions">
+    <tar destfile="functions.tgz" compression="gzip">
+      <tarfileset dir="WebContent">
+        <include name="cancel.png"/>
+        <include name="check_mark.png"/>
+        <include name="delete.png"/>
+        <include name="pencil.png"/>
+        <include name="functions.css"/>
+        <include name="functions.html"/>
+        <include name="functions.js"/>
+      </tarfileset>
+    </tar>
+
+  </target>
+
+</project>

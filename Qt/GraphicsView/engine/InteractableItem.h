@@ -13,17 +13,17 @@ class QPainter;
 typedef unsigned int AbstractEditHandle;
 
 
-#ifdef EXP_SYMBOLS
+#ifdef ENGINE_LIBRARY
 class Q_DECL_EXPORT InteractableItem : public QObject {
 #else
 class Q_DECL_IMPORT InteractableItem : public QObject {
 #endif
 
-    Q_OBJECT;
+    Q_OBJECT
 
 public:
 
-    virtual ~InteractableItem() {};
+    virtual ~InteractableItem() {}
 
     virtual AbstractEditHandle getEditHandle(GraphicsSheet* view, const QPointF& pos, AbstractEditHandle enabledHandles = 0xffff) = 0;
 

@@ -1,0 +1,6 @@
+eclipse.preferences.version=1
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.206435547/PATH/delimiter=;
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.206435547/PATH/operation=replace
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.206435547/PATH/value=d\:\\Qt5.2.1\\Tools\\mingw48_32\\bin;C\:\\MinGW\\msys\\1.0\\bin;C\:\\windows\\system32;C\:\\windows;C\:\\windows\\System32\\Wbem;C\:\\windows\\System32\\WindowsPowerShell\\v1.0\\;C\:\\Program Files\\WIDCOMM\\Bluetooth Software\\;C\:\\Program Files\\WIDCOMM\\Bluetooth Software\\syswow64;C\:\\Program Files (x86)\\Intel\\OpenCL SDK\\2.0\\bin\\x86;C\:\\Program Files (x86)\\Intel\\OpenCL SDK\\2.0\\bin\\x64
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.206435547/append=true
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.206435547/appendContributed=true

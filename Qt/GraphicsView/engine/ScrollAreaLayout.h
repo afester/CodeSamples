@@ -8,7 +8,7 @@
 
 #include <QLayout>
 
-#ifdef EXP_SYMBOLS
+#ifdef ENGINE_LIBRARY
 class Q_DECL_EXPORT ScrollAreaLayout : public QLayout {
 #else
 class Q_DECL_EXPORT ScrollAreaLayout : public QLayout {

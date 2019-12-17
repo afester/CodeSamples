@@ -141,6 +141,12 @@ FROM   all_tab_cols
 WHERE  table_name = 'MY_TABLE'
 ORDER BY column_name;
 
+-- Select all tables which have a specified column
+SELECT table_name, data_type, data_length, owner
+FROM   all_tab_cols
+WHERE  column_name = 'MY_COLUMN'
+ORDER BY table_name;
+
 -- Select view definition for a given view
 SELECT TEXT_VC
 FROM DBA_VIEWS

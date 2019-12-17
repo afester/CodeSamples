@@ -5,7 +5,7 @@
 
 class GraphicsSheet;
 
-#ifdef EXP_SYMBOLS
+#ifdef ENGINE_LIBRARY
 class Q_DECL_EXPORT Snapper {
 #else
 class Q_DECL_IMPORT Snapper {
@@ -26,7 +26,7 @@ public:
 /**
  * This snapper does not snap at all. It just returns back the passed point.
  */
-#ifdef EXP_SYMBOLS
+#ifdef ENGINE_LIBRARY
 class Q_DECL_EXPORT NoSnapper : public Snapper {
 #else
 class Q_DECL_IMPORT NoSnapper : public Snapper {
@@ -42,7 +42,7 @@ public:
  * Its basically a rounding to the nearest integer - if the position
  * would be 1.3/3.5, then the result is 1/4
  */
-#ifdef EXP_SYMBOLS
+#ifdef ENGINE_LIBRARY
 class Q_DECL_EXPORT UnitSnapper : public Snapper {
 #else
 class Q_DECL_IMPORT UnitSnapper : public Snapper {
@@ -60,7 +60,7 @@ public:
  * would be 1.3/3.5, then the result is 2/4 (since the smallest grid
  * is at positions 0, 2, 4, 6, ...)
  */
-#ifdef EXP_SYMBOLS
+#ifdef ENGINE_LIBRARY
 class Q_DECL_EXPORT GridSnapper : public Snapper {
 #else
 class Q_DECL_IMPORT GridSnapper : public Snapper {
@@ -75,7 +75,7 @@ public:
  * This snapper calculates the nearest edge of any object within a specific range.
  * If no point is found nearby, the given fallback snapper is used.
  */
-#ifdef EXP_SYMBOLS
+#ifdef ENGINE_LIBRARY
 class Q_DECL_EXPORT EdgeSnapper : public Snapper {
 #else
 class Q_DECL_IMPORT EdgeSnapper : public Snapper {

@@ -7,23 +7,23 @@ REM SET "MVN_HOME=c:\Program Files\apache-maven-3.2.5"
 
 rem SET "JAVA_HOME=c:\Program Files\Java\jdk1.6.0_43"
 rem SET "JAVA_HOME=c:\Program Files\Java\jdk1.7.0_80"
-SET "JAVA_HOME=c:\Program Files\Java\jdk1.8.0_144"
-rem SET JAVA_HOME=c:\Program Files\Java\jdk-9
+rem SET "JAVA_HOME=c:\Program Files\Java\jdk1.8.0_144"
+SET JAVA_HOME=c:\Program Files\Java\jdk-9
 
-REM SET ANT_HOME=c:\Program Files\apache-ant-1.9.1
+SET ANT_HOME=D:\apache-ant-1.10.2
 SET "CYGWIN_HOME=c:\cygwin64"
-REM SET CMAKE_HOME=c:\Program Files\cmake-3.8.2-win64-x64
+SET "CMAKE_HOME=c:\Program Files\cmake"
 REM SET MSVC_HOME=D:\Microsoft Visual Studio 12.0\VC
 
-REM SET QT_HOME=d:\Qt5.5.0\5.5\msvc2013
+SET QT_HOME=D:\Qt\5.10.0\msvc2017_64
 REM SET QT_HOME=d:\cygwin64
 
 SET "GRADLE_HOME=C:\Program Files\gradle-4.2.1"
 REM SET NASM_HOME=C:\Users\afester\nasm-2.10.07
 REM SET HG_HOME=D:\Program Files\TortoiseHg
-rem SET GIT_HOME=C:\Program Files\Git
+REM SET GIT_HOME=C:\Program Files\Git
 REM SET GROOVY_HOME=D:\groovy-2.4.5
-rem SET MSVC_HOME=C:\Program Files (x86)\Microsoft Visual Studio 14.0\vc
+SET "MSVC_HOME=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build"
 REM SET HASKELL_HOME=D:\Program Files\Haskell Platform\8.0.1
 
 echo.
@@ -60,7 +60,8 @@ IF DEFINED CMAKE_HOME (
 )
 
 IF DEFINED MSVC_HOME (
-  CALL "%MSVC_HOME%\vcvarsall.bat"
+  CALL "%MSVC_HOME%\vcvarsall.bat" x86_amd64
+  rem CALL "%MSVC_HOME%\vcvarsall.bat" x86
   where cl
   echo.
 )

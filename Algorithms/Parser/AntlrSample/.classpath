@@ -6,5 +6,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/ProfileJava"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/ANTLR44"/>
+	<classpathentry kind="lib" path="C:/Users/afester/Projects/CodeSamples/nodistrib/antlr-4.4-complete.jar"/>
+	<classpathentry kind="lib" path="C:/Users/afester/Projects/CodeSamples/nodistrib/asm-all-4.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

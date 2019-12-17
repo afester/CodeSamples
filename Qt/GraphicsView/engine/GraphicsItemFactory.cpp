@@ -6,6 +6,7 @@
  */
 
 #include <QDebug>
+#include <QCoreApplication>
 #include <QDir>
 #include <QLibrary>
 #include <iostream>
@@ -17,24 +18,27 @@ typedef void (*ItemMain)(GraphicsItemFactory*);
 
 GraphicsItemFactory::GraphicsItemFactory() {
 
-    // search all shared libraries below the bin directory where the
+    // In all plugin directories, search all shared libraries where the
     // base name ends with "items":
-    QDir itemsDir("bin");
-    QStringList names;
-    names << "*items.dll" << "*items.so";  // TODO: better approach?
-    QStringList itemLibs = itemsDir.entryList(names);
-    foreach(QString libName, itemLibs) {
-        QString libPath = itemsDir.path() + QDir::separator() + libName;
-        qDebug() << "Loading: " << libPath;
+    foreach (const QString &path, QCoreApplication::libraryPaths()) {
+        qDebug() << "Searching: " << path;
+        QDir itemsDir(path);
+        QStringList names;
+        names << "*items.dll" << "*items.so";  // TODO: better approach?
+        QStringList itemLibs = itemsDir.entryList(names);
+        foreach(QString libName, itemLibs) {
+            QString libPath = itemsDir.path() + QDir::separator() + libName;
+            qDebug() << "  Loading: " << libPath;
 
-        QLibrary itemLibrary(libPath);
-        itemLibrary.load();
+            QLibrary itemLibrary(libPath);
+            itemLibrary.load();
 
-        ItemMain itemMain = (ItemMain) itemLibrary.resolve("ItemsMain");
-        if (itemMain == 0) {
-           std::cerr << "Could not resolve ItemsMain" << std::endl;
-        } else {
-           itemMain(this);
+            ItemMain itemMain = (ItemMain) itemLibrary.resolve("ItemsMain");
+            if (itemMain == 0) {
+               std::cerr << "Could not resolve ItemsMain" << std::endl;
+            } else {
+               itemMain(this);
+            }
         }
     }
 }
