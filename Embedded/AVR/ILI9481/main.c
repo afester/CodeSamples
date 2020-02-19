@@ -16,6 +16,15 @@
 //extern volatile int16_t timeItTook;
 extern volatile bool accel;
 
+// ADC channels
+#define U_MESS1  0
+#define U_MESS2  1
+#define U_MESS3  2
+#define I_MESS1  3
+#define I_MESS2  4
+#define I_MESS3  5
+#define T_MESS   6
+
 #if 0
 void displayValue(int y, int value, int color) {
    if (value < 0) {
@@ -129,26 +138,26 @@ int main() {
 //   while(1);
 
 
-   int ypos = 10;
-   tftDrawText(5, ypos, "U");
-   tftDrawText(80, ypos, ":"); //  18,5 V");
-   tftDrawText(290, ypos, "1,25 A");
-   ypos += 60;
-   tftDrawText(200, ypos, "Max: ");
-
-   ypos += 60;
-   tftDrawText(5, ypos, "U5");
-   tftDrawText(80, ypos, ": 4,9 V");
-   tftDrawText(290, ypos, "0,01 A");
-
-   ypos += 60;
-   tftDrawText(5, ypos, "U12");
-   tftDrawText(80, ypos, ": 12,1 V");
-   tftDrawText(290, ypos, "0,02 A");
-
-   ypos += 60;
-   tftDrawText(260, ypos, "T: 42 °C");
-
+//   int ypos = 10;
+//   tftDrawText(5, ypos, "U");
+//   tftDrawText(80, ypos, ":"); //  18,5 V");
+//   tftDrawText(290, ypos, "1,25 A");
+//   ypos += 60;
+//   tftDrawText(200, ypos, "Max: ");
+//
+//   ypos += 60;
+//   tftDrawText(5, ypos, "U5");
+//   tftDrawText(80, ypos, ": 4,9 V");
+//   tftDrawText(290, ypos, "0,01 A");
+//
+//   ypos += 60;
+//   tftDrawText(5, ypos, "U12");
+//   tftDrawText(80, ypos, ": 12,1 V");
+//   tftDrawText(290, ypos, "0,02 A");
+//
+//   ypos += 60;
+//   tftDrawText(260, ypos, "T: 42 °C");
+//
    sei();
 //   displayValue(50, 0, RED);
 //   displayValue(130, 0, GREEN);
@@ -156,6 +165,7 @@ int main() {
 
    int voltage = 0;
    int current = 0;
+   int adcChannel = 0;
    while(1) {
       set_sleep_mode(0); // IDLE mode
       sleep_mode();
@@ -170,9 +180,10 @@ int main() {
             voltage = 350;
          }
 
-         strFormat(voltage, 1, buffer);
-         strcat(buffer, " V    ");
-         tftDrawText(98, 10, buffer);
+         //strFormat(voltage, 1, buffer);
+         //strcat(buffer, " V    ");
+         //tftDrawText(98, 10, buffer);
+
          MCP48xx_SetValue(1, voltage * 11);
       }
 
@@ -195,19 +206,34 @@ int main() {
       wakeup++;
       if (wakeup > 100) {
          wakeup = 0;
-         values[valuePtr++] = adcReadChannel(3);
+         values[valuePtr++] = adcReadChannel(U_MESS1);
+
+//         int value = adcReadChannel(adcChannel);
+//         strFormat(value, 0, buffer);
+//         strcat(buffer, "     " + strlen(buffer));
+//         if (adcChannel > 3) {
+//            tftDrawText(200, 20 + (adcChannel - 4) * 50, buffer);
+//         } else {
+//            tftDrawText(20, 2 + adcChannel * 50, buffer);
+//         }
+//         
+//         adcChannel++;
+//         if (adcChannel > 7) {
+//             adcChannel = 0;
+//         }
+
          if (valuePtr == 4) {
             valuePtr = 0;
             uint16_t value = (values[0] + values[1] + values[2] + values[3]) >> 2;
             value = (value * 11) >> 5;          // / 2,9 => 0 .. 352 => 0..35,2 V or 0..3,52 A
 
-            // strFormat(value, 1, buffer);
-            // strcat(buffer, " V    ");
+            strFormat(value, 1, buffer);
+            strcat(buffer, " V    ");
+            tftDrawText(98, 10, buffer);
 
-            strFormat(value, 2, buffer);
-            strcat(buffer, " A    ");
-
-            tftDrawText(10, 70, buffer);
+            // strFormat(value, 2, buffer);
+            // strcat(buffer, " A    ");
+            // tftDrawText(10, 70, buffer);
          }
       }
    }
