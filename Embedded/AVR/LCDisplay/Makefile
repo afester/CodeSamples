@@ -1,8 +1,9 @@
 # Device definitions
 
-# DEVICE=atmega328p
+DEVICE=atmega328p
 # DEVICE=atmega2560
-DEVICE=atmega1284p
+# DEVICE=atmega1284p
+
 CLOCK=20000000
 
 # Programmer definitions
@@ -10,14 +11,11 @@ CLOCK=20000000
 PGM_DEVICE=$(DEVICE)
 
 # PGM_DEVFILE=usb
-# PGM_PROTO=stk500v2
-# PGM_PROTO=arduino
-
-# PGM_DEVFILE=/dev/ttyACM0
-# PGM_PROTO=wiring
-
-PGM_PROTO=stk500v1
 PGM_DEVFILE=/dev/ttyACM0
+
+PGM_PROTO=arduino
+# PGM_PROTO=stk500v2
+# PGM_PROTO=wiring
 
 # Source and target definitions
 

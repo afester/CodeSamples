@@ -225,11 +225,21 @@ int main() {
          if (valuePtr == 4) {
             valuePtr = 0;
             uint16_t value = (values[0] + values[1] + values[2] + values[3]) >> 2;
-            value = (value * 11) >> 5;          // / 2,9 => 0 .. 352 => 0..35,2 V or 0..3,52 A
+
+            strFormat(value, 0, buffer);
+            strcat(buffer, "     ");
+            tftDrawText(98, 10, buffer);
+
+
+
+            //value = (value * 11) >> 5;          // / 2,9 => 0 .. 352 => 0..35,2 V or 0..3,52 A
+            //value = value / 2.927;
+            value = value / 2.927;
+            //value = (value * 1000) / 2927;
 
             strFormat(value, 1, buffer);
             strcat(buffer, " V    ");
-            tftDrawText(98, 10, buffer);
+            tftDrawText(98, 50, buffer);
 
             // strFormat(value, 2, buffer);
             // strcat(buffer, " A    ");

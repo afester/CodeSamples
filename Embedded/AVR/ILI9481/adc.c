@@ -5,12 +5,15 @@
 
 
 void adcInit() {
+   PORTA = 0x00;
+   DDRA = 0x00;
+   DIDR0 = 0xff; // disable all digital input pins // _BV(ADC0D);			// disable PA0 digital input pin
+
    ADMUX = _BV(REFS1) | _BV(REFS0);	// 2.56V reference, select ADC0
 
    ADCSRA = _BV(ADEN) | 			   // Enable ADC
             _BV(ADPS2) | _BV(ADPS1) | _BV(ADPS0);  // 156 kHz ADC clock
    ADCSRB = 0;
-   DIDR0 = _BV(ADC0D);			// disable PA0 digital input pin
 }
 
 

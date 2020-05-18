@@ -30,6 +30,8 @@ ISR(TIMER0_OVF_vect) {
    }
 }
 
+static char CLOCK[] = " |\0 /\0 -\0 \244\0";
+static int clockIdx = 0;
 
 int main() {
    CLKPR = 0b10000000; // Enable clock prescaler change
@@ -56,7 +58,11 @@ int main() {
          bitToggle(PORTD, PD3);
          uint16_t value = adcRead();
          utoa(value, buffer, 10);
-         strcat(buffer, "mA");
+         strcat(buffer, CLOCK + clockIdx);
+         clockIdx += 3;
+         if (clockIdx > 9) {
+             clockIdx = 0;
+         }
          cfa533SetContent(1, buffer);
          timerEvent = 0;
       }
