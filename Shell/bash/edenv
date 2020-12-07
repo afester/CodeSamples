@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [[ $# -ne 1 ]] ; then
+   echo "Usage: edenv envVar"
+   exit
+fi
+
+if [[ -z ${EDITOR+x} ]] ; then
+   EDITOR=vi
+fi
+
+envVar=$1
+tempFile="/tmp/edVar$$.txt"
+echo ${!envVar} > ${tempFile}
+${EDITOR} ${tempFile}
+echo -n "setenv ${envVar} " # for csh
+cat ${tempFile}
+rm ${tempFile} &> /dev/null
