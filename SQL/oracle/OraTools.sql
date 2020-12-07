@@ -157,6 +157,11 @@ SELECT TABLE_NAME, TABLESPACE_NAME, STATUS, TEMPORARY
 FROM DBA_TABLES
 WHERE TABLE_NAME LIKE 'xyz%';
 
+-- get destination object for synonym
+SELECT * 
+FROM user_synonyms 
+WHERE synonym_name LIKE 'xyz%';
+
 -- Select all temporary tables
 SELECT TABLE_NAME, TABLESPACE_NAME, STATUS
 FROM DBA_TABLES
