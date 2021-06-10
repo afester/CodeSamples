@@ -1,0 +1,18 @@
+plugins {
+    id 'org.openjfx.javafxplugin' version '0.0.9'
+    id 'application'
+    id 'eclipse'
+}
+
+repositories {
+    mavenCentral()
+}
+
+javafx {
+    version = "11.0.2"
+    modules = [ 'javafx.controls' ]
+}
+
+application {
+    mainClass = 'com.example.HelloWorld'
+}

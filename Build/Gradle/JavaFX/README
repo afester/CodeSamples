@@ -1,0 +1,8 @@
+This example shows how to build a minimal JavaFX 11 application using Gradle
+(Remember that starting with Java 11, JavaFX is not bundled with the JDK anymore).
+
+Note:
+In Ubuntu 21.04, the default gradle version is 4.4.2 which is too old for the JavaFX plugin.
+The Snap version is 7.0.2 which works well for the build, but then running the application fails
+due to a GLIBC issue - because gradle then uses the java environment from the Snap.
+Manually installing gradle to /opt and then using gradle from that directory worked well.
