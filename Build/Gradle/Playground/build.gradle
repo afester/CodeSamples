@@ -1,0 +1,9 @@
+
+
+println "build.gradle"
+
+subprojects {
+	// Closure being called once for each sub project
+	// (before the sub projects build.gradle scripts) 
+	println "SUB:" + it.name
+}
