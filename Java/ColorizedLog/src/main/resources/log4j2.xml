@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_PATTERN">%d{dd-MMM-yyyy HH:mm:ss.SSSZ}|%p [%logger] %m%n</Property>
+        <Property name="LOG_PATTERN_TRACE">%style{%d{dd-MMM-yyyy HH:mm:ss.SSSZ}|%p [%logger]}{FG_Green} %style{%m}{FG_White,Bright}%n</Property>
+        <Property name="LOG_PATTERN_DEBUG">%style{%d{dd-MMM-yyyy HH:mm:ss.SSSZ}|%p [%logger]}{FG_Green} %style{%m}{FG_Lightgray}%n</Property>
+        <Property name="LOG_PATTERN_INFO">%style{%d{dd-MMM-yyyy HH:mm:ss.SSSZ}|%p [%logger]}{FG_Green} %style{%m}{FG_Green}%n</Property>
+        <Property name="LOG_PATTERN_WARNING">%style{%d{dd-MMM-yyyy HH:mm:ss.SSSZ}|%p [%logger]}{FG_Green} %style{%m}{FG_Yellow,Bright}%n</Property>
+        <Property name="LOG_PATTERN_ERROR">%style{%d{dd-MMM-yyyy HH:mm:ss.SSSZ}|%p [%logger]}{FG_Green} %style{%m}{FG_Red,Bright}%n</Property>
+        <Property name="LOG_PATTERN_FATAL">%style{%d{dd-MMM-yyyy HH:mm:ss.SSSZ}|%p [%logger]}{FG_Green} %style{%m}{FG_Red,Reverse}%n</Property>
+    </Properties>
+ 
+    <Appenders>
+y        <Console name="console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout>
+		        <LevelPatternSelector defaultPattern="${LOG_PATTERN}">
+		            <PatternMatch key="trace"   pattern="${LOG_PATTERN_TRACE}"/>
+                    <PatternMatch key="debug"   pattern="${LOG_PATTERN_DEBUG}"/>
+                    <PatternMatch key="info"    pattern="${LOG_PATTERN_INFO}"/>
+                    <PatternMatch key="warn"    pattern="${LOG_PATTERN_WARNING}"/>
+                    <PatternMatch key="error"   pattern="${LOG_PATTERN_ERROR}"/>
+                    <PatternMatch key="fatal"   pattern="${LOG_PATTERN_FATAL}"/>
+		        </LevelPatternSelector>
+	        </PatternLayout>
+        </Console>
+    </Appenders>
+ 
+    <Loggers>
+        <Root level="trace">
+            <AppenderRef ref="console"/>
+        </Root>
+    </Loggers>
+</Configuration>
