@@ -11,7 +11,7 @@
     </Properties>
  
     <Appenders>
-y        <Console name="console" target="SYSTEM_OUT" follow="true">
+        <Console name="console" target="SYSTEM_OUT" follow="true">
             <PatternLayout>
 		        <LevelPatternSelector defaultPattern="${LOG_PATTERN}">
 		            <PatternMatch key="trace"   pattern="${LOG_PATTERN_TRACE}"/>
