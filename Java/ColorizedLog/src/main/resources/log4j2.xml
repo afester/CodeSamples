@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN" monitorInterval="30">
+<!-- 
     <Properties>
         <Property name="LOG_PATTERN">%d{dd-MMM-yyyy HH:mm:ss.SSSZ}|%p [%logger] %m%n</Property>
         <Property name="LOG_PATTERN_TRACE">%style{%d{dd-MMM-yyyy HH:mm:ss.SSSZ}|%p [%logger]}{FG_Green} %style{%m}{FG_White,Bright}%n</Property>
@@ -9,22 +10,34 @@
         <Property name="LOG_PATTERN_ERROR">%style{%d{dd-MMM-yyyy HH:mm:ss.SSSZ}|%p [%logger]}{FG_Green} %style{%m}{FG_Red,Bright}%n</Property>
         <Property name="LOG_PATTERN_FATAL">%style{%d{dd-MMM-yyyy HH:mm:ss.SSSZ}|%p [%logger]}{FG_Green} %style{%m}{FG_Red,Reverse}%n</Property>
     </Properties>
- 
+
     <Appenders>
         <Console name="console" target="SYSTEM_OUT" follow="true">
             <PatternLayout>
-		        <LevelPatternSelector defaultPattern="${LOG_PATTERN}">
-		            <PatternMatch key="trace"   pattern="${LOG_PATTERN_TRACE}"/>
+                <LevelPatternSelector defaultPattern="${LOG_PATTERN}">
+                    <PatternMatch key="trace"   pattern="${LOG_PATTERN_TRACE}"/>
                     <PatternMatch key="debug"   pattern="${LOG_PATTERN_DEBUG}"/>
                     <PatternMatch key="info"    pattern="${LOG_PATTERN_INFO}"/>
                     <PatternMatch key="warn"    pattern="${LOG_PATTERN_WARNING}"/>
                     <PatternMatch key="error"   pattern="${LOG_PATTERN_ERROR}"/>
                     <PatternMatch key="fatal"   pattern="${LOG_PATTERN_FATAL}"/>
-		        </LevelPatternSelector>
-	        </PatternLayout>
+                </LevelPatternSelector>
+            </PatternLayout>
         </Console>
     </Appenders>
- 
+-->
+
+    <!-- A much simpler solution is to use the %highlight pattern -->
+    <Properties>
+        <Property name="LOG_PATTERN">%style{%d{dd-MMM-yyyy HH:mm:ss.SSSZ}}{FG_Green}%style{[%logger]}{FG_Cyan}%highlight{%-5p: %m}{FATAL=BG_red black, ERROR=red bright, WARN=yellow bright, INFO=green, DEBUG=gray, TRACE=white bright}%n</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+    </Appenders>
+
     <Loggers>
         <Root level="trace">
             <AppenderRef ref="console"/>
