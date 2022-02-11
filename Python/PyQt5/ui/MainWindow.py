@@ -6,13 +6,13 @@ Created on Feb 13, 2015
 @author: andreas
 '''
 
-from PyQt5.QtCore import PYQT_VERSION_STR, QT_VERSION_STR, qVersion, pyqtSignal, Qt
-from PyQt5.QtWidgets import QWidget, QTabWidget
-from PyQt5.QtWidgets import QTextEdit, QSplitter, QHBoxLayout, QVBoxLayout, QMainWindow
-from PyQt5.QtWidgets import QAction, QStatusBar, QMenuBar, QMessageBox, QListView
-from PyQt5.QtWebKitWidgets import QWebView, QWebPage
-from PyQt5.QtCore import QUrl, QObject, QThread 
-from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon
+from PyQt6.QtCore import PYQT_VERSION_STR, QT_VERSION_STR, qVersion, pyqtSignal, Qt, QDir
+from PyQt6.QtWidgets import QWidget, QTabWidget
+from PyQt6.QtWidgets import QTextEdit, QSplitter, QHBoxLayout, QVBoxLayout, QMainWindow
+from PyQt6.QtWidgets import QStatusBar, QMenuBar, QMessageBox, QListView
+# from PyQt6.QtWebKitWidgets import QWebView, QWebPage
+from PyQt6.QtCore import QUrl, QObject, QThread
+from PyQt6.QtGui import QAction, QStandardItem, QStandardItemModel, QIcon
 
 import sys, os, platform, re, sqlite3, logging
 import pkg_resources, data
@@ -29,7 +29,7 @@ from model.XMLExporter import XMLExporter
 from HTMLExporter import HTMLExporter
 from model.XMLImporter import XMLImporter
 
-import ui.resources
+# import ui.resources
 
 class SearchWorker(QObject):
     
@@ -88,8 +88,8 @@ class SearchWidget(QWidget):
         self.ui.resultList.setModel(self.resultListModel)
         self.ui.resultList.selectionModel().selectionChanged.connect(self.doResultSelected)
 
-        self.startIcon = QIcon(':/icons/search-global-start.png')
-        self.stopIcon = QIcon(':/icons/search-global-stop.png')
+        self.startIcon = QIcon('icons:search-global-start.png')
+        self.stopIcon = QIcon('icons:search-global-stop.png')
         self.ui.startStopButton.setIcon(self.startIcon)
 
         self.ui.searchInput.returnPressed.connect(self.doReturnKey)
@@ -220,9 +220,9 @@ class CentralWidget(QWidget):
         self.editTabIdx = self.tabWidget.addTab(tab, "Edit")
 #############################
 
-        self.browser = QWebView(self.tabWidget)
-        self.browser.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
-        self.browser.linkClicked.connect(self.navigateWeb)
+        self.browser = QWidget() # QWebView(self.tabWidget)
+#        self.browser.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
+#        self.browser.linkClicked.connect(self.navigateWeb)
         self.webTabIdx = self.tabWidget.addTab(self.browser, "View web")
 
         self.pdfTabIdx = self.tabWidget.addTab(QWidget(self.tabWidget), "View pdf")
@@ -263,7 +263,7 @@ class CentralWidget(QWidget):
         self.listsWidget.addTab(self.fromLinksWidget, 'Links from')
 ###############################################################################
 
-        leftWidget = QSplitter(Qt.Vertical, self)
+        leftWidget = QSplitter(Qt.Orientation.Vertical, self)
         leftWidget.addWidget(self.browserWidget)
         leftWidget.addWidget(self.listsWidget)
 
@@ -403,10 +403,13 @@ class MainWindow(QMainWindow):
 
     def __init__(self, app):
         QMainWindow.__init__(self, None)
+
+        QDir.addSearchPath('icons', 'icons/')
+
         self.l.debug('Initializing MainWindow ...')
 
         self.setWindowTitle('MynPad')
-        app.setWindowIcon(QIcon(':/icons/mynpad.png'))
+        app.setWindowIcon(QIcon('icons:mynpad.png'))
 
         if os.name == 'nt':
             # On Windows, make sure to use a unique Application User Model Id, otherwise

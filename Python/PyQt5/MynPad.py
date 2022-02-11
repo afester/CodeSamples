@@ -10,10 +10,10 @@ Created on Feb 13, 2015
 import sys
 sys.path.insert(0, '/opt/pyqt53/site-packages')
 
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 
 import logging.config
-from pip.commands.list import ListCommand
+# from pip.commands.list import ListCommand
 
 
 from ui.MainWindow import MainWindow
@@ -23,8 +23,8 @@ import io
 
 def main():
     print(__name__)
-    lx = ListCommand()
-    lx.main(args=None)
+#    lx = ListCommand()
+#    lx.main(args=None)
 
     # Note: Need a TextIOWrapper since streams are essentially byte-based since Python 3
     # See also http://bugs.python.org/issue13518

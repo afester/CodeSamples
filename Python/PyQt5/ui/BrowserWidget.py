@@ -4,14 +4,15 @@ Created on 25.02.2015
 @author: afester
 '''
 
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QToolBar, QAction
-from PyQt5.QtWidgets import QVBoxLayout, QDialog, QFileDialog, QDialogButtonBox
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtGui import QAction
+from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QToolBar
+from PyQt6.QtWidgets import QVBoxLayout, QDialog, QFileDialog, QDialogButtonBox
 
 import os, logging
 from model.Notepad import LocalNotepad, DropboxNotepad
-import dropbox
-from dropbox.rest import ErrorResponse
+# import dropbox
+# from dropbox.rest import ErrorResponse
 from ui.AddNotepadDlg import Ui_AddNotepadDlg
 
 
@@ -155,7 +156,7 @@ class TreeWidget(QTreeWidget):
                 linkItem = TreeNode(notepad, keyword)
     
                 if childCount > 0:
-                    linkItem.setChildIndicatorPolicy(QTreeWidgetItem.ShowIndicator)
+                    linkItem.setChildIndicatorPolicy(QTreeWidgetItem.ChildIndicatorPolicy.ShowIndicator)
 
                 item.addChild(linkItem)
             item.setWasExpanded(True)
@@ -169,7 +170,7 @@ class TreeWidget(QTreeWidget):
 
         # set the child indicator
         if notepad.getChildCount('Title page') > 0:
-            rootItem.setChildIndicatorPolicy(QTreeWidgetItem.ShowIndicator)
+            rootItem.setChildIndicatorPolicy(QTreeWidgetItem.ChildIndicatorPolicy.ShowIndicator)
 
 
     def addNotepad(self, notepad):
@@ -310,7 +311,7 @@ class BrowserWidget(QWidget):
 
     def addNotepad(self):
         dlg = AddNotepadDlg(self, self.settings)
-        if dlg.exec() == QDialog.Accepted:
+        if dlg.exec() == QDialog.DialogCode.Accepted:
             notepad = None
 
             # create a notepad definition from user input

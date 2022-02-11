@@ -7,7 +7,7 @@ Created on 24.02.2015
 from model.XMLImporter import XMLImporter
 from model.XMLExporter import XMLExporter
 import os, urllib.parse, uuid, logging
-from dropbox.rest import ErrorResponse
+# from dropbox.rest import ErrorResponse
 
 from StylableTextEdit.StylableTextModel import Frame, Paragraph, TextFragment, DocumentFactory
 

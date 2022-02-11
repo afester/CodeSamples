@@ -4,7 +4,7 @@ Created on 10.03.2015
 @author: afester
 '''
 
-from PyQt5.Qt import QTextTable, QTextDocument, QTextCursor, QTextFormat, QTextCharFormat
+from PyQt6.QtGui import QTextTable, QTextDocument, QTextCursor, QTextFormat, QTextCharFormat
 
 import tools
 import os
@@ -171,7 +171,7 @@ class TextDocumentSelectionTraversal:
 
     def getParagraph(self, block):
         blockFormat = block.blockFormat()
-        blockStyle = blockFormat.property(QTextFormat.UserProperty)
+        blockStyle = blockFormat.property(QTextFormat.Property.UserProperty)
 
         listLevel = 0
         textList = block.textList()
@@ -199,7 +199,7 @@ class TextDocumentSelectionTraversal:
         text = fragment.text().replace('\u2028', '\n')
 
         charFormat = fragment.charFormat()
-        style = charFormat.property(QTextFormat.UserProperty)
+        style = charFormat.property(QTextFormat.Property.UserProperty)
 
         href = None
         if style and style[0] == 'link':
@@ -335,7 +335,7 @@ class TextDocumentTraversal:
 
     def getParagraph(self, block):
         blockFormat = block.blockFormat()
-        blockStyle = blockFormat.property(QTextFormat.UserProperty)
+        blockStyle = blockFormat.property(QTextFormat.Property.UserProperty)
 
         listLevel = 0
         textList = block.textList()
@@ -362,7 +362,7 @@ class TextDocumentTraversal:
         text = fragment.text().replace('\u2028', '\n')
 
         charFormat = fragment.charFormat()
-        style = charFormat.property(QTextFormat.UserProperty)
+        style = charFormat.property(QTextFormat.Property.UserProperty)
 
         href = None
         if style and style[0] == 'link':
@@ -387,7 +387,7 @@ class TextDocumentTraversal:
     #                 result.append(frag)
     #===========================================================================
             else:
-                customObject = charFormat.property(QTextCharFormat.UserProperty+1)
+                customObject = charFormat.property(QTextCharFormat.Property.UserProperty+1)
                 if type(customObject) is ImageObject:
                     frag = ImageFragment()
                     frag.image = tools.os_path_split(customObject.imageName)[-1]
@@ -447,7 +447,7 @@ class DocumentFactory:
         # Register a renderer for custom text objects
         mo = CustomObjectRenderer()
         mo.setParent(self.document)
-        self.document.documentLayout().registerHandler(QTextCharFormat.UserObject+1, mo);
+        self.document.documentLayout().registerHandler(QTextCharFormat.ObjectTypes.UserObject+1, mo);
 
         self.cursor = QTextCursor(self.document)
         self.listLevel = 0
@@ -458,11 +458,11 @@ class DocumentFactory:
             self.addNode(n)
 
         # Clean up the first paragraph if document is not empty
-        self.cursor.movePosition(QTextCursor.Start)
+        self.cursor.movePosition(QTextCursor.MoveOperation.Start)
         b = self.cursor.block()
         if b.length() == 1:
             cursor = QTextCursor(self.document.findBlockByLineNumber(0))
-            cursor.select(QTextCursor.BlockUnderCursor)
+            cursor.select(QTextCursor.SelectionType.BlockUnderCursor)
             cursor.deleteChar()
 
         return self.document
@@ -497,8 +497,8 @@ class DocumentFactory:
             imageObject.setName(imagePath)
 
             imageObjectFormat = QTextCharFormat()
-            imageObjectFormat.setObjectType(QTextFormat.UserObject + 1)
-            imageObjectFormat.setProperty(QTextFormat.UserProperty + 1, imageObject)
+            imageObjectFormat.setObjectType(QTextFormat.ObjectTypes.UserObject + 1)
+            imageObjectFormat.setProperty(QTextFormat.Property.UserProperty + 1, imageObject)
             self.cursor.insertText('\ufffc', imageObjectFormat);
 
         elif type(node) is MathFragment:
@@ -507,10 +507,11 @@ class DocumentFactory:
             mathFormula.image = node.image #  renderFormula()
 
             mathObjectFormat = QTextCharFormat()
-            mathObjectFormat.setObjectType(QTextFormat.UserObject + 1)
-            mathObjectFormat.setVerticalAlignment(QTextCharFormat.AlignMiddle)
-            mathObjectFormat.setProperty(QTextFormat.UserProperty + 1, mathFormula)
+            mathObjectFormat.setObjectType(QTextFormat.ObjectTypes.UserObject + 1)
+            mathObjectFormat.setVerticalAlignment(QTextCharFormat.VerticalAlignment.AlignMiddle)
+            mathObjectFormat.setProperty(QTextFormat.Property.UserProperty + 1, mathFormula)
             self.cursor.insertText('\ufffc', mathObjectFormat);
+
         elif type(node) is TextFragment:
             text = node.text.replace('\n', '\u2028')
             if node.href is not None:

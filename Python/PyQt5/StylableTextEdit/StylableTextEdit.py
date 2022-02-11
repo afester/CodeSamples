@@ -6,10 +6,9 @@ Created on 29.04.2015
 
 import os
 
-from PyQt5.Qt import QUrl, QSize, QDesktopServices, QMimeData
-from PyQt5.QtCore import pyqtSignal, Qt, QPoint
-from PyQt5.QtGui import QTextCursor, QTextFormat, QGuiApplication, QCursor, QTextCharFormat
-from PyQt5.QtWidgets import QTextEdit, QFrame, QHBoxLayout, QLineEdit, QPushButton, QMessageBox
+from PyQt6.QtCore import pyqtSignal, Qt, QPoint, QUrl, QSize, QMimeData, QPointF
+from PyQt6.QtGui import QTextCursor, QTextFormat, QGuiApplication, QCursor, QTextCharFormat, QDesktopServices
+from PyQt6.QtWidgets import QTextEdit, QFrame, QHBoxLayout, QLineEdit, QPushButton, QMessageBox
 
 from StylableTextEdit.CustomObjects import MathFormulaObject, ImageObject
 from StylableTextEdit.StylableTextModel import TextDocumentTraversal, StructurePrinter, Frame, Paragraph, List, TextFragment, TextDocumentSelectionTraversal
@@ -19,7 +18,7 @@ class UrlEditor(QFrame):
     applyUrl = pyqtSignal(str)
 
     def __init__(self, parentWidget):
-        QFrame.__init__(self, parentWidget, Qt.Tool )
+        QFrame.__init__(self, parentWidget) #), Tool )
         layout = QHBoxLayout()
         self.setWindowTitle('Edit URL reference')
         self.setLayout(layout)
@@ -180,9 +179,9 @@ class StylableTextEdit(QTextEdit):
             start = temp
 
         cursor.setPosition(start)
-        cursor.movePosition(QTextCursor.StartOfBlock)
-        cursor.setPosition(end, QTextCursor.KeepAnchor)
-        cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+        cursor.movePosition(QTextCursor.MoveOperation.StartOfBlock)
+        cursor.setPosition(end, QTextCursor.MoveMode.KeepAnchor)
+        cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock, QTextCursor.MoveMode.KeepAnchor)
 
 ###############################################################################
 
@@ -204,7 +203,7 @@ class StylableTextEdit(QTextEdit):
 
         cursor = self.textCursor()
         if not cursor.hasSelection():
-            cursor.select(QTextCursor.WordUnderCursor)
+            cursor.select(QTextCursor.SelectionType.WordUnderCursor)
 
         cursor.setCharFormat(fmt)
 
@@ -232,27 +231,27 @@ class StylableTextEdit(QTextEdit):
     def selectCurrentFragment(self, cursor):
 
         cf = cursor.charFormat();
-        style = cf.property(QTextFormat.UserProperty)
+        style = cf.property(QTextFormat.Property.UserProperty)
 
         # go to left while the style is the same
         searchLeft = True
         while searchLeft:
-            cursor.movePosition(QTextCursor.Left)
+            cursor.movePosition(QTextCursor.MoveOperation.Left)
             cf = cursor.charFormat();
-            styleX = cf.property(QTextFormat.UserProperty)
+            styleX = cf.property(QTextFormat.Property.UserProperty)
             if cursor.atBlockStart() or styleX != style:
                 searchLeft = False
 
         # Select all to the right while the style is the same
         searchRight = True
         while searchRight:
-            cursor.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor)
+            cursor.movePosition(QTextCursor.MoveOperation.Right, QTextCursor.MoveMode.KeepAnchor)
             cf = cursor.charFormat();
-            styleX = cf.property(QTextFormat.UserProperty)
+            styleX = cf.property(QTextFormat.Property.UserProperty)
             if cursor.atBlockEnd() or styleX != style:
                 searchRight = False
         if not cursor.atBlockEnd():
-            cursor.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor)
+            cursor.movePosition(QTextCursor.MoveOperation.Left, QTextCursor.MoveMode.KeepAnchor)
 
 
     def getTextForCurrentFragment(self, cursor):
@@ -267,17 +266,17 @@ class StylableTextEdit(QTextEdit):
 
         # update block format toolbar
         blockFmt = cursor.blockFormat()
-        blockStyle = blockFmt.property(QTextFormat.UserProperty)
+        blockStyle = blockFmt.property(QTextFormat.Property.UserProperty)
         self.updateBlockFormat.emit(blockStyle)
 
         # update text format toolbar
         charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
-        charStyle = charFmt.property(QTextFormat.UserProperty)
+        charStyle = charFmt.property(QTextFormat.Property.UserProperty)
         self.updateCharFormat.emit(charStyle)
 
         # open/close URL editor for external links
         if charStyle and charStyle[0] == 'link':
-            if not (QGuiApplication.keyboardModifiers() & Qt.ControlModifier):
+            if not (QGuiApplication.keyboardModifiers() & Qt.KeyboardModifier.ControlModifier):
                 url = charFmt.anchorHref()
 
                 # get global cursor position
@@ -317,7 +316,7 @@ class StylableTextEdit(QTextEdit):
     def setCurrentUrl(self, url):
         cursor = self.textCursor()
         charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
-        charStyle = charFmt.property(QTextFormat.UserProperty)
+        charStyle = charFmt.property(QTextFormat.Property.UserProperty)
         if charStyle and charStyle[0] == 'link':
             self.selectCurrentFragment(cursor)
             charFmt.setAnchorHref(url)
@@ -328,7 +327,7 @@ class StylableTextEdit(QTextEdit):
         cursor = self.exactCursorForPosition(pos)
         charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
 
-        style = charFmt.property(QTextFormat.UserProperty)
+        style = charFmt.property(QTextFormat.Property.UserProperty)
         if style and style[0] in ['link', 'olink']:
             return True
 
@@ -337,9 +336,9 @@ class StylableTextEdit(QTextEdit):
 
     def updateIBeamCursor(self, pos):
         if self.isAtAnchor(pos):
-            self.viewport().setCursor(Qt.PointingHandCursor)
+            self.viewport().setCursor(Qt.CursorShape.PointingHandCursor)
         else:
-            self.viewport().setCursor(Qt.IBeamCursor)
+            self.viewport().setCursor(Qt.CursorShape.IBeamCursor)
 
 
     def mouseMoveEvent(self, event):
@@ -350,7 +349,7 @@ class StylableTextEdit(QTextEdit):
 
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.setMouseTracking(True)
             self.tracking = True
             pos = self.mapFromGlobal(QCursor.pos())
@@ -360,16 +359,16 @@ class StylableTextEdit(QTextEdit):
 
 
     def keyReleaseEvent(self, event):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.setMouseTracking(False)
             self.tracking = False
-            self.viewport().setCursor(Qt.IBeamCursor)
+            self.viewport().setCursor(Qt.CursorShape.IBeamCursor)
 
         return QTextEdit.keyReleaseEvent(self, event)
 
 
     def mapToContents(self, point):
-        return QPoint(point.x() + self.horizontalScrollBar().value(), point.y() +  self.verticalScrollBar().value())
+        return QPointF(point.x() + self.horizontalScrollBar().value(), point.y() +  self.verticalScrollBar().value())
 
 
     def exactCursorForPosition(self, pos):
@@ -398,7 +397,7 @@ class StylableTextEdit(QTextEdit):
         # Unfortunately the mapToContents() method they use there is not
         # public, so we need to provide our own implementation.
         docPos = self.mapToContents(pos)
-        curPos = docLayout.hitTest(docPos, Qt.ExactHit)
+        curPos = docLayout.hitTest(docPos, Qt.HitTestAccuracy.ExactHit)
         if curPos == -1:
             curPos = 0
 
@@ -423,11 +422,11 @@ class StylableTextEdit(QTextEdit):
         cursor = self.exactCursorForPosition(event.pos())
         charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
 
-        if charFmt.objectType() == QTextCharFormat.UserObject+1:
+        if charFmt.objectType() == QTextCharFormat.ObjectTypes.UserObject+1:
             if self.selectedObject is not None:
                 self.selectedObject.setSelected(False)
 
-            self.selectedObject = charFmt.property(QTextCharFormat.UserProperty + 1)
+            self.selectedObject = charFmt.property(QTextCharFormat.Property.UserProperty + 1)
             self.selectedObject.setSelected(True)
             self.setCursorWidth(0)
             self.viewport().update()
@@ -441,7 +440,7 @@ class StylableTextEdit(QTextEdit):
                 self.objectSelectionChanged.emit()
 
             if self.tracking:
-                style = charFmt.property(QTextFormat.UserProperty)
+                style = charFmt.property(QTextFormat.Property.UserProperty)
 
                 if style and style[0] == 'link':
                     url = charFmt.anchorHref()
@@ -502,8 +501,8 @@ class StylableTextEdit(QTextEdit):
         imageObject.setName(imagePath)
 
         imageObjectFormat = QTextCharFormat()
-        imageObjectFormat.setObjectType(QTextFormat.UserObject + 1)
-        imageObjectFormat.setProperty(QTextFormat.UserProperty + 1, imageObject)
+        imageObjectFormat.setObjectType(QTextFormat.ObjectTypes.UserObject + 1)
+        imageObjectFormat.setProperty(QTextFormat.Property.UserProperty + 1, imageObject)
         cursor.insertText('\ufffc', imageObjectFormat);
 
         # Make sure that the image is also part of the page
@@ -518,9 +517,9 @@ class StylableTextEdit(QTextEdit):
         mathFormula.renderFormula()
 
         mathObjectFormat = QTextCharFormat()
-        mathObjectFormat.setObjectType(QTextFormat.UserObject + 1)
-        mathObjectFormat.setVerticalAlignment(QTextCharFormat.AlignMiddle)
-        mathObjectFormat.setProperty(QTextFormat.UserProperty + 1, mathFormula)
+        mathObjectFormat.setObjectType(QTextFormat.ObjectTypes.UserObject + 1)
+        mathObjectFormat.setVerticalAlignment(QTextCharFormat.VerticalAlignment.AlignMiddle)
+        mathObjectFormat.setProperty(QTextFormat.Property.UserProperty + 1, mathFormula)
         cursor.insertText('\ufffc', mathObjectFormat);
 
         if self.selectedObject is not None:
@@ -555,7 +554,7 @@ class StylableTextEdit(QTextEdit):
         curList = cursor.currentList()
         if curList:
             fmt = curList.format()
-            styleSelector = fmt.property(QTextFormat.UserProperty)
+            styleSelector = fmt.property(QTextFormat.ObjectTypes.UserProperty)
             indent = int(styleSelector[2])
             if indent > 1:
                 indent -= 1
@@ -573,7 +572,7 @@ class StylableTextEdit(QTextEdit):
         curList = cursor.currentList()
         if curList:
             fmt = curList.format()
-            styleSelector = fmt.property(QTextFormat.UserProperty)
+            styleSelector = fmt.property(QTextFormat.Property.UserProperty)
             indent = int(styleSelector[2])
             if indent < 4:
                 indent += 1

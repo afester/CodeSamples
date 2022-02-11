@@ -4,7 +4,7 @@ Created on 25.02.2015
 @author: afester
 '''
 
-from PyQt5.QtCore import QSize, QPoint
+from PyQt6.QtCore import QSize, QPoint
 import configparser
 import logging
 import ast

@@ -4,11 +4,10 @@ Created on 18.02.2015
 @author: afester
 '''
  
-from PyQt5.Qt import QIcon
-from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtGui import QTextOption, QImage, QTextDocument
-from PyQt5.QtWidgets import QWidget, QMessageBox, QPushButton, QAction
-from PyQt5.QtWidgets import QTextEdit, QVBoxLayout, QLineEdit, QHBoxLayout, QFileDialog, QToolButton
+from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtGui import QTextOption, QImage, QTextDocument, QIcon, QAction
+from PyQt6.QtWidgets import QWidget, QMessageBox, QPushButton
+from PyQt6.QtWidgets import QTextEdit, QVBoxLayout, QLineEdit, QHBoxLayout, QFileDialog, QToolButton
 
 import os, logging
 
@@ -26,7 +25,7 @@ class CancelAwareLineEdit(QLineEdit):
         QLineEdit.__init__(self, parentWidget)
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Escape:
+        if event.key() == Qt.Key.Key_Escape:
             self.editingFinished.emit()
 
         return QLineEdit.keyPressEvent(self, event)
@@ -52,14 +51,14 @@ class FindWidget(QWidget):
         self.searchPattern.editingFinished.connect(self.hideWidget)
         self.searchPattern.textEdited.connect(self.doSearch)
 
-        upAction = QAction(QIcon(':/icons/find-up.png'), "Find backwards (Shift-F3)", self)
-        upAction.setShortcut(Qt.SHIFT + Qt.Key_F3);
+        upAction = QAction(QIcon('icons:find-up.png'), "Find backwards (Shift-F3)", self)
+        upAction.setShortcut(Qt.Key.Key_Shift + Qt.Key.Key_F3);
         upAction.triggered.connect(self.findUpwards)
         self.upButton = QToolButton(self)
         self.upButton.setDefaultAction(upAction)
 
-        downAction = QAction(QIcon(':/icons/find-down.png'), "Find next (F3)", self)
-        downAction.setShortcut(Qt.Key_F3);
+        downAction = QAction(QIcon('icons:find-down.png'), "Find next (F3)", self)
+        downAction.setShortcut(Qt.Key.Key_F3);
         downAction.triggered.connect(self.findDownwards)
         self.downButton = QToolButton(self)
         self.downButton.setDefaultAction(downAction)
@@ -216,7 +215,7 @@ class EditorWidget(QWidget):
         hLayout.setStretch(0, 0)
         hLayout.setStretch(1, 0)
         hLayout.setStretch(2, 1)
-        hLayout.setStretch(3, 0.1)
+        hLayout.setStretch(3, 0) # 0.1)
 
 
     def load(self, notepad, pageId):

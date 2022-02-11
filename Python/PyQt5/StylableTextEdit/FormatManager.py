@@ -4,7 +4,8 @@ Created on 20.02.2015
 @author: afester
 '''
 
-from PyQt5.QtGui import QTextFormat, QTextBlockFormat, QTextCharFormat, QTextListFormat, QFont, QColor
+from PyQt6.QtCore import QVariant
+from PyQt6.QtGui import QTextFormat, QTextBlockFormat, QTextCharFormat, QTextListFormat, QFont, QColor
 import cssutils
 import re
 import io, pkg_resources, data
@@ -143,7 +144,7 @@ class FormatManager:
             charFmt.setFontFamily(value)
         value = self.getStringValue(cssRule, 'font-weight')
         if value and value == 'bold':
-            charFmt.setFontWeight(QFont.Bold)
+            charFmt.setFontWeight(QFont.Weight.Bold)
         value = self.getIntValue(cssRule, 'font-size')
         if value:
             charFmt.setFontPointSize(value)
@@ -198,7 +199,7 @@ class FormatManager:
             selector = m.groups()
 
             blockFmt = QTextBlockFormat()
-            blockFmt.setProperty(QTextFormat.UserProperty, selector)
+            blockFmt.setProperty(QTextFormat.Property.UserProperty, QVariant(selector))
 
             value = self.getIntValue(cssRule, 'margin-top')
             if value:
@@ -245,19 +246,19 @@ class FormatManager:
                 indent = int(selector[2])
 
             listFmt = QTextListFormat()
-            listFmt.setProperty(QTextFormat.UserProperty, selector)
+            listFmt.setProperty(QTextFormat.Property.UserProperty, QVariant(selector))
             listFmt.setIndent(indent)
 
             value = self.getStringValue(cssRule, 'list-style-type')
             if value:
                 if value == 'disc':
-                    listFmt.setStyle(QTextListFormat.ListDisc)
+                    listFmt.setStyle(QTextListFormat.Style.ListDisc)
                 elif value == 'circle':
-                    listFmt.setStyle(QTextListFormat.ListCircle)
+                    listFmt.setStyle(QTextListFormat.Style.ListCircle)
                 elif value == 'square':
-                    listFmt.setStyle(QTextListFormat.ListSquare)
+                    listFmt.setStyle(QTextListFormat.Style.ListSquare)
                 elif value == 'decimal':
-                    listFmt.setStyle(QTextListFormat.ListDecimal)
+                    listFmt.setStyle(QTextListFormat.Style.ListDecimal)
 
             self.formats[selector] = Format(None, None, listFmt)
 
@@ -281,7 +282,7 @@ class FormatManager:
             selector = m.groups()
 
             charFmt = QTextCharFormat(pcharFmt)
-            charFmt.setProperty(QTextFormat.UserProperty, selector)
+            charFmt.setProperty(QTextFormat.Property.UserProperty, QVariant(selector))
 
             # TODO: better approach?
             if cssKey in ['link', 'olink']:

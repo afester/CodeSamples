@@ -4,9 +4,8 @@ Created on 29.04.2015
 @author: afester
 '''
 
-from PyQt5.Qt import QObject, QTextObjectInterface, QSize
-from PyQt5.QtCore import Qt, QSizeF 
-from PyQt5.QtGui import QTextFormat, QImage, QPen
+from PyQt6.QtCore import Qt, QSizeF, QObject, QSize
+from PyQt6.QtGui import QTextFormat, QImage, QPen, QTextObjectInterface
  
 class CustomObjectRenderer(QObject, QTextObjectInterface):
     
@@ -17,13 +16,13 @@ class CustomObjectRenderer(QObject, QTextObjectInterface):
 
     # @Override
     def intrinsicSize(self, doc, posInDocument, fmt):
-        customObject = fmt.property(QTextFormat.UserProperty+1)
+        customObject = fmt.property(QTextFormat.Property.UserProperty+1)
         return customObject.getSize()
 
 
     # @Override
     def drawObject(self, painter, rect, doc, posInDocument, fmt):
-        customObject = fmt.property(QTextFormat.UserProperty+1)
+        customObject = fmt.property(QTextFormat.Property.UserProperty+1)
 
         # rect is the rectangle to redraw, in document contents coordinates
 
@@ -63,12 +62,12 @@ class ImageObject(CustomTextObject):
         painter.drawImage(0, 0, self.bufferedImage)
 
         if self.isSelected:
-            painter.setPen(QPen(Qt.red, 1.0, Qt.DashLine))
-            painter.drawRect(0, 0, rect.width()-1, rect.height()-1)
-            painter.fillRect(0, 0, 7, 7, Qt.red)
-            painter.fillRect(rect.width() - 7, 0, 7, 7, Qt.red)
-            painter.fillRect(0, rect.height() - 7, 7, 7, Qt.red)
-            painter.fillRect(rect.width() - 7, rect.height() - 7, 7, 7, Qt.red)
+            painter.setPen(QPen(Qt.GlobalColor.red, 1.0, Qt.PenStyle.DashLine))
+            painter.drawRect(0, 0, int(rect.width() - 1), int(rect.height() - 1))
+            painter.fillRect(0, 0, 7, 7, Qt.GlobalColor.red)
+            painter.fillRect(int(rect.width() - 7), 0, 7, 7, Qt.GlobalColor.red)
+            painter.fillRect(0, int(rect.height() - 7), 7, 7, Qt.GlobalColor.red)
+            painter.fillRect(int(rect.width() - 7), int(rect.height() - 7), 7, 7, Qt.GlobalColor.red)
 
     def setName(self, imageName):
         '''Sets the file name of the image. Either an absolute path name or 
@@ -100,8 +99,8 @@ class MathFormulaObject(CustomTextObject):
         painter.drawImage(2, 0, self.image)
 
         if self.isSelected:
-            painter.setPen(QPen(Qt.lightGray, 1.0, Qt.DashLine))
-            painter.drawRect(1, 0, rect.width() - 2, rect.height() - 2)
+            painter.setPen(QPen(Qt.GlobalColor.lightGray, 1.0, Qt.PenStyle.DashLine))
+            painter.drawRect(1, 0, int(rect.width() - 2), int(rect.height() - 2))
 
     def setFormula(self, formula):
         self.formula= formula

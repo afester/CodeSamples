@@ -4,7 +4,7 @@ Created on 24.02.2015
 @author: afester
 '''
 
-import dropbox
+# import dropbox
 
 from StylableTextEdit.FormatManager import FormatManager 
 from model.NotepadDB import NotepadDB
