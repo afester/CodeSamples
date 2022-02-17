@@ -1,24 +1,26 @@
-'''
+"""
 Created on 29.04.2015
 
 @author: afester
-'''
+"""
 
 import os
 
-from PyQt6.QtCore import pyqtSignal, Qt, QPoint, QUrl, QSize, QMimeData, QPointF
+from PyQt6.QtCore import pyqtSignal, Qt, QUrl, QSize, QMimeData, QPointF
 from PyQt6.QtGui import QTextCursor, QTextFormat, QGuiApplication, QCursor, QTextCharFormat, QDesktopServices
 from PyQt6.QtWidgets import QTextEdit, QFrame, QHBoxLayout, QLineEdit, QPushButton, QMessageBox
 
 from StylableTextEdit.CustomObjects import MathFormulaObject, ImageObject
-from StylableTextEdit.StylableTextModel import TextDocumentTraversal, StructurePrinter, Frame, Paragraph, List, TextFragment, TextDocumentSelectionTraversal
+from StylableTextEdit.StylableTextModel import StructurePrinter, Frame, Paragraph, List, TextFragment, \
+    TextDocumentSelectionTraversal
+
 
 class UrlEditor(QFrame):
 
     applyUrl = pyqtSignal(str)
 
     def __init__(self, parentWidget):
-        QFrame.__init__(self, parentWidget) #), Tool )
+        QFrame.__init__(self, parentWidget)     # ), Tool )
         layout = QHBoxLayout()
         self.setWindowTitle('Edit URL reference')
         self.setLayout(layout)
@@ -29,15 +31,12 @@ class UrlEditor(QFrame):
         applyButton.clicked.connect(self.doApply)
         layout.addWidget(applyButton)
 
-
     def doApply(self):
         self.applyUrl.emit(self.editLine.text())
         self.hide()
 
-
     def setUrl(self, text):
         self.editLine.setText(text)
-
 
 
 class AppXmlPrinter:
@@ -97,7 +96,6 @@ class StylableTextEdit(QTextEdit):
         self.cursorPositionChanged.connect(self.handleCursorPositionChanged)
         self.currentCharFormatChanged.connect(self.handleCharFormatChanged)
 
-
     # @SLOT
     def applyBlockStyle(self, style):
         pos = self.textCursor().position()
@@ -110,12 +108,11 @@ class StylableTextEdit(QTextEdit):
 
         self.textCursor().setPosition(pos)
 
-
     def textCode(self, fmt):
-        '''Format the currently selected blocks (or the block where the cursor
+        """Format the currently selected blocks (or the block where the cursor
            is located) with the given style. All existing styles will be removed,
            and if more than one block is selected all the blocks are merged into one
-           block with the block separators replaced by Unicode line separators'''
+           block with the block separators replaced by Unicode line separators"""
 
         cursor = self.textCursor()
         cursor.beginEditBlock()
@@ -135,7 +132,6 @@ class StylableTextEdit(QTextEdit):
         cursor.endEditBlock()
         self.setFocus()
 
-
     def reformatBlock(self, style):
         if style[0] in ['itemizedlist', 'orderedlist']:
             self.formatAsList(style)
@@ -151,12 +147,11 @@ class StylableTextEdit(QTextEdit):
             cursor.removeSelectedText()
             cursor.setBlockFormat(fmt.getBlockFormat())
             cursor.setCharFormat(fmt.getCharFormat())
-            cursor.setBlockCharFormat(fmt.getCharFormat())  # required for the initial fragment of an empty block 
+            cursor.setBlockCharFormat(fmt.getCharFormat())  # required for initial fragment of an empty block
             cursor.insertText(content)
 
             cursor.endEditBlock()
             self.setFocus()
-
 
     def formatAsList(self, style):
         cursor = self.textCursor()
@@ -167,7 +162,6 @@ class StylableTextEdit(QTextEdit):
 
         cursor.endEditBlock()
         self.setFocus()
-
 
     # Selects all blocks which are part of the current selection.
     def selectWholeBlocks(self, cursor):
@@ -189,13 +183,12 @@ class StylableTextEdit(QTextEdit):
     def applyTextFormat(self, style, flag):
         pos = self.textCursor().position()
 
-        if flag == True:
+        if flag:
             self.setTextFormat(style)
         else:
             self.removeTextFormat()
 
         self.textCursor().setPosition(pos)
-
 
     def setTextFormat(self, style):
         # TODO: support nested fragment formats (e.g. bold>highlight>/highlight/bold)
@@ -207,37 +200,34 @@ class StylableTextEdit(QTextEdit):
 
         cursor.setCharFormat(fmt)
 
-
     def removeTextFormat(self):
         # TODO: Take block char format or char format from previous fragment
-        fmt = self.formatManager.getFormat( ('para', None, None) ).getCharFormat()
+        fmt = self.formatManager.getFormat(('para', None, None)).getCharFormat()
         cursor = self.textCursor()
         self.selectCurrentFragment(cursor)
         cursor.setCharFormat(fmt)
 
-
     def handleCharFormatChanged(self):
         pass
-        #print("CHAR FORMAT CHANGED, ADJUST CURSOR COLOR ...")
-        # self.setTextColor(Qt.blue)
-        #p = self.palette();
-        #p.setColor(QPalette.WindowText, QColor(255, 0, 0))
-        #self.setPalette(p);
-        #self.setCursorWidth(5)
-        #self.setStyleSheet("QPlainTextEdit{color: #ffff00; background-color: #303030;"
-        #                  " selection-background-color: #606060; selection-color: #ffffff;}")
-
+        # print("CHAR FORMAT CHANGED, ADJUST CURSOR COLOR ...")
+        #  self.setTextColor(Qt.blue)
+        # p = self.palette();
+        # p.setColor(QPalette.WindowText, QColor(255, 0, 0))
+        # self.setPalette(p);
+        # self.setCursorWidth(5)
+        # self.setStyleSheet("QPlainTextEdit{color: #ffff00; background-color: #303030;"
+        #                    " selection-background-color: #606060; selection-color: #ffffff;}")
 
     def selectCurrentFragment(self, cursor):
 
-        cf = cursor.charFormat();
+        cf = cursor.charFormat()
         style = cf.property(QTextFormat.Property.UserProperty)
 
         # go to left while the style is the same
         searchLeft = True
         while searchLeft:
             cursor.movePosition(QTextCursor.MoveOperation.Left)
-            cf = cursor.charFormat();
+            cf = cursor.charFormat()
             styleX = cf.property(QTextFormat.Property.UserProperty)
             if cursor.atBlockStart() or styleX != style:
                 searchLeft = False
@@ -246,20 +236,18 @@ class StylableTextEdit(QTextEdit):
         searchRight = True
         while searchRight:
             cursor.movePosition(QTextCursor.MoveOperation.Right, QTextCursor.MoveMode.KeepAnchor)
-            cf = cursor.charFormat();
+            cf = cursor.charFormat()
             styleX = cf.property(QTextFormat.Property.UserProperty)
             if cursor.atBlockEnd() or styleX != style:
                 searchRight = False
         if not cursor.atBlockEnd():
             cursor.movePosition(QTextCursor.MoveOperation.Left, QTextCursor.MoveMode.KeepAnchor)
 
-
     def getTextForCurrentFragment(self, cursor):
         self.selectCurrentFragment(cursor)
         result = cursor.selectedText()
         print("RESULT:{}".format(result))
         return result
-
 
     def handleCursorPositionChanged(self):
         cursor = self.textCursor()
@@ -291,7 +279,7 @@ class StylableTextEdit(QTextEdit):
         else:
             self.l.hide()
 
-#===============================================================================
+# ===============================================================================
 #         # We would like to render the bullets of the current list in a different
 #         # color to make it clear which list items belong to the current list.
 #         # However, it does currently not seem possible to influence the
@@ -311,7 +299,7 @@ class StylableTextEdit(QTextEdit):
 #             fmt.setStyle(QTextListFormat.ListCircle)
 #             listBlock.setFormat(fmt)
 #             self.currentList = listBlock
-#===============================================================================
+# ===============================================================================
 
     def setCurrentUrl(self, url):
         cursor = self.textCursor()
@@ -321,7 +309,6 @@ class StylableTextEdit(QTextEdit):
             self.selectCurrentFragment(cursor)
             charFmt.setAnchorHref(url)
             cursor.setCharFormat(charFmt)
-
 
     def isAtAnchor(self, pos):
         cursor = self.exactCursorForPosition(pos)
@@ -333,20 +320,17 @@ class StylableTextEdit(QTextEdit):
 
         return False
 
-
     def updateIBeamCursor(self, pos):
         if self.isAtAnchor(pos):
             self.viewport().setCursor(Qt.CursorShape.PointingHandCursor)
         else:
             self.viewport().setCursor(Qt.CursorShape.IBeamCursor)
 
-
     def mouseMoveEvent(self, event):
         if self.tracking:
             self.updateIBeamCursor(event.pos())
 
         return QTextEdit.mouseMoveEvent(self, event)
-
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_Control:
@@ -357,7 +341,6 @@ class StylableTextEdit(QTextEdit):
 
         return QTextEdit.keyPressEvent(self, event)
 
-
     def keyReleaseEvent(self, event):
         if event.key() == Qt.Key.Key_Control:
             self.setMouseTracking(False)
@@ -366,10 +349,9 @@ class StylableTextEdit(QTextEdit):
 
         return QTextEdit.keyReleaseEvent(self, event)
 
-
     def mapToContents(self, point):
-        return QPointF(point.x() + self.horizontalScrollBar().value(), point.y() +  self.verticalScrollBar().value())
-
+        return QPointF(point.x() + self.horizontalScrollBar().value(), point.y() +
+                       self.verticalScrollBar().value())
 
     def exactCursorForPosition(self, pos):
         # get a cursor for a given position
@@ -380,12 +362,12 @@ class StylableTextEdit(QTextEdit):
         #             => returns cursor which is located between C and D
         #             => character addressed by cursor would be "C" !!!!!
         #                (position() would return 2)
-        #cursor = self.cursorForPosition(event.pos())
+        # cursor = self.cursorForPosition(event.pos())
 
         # this is identical to calling the document layout's hitTest() 
         # method with the FuzzyHit parameter:
 
-        #curPos = docLayout.hitTest(event.pos(), Qt.FuzzyHit)
+        # curPos = docLayout.hitTest(event.pos(), Qt.FuzzyHit)
 
         # A better approch is to use the document layout with the hitTest()
         # method and using the ExactHit parameter:
@@ -405,19 +387,18 @@ class StylableTextEdit(QTextEdit):
         # To get the proper format, we need to position the cursor
         # *after* the clicked character:
         cursor = QTextCursor(self.document())
-        cursor.setPosition(curPos + 1);
+        cursor.setPosition(curPos + 1)
 
         return cursor
 
-
     def mousePressEvent(self, event):
-        #=======================================================================
+        # =======================================================================
         # cursor = self.cursorForPosition(event.pos())
         # charFmt = cursor.charFormat()
         # if charFmt.isImageFormat():
         #     imgFmt = charFmt.toImageFormat()
         #     print("IMAGE {}: {} x {}".format(imgFmt.name(), imgFmt.width(), imgFmt.height()))
-        #=======================================================================
+        # =======================================================================
 
         cursor = self.exactCursorForPosition(event.pos())
         charFmt = cursor.charFormat()   # get the QTextCharFormat at the current cursor position
@@ -454,10 +435,8 @@ class StylableTextEdit(QTextEdit):
 
         return QTextEdit.mousePressEvent(self, event)
 
-
     def outPut(self, line):
         print(line, end='')
-
 
     def createMimeDataFromSelection(self):
         result = QMimeData()
@@ -489,7 +468,6 @@ class StylableTextEdit(QTextEdit):
         result.setData("application/xml", blafasel)
         return result
 
-
     def insertImage(self, image):
         cursor = self.textCursor()
 
@@ -503,11 +481,10 @@ class StylableTextEdit(QTextEdit):
         imageObjectFormat = QTextCharFormat()
         imageObjectFormat.setObjectType(QTextFormat.ObjectTypes.UserObject + 1)
         imageObjectFormat.setProperty(QTextFormat.Property.UserProperty + 1, imageObject)
-        cursor.insertText('\ufffc', imageObjectFormat);
+        cursor.insertText('\ufffc', imageObjectFormat)
 
         # Make sure that the image is also part of the page
         page.save()
-
 
     def insertFormula(self):
         cursor = self.textCursor()
@@ -520,7 +497,7 @@ class StylableTextEdit(QTextEdit):
         mathObjectFormat.setObjectType(QTextFormat.ObjectTypes.UserObject + 1)
         mathObjectFormat.setVerticalAlignment(QTextCharFormat.VerticalAlignment.AlignMiddle)
         mathObjectFormat.setProperty(QTextFormat.Property.UserProperty + 1, mathFormula)
-        cursor.insertText('\ufffc', mathObjectFormat);
+        cursor.insertText('\ufffc', mathObjectFormat)
 
         if self.selectedObject is not None:
             self.selectedObject.setSelected(False)
@@ -528,7 +505,6 @@ class StylableTextEdit(QTextEdit):
         self.selectedObject.setSelected(True)
         self.viewport().update()
         self.objectSelectionChanged.emit()
-
 
     def insertFromMimeData(self, data):
 
@@ -543,10 +519,8 @@ class StylableTextEdit(QTextEdit):
                 msg = msg + '\n   ' + f
             QMessageBox.information(self, 'Error', 'Unsupported clipboard content: {}'.format(msg))
 
-
     def getSelectedObject(self):
         return self.selectedObject
-
 
     # @SLOT
     def indentLess(self):
@@ -565,7 +539,6 @@ class StylableTextEdit(QTextEdit):
                     listFormat = style.getListFormat()
                     cursor.createList(listFormat)
 
-
     # @SLOT
     def indentMore(self):
         cursor = self.textCursor()
@@ -582,4 +555,3 @@ class StylableTextEdit(QTextEdit):
                 if style:
                     listFormat = style.getListFormat()
                     cursor.createList(listFormat)
-

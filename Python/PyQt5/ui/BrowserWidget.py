@@ -1,15 +1,17 @@
-'''
+"""
 Created on 25.02.2015
 
 @author: afester
-'''
+"""
+
+import logging
+import os
 
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QToolBar
 from PyQt6.QtWidgets import QVBoxLayout, QDialog, QFileDialog, QDialogButtonBox
 
-import os, logging
 from model.Notepad import LocalNotepad, DropboxNotepad
 # import dropbox
 # from dropbox.rest import ErrorResponse
@@ -34,28 +36,29 @@ class AddNotepadDlg(QDialog):
         self.ui.selectDirectory.clicked.connect(self.choosePath)
         self.ui.storageType.activated.connect(self.changeStorage)
 
-
     def choosePath(self):
         pathName = QFileDialog.getExistingDirectory(self, caption='Select Notepad to add')
         self.ui.localPath.setText(pathName)
 
-
     def changeStorage(self, index):
         if index == 0:
-            self.ui.buttonBox.setStandardButtons(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+            self.ui.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Ok |
+                                                 QDialogButtonBox.StandardButton.Cancel)
         elif index == 1:
             if len(self.settings.getDropboxToken()) == 0:
                 # No authentication token available
                 self.ui.dropboxPages.setCurrentIndex(0)
-                self.ui.buttonBox.setStandardButtons(QDialogButtonBox.Apply| QDialogButtonBox.Cancel)
+                self.ui.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Apply |
+                                                     QDialogButtonBox.StandardButton.Cancel)
 
-                self.flow = dropbox.client.DropboxOAuth2FlowNoRedirect('9tuq93gk3wkq242','4au1g1d5vp6phq3') 
+                self.flow = dropbox.client.DropboxOAuth2FlowNoRedirect('9tuq93gk3wkq242', '4au1g1d5vp6phq3')
                 authorize_url = self.flow.start()
 
                 self.ui.authUrl.setText('<a href="{0}">{0}</a>'.format(authorize_url))
                 self.ui.authCode.setFocus()
             else:
-                self.ui.buttonBox.setStandardButtons(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+                self.ui.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Ok |
+                                                     QDialogButtonBox.StandardButton.Cancel)
                 self.ui.dropboxPages.setCurrentIndex(1)
 
                 client = dropbox.client.DropboxClient(self.settings.getDropboxToken())
@@ -63,7 +66,6 @@ class AddNotepadDlg(QDialog):
 
                 self.ui.userName.setText('{} <{}>'.format(info['display_name'], info['email']))
                 self.ui.notepadName.setFocus()
-
 
     def applyAuth(self, button):
         if button.text() == "Apply":    # TODO!!!!
@@ -85,10 +87,8 @@ class TreeNode(QTreeWidgetItem):
         self.notepad = notepad
         self.wasExpanded = False
 
-
     def getLabel(self):
         return self.text(0)
-
 
     def getPageId(self):
         if self.parent() is None:
@@ -96,14 +96,11 @@ class TreeNode(QTreeWidgetItem):
         else:
             return self.getLabel()
 
-
     def getNotepad(self):
         return self.notepad
 
-
     def setWasExpanded(self,flag):
         self.wasExpanded = flag
-
 
     def isWasExpanded(self):
         return self.wasExpanded
@@ -114,13 +111,11 @@ class TreeNode(QTreeWidgetItem):
 
 class TreeWidget(QTreeWidget):
 
-
     def __init__(self, parentWidget):
         QTreeWidget.__init__(self, parentWidget)
         self.setColumnCount(1)
         self.setHeaderLabel("Notepads")
         self.itemExpanded.connect(self.addLazyChildren)
-
 
     def getCurrentPath(self):
         result = []
@@ -131,7 +126,6 @@ class TreeWidget(QTreeWidget):
             current = current.parent()
 
         return result
-
 
     def addLazyChildren(self, item):
         """Adds the children to a given item after it has been clicked.
@@ -161,7 +155,6 @@ class TreeWidget(QTreeWidget):
                 item.addChild(linkItem)
             item.setWasExpanded(True)
 
-
     # Adds a Notepad as top level item.
     def refresh(self, notepad):
         # Add the root node
@@ -172,14 +165,12 @@ class TreeWidget(QTreeWidget):
         if notepad.getChildCount('Title page') > 0:
             rootItem.setChildIndicatorPolicy(QTreeWidgetItem.ChildIndicatorPolicy.ShowIndicator)
 
-
     def addNotepad(self, notepad):
         rootItem = TreeNode(notepad, notepad.getName())
         self.addTopLevelItem(rootItem)
 
         self.setCurrentItem(rootItem)
         rootItem.setExpanded(True)
-
 
     def expandChild(self, item, path):
         """Expands all nodes on the given path, starting at a specific item
@@ -203,7 +194,6 @@ class TreeWidget(QTreeWidget):
                 self.expandChild(childItem, path[1:])
                 break
 
-
     def expandPath(self, path):
         """Expands a given path starting with a root node.
 
@@ -224,7 +214,6 @@ class TreeWidget(QTreeWidget):
 
         if rootItem is not None:
             self.expandChild(rootItem, path[1:])
-
 
     def navigateToChild(self, pageId):
         """Sets a specific child item of the current item as the current item.
@@ -249,7 +238,6 @@ class TreeWidget(QTreeWidget):
             current.addChild(node)
         self.setCurrentItem(node)
 
-
     def navigateToFirstChild(self, pageId):
         """Sets the first occurrence of a specific item in the current tree as the
         current item.
@@ -258,7 +246,8 @@ class TreeWidget(QTreeWidget):
 
         Args:
           pageId (str): The label of the item to activate.
-"""
+        """
+
         # print("  => {}".format(pageId))
 
         notepad = self.currentItem().getNotepad()
@@ -267,11 +256,10 @@ class TreeWidget(QTreeWidget):
         self.expandPath(path)
 
 
-
 class BrowserWidget(QWidget):
-    ''' Tree widget and button bar above '''
+    """ Tree widget and button bar above """
 
-    l = logging.getLogger('BrowserWidget')
+    LOG = logging.getLogger('BrowserWidget')
 
     itemSelected = pyqtSignal()
 
@@ -301,13 +289,11 @@ class BrowserWidget(QWidget):
         self.currentItem = None
         self.browserView.itemSelectionChanged.connect(self.handleItemSelected)
 
-
     def handleItemSelected(self):
         selItems = self.browserView.selectedItems()
         if len(selItems) == 1:
             self.currentItem = selItems[0]
             self.itemSelected.emit()
-
 
     def addNotepad(self):
         dlg = AddNotepadDlg(self, self.settings)
@@ -319,14 +305,14 @@ class BrowserWidget(QWidget):
             if npType == 0:         # LOCAL (TODO: enum)
                 npPath = dlg.ui.localPath.text()
                 npName = os.path.basename(npPath)
-                npDef = {'name' : npName,
-                         'type'  : 'local',
-                         'path'   : npPath }
+                npDef = {'name': npName,
+                         'type': 'local',
+                         'path': npPath }
                 notepad = LocalNotepad(npDef)
             elif npType == 1:       # DROPBOX (TODO: enum)
                 npName = dlg.ui.notepadName.text()
-                npDef = {'name' : npName,
-                         'type' : 'dropbox'}
+                npDef = {'name': npName,
+                         'type': 'dropbox'}
                 notepad = DropboxNotepad(npDef, self.settings)
 
             if notepad is not None:
@@ -338,14 +324,12 @@ class BrowserWidget(QWidget):
                 # will get created if it does not exist yet
                 self.browserView.addNotepad(notepad)
 
-
     def removeNotepad(self):
         pass
 
-
     def initialize(self):
         # Reload all notepads
-        self.l.debug("Adding top nodes in browser...")
+        self.LOG.debug("Adding top nodes in browser...")
 
         # Add notepads to the browser tree
         notepads = self.settings.getNotepads()
@@ -357,10 +341,9 @@ class BrowserWidget(QWidget):
             self.browserView.refresh(notepad)
 
         # Expand to and select the previous item
-        self.l.debug("Expanding saved path in browser ...")
+        self.LOG.debug("Expanding saved path in browser ...")
         path = self.settings.getBrowserPath()
         self.browserView.expandPath(path)
-
 
     def navigate(self, pageId):
         self.browserView.navigateToChild(pageId)

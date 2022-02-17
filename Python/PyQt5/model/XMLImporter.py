@@ -2,12 +2,15 @@
 import os
 import xml.sax
 
-from StylableTextEdit.StylableTextModel import Frame, List, Paragraph, TextFragment, ImageFragment, MathFragment, DocumentFactory
-from ui.EditorWidget import MathFormulaObject   # TODO: model should not reference UI
+from StylableTextEdit.StylableTextModel import Frame, List, Paragraph, TextFragment, ImageFragment, \
+    MathFragment, DocumentFactory
+from ui.EditorWidget import MathFormulaObject  # TODO: model should not reference UI
+
 
 class Handler(xml.sax.handler.ContentHandler):
 
     def __init__(self, contentPath):
+        super().__init__()
         self.contentPath = contentPath
 
         self.sectionLevel = 0
@@ -97,9 +100,11 @@ class Handler(xml.sax.handler.ContentHandler):
 
             emphasizeRole = attrs.get('role', '')
             if emphasizeRole == '':
-                self.currentStyle = ('emphasis', None, None)    # todo: nested styles support (needs yet another stack ...)
+                self.currentStyle = ('emphasis', None, None)
+                # todo: nested styles support (needs yet another stack ...)
             else:
-                self.currentStyle = ('emphasis', 'role', emphasizeRole)    # todo: nested styles support (needs yet another stack ...)
+                self.currentStyle = ('emphasis', 'role', emphasizeRole)
+                # todo: nested styles support (needs yet another stack ...)
         elif name == 'code':
             # Add content so far to the current paragraph
             if len(self.content) > 0:
@@ -110,7 +115,8 @@ class Handler(xml.sax.handler.ContentHandler):
                 self.content = ''
                 parent.add(frag)
 
-            self.currentStyle = ('code', None, None)    # todo: nested styles support (needs yet another stack ...)
+            self.currentStyle = ('code', None, None)
+            # todo: nested styles support (needs yet another stack ...)
         elif name == 'link':
             # Add content so far to the current paragraph
             if len(self.content) > 0:
@@ -131,7 +137,8 @@ class Handler(xml.sax.handler.ContentHandler):
                 self.content = ''
                 parent.add(frag)
 
-            self.currentStyle = ('olink', None, None)    # todo: nested styles support (needs yet another stack ...)
+            self.currentStyle = ('olink', None, None)
+            # todo: nested styles support (needs yet another stack ...)
         elif name == 'imagedata':
             parent = self.nodeStack[-1]
 
@@ -205,7 +212,8 @@ class Handler(xml.sax.handler.ContentHandler):
                 frag.setText(self.content)
                 self.content = None
                 parent.add(frag)
-                self.currentStyle = None            # todo: nested styles support (needs yet another stack ...)
+                self.currentStyle = None
+                # todo: nested styles support (needs yet another stack ...)
                 self.paraStyle = None
 
             self.nodeStack = self.nodeStack[0:-1]     # pop()
@@ -217,9 +225,11 @@ class Handler(xml.sax.handler.ContentHandler):
                 frag.setText(self.content)
                 self.content = None
                 parent.add(frag)
-                self.currentStyle = None            # todo: nested styles support (needs yet another stack ...)
+                self.currentStyle = None
+                # todo: nested styles support (needs yet another stack ...)
 
             self.nodeStack = self.nodeStack[0:-1]     # pop()
+
         elif name == 'screen':
             if self.content != '':
                 parent = self.nodeStack[-1]
@@ -228,7 +238,8 @@ class Handler(xml.sax.handler.ContentHandler):
                 frag.setText(self.content)
                 self.content = None
                 parent.add(frag)
-                self.currentStyle = None            # todo: nested styles support (needs yet another stack ...)
+                self.currentStyle = None
+                # todo: nested styles support (needs yet another stack ...)
 
             self.nodeStack = self.nodeStack[0:-1]     # pop()
 
@@ -239,7 +250,9 @@ class Handler(xml.sax.handler.ContentHandler):
             frag.setText(self.content)
             self.content = ''
             parent.add(frag)
-            self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
+            self.currentStyle = None
+            # todo: nested styles support (needs yet another stack ...)
+
         elif name == 'code':
             parent = self.nodeStack[-1]
 
@@ -247,7 +260,9 @@ class Handler(xml.sax.handler.ContentHandler):
             frag.setText(self.content)
             self.content = ''
             parent.add(frag)
-            self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
+            self.currentStyle = None
+            # todo: nested styles support (needs yet another stack ...)
+
         elif name == 'link':
             parent = self.nodeStack[-1]
 
@@ -257,7 +272,9 @@ class Handler(xml.sax.handler.ContentHandler):
             self.href = None
             self.content = ''
             parent.add(frag)
-            self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
+            self.currentStyle = None
+            # todo: nested styles support (needs yet another stack ...)
+
         elif name == 'olink':
             parent = self.nodeStack[-1]
 
@@ -268,21 +285,27 @@ class Handler(xml.sax.handler.ContentHandler):
             self.keywordLinks.add(self.content) 
 
             self.content = ''
-            self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
+            self.currentStyle = None
+            # todo: nested styles support (needs yet another stack ...)
+
         elif name == 'imagedata':
             pass
+
         elif name == 'mathphrase':
             mathFormula = MathFormulaObject()
             mathFormula.setFormula(self.content)
-            mathFormula.renderFormula()             # generate image - TODO: is there a better approach?
-                                                    # Do we need the image as part of the fragment?
+            mathFormula.renderFormula()
+            # generate image - TODO: is there a better approach?
+            # Do we need the image as part of the fragment?
+
             parent = self.nodeStack[-1]
             frag = MathFragment()
             frag.setText(mathFormula.formula)
             frag.setImage(mathFormula.image)
             parent.add(frag)
 
-            self.currentStyle = None                # todo: nested styles support (needs yet another stack ...)
+            self.currentStyle = None
+            # todo: nested styles support (needs yet another stack ...)
             self.content = ''
 
 
@@ -293,7 +316,6 @@ class XMLImporter:
         self.contentPath = contentPath
         self.contentFile = contentFile
         self.formatManager = formatManager
-
 
     def importDocument(self):
         contentFilePath = os.path.join(self.contentPath, self.contentFile)
@@ -312,7 +334,6 @@ class XMLImporter:
             self.links = sorted(handler.keywordLinks)
             return handler.result
 
-
     def importFromFile(self, fileDesc):
         # Step 1: read the XML file and create the document structure with the 
         # corresponding styles
@@ -328,10 +349,8 @@ class XMLImporter:
         df = DocumentFactory(self.contentPath, self.formatManager)
         self.document = df.createDocument(documentModel)
 
-
     def getDocument(self):
         return self.document
-    
 
     def getLinks(self):
         return self.links

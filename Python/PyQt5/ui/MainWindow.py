@@ -1,38 +1,41 @@
 #!/usr/bin/env python3
 
-'''
+"""
 Created on Feb 13, 2015
 
 @author: andreas
-'''
+"""
 
-from PyQt6.QtCore import PYQT_VERSION_STR, QT_VERSION_STR, qVersion, pyqtSignal, Qt, QDir
-from PyQt6.QtWidgets import QWidget, QTabWidget
-from PyQt6.QtWidgets import QTextEdit, QSplitter, QHBoxLayout, QVBoxLayout, QMainWindow
-from PyQt6.QtWidgets import QStatusBar, QMenuBar, QMessageBox, QListView
-# from PyQt6.QtWebKitWidgets import QWebView, QWebPage
-from PyQt6.QtCore import QUrl, QObject, QThread
-from PyQt6.QtGui import QAction, QStandardItem, QStandardItemModel, QIcon
-
-import sys, os, platform, re, sqlite3, logging
-import pkg_resources, data
+import logging
+import os
+import platform
+import re
+import sqlite3
+import sys
 from os.path import expanduser
 
-from ui.EditorWidget import EditorWidget
-from ui.BrowserWidget import BrowserWidget
-from model.Page import LocalPage
-from ui.SearchWidget import Ui_SearchWidget
+from PyQt6.QtCore import PYQT_VERSION_STR, QT_VERSION_STR, qVersion, pyqtSignal, Qt, QDir
+from PyQt6.QtCore import QUrl, QObject, QThread
+from PyQt6.QtGui import QAction, QStandardItem, QStandardItemModel, QIcon
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtWidgets import QStatusBar, QMenuBar, QMessageBox, QListView
+from PyQt6.QtWidgets import QTextEdit, QSplitter, QHBoxLayout, QVBoxLayout, QMainWindow
+from PyQt6.QtWidgets import QWidget, QTabWidget
 
+from HTMLExporter import HTMLExporter
 from Settings import Settings
 from StylableTextEdit.StylableTextModel import TextDocumentTraversal, StructurePrinter
+from model.Page import LocalPage
 from model.XMLExporter import XMLExporter
-from HTMLExporter import HTMLExporter
 from model.XMLImporter import XMLImporter
+from ui.BrowserWidget import BrowserWidget
+from ui.EditorWidget import EditorWidget
+from ui.SearchWidget import Ui_SearchWidget
+
 
 # import ui.resources
 
 class SearchWorker(QObject):
-    
     searchDone = pyqtSignal()
     addMatch = pyqtSignal(str)
 
@@ -60,25 +63,22 @@ class SearchWorker(QObject):
 
         self.searchDone.emit()
 
-
     def stopSearch(self):
-        '''We can not call this method through a slot, since it would be 
-        queued until the actual worker method is done'''
+        """We can not call this method through a slot, since it would be
+        queued until the actual worker method is done"""
 
         print('Stopping search operation ...')
         self.aborted = True
 
 
-
 class SearchWidget(QWidget):
-
     startWork = pyqtSignal(str)
     resultSelected = pyqtSignal(str)
 
     def __init__(self, parentWidget):
         QWidget.__init__(self, parentWidget)
-        
-        self.editorWidget = parentWidget.editorWidget   # TODO: Review class structure
+
+        self.editorWidget = parentWidget.editorWidget  # TODO: Review class structure
 
         self.searching = False
         self.ui = Ui_SearchWidget()
@@ -104,21 +104,18 @@ class SearchWidget(QWidget):
         # self.stopWork.connect(self.worker.stopSearch)
         self.workerThread.start()
 
-
     def doReturnKey(self):
         if self.searching:
-            self.worker.stopSearch()        # must not call trough a slot since it would be queued
-                                            # ATTENTION! Still a race condition!!! (At least when the search process just finished normally)
+            self.worker.stopSearch()  # must not call trough a slot since it would be queued
+            # ATTENTION! Still a race condition!!! (At least when the search process just finished normally)
         self.startSearch()
-
 
     def doStartStopButton(self):
         if self.searching:
-            self.worker.stopSearch()        # must not call trough a slot since it would be queued
+            self.worker.stopSearch()  # must not call trough a slot since it would be queued
             self.searchDone()
-        else: 
+        else:
             self.startSearch()
-
 
     def startSearch(self):
         self.searching = True
@@ -134,7 +131,6 @@ class SearchWidget(QWidget):
         self.worker.pageList = self.editorWidget.page.notepad.getAllPages()
         self.startWork.emit(queryText)
 
-
     def searchDone(self):
         print("Search Done.")
         self.searching = False
@@ -144,13 +140,12 @@ class SearchWidget(QWidget):
 
     def addMatch(self, pageId):
         # print("    Adding: {}".format(pageId))
-        self.ui.resultWidget.setCurrentIndex(0)     # make sure to show the list
+        self.ui.resultWidget.setCurrentIndex(0)  # make sure to show the list
         resultItem = QStandardItem(pageId)
         resultItem.setEditable(False)
         self.resultListModel.appendRow(resultItem)
 
-
-    def doResultSelected(self, selectedtItem, idx2):
+    def doResultSelected(self, selectedtItem, _):
         indexes = selectedtItem.indexes()
         if len(indexes) == 1:
             item = self.resultListModel.itemFromIndex(indexes[0])
@@ -159,7 +154,6 @@ class SearchWidget(QWidget):
 
 
 class LinklistWidget(QListView):
-    
     resultSelected = pyqtSignal(str)
 
     def __init__(self, parent):
@@ -169,7 +163,7 @@ class LinklistWidget(QListView):
         self.setModel(self.resultListModel)
         self.selectionModel().selectionChanged.connect(self.doItemSelected)
 
-    def doItemSelected(self, selectedtItem, idx2):
+    def doItemSelected(self, selectedtItem, _):
         indexes = selectedtItem.indexes()
         if len(indexes) == 1:
             item = self.resultListModel.itemFromIndex(indexes[0])
@@ -186,8 +180,7 @@ class LinklistWidget(QListView):
 
 # The central widget for the MainWindow.
 class CentralWidget(QWidget):
-
-    l = logging.getLogger('CentralWidget')
+    LOG = logging.getLogger('CentralWidget')
 
     updateWindowTitle = pyqtSignal(str)
 
@@ -218,11 +211,11 @@ class CentralWidget(QWidget):
 
         tabLayout.addWidget(self.editorWidget)
         self.editTabIdx = self.tabWidget.addTab(tab, "Edit")
-#############################
+        #############################
 
-        self.browser = QWidget() # QWebView(self.tabWidget)
-#        self.browser.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
-#        self.browser.linkClicked.connect(self.navigateWeb)
+        self.browser = QWebEngineView()
+        #        self.browser.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
+        #        self.browser.linkClicked.connect(self.navigateWeb)
         self.webTabIdx = self.tabWidget.addTab(self.browser, "View web")
 
         self.pdfTabIdx = self.tabWidget.addTab(QWidget(self.tabWidget), "View pdf")
@@ -247,7 +240,7 @@ class CentralWidget(QWidget):
 
         self.tabWidget.currentChanged.connect(self.tabSelected)
 
-# Search/Links widget in lower left corner ####################################
+        # Search/Links widget in lower left corner ####################################
         self.searchWidget = SearchWidget(self)
         self.searchWidget.resultSelected.connect(self.navigateDirect)
 
@@ -261,7 +254,7 @@ class CentralWidget(QWidget):
         self.listsWidget.addTab(self.searchWidget, 'Search')
         self.listsWidget.addTab(self.toLinksWidget, 'Links to')
         self.listsWidget.addTab(self.fromLinksWidget, 'Links from')
-###############################################################################
+        ###############################################################################
 
         leftWidget = QSplitter(Qt.Orientation.Vertical, self)
         leftWidget.addWidget(self.browserWidget)
@@ -269,13 +262,12 @@ class CentralWidget(QWidget):
 
         self.splitter.addWidget(leftWidget)
         self.splitter.addWidget(self.tabWidget)
-        leftWidget.setSizes([400, 100])             # TODO
+        leftWidget.setSizes([400, 100])  # TODO
 
         self.setLayout(self.theLayout)
-        self.splitter.setSizes([100, 400])          # TODO
+        self.splitter.setSizes([100, 400])  # TODO
         # self.splitter.setChildrenCollapsible(False)
         self.editorWidget.setEnabled(False)
-
 
     def navigateWeb(self, url):
         if url.scheme() == 'file':
@@ -285,31 +277,27 @@ class CentralWidget(QWidget):
         elif url.scheme() == 'http' or url.scheme() == 'https':
             self.browser.setUrl(url)
 
-
     def showMessage(self, message):
         self.parent().statusBar.showMessage(message, 3000)
 
-
     def navigate(self, pageId):
         """Assumption: pageId is sub page of current page"""
-        self.l.debug('Navigating to sub page "{}"'.format(pageId))
+        self.LOG.debug('Navigating to sub page "{}"'.format(pageId))
 
         self.editorWidget.save()
-        self.browserWidget.navigate(pageId)        # Will implicitly load the page
-
+        self.browserWidget.navigate(pageId)  # Will implicitly load the page
 
     def navigateDirect(self, pageId):
         """Assumption: pageId is NOT sub page of current page. 
         Hence we need to let the browser point to the first occurrence of the page."""
-        self.l.debug('Navigating directly to "{}"'.format(pageId))
+        self.LOG.debug('Navigating directly to "{}"'.format(pageId))
 
         self.editorWidget.save()
-        self.browserWidget.navigateDirect(pageId)   # Will implicitly load the page
-
+        self.browserWidget.navigateDirect(pageId)  # Will implicitly load the page
 
     def itemSelected(self):
         treeNode = self.browserWidget.currentItem
-        self.l.debug('Selected tree node: {}'.format(treeNode))
+        self.LOG.debug('Selected tree node: {}'.format(treeNode))
 
         pageId = treeNode.getPageId()
         notepad = treeNode.getNotepad()
@@ -320,15 +308,13 @@ class CentralWidget(QWidget):
 
         self.updateLinkLists(notepad, pageId)
 
-
     def updateLinkLists(self, notepad, pageId):
-        
+
         linksTo = notepad.getChildPages(pageId)
         linksFrom = notepad.getParentPages(pageId)
 
         self.toLinksWidget.setContents(linksTo)
         self.fromLinksWidget.setContents(linksFrom)
-
 
     def tabSelected(self, index):
         if index == self.editTabIdx:
@@ -344,37 +330,16 @@ class CentralWidget(QWidget):
         elif index == self.htmlTabIdx:
             self.activateHTMLView()
 
-
     def activateWebView(self):
         exporter = HTMLExporter(self.editorWidget.page.getPageDir())
         self.htmlView.setPlainText(exporter.getHtmlString(self.editorWidget.editView.document()))
-
-        ########### get URL for the stylesheet and for the base URL
-
-        webpageCSS = pkg_resources.resource_string(data.__name__, 'webpage.css')
-        print("webpage.css file: {} - {}".format(webpageCSS, type(webpageCSS)))
 
         mypath = os.getcwd()
         mypath = mypath.replace('\\', '/')
         baseURL = QUrl('file:///{}/'.format(mypath))
 
-        # The location must be either a path on the local filesystem, or a 
-        # data URL with UTF-8 and Base64 encoded data, such as:
-        # "data:text/css;charset=utf-8;base64,cCB7IGJhY2tncm91bmQtY29sb3I6IHJlZCB9Ow=="
-        # BASE64 works on bytes!!
-        import base64
-        cssData = base64.b64encode(webpageCSS)
-        cssData = cssData.decode('utf-8')
-        cssDataUrl = 'data:text/css;charset=utf-8;base64,{}'.format(cssData)
-        print("webpage.css base64: {}".format(cssDataUrl ))
-        # cssDataUrl = QUrl('data:text/css;charset=utf-8;base64,{}'.format(cssData)) # 'file:///{}/webpage.css'.format(mypath))
-
-        ###########
-
-        self.browser.settings().setUserStyleSheetUrl(QUrl(cssDataUrl))
-
-        self.browser.setHtml(self.htmlView.toPlainText(), baseURL)
-
+        htmlContent = self.htmlView.toPlainText()
+        self.browser.setHtml(htmlContent, baseURL)
 
     def activateStructureView(self):
         self.textView.clear()
@@ -382,15 +347,13 @@ class CentralWidget(QWidget):
         doc = self.editorWidget.editView.document()
         traversal = TextDocumentTraversal()
         tree = traversal.traverse(doc)
-        
+
         sp = StructurePrinter(tree, self.textView.insertPlainText)
         sp.traverse()
-
 
     def activateXMLView(self):
         exporter = XMLExporter(self.editorWidget.page.getPageDir(), None)
         self.customView.setPlainText(exporter.getXmlString(self.editorWidget.editView.document()))
-
 
     def activateHTMLView(self):
         exporter = HTMLExporter(self.editorWidget.page.getPageDir())
@@ -398,15 +361,14 @@ class CentralWidget(QWidget):
 
 
 class MainWindow(QMainWindow):
-
-    l = logging.getLogger('MainWindow')
+    LOG = logging.getLogger('MainWindow')
 
     def __init__(self, app):
         QMainWindow.__init__(self, None)
 
         QDir.addSearchPath('icons', 'icons/')
 
-        self.l.debug('Initializing MainWindow ...')
+        self.LOG.debug('Initializing MainWindow ...')
 
         self.setWindowTitle('MynPad')
         app.setWindowIcon(QIcon('icons:mynpad.png'))
@@ -435,7 +397,7 @@ class MainWindow(QMainWindow):
         fileMenu = menuBar.addMenu("&File")
         fileMenu.addAction(exitAction)
 
-        aboutAction = QAction("About ...", self, triggered = self.handleAbout)
+        aboutAction = QAction("About ...", self, triggered=self.handleAbout)
         helpMenu = menuBar.addMenu("&Help")
         helpMenu.addAction(aboutAction)
 
@@ -458,10 +420,8 @@ class MainWindow(QMainWindow):
         # initialize the browser tree (add the top nodes and expand the saved path)
         self.mainWidget.browserWidget.initialize()
 
-
     def updateWindowTitle(self, title):
         self.setWindowTitle('{} - MynPad'.format(title))
-
 
     def saveState(self):
         # Make sure that the current notepad page is saved
@@ -476,29 +436,36 @@ class MainWindow(QMainWindow):
         self.settings.save()
 
         # Close all notepads - TODO (HACK)
-        for x in range (0, self.mainWidget.browserWidget.browserView.topLevelItemCount()):
+        for x in range(0, self.mainWidget.browserWidget.browserView.topLevelItemCount()):
             notepad = self.mainWidget.browserWidget.browserView.topLevelItem(x).getNotepad()
             notepad.close()
 
-
     def handleAbout(self):
         appVersion = "Development version"
-        pythonVersion = "%s.%s.%s (%s)" % (sys.version_info[0], sys.version_info[1], sys.version_info[2], sys.version_info[3])
+        pythonVersion = "%s.%s.%s (%s)" % (sys.version_info[0], sys.version_info[1], sys.version_info[2],
+                                           sys.version_info[3])
         pyQtVersion = PYQT_VERSION_STR
         pyQtQtVersion = QT_VERSION_STR
         qtRuntimeVersion = qVersion()
-        
+
         platformSystem = platform.system()
         platformRelease = platform.release()
 
         QMessageBox.about(self, "About MynPad",
-                          "Copyright \u00a9 2015 by Andreas Fester<br/>"+
-                          "<table>"+
-                          "<tr><th align=\"right\">Application version:</th><td>{}</td></tr>".format(appVersion) +
-                          "<tr><th align=\"right\">Python version:</th><td>{}</td></tr>".format(pythonVersion) +
-                          "<tr><th align=\"right\">PyQt version:</th><td>{} for Qt {}</td></tr>".format(pyQtVersion, pyQtQtVersion) +
-                          "<tr><th align=\"right\">Qt runtime version:</th><td>{}</td></tr>".format(qtRuntimeVersion)+
-                          "<tr><th align=\"right\">Operating System:</th><td>{} {}</td></tr>".format(platformSystem, platformRelease)+
-                          "<tr><th align=\"right\">sqlite version:</th><td>{}</td></tr>".format(sqlite3.version) +
-                          "<tr><th align=\"right\">sqlite runtime version:</th><td>{}</td></tr>".format(sqlite3.sqlite_version)+
+                          "Copyright \u00a9 2015 by Andreas Fester<br/>" +
+                          "<table>" +
+                          "<tr><th align=\"right\">Application version:</th><td>{}</td></tr>".format(
+                              appVersion) +
+                          "<tr><th align=\"right\">Python version:</th><td>{}</td></tr>".format(
+                              pythonVersion) +
+                          "<tr><th align=\"right\">PyQt version:</th><td>{} for Qt {}</td></tr>".format(
+                              pyQtVersion, pyQtQtVersion) +
+                          "<tr><th align=\"right\">Qt runtime version:</th><td>{}</td></tr>".format(
+                              qtRuntimeVersion) +
+                          "<tr><th align=\"right\">Operating System:</th><td>{} {}</td></tr>".format(
+                              platformSystem, platformRelease) +
+                          "<tr><th align=\"right\">sqlite version:</th><td>{}</td></tr>".format(
+                              sqlite3.version) +
+                          "<tr><th align=\"right\">sqlite runtime version:</th><td>{}</td></tr>".format(
+                              sqlite3.sqlite_version) +
                           "</table>")

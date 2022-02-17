@@ -1,25 +1,29 @@
-'''
+"""
 Created on 24.02.2015
 
 @author: afester
-'''
+"""
 
-from model.XMLImporter import XMLImporter
-from model.XMLExporter import XMLExporter
-import os, urllib.parse, uuid, logging
+import logging
+import os
+import urllib.parse
+import uuid
+
 # from dropbox.rest import ErrorResponse
-
 from StylableTextEdit.StylableTextModel import Frame, Paragraph, TextFragment, DocumentFactory
+from model.XMLExporter import XMLExporter
+from model.XMLImporter import XMLImporter
 
 
 class LocalPage:
 
-    l = logging.getLogger('LocalPage')
+    LOG = logging.getLogger('LocalPage')
 
     def __init__(self, notepad, pageId):
-        '''@param notepad  The Notepad instance for this page
+        """@param notepad  The Notepad instance for this page
            @param pageId   The page name / page id for this page
-'''
+        """
+
         assert type(pageId) is str
 
         self.notepad = notepad
@@ -27,42 +31,37 @@ class LocalPage:
         self.links = []
         self.document = None
 
-
     def getName(self):
-        '''@return The page id (page name) of this page
-        '''
+        """@return The page id (page name) of this page
+        """
         return self.pageId
 
-
     def getFilename(self):
-        '''@return The file name for this page, like "Todo%20List.xml" 
-        '''
+        """@return The file name for this page, like "Todo%20List.xml"
+        """
         return urllib.parse.quote(self.getName(), '') + '.xml'
 
-
     def getPageDir(self):
-        '''@return The directory for this page, like "c:\temp\testpad\T" 
-        '''
+        """@return The directory for this page, like "c:\temp\testpad\T"
+        """
         pagePath = self.notepad.getRootpath()
         pageIdx = self.pageId[0].upper()
         pagePath = pagePath + '/' + pageIdx
         return pagePath
 
-
     def getPagePath(self):
-        '''@return The absolute path name to the page.xml file,
-                   like "c:\temp\testpad\T\Todo%20List.xml" 
-        '''
+        """@return The absolute path name to the page.xml file,
+                   like "c:\temp\testpad\T\Todo%20List.xml"
+        """
         return self.getPageDir() + '/' + self.getFilename()
-
 
     def load(self):
         pageFullPath = self.getPagePath()
-        self.l.debug('Loading page at {} '.format(pageFullPath))
+        self.LOG.debug('Loading page at {} '.format(pageFullPath))
 
         pageDir = self.getPageDir()
         if not os.path.isfile(pageFullPath):
-            self.l.debug('Page does not exist, creating empty document ...')
+            self.LOG.debug('Page does not exist, creating empty document ...')
 
             rootFrame = Frame()
             p1 = Paragraph(0, ('title', 'level', '1'))
@@ -73,7 +72,7 @@ class LocalPage:
             rootFrame.add(p1)
             rootFrame.add(p2)
 
-            docFac= DocumentFactory(pageDir, self.notepad.formatManager)
+            docFac = DocumentFactory(pageDir, self.notepad.formatManager)
             self.document = docFac.createDocument(rootFrame)
 
             self.links = []
@@ -85,11 +84,11 @@ class LocalPage:
 
     def save(self):
         pagePath = self.getPagePath()
-        self.l.debug('Saving page to {}'.format(pagePath))
+        self.LOG.debug('Saving page to {}'.format(pagePath))
 
         pageDir = self.getPageDir()
         if not os.path.isdir(pageDir):
-            self.l.debug('{} does not exist, creating directory ...'.format(pageDir))
+            self.LOG.debug('{} does not exist, creating directory ...'.format(pageDir))
             os.makedirs(pageDir)
 
         exporter = XMLExporter(self.getPageDir(), self.getFilename())
@@ -97,7 +96,6 @@ class LocalPage:
 
         self.notepad.updateLinks(self.getName(), exporter.getLinks())
         self.document.setModified(False)
-
 
     def saveImage(self, image):
         fileName = str(uuid.uuid4()).replace('-', '') + '.png'
@@ -107,10 +105,8 @@ class LocalPage:
 
         return fileName
 
-
     def getLinks(self):
         return self.links
-
 
     def getDocument(self):
         return self.document
@@ -121,10 +117,9 @@ class DropboxPage(LocalPage):
     def __init__(self, notepad, pageId):
         LocalPage.__init__(self, notepad, pageId)
 
-
     def getPageDir(self):
-        '''@return The directory for this page, like "testpad/T" 
-        '''
+        """@return The directory for this page, like "testpad/T"
+        """
         pagePath = self.notepad.getRootpath()
 
         if self.pageId is not None:     # not the root page
@@ -132,13 +127,11 @@ class DropboxPage(LocalPage):
             pagePath = pagePath + '/' + pageIdx
         return pagePath
 
-
     def getPagePath(self):
-        '''@return The absolute path name to the page.xml file,
-                   like "testpad/T/Todo%20List.xml" 
-        '''
+        """@return The absolute path name to the page.xml file,
+                   like "testpad/T/Todo%20List.xml"
+        """
         return self.getPageDir() + '/' + self.getFilename()
-
 
     def load(self):
         pagePath = self.getPagePath()
@@ -158,13 +151,13 @@ class DropboxPage(LocalPage):
 
                 # TODO: Should not require an additional roundtrip after page creation
                 with self.notepad.client.get_file(pagePath) as f:
-                    importer = XMLImporter(self.getPageDir(), self.getFilename(), self.notepad.getFormatManager())
+                    importer = XMLImporter(self.getPageDir(), self.getFilename(),
+                                           self.notepad.getFormatManager())
                     importer.importFromFile(f)
                     self.document = importer.getDocument()
                     self.links = importer.getLinks()
             else:
                 print(str(rsp))
-
 
     def createPage(self, pagePath):
         print("  DROPBOX: CREATING PAGE {}".format(pagePath))
@@ -184,7 +177,6 @@ class DropboxPage(LocalPage):
             self.notepad.client.put_file(pagePath, fileData)
         except ErrorResponse as rsp:
             print(str(rsp))
-
 
     def save(self):
         pagePath = self.getPagePath()

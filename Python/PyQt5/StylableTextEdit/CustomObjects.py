@@ -6,19 +6,18 @@ Created on 29.04.2015
 
 from PyQt6.QtCore import Qt, QSizeF, QObject, QSize
 from PyQt6.QtGui import QTextFormat, QImage, QPen, QTextObjectInterface
- 
+
+
 class CustomObjectRenderer(QObject, QTextObjectInterface):
     
     def __init__(self):
         QObject.__init__(self)
         QTextObjectInterface.__init__(self)
 
-
     # @Override
     def intrinsicSize(self, doc, posInDocument, fmt):
         customObject = fmt.property(QTextFormat.Property.UserProperty+1)
         return customObject.getSize()
-
 
     # @Override
     def drawObject(self, painter, rect, doc, posInDocument, fmt):
@@ -79,9 +78,8 @@ class ImageObject(CustomTextObject):
             self.bufferedImage = img
 
 
-
 class MathFormulaObject(CustomTextObject):
-    '''A container for a mathematical formula and its rendered .png equivalent'''
+    """A container for a mathematical formula and its rendered .png equivalent"""
 
     def __init__(self):
         CustomTextObject.__init__(self)

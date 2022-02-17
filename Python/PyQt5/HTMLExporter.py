@@ -22,10 +22,14 @@ class HtmlPrinter:
         return '\u00a0' * self.indent * 2
 
     def traverse(self):
+        mainCssFile = "data/webpage.css"
+
         self.out('''<!DOCTYPE html>
 <html lang="en">
-  <head></head>
-  <body>''')
+  <head>
+    <link rel="stylesheet" href="{}">
+  </head>
+  <body>'''.format(mainCssFile))
 
         self.indent = 2
         for c in self.rootFrame.children:
