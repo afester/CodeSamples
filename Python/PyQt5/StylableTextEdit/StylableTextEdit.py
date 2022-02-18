@@ -455,7 +455,7 @@ class StylableTextEdit(QTextEdit):
         printer.traverse()
         print('-----------------------------------------------')
 
-        return
+        return result
 
         sp = AppXmlPrinter(frame, None)
         sp.traverse()
