@@ -20,7 +20,7 @@ class UrlEditor(QFrame):
     applyUrl = pyqtSignal(str)
 
     def __init__(self, parentWidget):
-        QFrame.__init__(self, parentWidget)     # ), Tool )
+        QFrame.__init__(self, parentWidget, Qt.WindowType.Tool)
         layout = QHBoxLayout()
         self.setWindowTitle('Edit URL reference')
         self.setLayout(layout)
@@ -90,9 +90,9 @@ class StylableTextEdit(QTextEdit):
         self.selectedObject = None
         self.orgCursorWidth = self.cursorWidth()
 
-        self.l = UrlEditor(self)
-        self.l.applyUrl.connect(self.setCurrentUrl)
-        self.l.resize(QSize(500, self.l.size().height()))
+        self.urlEditor = UrlEditor(self)
+        self.urlEditor.applyUrl.connect(self.setCurrentUrl)
+        self.urlEditor.resize(QSize(500, self.urlEditor.size().height()))
         self.cursorPositionChanged.connect(self.handleCursorPositionChanged)
         self.currentCharFormatChanged.connect(self.handleCharFormatChanged)
 
@@ -272,12 +272,12 @@ class StylableTextEdit(QTextEdit):
                 pos = pos.bottomLeft()
                 pos = self.viewport().mapToGlobal(pos)
 
-                self.l.move(pos)
-                self.l.setUrl(url)
-                self.l.show()
+                self.urlEditor.move(pos)
+                self.urlEditor.setUrl(url)
+                self.urlEditor.show()
 
         else:
-            self.l.hide()
+            self.urlEditor.hide()
 
 # ===============================================================================
 #         # We would like to render the bullets of the current list in a different
