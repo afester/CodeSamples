@@ -84,6 +84,22 @@ programlisting[language="java"] {
 	font-weight: bold;
 }
 
+programlisting[language="javascript"] {
+	white-space: pre;
+
+	margin-top: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	margin-left: 5px;
+	background-color: #37467a;
+
+	color: #fcc9b4;
+	font-family: "Courier";
+	font-size: 10pt;
+	/*font-weight: bold;*/
+	font-style: italic;
+}
+
 programlisting[language="cpp"] {
 	white-space: pre;
 

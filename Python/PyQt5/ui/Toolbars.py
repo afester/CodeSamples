@@ -171,31 +171,36 @@ class BlockStyleSelector(TitledToolbar):
         d4.addItem("Java", selector)
         self.styleToDropdown[selector] = d4
         self.styleToIndex[selector] = 1
-        
+
+        selector = ('programlisting', 'language', 'javascript')
+        d4.addItem("JavaScript", selector)
+        self.styleToDropdown[selector] = d4
+        self.styleToIndex[selector] = 2
+
         selector = ('programlisting', 'language', 'python')
         d4.addItem("Python", selector)
         self.styleToDropdown[selector] = d4
-        self.styleToIndex[selector] = 2
+        self.styleToIndex[selector] = 3
         
         selector = ('programlisting', 'language', 'sql')
         d4.addItem("SQL", selector)
         self.styleToDropdown[selector] = d4
-        self.styleToIndex[selector] = 3
+        self.styleToIndex[selector] = 4
         
         selector = ('programlisting', 'language', 'xml')
         d4.addItem("XML", selector)
         self.styleToDropdown[selector] = d4
-        self.styleToIndex[selector] = 4
+        self.styleToIndex[selector] = 5
 
         selector = ('programlisting', 'language', 'bash')
         d4.addItem("Bash", selector)
         self.styleToDropdown[selector] = d4
-        self.styleToIndex[selector] = 5
+        self.styleToIndex[selector] = 6
         
         selector = ('screen', None, None)
         d4.addItem("Generic", selector)
         self.styleToDropdown[selector] = d4
-        self.styleToIndex[selector] = 6
+        self.styleToIndex[selector] = 7
 
         toolbar.addWidget(d1)
         toolbar.addWidget(d2)

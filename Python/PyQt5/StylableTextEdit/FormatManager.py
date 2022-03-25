@@ -174,6 +174,7 @@ class FormatManager:
                         'warning',
                         'blockquote',
                         'programlisting[language="java"]',
+                        'programlisting[language="javascript"]',
                         'programlisting[language="cpp"]',
                         'programlisting[language="xml"]',
                         'programlisting[language="sql"]',
