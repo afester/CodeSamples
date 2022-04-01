@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QDialog, QFileDialog, QDialogButtonBox
 import os, logging
 from model.Notepad import LocalNotepad, DropboxNotepad
 import dropbox
-from dropbox.rest import ErrorResponse
+# from dropbox.rest import ErrorResponse
 from ui.AddNotepadDlg import Ui_AddNotepadDlg
 
 

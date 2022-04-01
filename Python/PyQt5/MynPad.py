@@ -13,7 +13,7 @@ sys.path.insert(0, '/opt/pyqt53/site-packages')
 from PyQt5.QtWidgets import QApplication
 
 import logging.config
-from pip.commands.list import ListCommand
+from pip._internal.commands.list import ListCommand
 
 
 from ui.MainWindow import MainWindow
@@ -23,7 +23,7 @@ import io
 
 def main():
     print(__name__)
-    lx = ListCommand()
+    lx = ListCommand("MynPad", "")
     lx.main(args=None)
 
     # Note: Need a TextIOWrapper since streams are essentially byte-based since Python 3
