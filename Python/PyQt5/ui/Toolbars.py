@@ -1,9 +1,9 @@
 
 
-from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtWidgets import QToolBar, QAction, QLabel, QComboBox, QWidget
-from PyQt5.QtWidgets import QVBoxLayout, QFrame,  QSizePolicy, QHBoxLayout
-from PyQt5.QtGui  import QIcon,  QPixmap
+from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtWidgets import QToolBar, QLabel, QComboBox, QWidget
+from PyQt6.QtWidgets import QVBoxLayout, QFrame,  QSizePolicy, QHBoxLayout
+from PyQt6.QtGui  import QIcon, QAction,  QPixmap, QKeySequence
 
 
 class IconDropDown(QWidget):
@@ -23,7 +23,7 @@ class IconDropDown(QWidget):
         hLayout.setContentsMargins(5, 5, 5, 5)
         
         self.setLayout(hLayout)
-        hLayout.addWidget(icon, 0, Qt.AlignHCenter)
+        hLayout.addWidget(icon, 0, Qt.AlignmentFlag.AlignHCenter)
         hLayout.addWidget(self.dropdown)
 
 
@@ -40,11 +40,11 @@ class TitledToolbar(QFrame):
 
     def __init__(self, parent, title):
         QFrame.__init__(self, parent)
-        self.setFrameStyle(QFrame.StyledPanel)
+        self.setFrameStyle(QFrame.Shape.StyledPanel)
 
         titleLabel = QLabel(title, self)
         contentPanel = QWidget(self)
-        contentPanel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.MinimumExpanding)
+        contentPanel.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.MinimumExpanding)
         self.contentLayout = QHBoxLayout()
         self.contentLayout.setContentsMargins(0, 0, 0, 0)
         contentPanel.setLayout(self.contentLayout)
@@ -75,7 +75,7 @@ class TitledToolbar(QFrame):
         myLayout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(myLayout)
 
-        myLayout.addWidget(titleLabel, 0, Qt.AlignHCenter | Qt.AlignTop)
+        myLayout.addWidget(titleLabel, 0, Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
         myLayout.addWidget(contentPanel)
 
 
@@ -102,7 +102,7 @@ class BlockStyleSelector(TitledToolbar):
         self.styleToDropdown = {}
 
 ##########################
-        d1 = IconDropDown(self, ':/icons/format-text-paragraph.png')
+        d1 = IconDropDown(self, 'icons:format-text-paragraph.png')
         d1.entrySelected.connect(self.styleSelected)
 
         selector = ('para', None, None)
@@ -126,7 +126,7 @@ class BlockStyleSelector(TitledToolbar):
         self.styleToIndex[selector] = 3
 
 ##########################
-        d2 = IconDropDown(self, ':/icons/format-text-header.png')
+        d2 = IconDropDown(self, 'icons:format-text-header.png')
         d2.entrySelected.connect(self.styleSelected)
 
         selector = ('title', 'level', '1')
@@ -145,7 +145,7 @@ class BlockStyleSelector(TitledToolbar):
         self.styleToIndex[selector] = 2
 
 ##########################
-        d3 = IconDropDown(self, ":/icons/format-list-unordered.png")
+        d3 = IconDropDown(self, "icons:format-list-unordered.png")
         d3.entrySelected.connect(self.styleSelected)
 
         selector = ('itemizedlist', 'level', '1')
@@ -159,7 +159,7 @@ class BlockStyleSelector(TitledToolbar):
         self.styleToIndex[selector] = 1
 
 ##########################
-        d4 = IconDropDown(self, ":/icons/format-text-code.png")
+        d4 = IconDropDown(self, "icons:format-text-code.png")
         d4.entrySelected.connect(self.styleSelected)
 
         selector = ('programlisting', 'language', 'cpp')
@@ -171,42 +171,47 @@ class BlockStyleSelector(TitledToolbar):
         d4.addItem("Java", selector)
         self.styleToDropdown[selector] = d4
         self.styleToIndex[selector] = 1
-        
+
+        selector = ('programlisting', 'language', 'javascript')
+        d4.addItem("JavaScript", selector)
+        self.styleToDropdown[selector] = d4
+        self.styleToIndex[selector] = 2
+
         selector = ('programlisting', 'language', 'python')
         d4.addItem("Python", selector)
         self.styleToDropdown[selector] = d4
-        self.styleToIndex[selector] = 2
+        self.styleToIndex[selector] = 3
         
         selector = ('programlisting', 'language', 'sql')
         d4.addItem("SQL", selector)
         self.styleToDropdown[selector] = d4
-        self.styleToIndex[selector] = 3
+        self.styleToIndex[selector] = 4
         
         selector = ('programlisting', 'language', 'xml')
         d4.addItem("XML", selector)
         self.styleToDropdown[selector] = d4
-        self.styleToIndex[selector] = 4
+        self.styleToIndex[selector] = 5
 
         selector = ('programlisting', 'language', 'bash')
         d4.addItem("Bash", selector)
         self.styleToDropdown[selector] = d4
-        self.styleToIndex[selector] = 5
+        self.styleToIndex[selector] = 6
         
         selector = ('screen', None, None)
         d4.addItem("Generic", selector)
         self.styleToDropdown[selector] = d4
-        self.styleToIndex[selector] = 6
+        self.styleToIndex[selector] = 7
 
         toolbar.addWidget(d1)
         toolbar.addWidget(d2)
         toolbar.addWidget(d3)
         toolbar.addWidget(d4)
 
-        intendLessAction = QAction(QIcon(":/icons/format-indent-less.png"), "", toolbar) 
+        intendLessAction = QAction(QIcon("icons:format-indent-less.png"), "", toolbar)
         intendLessAction.triggered.connect(self.indentLess)
         toolbar.addAction(intendLessAction)
 
-        intendMoreAction = QAction(QIcon(":/icons/format-indent-more.png"), "", toolbar) 
+        intendMoreAction = QAction(QIcon("icons:format-indent-more.png"), "", toolbar)
         intendMoreAction.triggered.connect(self.indentMore)
         toolbar.addAction(intendMoreAction)
 
@@ -218,21 +223,17 @@ class BlockStyleSelector(TitledToolbar):
 
         self.addWidget(toolbar)
 
-
     def addCategory(self):
         pass
-    
 
     def addStyle(self):
         pass
-
 
     def styleSelected(self):
         icd = self.sender()
         dd = icd.dropdown
         style = dd.currentData()
         self.styleChanged.emit(style)
-
 
     def setCurrentStyle(self, styleName):
         if self.currentStyle != styleName:
@@ -260,40 +261,40 @@ class TextStyleSelector(TitledToolbar):
 
         self.styleToAction = {}
 
-        textKeywordAction = QAction(QIcon(':/icons/format-keyword.png'), 'Notepad link', toolbar)
-        textKeywordAction.setCheckable(True);
+        textKeywordAction = QAction(QIcon('icons:format-keyword.png'), 'Notepad link', toolbar)
+        textKeywordAction.setCheckable(True)
         selector = ('olink', None, None)
         textKeywordAction.setProperty('style', selector)
         self.styleToAction[selector] = textKeywordAction
         textKeywordAction.triggered.connect(self.styleSelected)
         toolbar.addAction(textKeywordAction)
 
-        textLinkAction = QAction(QIcon(':/icons/format-link.png'), 'Internet link', toolbar)
-        textLinkAction.setCheckable(True);
+        textLinkAction = QAction(QIcon('icons:format-link.png'), 'Internet link', toolbar)
+        textLinkAction.setCheckable(True)
         selector = ('link', None, None)
         textLinkAction.setProperty('style', selector)
         self.styleToAction[selector] = textLinkAction 
         textLinkAction.triggered.connect(self.styleSelected)
         toolbar.addAction(textLinkAction)
 
-        textBoldAction = QAction(QIcon(':/icons/format-text-emphasized.png'), 'Emphasize', toolbar)
-        textBoldAction.setCheckable(True);
+        textBoldAction = QAction(QIcon('icons:format-text-emphasized.png'), 'Emphasize', toolbar)
+        textBoldAction.setCheckable(True)
         selector = ('emphasis', None, None)
         textBoldAction.setProperty('style', selector)
         self.styleToAction[selector] = textBoldAction
         textBoldAction.triggered.connect(self.styleSelected)
         toolbar.addAction(textBoldAction)
 
-        textHighlightAction = QAction(QIcon(':/icons/format-text-highlight.png'), 'Highlight', toolbar)
-        textHighlightAction.setCheckable(True);
+        textHighlightAction = QAction(QIcon('icons:format-text-highlight.png'), 'Highlight', toolbar)
+        textHighlightAction.setCheckable(True)
         selector = ('emphasis', 'role', 'highlight')
         textHighlightAction.setProperty('style', selector)
         self.styleToAction[selector] = textHighlightAction
         textHighlightAction.triggered.connect(self.styleSelected)
         toolbar.addAction(textHighlightAction)
  
-        textCodeAction = QAction(QIcon(':/icons/format-text-code.png'), 'Code', toolbar)
-        textCodeAction.setCheckable(True);
+        textCodeAction = QAction(QIcon('icons:format-text-code.png'), 'Code', toolbar)
+        textCodeAction.setCheckable(True)
         selector = ('code', None, None)
         textCodeAction.setProperty('style', selector)
         self.styleToAction[selector] = textCodeAction
@@ -302,13 +303,11 @@ class TextStyleSelector(TitledToolbar):
 
         self.addWidget(toolbar)
 
-
     def styleSelected(self):
         action = self.sender()
         style = action.property('style')
         flag = action.isChecked()
         self.styleChanged.emit(style, flag)
-
 
     def setCurrentStyle(self, styleName):
         if self.currentStyle != styleName:
@@ -330,37 +329,37 @@ class ActionSelector(TitledToolbar):
         toolbar.setFloatable(False)
         toolbar.setMovable(False)
 
-        self.saveAction = QAction(QIcon(":/icons/file-save.png"), "Save (Ctrl-S)", toolbar)
-        self.saveAction.setShortcut(Qt.CTRL + Qt.Key_S);
+        self.saveAction = QAction(QIcon("icons:file-save.png"), "Save (Ctrl-S)", toolbar)
+        self.saveAction.setShortcut(QKeySequence("CTRL+s"))
         self.saveAction.triggered.connect(parent.save)
         toolbar.addAction(self.saveAction)
 
-        self.nonprintableAction = QAction(QIcon(":/icons/view-nonprintable.png"), "View nonprintable chars", toolbar)
-        self.nonprintableAction.setCheckable(True);
+        self.nonprintableAction = QAction(QIcon("icons:view-nonprintable.png"), "View nonprintable chars", toolbar)
+        self.nonprintableAction.setCheckable(True)
         self.nonprintableAction.triggered.connect(parent.toggleNonprintable)
         toolbar.addAction(self.nonprintableAction)
 
-        self.undoAction = QAction(QIcon(":/icons/edit-undo.png"), "Undo (Ctrl-Z)", toolbar)
-        # saveAction.setShortcut(Qt.CTRL + Qt.Key_Z);
+        self.undoAction = QAction(QIcon("icons:edit-undo.png"), "Undo (Ctrl-Z)", toolbar)
+        self.undoAction.setShortcut(QKeySequence("CTRL+z"))
         self.undoAction.triggered.connect(parent.undo)
         toolbar.addAction(self.undoAction)
 
-        self.redoAction = QAction(QIcon(":/icons/edit-redo.png"), "Redo (Ctrl-Y)", toolbar)
-        # saveAction.setShortcut(Qt.CTRL + Qt.Key_Y);
+        self.redoAction = QAction(QIcon("icons:edit-redo.png"), "Redo (Ctrl-Y)", toolbar)
+        self.redoAction.setShortcut(QKeySequence("CTRL+y"))
         self.redoAction.triggered.connect(parent.redo)
         toolbar.addAction(self.redoAction)
 
-        self.backAction = QAction(QIcon(":/icons/view-back.png"), "Back", toolbar)
+        self.backAction = QAction(QIcon("icons:view-back.png"), "Back", toolbar)
         self.backAction.setEnabled(False)
         self.backAction.triggered.connect(parent.navigateBack)
         toolbar.addAction(self.backAction)
 
-        self.forwardAction = QAction(QIcon(":/icons/view-forward.png"), "Forward", toolbar)
+        self.forwardAction = QAction(QIcon("icons:view-forward.png"), "Forward", toolbar)
         self.forwardAction.setEnabled(False)
         self.forwardAction.triggered.connect(parent.navigateForward)
         toolbar.addAction(self.forwardAction)
 
-        insertImageAction = QAction(QIcon(":/icons/edit-insert-image.png"), "Insert Image", toolbar)
+        insertImageAction = QAction(QIcon("icons:edit-insert-image.png"), "Insert Image", toolbar)
         insertImageAction.triggered.connect(parent.insertImage)
         toolbar.addAction(insertImageAction)
 
@@ -368,8 +367,8 @@ class ActionSelector(TitledToolbar):
         insertFormulaAction.triggered.connect(parent.insertFormula)
         toolbar.addAction(insertFormulaAction)
 
-        findInPageAction = QAction(QIcon(":/icons/edit-find.png"), "Find in page (CTRL-F)", toolbar)
-        findInPageAction.setShortcut(Qt.CTRL + Qt.Key_F);
+        findInPageAction = QAction(QIcon("icons:edit-find.png"), "Find in page (CTRL-F)", toolbar)
+        findInPageAction.setShortcut(QKeySequence("CTRL+f"))
         findInPageAction.triggered.connect(parent.findInPage)
         toolbar.addAction(findInPageAction)
 

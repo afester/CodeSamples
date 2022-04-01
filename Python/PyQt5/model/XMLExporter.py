@@ -1,12 +1,15 @@
-'''
+"""
 Created on 19.02.2015
 
 @author: afester
-'''
+"""
 
-import os, urllib
+import os
+import urllib
 from xml.sax.saxutils import escape
-from StylableTextEdit.StylableTextModel import TextDocumentTraversal, List, Paragraph, TextFragment, ImageFragment, MathFragment
+
+from StylableTextEdit.StylableTextModel import TextDocumentTraversal, List, Paragraph, TextFragment, \
+    ImageFragment, MathFragment
 
 
 class DocbookPrinter:
@@ -38,17 +41,16 @@ class DocbookPrinter:
 
         self.out('\n</article>\n')
 
-
     def visitNode(self, node):
-#===============================================================================
-#         if type(node) == Fragment:
-#             self.emitFragment(node)
-# 
-#         el
-#===============================================================================
+        # ===============================================================================
+        #         if type(node) == Fragment:
+        #             self.emitFragment(node)
+        #
+        #         el
+        # ===============================================================================
         if type(node) == Paragraph:
             if node.style[0] == 'programlisting':
-                    self.out('\n{}<programlisting language="{}">'.format(self.prefix(), node.style[2]))
+                self.out('\n{}<programlisting language="{}">'.format(self.prefix(), node.style[2]))
             elif node.style[0] == 'title':
                 # close previous sections
                 newLevel = int(node.style[2])
@@ -118,7 +120,6 @@ class DocbookPrinter:
 
             self.out('\n{}</itemizedlist>'.format(self.prefix()))
 
-
     def emitFragment(self, fragment):
 
         if fragment.href is not None:
@@ -127,7 +128,8 @@ class DocbookPrinter:
 
         if type(fragment) == ImageFragment:
             imageName = escape(fragment.image)
-            self.out('<mediaobject><imageobject><imagedata fileref="{}"/></imageobject></mediaobject>'.format(imageName))
+            self.out('<mediaobject><imageobject><imagedata fileref="{}"/></imageobject></mediaobject>'.format(
+                imageName))
         elif type(fragment) == MathFragment:
             formula = escape(fragment.text)
             self.out('<inlineequation><mathphrase>{}</mathphrase></inlineequation>'.format(formula))
@@ -157,12 +159,10 @@ class XMLExporter:
         self.contentPath = contentPath
         self.contentFile = contentFile
 
-
     def exportDocument(self, document):
         contentFilePath = os.path.join(self.contentPath, self.contentFile)
         with open(contentFilePath, 'w', encoding='utf-8') as content_file:
             content_file.write(self.getXmlString(document))
-
 
     def getXmlString(self, document):
         self.contents = ''
@@ -176,10 +176,8 @@ class XMLExporter:
 
         return self.contents
 
-
     def getLinks(self):
         return self.links
-
 
     def collect(self, data):
         if data is not None:

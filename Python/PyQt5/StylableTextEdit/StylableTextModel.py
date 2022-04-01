@@ -1,13 +1,14 @@
-'''
+"""
 Created on 10.03.2015
 
 @author: afester
-'''
+"""
 
-from PyQt5.Qt import QTextTable, QTextDocument, QTextCursor, QTextFormat, QTextCharFormat
+import os
+
+from PyQt6.QtGui import QTextTable, QTextDocument, QTextCursor, QTextFormat, QTextCharFormat
 
 import tools
-import os
 from StylableTextEdit.CustomObjects import ImageObject, MathFormulaObject, CustomObjectRenderer
 
 
@@ -70,7 +71,6 @@ class List(Node):
         return '{}[style={}]'.format(self.getLocalName(), self.style)
 
 
-
 class Table:
     pass
 
@@ -103,7 +103,8 @@ class TextFragment(Fragment):
         return 'TextFragment'
 
     def __str__(self):
-        return '{}[style={}, text="{}", href={}]'.format(self.getLocalName(), self.style, self.text, self.href)
+        return '{}[style={}, text="{}", href={}]'.format(self.getLocalName(), self.style, self.text,
+                                                         self.href)
 
 
 class ImageFragment(Fragment):
@@ -139,7 +140,8 @@ class MathFragment(Fragment):
         return 'MathFragment'
 
     def __str__(self):
-        return '{}[text="{}", image={}, href={}]'.format(self.getLocalName(), self.text, self.image, self.href)
+        return '{}[text="{}", image={}, href={}]'.format(self.getLocalName(), self.text, self.image,
+                                                         self.href)
 
 
 class TextDocumentSelectionTraversal:
@@ -167,11 +169,9 @@ class TextDocumentSelectionTraversal:
 
         return result
 
-
-
     def getParagraph(self, block):
         blockFormat = block.blockFormat()
-        blockStyle = blockFormat.property(QTextFormat.UserProperty)
+        blockStyle = blockFormat.property(QTextFormat.Property.UserProperty)
 
         listLevel = 0
         textList = block.textList()
@@ -191,27 +191,26 @@ class TextDocumentSelectionTraversal:
 
         return result
 
-
-
     def getFragments(self, fragment):
         result = []
 
         text = fragment.text().replace('\u2028', '\n')
 
         charFormat = fragment.charFormat()
-        style = charFormat.property(QTextFormat.UserProperty)
+        style = charFormat.property(QTextFormat.Property.UserProperty)
 
         href = None
         if style and style[0] == 'link':
-            href = charFormat.anchorHref()  #escape(charFormat.anchorHref())
+            href = charFormat.anchorHref()  # escape(charFormat.anchorHref())
             style = None     # Link implicitly defined by setting href
 
         isObject = (text.find('\ufffc') != -1)
         if isObject:
             if charFormat.isImageFormat():
-                assert(False)   # This condition should never be true anymore - we are reendering images as custom objects
+                # This condition should never be true anymore - we are reendering images as custom objects
+                assert False
             else:
-                customObject = charFormat.property(QTextCharFormat.UserProperty+1)
+                customObject = charFormat.property(QTextCharFormat.Property.UserProperty + 1)
                 if type(customObject) is ImageObject:
                     frag = ImageFragment()
                     frag.image = tools.os_path_split(customObject.imageName)[-1]
@@ -230,7 +229,8 @@ class TextDocumentSelectionTraversal:
             fragStart = fragment.position()
             fragEnd = fragment.position() + fragment.length() - 1
  
-            print(" Frag: {}-{}   Sel: {}-{}".format(fragStart, fragEnd, self.selectionStart, self.selectionEnd))
+            print(" Frag: {}-{}   Sel: {}-{}".format(fragStart, fragEnd, self.selectionStart,
+                                                     self.selectionEnd))
 
             print("   1Text: {}".format(text))
  
@@ -255,7 +255,6 @@ class TextDocumentSelectionTraversal:
 
             print("   3Text: {}".format(text))
 
-
             frag.setText(text)
             result.append(frag)
 
@@ -273,7 +272,6 @@ class TextDocumentTraversal:
 
         return result
 
-
     def dumpFrame(self, frm):
 
         parentStack = [Frame()]
@@ -284,8 +282,8 @@ class TextDocumentTraversal:
         else:
             iterator = frm.begin()
             while not iterator.atEnd():
-                frame = iterator.currentFrame() # None if not a frame
-                block = iterator.currentBlock() # Invalid block if its a frame
+                frame = iterator.currentFrame()  # None if not a frame
+                block = iterator.currentBlock()  # Invalid block if its a frame
 
                 if frame:
                     subframe = self.dumpFrame(frame)
@@ -317,25 +315,24 @@ class TextDocumentTraversal:
 
         return parentStack[0]
 
-
     def dumpTable(self, table):
         raise None
     
-        for row in range(0, table.rows()):
-            for column in range(0, table.columns()):
-                tableCell = table.cellAt(row, column)
-
-                # BUG: PyQt's QTextTableCell does not expose the frame iterator (begin(), end()) 
-                iterator = tableCell.begin()        # AttributeError: 'QTextTableCell' object has no attribute 'begin'
-                while not iterator.atEnd():
-                    pass
+        # for row in range(0, table.rows()):
+        #     for column in range(0, table.columns()):
+        #         tableCell = table.cellAt(row, column)
+        #
+        #         # BUG: PyQt's QTextTableCell does not expose the frame iterator (begin(), end())
+        #         iterator = tableCell.begin()  # AttributeError: 'QTextTableCell' object has no attribute
+        #                                       # 'begin'
+        #         while not iterator.atEnd():
+        #             pass
 
         return Table()  # Mock
 
-
     def getParagraph(self, block):
         blockFormat = block.blockFormat()
-        blockStyle = blockFormat.property(QTextFormat.UserProperty)
+        blockStyle = blockFormat.property(QTextFormat.Property.UserProperty)
 
         listLevel = 0
         textList = block.textList()
@@ -355,26 +352,26 @@ class TextDocumentTraversal:
 
         return result
 
-
     def getFragments(self, fragment):
         result = []
 
         text = fragment.text().replace('\u2028', '\n')
 
         charFormat = fragment.charFormat()
-        style = charFormat.property(QTextFormat.UserProperty)
+        style = charFormat.property(QTextFormat.Property.UserProperty)
 
         href = None
         if style and style[0] == 'link':
-            href = charFormat.anchorHref()  #escape(charFormat.anchorHref())
+            href = charFormat.anchorHref()  # escape(charFormat.anchorHref())
             style = None     # Link implicitly defined by setting href
 
         isObject = (text.find('\ufffc') != -1)
         if isObject:
             if charFormat.isImageFormat():
-                assert(False)   # This condition should never be true anymore - we are reendering images as custom objects
+                # This condition should never be true anymore - we are reendering images as custom objects
+                assert False
 
-    #===========================================================================
+    # ===========================================================================
     #             imgFmt = charFormat.toImageFormat()
     #             imgName = tools.os_path_split(imgFmt.name())[-1]
     # 
@@ -385,9 +382,9 @@ class TextDocumentTraversal:
     #                 frag.image = imgName
     #                 frag.setHref(href)
     #                 result.append(frag)
-    #===========================================================================
+    # ===========================================================================
             else:
-                customObject = charFormat.property(QTextCharFormat.UserProperty+1)
+                customObject = charFormat.property(QTextCharFormat.Property.UserProperty+1)
                 if type(customObject) is ImageObject:
                     frag = ImageFragment()
                     frag.image = tools.os_path_split(customObject.imageName)[-1]
@@ -447,7 +444,7 @@ class DocumentFactory:
         # Register a renderer for custom text objects
         mo = CustomObjectRenderer()
         mo.setParent(self.document)
-        self.document.documentLayout().registerHandler(QTextCharFormat.UserObject+1, mo);
+        self.document.documentLayout().registerHandler(QTextCharFormat.ObjectTypes.UserObject+1, mo)
 
         self.cursor = QTextCursor(self.document)
         self.listLevel = 0
@@ -458,15 +455,14 @@ class DocumentFactory:
             self.addNode(n)
 
         # Clean up the first paragraph if document is not empty
-        self.cursor.movePosition(QTextCursor.Start)
+        self.cursor.movePosition(QTextCursor.MoveOperation.Start)
         b = self.cursor.block()
         if b.length() == 1:
             cursor = QTextCursor(self.document.findBlockByLineNumber(0))
-            cursor.select(QTextCursor.BlockUnderCursor)
+            cursor.select(QTextCursor.SelectionType.BlockUnderCursor)
             cursor.deleteChar()
 
         return self.document
-
 
     def addNode(self, node):
         if type(node) == Paragraph:
@@ -497,20 +493,21 @@ class DocumentFactory:
             imageObject.setName(imagePath)
 
             imageObjectFormat = QTextCharFormat()
-            imageObjectFormat.setObjectType(QTextFormat.UserObject + 1)
-            imageObjectFormat.setProperty(QTextFormat.UserProperty + 1, imageObject)
-            self.cursor.insertText('\ufffc', imageObjectFormat);
+            imageObjectFormat.setObjectType(QTextFormat.ObjectTypes.UserObject + 1)
+            imageObjectFormat.setProperty(QTextFormat.Property.UserProperty + 1, imageObject)
+            self.cursor.insertText('\ufffc', imageObjectFormat)
 
         elif type(node) is MathFragment:
             mathFormula = MathFormulaObject()
             mathFormula.setFormula(node.text)
-            mathFormula.image = node.image #  renderFormula()
+            mathFormula.image = node.image      # renderFormula()
 
             mathObjectFormat = QTextCharFormat()
-            mathObjectFormat.setObjectType(QTextFormat.UserObject + 1)
-            mathObjectFormat.setVerticalAlignment(QTextCharFormat.AlignMiddle)
-            mathObjectFormat.setProperty(QTextFormat.UserProperty + 1, mathFormula)
-            self.cursor.insertText('\ufffc', mathObjectFormat);
+            mathObjectFormat.setObjectType(QTextFormat.ObjectTypes.UserObject + 1)
+            mathObjectFormat.setVerticalAlignment(QTextCharFormat.VerticalAlignment.AlignMiddle)
+            mathObjectFormat.setProperty(QTextFormat.Property.UserProperty + 1, mathFormula)
+            self.cursor.insertText('\ufffc', mathObjectFormat)
+
         elif type(node) is TextFragment:
             text = node.text.replace('\n', '\u2028')
             if node.href is not None:
@@ -519,7 +516,8 @@ class DocumentFactory:
                 charFmt.setAnchorHref(node.href)
                 self.cursor.insertText(text, charFmt)
             else:
-                # "The block char format is the format used when inserting text at the beginning of an empty block.
+                # "The block char format is the format used when inserting text at the beginning of an
+                # empty block.
                 # Hence, the block char format is only useful for the first fragment -
                 # once a fragment is inserted with a different style, and afterwards
                 # another fragment is inserted with no specific style, we need to reset
@@ -533,12 +531,10 @@ class DocumentFactory:
                 self.cursor.insertText(text, fmt.getCharFormat())
 
 
-
 class PlainTextFactory:
     
     def __init__(self):
         pass
-
 
     def getPlainText(self, rootFrame):
         self.result = ""
@@ -548,7 +544,6 @@ class PlainTextFactory:
             self.processNode(n)
 
         return self.result
-
 
     def processNode(self, node):
         if type(node) == Paragraph:

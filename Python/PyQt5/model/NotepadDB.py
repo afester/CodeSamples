@@ -1,37 +1,39 @@
-'''
+"""
 Created on 04.05.2015
 
 @author: afester
-'''
+"""
 
-import sqlite3, os, urllib, fnmatch, logging
+import fnmatch
+import logging
+import os
+import sqlite3
+import urllib
+
 from model.Page import LocalPage
 
 
 class NotepadDB:
     
-    l = logging.getLogger('NotepadDB')
+    LOG = logging.getLogger('NotepadDB')
 
     def __init__(self):
         self.conn = None
-
 
     def openDatabase(self, notepad):
         self.rootDir = notepad.getRootpath()
         self.dbFile = self.rootDir + '/mynpad.dbf'
 
         # Create the database file if it does not exist yet and open the database
-        self.l.debug('Opening {}'.format(self.dbFile)) 
+        self.LOG.debug('Opening {}'.format(self.dbFile))
         self.conn = sqlite3.connect(self.dbFile)
 
         self.createDatabase(notepad)
 
         # self.dumpDatabase()
 
-
     def closeDatabase(self):
         self.conn.close()
-
 
     def createDatabase(self, notepad):
         result = self.conn.execute('''
@@ -64,10 +66,9 @@ CREATE INDEX childIdx ON pageref(childId)
 
             self.refreshDatabase(notepad)
 
-
     def refreshDatabase(self, notepad):
         
-        self.l.debug('Refreshing database {}'.format(self.dbFile)) 
+        self.LOG.debug('Refreshing database {}'.format(self.dbFile))
 
         self.conn.execute('''
 DELETE FROM pageref''')
@@ -83,7 +84,7 @@ DELETE FROM page''')
 
                 stmt = '''
 INSERT INTO page VALUES(?)'''
-                self.conn.execute(stmt, (pageId, ) )
+                self.conn.execute(stmt, (pageId, ))
 
                 page = LocalPage(notepad, pageId)
                 page.load()
@@ -98,7 +99,6 @@ INSERT INTO pageref VALUES(?, ?)'''
 
         self.conn.commit()
 
-
     def getAllPages(self):
         result = []
 
@@ -112,7 +112,6 @@ COLLATE NOCASE''')
 
         return result
 
-
     def getChildPages(self, pageId):
         result = []
 
@@ -120,12 +119,11 @@ COLLATE NOCASE''')
 SELECT childId 
 FROM pageref
 WHERE parentId = ? 
-ORDER BY childId''', (pageId, ) )
+ORDER BY childId''', (pageId, ))
         for row in resCursor:
             result.append(row[0])
 
         return result
-
 
     def getParentPages(self, pageId):
         result = []
@@ -134,21 +132,19 @@ ORDER BY childId''', (pageId, ) )
 SELECT parentId 
 FROM pageref
 WHERE childId = ? 
-ORDER BY parentId''', (pageId, ) )
+ORDER BY parentId''', (pageId, ))
         for row in resCursor:
             result.append(row[0])
 
         return result
 
-
     def getChildCount(self, pageId):
         resCursor = self.conn.execute('''
 SELECT COUNT(*) 
 FROM pageref 
-WHERE parentId = ? ''', (pageId, ) )
+WHERE parentId = ? ''', (pageId, ))
         row = resCursor.fetchone()
         return row[0]
-
 
     def getChildPagesWithHandle(self, pageId):
         result = []
@@ -161,11 +157,10 @@ ORDER BY childId''', (pageId, ))
         for row in resCursor:
             pageId = row[0]
             childCount = self.getChildCount(pageId) 
-            result.append( (pageId, childCount) )
+            result.append((pageId, childCount))
 
         # print('{}'.format(result))
         return result
-
 
     def getOrphanedPages(self):
         result = []
@@ -178,30 +173,28 @@ ORDER BY pageId''')
             result.append(row[0])
         return result
 
-
     def updateLinks(self, pageId, linksTo):
-        self.l.debug('Updating links for "{}": {}'.format(pageId, linksTo))
+        self.LOG.debug('Updating links for "{}": {}'.format(pageId, linksTo))
 
         # Make sure that the page exists in the pages table
         try:
             stmt = '''
 INSERT INTO page VALUES(?)'''
-            self.conn.execute(stmt, (pageId, ) )
+            self.conn.execute(stmt, (pageId, ))
         except sqlite3.IntegrityError:      # Ignore unique constraint violation
             pass
 
         stmt = '''
 DELETE FROM pageref 
 WHERE parentId=?'''
-        self.conn.execute(stmt, (pageId, ) )
+        self.conn.execute(stmt, (pageId, ))
 
         for childLink in linksTo:
             stmt = '''
 INSERT INTO pageref VALUES(?, ?)'''
-            self.conn.execute(stmt, (pageId, childLink) )
+            self.conn.execute(stmt, (pageId, childLink))
 
         self.conn.commit()
-
 
     def _recFind(self, parentId, pageId):
         childLinks = self.getChildPages(parentId)
@@ -218,7 +211,6 @@ INSERT INTO pageref VALUES(?, ?)'''
 
             self.path = self.path[:-1]
 
-
     def getPathToPage(self, pageId):
         # print('getPathToPage({})'.format(pageId))
 
@@ -229,7 +221,6 @@ INSERT INTO pageref VALUES(?, ?)'''
 
         # print('  => {}'.format(self.path))
         return self.path
-
 
 # TODO: move to unit tests #####################################################
 
@@ -279,7 +270,7 @@ INSERT INTO pageref VALUES(?, ?)'''
 
         # Dump the rows.
         for row in allRows:
-            #print(row)
+            # print(row)
 
             idx = 0
             for col in row:
@@ -289,12 +280,10 @@ INSERT INTO pageref VALUES(?, ?)'''
                 idx += 1
             print()
 
-
     def selectAll(self, selection, tableName):
         stmt = '''SELECT {} FROM {}'''.format(selection, tableName)
         rows = self.conn.execute(stmt)
         self.printData(tableName, selection, rows)
-
 
     def dumpDatabase(self):
         print('All pages\n==================================================')
@@ -319,6 +308,7 @@ INSERT INTO pageref VALUES(?, ?)'''
         children = self.getChildCount('Title page')
         print(children)
 
-        print('\nChild pages of "Title page", including a child indicator flag\n==================================================')
+        print('\nChild pages of "Title page", including a child indicator flag\n'
+              '==================================================')
         children = self.getChildPagesWithHandle('Sample Page')
         print(children)
