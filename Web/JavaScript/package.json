@@ -1,0 +1,7 @@
+{
+  "name": "JavaScript",
+  "version": "1.0.0",
+  "dependencies": {
+    "immutable": "^4.0.0"
+  }
+}
