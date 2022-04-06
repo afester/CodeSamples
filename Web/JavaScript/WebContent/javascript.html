@@ -19,6 +19,7 @@
 
     <link rel="stylesheet" type="text/css" href="javascript.css">
     <script type="text/javascript" src="javascript.js"></script>
+		<!-- <script type="module" src="javascript.js"></script> -->
     <title>JavaScript s</title>
   </head>
 
@@ -29,13 +30,22 @@
     <p><button id="_clearButton" onclick="debugConsole.clear()">Clear Console</button></p>
 
     <h1>Samples to execute:</h1>
+    <p><button id="vads">Variables and Data structures</button></p>
     <p><button onclick="dumpAction()">Dump objects</button>
        <button onclick="functionAction()">Function objects</button>
        <button onclick="exceptionAction()">Exceptions sample</button>
        <button onclick="traverseDOMAction()">Show DOM tree</button></p>
-       <button onclick="colorSampleAction()">Color sample</button>
+    <p><button onclick="colorSampleAction()">Color sample</button>
        <button onclick="arraySampleAction()">Array sample</button>
        <button onclick="regexpSampleAction()">Regexp sample</button>
+       <button onclick="classSampleAction()">Class sample</button>
+       <button onclick="moduleSampleAction()">Module sample</button></p>
+
+       <script type="module" src="js_module.js"></script>
+       <script type="module">
+         import {variablesAction} from "./js_module";
+         document.querySelector('#vads').addEventListener('click', variablesAction);
+       </script>
   </body>
 
 </html>

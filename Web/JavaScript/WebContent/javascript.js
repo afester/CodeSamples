@@ -6,6 +6,8 @@
  */
 
 
+// import {add} from './lib/mathfuncs.js'
+
 'use strict';
 
 var textArea, document, textNode, myPoint, value;
@@ -185,7 +187,7 @@ function functionAction() {
 
     /** Apply invocation pattern */
     // each function has the "apply" method which can be used to invoke the function.
-    // the first parameter is the object which will be passed to the function 
+    // the first parameter is the object which will be passed to the function
     // as "this" parameter, the optional second parameter are the parameters passed to the function.
     result = SomeValue.prototype.getValue.apply(value1);
     debugConsole.writeln("value1 through apply(): " + result);
@@ -202,7 +204,7 @@ function functionAction() {
 
     /** ********************************************************* */
 
-    // Add a method "method" to all functions 
+    // Add a method "method" to all functions
     Function.prototype.method = function (name, func) {
         this.prototype[name] = func;
         return this;
@@ -442,4 +444,30 @@ function regexpSampleAction() {
     debugConsole.writeln('Fragment  : ' + fragment);
 
     dumpObject('result', result);
+}
+
+
+/* Class is syntactic sugar over the prototype mechanism */
+class SampleClass {
+	constructor(x, y) {
+		this.x = x;
+		this.y = y;
+	}
+
+	toString() {
+		return "x=" + this.x + ", y=" + this.y;
+	}
+}
+
+
+function classSampleAction() {
+    debugConsole.writeln("class Sample");
+
+	var p = new SampleClass(45, 98);
+	debugConsole.writeln("Point:" + p.toString());
+}
+
+function moduleSampleAction() {
+	alert(add(5, 9))
+	alert(sub(8, 4))
 }
