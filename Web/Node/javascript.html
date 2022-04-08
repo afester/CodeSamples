@@ -41,9 +41,8 @@
        <button onclick="classSampleAction()">Class sample</button>
        <button onclick="moduleSampleAction()">Module sample</button></p>
 
-       <script type="module" src="js_module.js"></script>
        <script type="module">
-         import {variablesAction} from "./js_module";
+         import {variablesAction} from "./js_module.mjs";
          document.querySelector('#vads').addEventListener('click', variablesAction);
        </script>
   </body>

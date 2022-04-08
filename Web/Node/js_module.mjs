@@ -6,7 +6,9 @@
  */
 
 // ????????? How to properly do this?
-import Immutable from './immutable/dist/immutable.es.js';
+// import Immutable from './node_modules/immutable/dist/immutable.es.js';
+// import Immutable from './immutable';
+import Immutable from 'immutable';
 
 export function variablesAction() {
   let x=4;
