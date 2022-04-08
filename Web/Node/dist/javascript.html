@@ -18,12 +18,10 @@
     <meta http-equiv="pragma" content="no-cache" />
 
     <link rel="stylesheet" type="text/css" href="javascript.css">
-    <script type="text/javascript" src="javascript.js"></script>
-		<!-- <script type="module" src="javascript.js"></script> -->
-    <title>JavaScript s</title>
+    <title>JavaScript</title>
   </head>
 
-  <body id="_body" onload="debugConsole.initialize();">
+  <body id="_body">
     <noscript><div>JavaScript is required on this page. Your browser does currently not support it.</div></noscript>
 
     <textarea readonly="readonly" wrap="off" id="_textArea" cols="80" rows="25"></textarea>
@@ -31,20 +29,17 @@
 
     <h1>Samples to execute:</h1>
     <p><button id="vads">Variables and Data structures</button></p>
-    <p><button onclick="dumpAction()">Dump objects</button>
-       <button onclick="functionAction()">Function objects</button>
-       <button onclick="exceptionAction()">Exceptions sample</button>
-       <button onclick="traverseDOMAction()">Show DOM tree</button></p>
-    <p><button onclick="colorSampleAction()">Color sample</button>
-       <button onclick="arraySampleAction()">Array sample</button>
-       <button onclick="regexpSampleAction()">Regexp sample</button>
-       <button onclick="classSampleAction()">Class sample</button>
-       <button onclick="moduleSampleAction()">Module sample</button></p>
+    <p><button id="doa">Dump objects</button>
+       <button id="foa">Function objects</button>
+       <button id="exa">Exceptions sample</button>
+       <button id="tda">Show DOM tree</button></p>
+    <p><button id="csa">Color sample</button>
+       <button id="asa">Array sample</button>
+       <button id="rsa">Regexp sample</button>
+       <button id="clsa">Class sample</button>
+       <button id="msa">Module sample</button></p>
 
-       <script type="module">
-         import {variablesAction} from "./js_module.mjs";
-         document.querySelector('#vads').addEventListener('click', variablesAction);
-       </script>
+    <script type="module" src="main.js"></script>
   </body>
 
 </html>

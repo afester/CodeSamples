@@ -2,7 +2,7 @@
   "name": "sample",
   "version": "1.0.0",
   "description": "Sample Node project",
-  "main": "index.js",
+  "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,6 +10,11 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.3",
-    "immutable": "^4.0.0"
+    "immutable": "^4.0.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2"
   }
 }

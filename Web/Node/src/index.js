@@ -8,9 +8,9 @@
 
 // import {add} from './lib/mathfuncs.js'
 
-'use strict';
+// 'use strict';
 
-var textArea, document, textNode, myPoint, value;
+var textArea, textNode, myPoint, value;
 
 if (typeof Object.create !== 'function') {
     Object.create = function (o) {
@@ -20,7 +20,7 @@ if (typeof Object.create !== 'function') {
     };
 }
 
-var debugConsole = {
+export var debugConsole = {
         "initialize" :
             function () {
                 textArea = document.getElementById("_textArea");
@@ -90,7 +90,7 @@ function dumpObject(objName, obj) {
 }
 
 
-function dumpAction() {
+export function dumpAction() {
     debugConsole.appendText("Hello World!!\n");
 
     myPoint = Object.create(Point);
@@ -471,3 +471,15 @@ function moduleSampleAction() {
 	alert(add(5, 9))
 	alert(sub(8, 4))
 }
+
+debugConsole.initialize();
+// document.querySelector('#vads').addEventListener('click', variablesAction);
+document.querySelector('#doa').addEventListener('click', dumpAction);
+document.querySelector('#foa').addEventListener('click', functionAction);
+document.querySelector('#exa').addEventListener('click', exceptionAction);
+document.querySelector('#tda').addEventListener('click', traverseDOMAction);
+document.querySelector('#csa').addEventListener('click', colorSampleAction);
+document.querySelector('#asa').addEventListener('click', arraySampleAction);
+document.querySelector('#rsa').addEventListener('click', regexpSampleAction);
+document.querySelector('#clsa').addEventListener('click', classSampleAction);
+document.querySelector('#msa').addEventListener('click', moduleSampleAction);
