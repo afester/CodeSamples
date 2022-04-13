@@ -5,12 +5,10 @@
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
 
+import {variablesAction} from "./variables";
+import {debugConsole} from "./tools";
 
-// import {add} from './lib/mathfuncs.js'
-
-// 'use strict';
-
-var textArea, textNode, myPoint, value;
+var myPoint, value;
 
 if (typeof Object.create !== 'function') {
     Object.create = function (o) {
@@ -19,31 +17,6 @@ if (typeof Object.create !== 'function') {
         return new F();
     };
 }
-
-export var debugConsole = {
-        "initialize" :
-            function () {
-                textArea = document.getElementById("_textArea");
-                textNode = document.createTextNode("JavaScript console activated.\n");
-                textArea.appendChild(textNode);
-            },
-
-        "appendText" :
-            function (text) {
-                textNode.data = textNode.data + text;
-                textArea.scrollTop = textArea.scrollHeight;
-            },
-
-        "writeln" :
-            function (text) {
-                this.appendText(text + "\n");
-            },
-
-        "clear" :
-            function () {
-                textNode.data = "";
-            }
-    };
 
 var Point = {
         "x" : 0,
@@ -467,13 +440,8 @@ function classSampleAction() {
 	debugConsole.writeln("Point:" + p.toString());
 }
 
-function moduleSampleAction() {
-	alert(add(5, 9))
-	alert(sub(8, 4))
-}
-
-debugConsole.initialize();
-// document.querySelector('#vads').addEventListener('click', variablesAction);
+document.querySelector('#vads').addEventListener('click', variablesAction);
+document.querySelector('#_clearButton').addEventListener('click', debugConsole.clear);
 document.querySelector('#doa').addEventListener('click', dumpAction);
 document.querySelector('#foa').addEventListener('click', functionAction);
 document.querySelector('#exa').addEventListener('click', exceptionAction);
@@ -482,4 +450,3 @@ document.querySelector('#csa').addEventListener('click', colorSampleAction);
 document.querySelector('#asa').addEventListener('click', arraySampleAction);
 document.querySelector('#rsa').addEventListener('click', regexpSampleAction);
 document.querySelector('#clsa').addEventListener('click', classSampleAction);
-document.querySelector('#msa').addEventListener('click', moduleSampleAction);

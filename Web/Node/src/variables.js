@@ -9,6 +9,7 @@
 // import Immutable from './node_modules/immutable/dist/immutable.es.js';
 // import Immutable from './immutable';
 import Immutable from 'immutable';
+import {debugConsole} from "./tools";
 
 export function variablesAction() {
   let x=4;
