@@ -4,6 +4,6 @@ module.exports = {
         poll: true
     },
     output: {
-        filename: "samples.js"
+        filename: "samples-bundle.js"
     }
 }

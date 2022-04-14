@@ -6,7 +6,8 @@
  */
 
 import {variablesAction} from "./variables";
-import {debugConsole} from "./tools";
+import {debugConsole, clearProxy} from "./tools";
+import {jquerySampleAction} from "./samples";
 
 var myPoint, value;
 
@@ -441,7 +442,7 @@ function classSampleAction() {
 }
 
 document.querySelector('#vads').addEventListener('click', variablesAction);
-document.querySelector('#_clearButton').addEventListener('click', debugConsole.clear);
+document.querySelector('#_clearButton').addEventListener('click', clearProxy);
 document.querySelector('#doa').addEventListener('click', dumpAction);
 document.querySelector('#foa').addEventListener('click', functionAction);
 document.querySelector('#exa').addEventListener('click', exceptionAction);
@@ -450,3 +451,4 @@ document.querySelector('#csa').addEventListener('click', colorSampleAction);
 document.querySelector('#asa').addEventListener('click', arraySampleAction);
 document.querySelector('#rsa').addEventListener('click', regexpSampleAction);
 document.querySelector('#clsa').addEventListener('click', classSampleAction);
+document.querySelector('#jqs').addEventListener('click', jquerySampleAction);

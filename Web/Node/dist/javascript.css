@@ -10,6 +10,7 @@
 body {
 	background-color: #303030;
 	font: 10pt sans-serif;
+    color: white;
 }
 
 h1 {
@@ -24,10 +25,23 @@ noscript div {
 	padding: 4px;
 }
 
+.float-container {
+    display: flex;              /* !!!!! */
+    /*border: 3px solid #fff;*/
+    /*padding: 20px;*/
+}
+
+.float-content {
+    /*width: 50%;*/
+    float: left;
+    padding: 20px;
+    /*border: 2px solid red;*/
+}
+
 textarea {
     background-color: black;
     color: green;
-    
+
     border-style: inset;
     border-width: 3px;
 }

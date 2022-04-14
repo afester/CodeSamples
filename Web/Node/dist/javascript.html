@@ -24,22 +24,41 @@
   <body id="_body">
     <noscript><div>JavaScript is required on this page. Your browser does currently not support it.</div></noscript>
 
-    <textarea readonly="readonly" wrap="off" id="_textArea" cols="80" rows="25"></textarea>
+    <div class="float-container">
 
-    <p><button id="_clearButton">Clear Console</button></p>
+      <div class="float-content">
+          <textarea readonly="readonly" wrap="off" id="_textArea" cols="80" rows="25"></textarea>
+          <p/><button id="_clearButton">Clear Console</button>
+      </div>
 
-    <h1>Samples to execute:</h1>
-    <p><button id="vads">Variables and Data structures</button></p>
-    <p><button id="doa">Dump objects</button>
-       <button id="foa">Function objects</button>
-       <button id="exa">Exceptions sample</button>
-       <button id="tda">Show DOM tree</button></p>
-    <p><button id="csa">Color sample</button>
-       <button id="asa">Array sample</button>
-       <button id="rsa">Regexp sample</button>
-       <button id="clsa">Class sample</button>
+      <div class="float-content">
+         <table id="properties">
+            <tr><td><input type="checkbox"/></td><td>First Name</td><td>Peter</td></tr>
+            <tr><td><input type="checkbox"/></td><td>Last Name</td><td>Shaw</td></tr>
+            <tr><td><input type="checkbox"/></td><td>Street</td><td></td></tr>
+            <tr><td><input type="checkbox"/></td><td>ZIP</td><td></td></tr>
+            <tr><td><input type="checkbox"/></td><td>City</td><td></td></tr>
+            <tr><td><input type="checkbox"/></td><td>Phone</td><td></td></tr>
+        </table>
+      </div>
 
-    <script type="module" src="samples.js"></script>
+    </div>
+
+    <div class="float-content">
+        <h1>Samples to execute:</h1>
+        <p><button id="vads">Variables and Data structures</button></p>
+        <p><button id="doa">Dump objects</button>
+           <button id="foa">Function objects</button>
+           <button id="exa">Exceptions sample</button>
+           <button id="tda">Show DOM tree</button></p>
+        <p><button id="csa">Color sample</button>
+           <button id="asa">Array sample</button>
+           <button id="rsa">Regexp sample</button>
+            <button id="clsa">Class sample</button></p>
+        <p><button id="jqs">jquery sample</button></p>
+    </div>
+
+    <script type="module" src="samples-bundle.js"></script>
   </body>
 
 </html>

@@ -5,32 +5,36 @@
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
 
-var textArea, textNode;
 
-export var debugConsole = {
-        "initialize" :
-            function () {
-                textArea = document.getElementById("_textArea");
-                textNode = document.createTextNode("JavaScript console activated.\n");
-                textArea.appendChild(textNode);
-            },
+class DebugConsole {
+    constructor() {
+        this.textArea = document.getElementById("_textArea");
+        this.textNode = document.createTextNode("JavaScript console activated.\n");
+        this.textArea.appendChild(this.textNode);
+    }
 
-        "appendText" :
-            function (text) {
-                textNode.data = textNode.data + text;
-                textArea.scrollTop = textArea.scrollHeight;
-            },
+    appendText(text) {
+        this.textNode.data = this.textNode.data + text;
+        this.textArea.scrollTop = this.textArea.scrollHeight;
+    }
 
-        "writeln" :
-            function (text) {
-                this.appendText(text + "\n");
-            },
+    writeln(text) {
+        if (text) {
+            this.appendText(text);
+        }
 
-        "clear" :
-            function () {
-                textNode.data = "";
-            }
-    };
+        this.appendText("\n");
+    }
 
-// debugConsole.initialize();
-debugConsole["initialize"]();
+    clear() {
+        this.textNode.data = "";
+    }
+}
+
+const debugConsole = new DebugConsole();
+
+function clearProxy() {
+    debugConsole.clear();
+}
+
+export {debugConsole, clearProxy};
