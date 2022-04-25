@@ -27,6 +27,30 @@ const port = 5000;                  //Save the port number where your server wil
 
 app.use('/', express.static('.'));
 
+app.get('/getPerson', (req, res) => {
+    const id = parseInt(req.query.id);
+    console.log(`Retrieving record: ${id}`);
+
+    let data = undefined;
+    switch (id) {
+        case 1 : data = {
+                    firstname: "Peter",
+                    lastname: "Shaw"
+                 }
+                 break;
+
+        case 2 : data = {
+                    firstname: "Justus",
+                    lastname: "Jonas"
+                 }
+                 break;
+    }
+
+    console.log(data);
+    res.type('json')
+    res.send(JSON.stringify(data));
+});
+
 app.listen(port, () => {            //server starts listening for any attempts from a client to connect at port: {port}
     console.log(`Now listening on port ${port}`);
 });

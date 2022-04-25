@@ -5,7 +5,7 @@
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
 
-import {debugConsole} from "./tools";
+import {debugConsole, dumpObject} from "./tools";
 import $ from "jquery";
 
 export function jquerySampleAction() {
@@ -42,4 +42,62 @@ export function jquerySampleAction() {
   $('#properties').css('border', '2px solid yellow');
   $('#properties td').css('background-color', '#f6d2c2');
   $('#properties td:nth-child(3)').css('background-color', 'green');
+}
+
+function createRow(columns) {
+  const colKeys = Object.keys(columns);
+
+  const tr = document.createElement("tr");
+  colKeys.forEach(key => {
+    const cell1 = document.createElement("td");
+    tr.appendChild(cell1);
+    cell1.innerText = columns[key];// columns.firstname;
+  });
+
+  return tr;
+}
+
+function updateDOM(data) {
+  dumpObject("RESULT", data);
+  $("#firstname").text(data.firstname);
+  $("#lastname").text(data.lastname);
+
+  const tr = createRow(data);
+  $("#table-data").append(tr);
+}
+
+export function promiseExample() {
+  debugConsole.writeln("\nPromise REST Example");
+  fetch("getPerson?id=1")
+      .then(res => res.json())
+      .then(updateDOM);
+  debugConsole.writeln("REST Example DONE.");
+}
+
+function xyz(data) {
+  debugConsole.writeln(data);
+}
+
+export function asyncExample() {
+  debugConsole.writeln("\nAsync REST Example");
+
+  const getPersonData = async () => {
+    const res = await fetch("getPerson?id=2");
+    // const { json } = res.json();   // Does not work
+    const json = await res.json();  // Works
+
+    updateDOM(json);
+  };
+
+  getPersonData();
+
+  // Read the body and write it to the debug console
+        // fetch("getNumbers?id=2")
+        //     .then(res => res.text())
+        //     .then(data => debugConsole.writeln(data));
+  // fetch("getNumbers?id=2")
+  //     .then(res => res.text())
+  //     .then(xyz);   // NOTE: USING A METHOD REFERENCE DOES NOT WORK HERE!
+
+  debugConsole.writeln("Async REST Example DONE.");
 }

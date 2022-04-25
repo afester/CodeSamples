@@ -1,8 +1,8 @@
 module.exports = {
     mode: 'development',
-    watchOptions: {
-        poll: true
-    },
+    // watchOptions: {
+    //     poll: true
+    // },
     output: {
         filename: "samples-bundle.js"
     }

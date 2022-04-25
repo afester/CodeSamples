@@ -6,6 +6,36 @@
  */
 
 
+
+function dumpObjectRec(indent, objName, obj) {
+    const prefix = '                    '.substring(0, indent);
+
+    debugConsole.writeln("\n" + prefix + "Properties of " + typeof obj + " " + objName + ":\n" + prefix + "----------------------------");
+
+    for (let name in obj) {
+        debugConsole.writeln(prefix + "  " + name + " (" + typeof name + ") own property: " + obj.hasOwnProperty(name) + " = " + obj[name]);
+    }
+
+    const ownProperties = Object.getOwnPropertyNames(obj);
+    if (ownProperties.length > 0) {
+        debugConsole.writeln("\n" + prefix + "  Own properties:\n" + prefix + "  -------------------------");
+
+        for (let idx in ownProperties) {
+            name = ownProperties[idx];
+            debugConsole.writeln(prefix + "  " + name + " (" + typeof obj[name] + ") = " + obj[name]);
+
+            if (obj[name] !== null && typeof obj[name] === 'object') {
+                dumpObjectRec(indent + 2, name, obj[name]);
+            }
+        }
+    }
+}
+
+
+export function dumpObject(objName, obj) {
+    dumpObjectRec(0, objName, obj);
+}
+
 class DebugConsole {
     constructor() {
         this.textArea = document.getElementById("_textArea");

@@ -5,9 +5,9 @@
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
 
-import {variablesAction} from "./variables";
-import {debugConsole, clearProxy} from "./tools";
-import {jquerySampleAction} from "./samples";
+import {variablesAction, enhancedVariablesAction} from "./variables";
+import {debugConsole, clearProxy, dumpObject} from "./tools";
+import {asyncExample, jquerySampleAction, promiseExample} from "./samples";
 
 var myPoint, value;
 
@@ -19,7 +19,7 @@ if (typeof Object.create !== 'function') {
     };
 }
 
-var Point = {
+const Point = {
         "x" : 0,
 
         "y" : 0,
@@ -29,40 +29,6 @@ var Point = {
                 return "Point[" + this.x + ", " + this.y + "]";
             }
     };
-
-
-function dumpObjectRec(indent, objName, obj) {
-    var ownProperties,
-        prefix = '                    '.substring(0, indent),
-        name,
-        idx;
-
-    debugConsole.writeln("\n" + prefix + "Properties of " + typeof obj + " " + objName + ":\n" + prefix + "----------------------------");
-
-    for (name in obj) {
-        debugConsole.writeln(prefix + "  " + name + " (" + typeof name + ") own property: " + obj.hasOwnProperty(name) + " = " + obj[name]);
-    }
-
-    ownProperties = Object.getOwnPropertyNames(obj);
-    if (ownProperties.length > 0) {
-        debugConsole.writeln("\n" + prefix + "  Own properties:\n" + prefix + "  -------------------------");
-
-        for (idx in ownProperties) {
-            name = ownProperties[idx];
-            debugConsole.writeln(prefix + "  " + name + " (" + typeof obj[name] + ") = " + obj[name]);
-
-            if (obj[name] !== null && typeof obj[name] === 'object') {
-                dumpObjectRec(indent + 2, name, obj[name]);
-            }
-        }
-    }
-}
-
-
-function dumpObject(objName, obj) {
-    dumpObjectRec(0, objName, obj);
-}
-
 
 export function dumpAction() {
     debugConsole.appendText("Hello World!!\n");
@@ -90,19 +56,19 @@ export function dumpAction() {
 
 
 function functionAction() {
-    var add, result, someObject, someOtherObject, SomeValue, value1, value2, calculateAvg;
 
-    add = function (a, b) {
+    /** Function expression */
+    const add = function (a, b) {
         return a + b;
     };
 
     // add is a reference to a function object, so it can be invoked
-    result = add(5, 7);
+    const result = add(5, 7);
 
     debugConsole.writeln("5 + 7 = " + result);
 
     /** Method Invocation Pattern - "this" refers to the current object **/
-    someObject = {
+    const someObject = {
         'value' : 'SomeValue',
 
         'invokeMethod' : function() {
@@ -111,7 +77,7 @@ function functionAction() {
     };
     someObject.invokeMethod();
 
-    someOtherObject = {
+    const someOtherObject = {
         'value' : 4.5,
 
         'invokeMethod' : someObject.invokeMethod  // same function can be attached to multiple objects
@@ -119,17 +85,21 @@ function functionAction() {
     someOtherObject.invokeMethod();
 
     /** Function invocation pattern: "this" refers to the global context **/
-    someOtherObject.setDefaultValue = function () {
+    // Note: this should be undefined here, because someFunction was called directly and not as a method or
+    // property of an object. This feature wasn't implemented in some browsers when they first started to
+    // support strict mode. As a result, they incorrectly returned the window object.
 
-        var someFunction = function () {
-                this.value = 1.5;    // Attention! when invoked as a function, "this" refers to the global context!
-            };
-
-        someFunction();
-    };
-    someOtherObject.setDefaultValue();
-    debugConsole.writeln("someOtherObject.value: " + someOtherObject.value); // still 4.5!
-    debugConsole.writeln("global value: " + value);                          // new global property: 1.5!!
+    // someOtherObject.setDefaultValue = function () {
+    //
+    //     var someFunction = function () {
+    //             this.value = 1.5;    // (Attention! when invoked as a function, "this" refers to the global context!)
+    //         };
+    //
+    //     someFunction();
+    // };
+    // someOtherObject.setDefaultValue();
+    // debugConsole.writeln("someOtherObject.value: " + someOtherObject.value); // still 4.5!
+    // debugConsole.writeln("global value: " + value);                          // new global property: 1.5!!
 
     someOtherObject.setDefaultValue2 = function () {
         var that, someFunction2;
@@ -146,7 +116,7 @@ function functionAction() {
     debugConsole.writeln("global value: " + value);                          // global property is still 1.5
 
     /** Constructor Invocation Pattern */
-    SomeValue = function (aValue) {    // constructor function
+    const SomeValue = function (aValue) {    // constructor function
         this.value = aValue;
     };
 
@@ -154,8 +124,8 @@ function functionAction() {
         return this.value;
     };
 
-    value1 = new SomeValue("Hello");
-    value2 = new SomeValue("World");
+    const value1 = new SomeValue("Hello");
+    const value2 = new SomeValue("World");
     debugConsole.writeln("value1: " + value1.getValue());
     debugConsole.writeln("value2: " + value2.getValue());
 
@@ -163,11 +133,11 @@ function functionAction() {
     // each function has the "apply" method which can be used to invoke the function.
     // the first parameter is the object which will be passed to the function
     // as "this" parameter, the optional second parameter are the parameters passed to the function.
-    result = SomeValue.prototype.getValue.apply(value1);
-    debugConsole.writeln("value1 through apply(): " + result);
+    const result2 = SomeValue.prototype.getValue.apply(value1);
+    debugConsole.writeln("value1 through apply(): " + result2);
 
     /** The arguments parameter - allow access to all parameters */
-    calculateAvg = function() {
+    const calculateAvg = function() {
         var sum = 0, idx;
         for (idx = 0;  idx < arguments.length;  idx += 1) {
             sum += arguments[idx];
@@ -208,6 +178,23 @@ function functionAction() {
     };
 
     debugConsole.writeln(Math.avg(1, 3, 4, 5));
+
+    debugConsole.writeln("\nDefault parameters\n========================");
+    function sayHello(name="World") {
+        debugConsole.writeln(`Hello ${name}`)
+    }
+    sayHello();
+    sayHello("Moon");
+
+    debugConsole.writeln("\nArrow function\n========================");
+    const arrowFunc = name => `Hello ${name}`;
+    debugConsole.writeln(arrowFunc('Mars'));
+
+    const arrowFunc2 = (firstname, lastname) => ({
+            first: firstname,
+            last: lastname
+        });
+    debugConsole.writeln(arrowFunc2('Peter', 'Meier').first);
 }
 
 
@@ -442,6 +429,7 @@ function classSampleAction() {
 }
 
 document.querySelector('#vads').addEventListener('click', variablesAction);
+document.querySelector('#evads').addEventListener('click', enhancedVariablesAction);
 document.querySelector('#_clearButton').addEventListener('click', clearProxy);
 document.querySelector('#doa').addEventListener('click', dumpAction);
 document.querySelector('#foa').addEventListener('click', functionAction);
@@ -452,3 +440,5 @@ document.querySelector('#asa').addEventListener('click', arraySampleAction);
 document.querySelector('#rsa').addEventListener('click', regexpSampleAction);
 document.querySelector('#clsa').addEventListener('click', classSampleAction);
 document.querySelector('#jqs').addEventListener('click', jquerySampleAction);
+document.querySelector('#promise').addEventListener('click', promiseExample);
+document.querySelector('#async').addEventListener('click', asyncExample);

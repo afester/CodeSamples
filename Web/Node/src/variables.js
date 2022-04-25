@@ -5,9 +5,6 @@
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
 
-// ????????? How to properly do this?
-// import Immutable from './node_modules/immutable/dist/immutable.es.js';
-// import Immutable from './immutable';
 import Immutable from 'immutable';
 import {debugConsole} from "./tools";
 
@@ -41,4 +38,51 @@ export function variablesAction() {
   debugConsole.writeln("oddNumbers:" + oddNumbers);
 }
 
-// export {variablesAction}
+
+export function enhancedVariablesAction() {
+  debugConsole.writeln("Destructuring objects");
+
+  const address = {
+    firstname: 'Peter',
+    lastname: 'Shaw',
+    city: 'Rocky Beach'
+  }
+
+  const {firstname, lastname} = address;
+  debugConsole.writeln(`${firstname} ${lastname}`);
+
+  debugConsole.writeln("Destructuring arrays");
+  const animals = ["Horse", "Mouse", "Cat"];
+  debugConsole.writeln(animals);
+  const [firstAnimal] = animals;
+  debugConsole.writeln(firstAnimal);
+  const [, secondAnimal] = animals;
+  debugConsole.writeln(secondAnimal);
+
+  debugConsole.writeln("Spread operator");
+  const wildAnimals = ["Lion", "Tiger", "Leopard"];
+  const allAnimals = [...animals, ...wildAnimals];
+  debugConsole.writeln(allAnimals);
+
+  function sumValues(...args) {
+    let result = 0;
+    args.forEach(v => result = result + v);
+    return result;
+  }
+  debugConsole.writeln(sumValues(1, 2, 3, 4));
+}
+
+export function nonworking() {
+  const string = "Restaurants in Hanalei";
+  const urlFriendly = "";
+
+  for (var i = 0; i < string.length; i++) {
+    if (string[i] === " ") {
+      urlFriendly += "-";
+    } else {
+      urlFriendly += string[i];
+    }
+  }
+
+  console.log(urlFriendly); // "Restaurants-in-Hanalei"
+}
