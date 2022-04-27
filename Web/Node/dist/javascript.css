@@ -38,6 +38,11 @@ noscript div {
     /*border: 2px solid red;*/
 }
 
+.vbox-content {
+    padding: 20px;
+    /*border: 2px solid red;*/
+}
+
 textarea {
     background-color: black;
     color: green;
@@ -60,4 +65,18 @@ button {
 button:HOVER {
     background-image: none;
     background-color: #fff3e2;
+}
+
+@font-face {
+  font-family: myFirstFont;
+  src: url("LCD2B.woff");
+}
+
+
+.lcd-clock {
+    font-family: myFirstFont, serif;
+    font-size: 32pt;
+    padding: 5px;
+    background-color: #bdbd83;
+    color: #2a2a2a;
 }

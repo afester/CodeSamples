@@ -56,12 +56,26 @@ class DebugConsole {
         this.appendText("\n");
     }
 
+    dumpObjectFlat(obj) {
+        for (let propName of Object.getOwnPropertyNames(obj)) {
+            this.writeln(propName + " (" + typeof obj[propName] + ") = " + obj[propName]);
+
+            // if (obj[name] !== null && typeof obj[name] === 'object') {
+            //     dumpObjectRec(indent + 2, name, obj[name]);
+            // }
+        }
+    }
+
     clear() {
         this.textNode.data = "";
     }
 }
 
-const debugConsole = new DebugConsole();
+let debugConsole = undefined;
+
+export function initializeDebugConsole() {
+    debugConsole = new DebugConsole();
+}
 
 function clearProxy() {
     debugConsole.clear();

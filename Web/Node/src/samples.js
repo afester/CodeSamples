@@ -7,6 +7,7 @@
 
 import {debugConsole, dumpObject} from "./tools";
 import $ from "jquery";
+import {setIn} from "immutable";
 
 export function jquerySampleAction() {
   debugConsole.clear();
@@ -51,7 +52,7 @@ function createRow(columns) {
   colKeys.forEach(key => {
     const cell1 = document.createElement("td");
     tr.appendChild(cell1);
-    cell1.innerText = columns[key];// columns.firstname;
+    cell1.innerText = columns[key];
   });
 
   return tr;
@@ -100,4 +101,128 @@ export function asyncExample() {
   //     .then(xyz);   // NOTE: USING A METHOD REFERENCE DOES NOT WORK HERE!
 
   debugConsole.writeln("Async REST Example DONE.");
+}
+
+
+export function functionalExamples() {
+  debugConsole.writeln("\nFunctional programming examples");
+
+  debugConsole.writeln("\nfilter\n===========");
+  const data = ['Peter', 'Michael', 'John', 'Joane'];
+  const namesWithJ = data.filter(e => e.startsWith('J'));
+  debugConsole.writeln(data + " => " + namesWithJ);
+
+  debugConsole.writeln("\nmap\n===========");
+  const newData = data.map((e, idx) => idx + e);
+  debugConsole.writeln(data + " => " + newData);
+
+  debugConsole.writeln("\nreduce\n===========");
+  const reduced = data.reduce( (current, element, idx) => { current.unshift(element); return current; }, new Array());
+  debugConsole.writeln(data + " => " + reduced);
+
+  debugConsole.writeln("\nrecursion\n===========");
+  const dan = {
+    type: "person",
+    data: {
+      gender: "male",
+      info: {
+        id: 22,
+        fullname: {
+          first: "Dan",
+          last: "Deacon"
+        }
+      }
+    }
+  };
+
+  // braindead solution (executes a depth first search over the complete data structure)
+//   function deepPick2(searchPath, obj, currentPath) {
+// //  const deepPick2 = (searchPath, obj, currentPath) => {
+//     for (let key of Object.keys(obj)) {
+//       const value = obj[key];
+//
+//       let nextPath = "";
+//       if (currentPath.length > 0) {
+//         nextPath = currentPath + "." + key;
+//       } else {
+//         nextPath = key;
+//       }
+//
+//       if (typeof(value) === "object") {
+//         const result = deepPick2(searchPath, value, nextPath);
+//         if (result !== undefined) {
+//           return result;
+//         }
+//       } else {
+//         if (nextPath === searchPath) {
+//           return value;
+//         }
+//       }
+//     }
+//
+//     return undefined;
+//   }
+//
+//   const deepPick = (search, obj) => {
+//     return deepPick2(search, obj, "");
+//   }
+
+  // Optimized approach from the book:
+  // (traverses the given path until a value is found)
+  const deepPick = (fields, object = {}) => {
+    const [first, ...remaining] = fields.split(".");
+
+    return remaining.length
+      ? deepPick(remaining.join("."), object[first])
+      : object[first];
+  };
+
+  let result = deepPick("type", dan); // "person"
+  debugConsole.writeln("RESULT: " + result);
+  result = deepPick("data.info.fullname.first", dan); // "Dan"
+  debugConsole.writeln("RESULT: " + result);
+  result = deepPick("data.info.fullname.first.second", dan); // "Dan"
+  debugConsole.writeln("RESULT: " + result);
+}
+
+
+export function initializeClock() {
+  const getCurrentTime = () => new Date();
+  const serializeClockTime = date => ({
+    hours: date.getHours(),
+    minutes: 4, // date.getMinutes(),
+    seconds: date.getSeconds()
+  });
+
+  const prependZero = key => clockTime => ({
+    ...clockTime,
+        [key]: clockTime[key] < 10 ? "0" + clockTime[key] : clockTime[key]
+    });
+
+  const compose = (...fns) => arg =>
+    fns.reduce((composed, f) => f(composed), arg);
+
+
+  // const doubleDigits = dateObj => {
+  //   return compose(prependZero("hours"),
+  //                  prependZero("minutes"),
+  //                  prependZero("seconds"))(dateObj);
+  // };
+  const doubleDigits = dateObj =>
+    compose(prependZero("hours"),
+            prependZero("minutes"),
+            prependZero("seconds"))(dateObj);
+  const formatTime = dateObj => (dateObj.hours + ":" + dateObj.minutes + ":" + dateObj.seconds);
+
+  const pipeline = compose(
+      getCurrentTime,
+      serializeClockTime,
+      doubleDigits,
+      formatTime);
+
+  const spanElement = $("#clock-text");
+  spanElement.text(pipeline());
+  setInterval(() => {
+    spanElement.text(pipeline());
+  }, 1000);
 }

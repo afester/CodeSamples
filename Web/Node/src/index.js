@@ -6,8 +6,9 @@
  */
 
 import {variablesAction, enhancedVariablesAction} from "./variables";
-import {debugConsole, clearProxy, dumpObject} from "./tools";
-import {asyncExample, jquerySampleAction, promiseExample} from "./samples";
+import {debugConsole, initializeDebugConsole, clearProxy, dumpObject} from "./tools";
+import {asyncExample, functionalExamples, jquerySampleAction, promiseExample, initializeClock} from "./samples";
+import {reactMain} from "./reactSamples";
 
 var myPoint, value;
 
@@ -190,6 +191,7 @@ function functionAction() {
     const arrowFunc = name => `Hello ${name}`;
     debugConsole.writeln(arrowFunc('Mars'));
 
+    // Advanced syntax: use parantheses when returning object literals
     const arrowFunc2 = (firstname, lastname) => ({
             first: firstname,
             last: lastname
@@ -428,17 +430,26 @@ function classSampleAction() {
 	debugConsole.writeln("Point:" + p.toString());
 }
 
-document.querySelector('#vads').addEventListener('click', variablesAction);
-document.querySelector('#evads').addEventListener('click', enhancedVariablesAction);
-document.querySelector('#_clearButton').addEventListener('click', clearProxy);
-document.querySelector('#doa').addEventListener('click', dumpAction);
-document.querySelector('#foa').addEventListener('click', functionAction);
-document.querySelector('#exa').addEventListener('click', exceptionAction);
-document.querySelector('#tda').addEventListener('click', traverseDOMAction);
-document.querySelector('#csa').addEventListener('click', colorSampleAction);
-document.querySelector('#asa').addEventListener('click', arraySampleAction);
-document.querySelector('#rsa').addEventListener('click', regexpSampleAction);
-document.querySelector('#clsa').addEventListener('click', classSampleAction);
-document.querySelector('#jqs').addEventListener('click', jquerySampleAction);
-document.querySelector('#promise').addEventListener('click', promiseExample);
-document.querySelector('#async').addEventListener('click', asyncExample);
+function _initializeSamples() {
+    initializeDebugConsole();
+    document.querySelector('#vads').addEventListener('click', variablesAction);
+    document.querySelector('#evads').addEventListener('click', enhancedVariablesAction);
+    document.querySelector('#_clearButton').addEventListener('click', clearProxy);
+    document.querySelector('#doa').addEventListener('click', dumpAction);
+    document.querySelector('#foa').addEventListener('click', functionAction);
+    document.querySelector('#exa').addEventListener('click', exceptionAction);
+    document.querySelector('#tda').addEventListener('click', traverseDOMAction);
+    document.querySelector('#csa').addEventListener('click', colorSampleAction);
+    document.querySelector('#asa').addEventListener('click', arraySampleAction);
+    document.querySelector('#rsa').addEventListener('click', regexpSampleAction);
+    document.querySelector('#clsa').addEventListener('click', classSampleAction);
+    document.querySelector('#jqs').addEventListener('click', jquerySampleAction);
+    document.querySelector('#promise').addEventListener('click', promiseExample);
+    document.querySelector('#async').addEventListener('click', asyncExample);
+    document.querySelector('#fpgm').addEventListener('click', functionalExamples);
+
+    initializeClock();
+}
+
+// _initializeSamples();
+

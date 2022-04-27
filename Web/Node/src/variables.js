@@ -45,7 +45,12 @@ export function enhancedVariablesAction() {
   const address = {
     firstname: 'Peter',
     lastname: 'Shaw',
-    city: 'Rocky Beach'
+    city: 'Rocky Beach',
+    age: 18,
+    data: {
+      a: 4,
+      b: 5,
+    }
   }
 
   const {firstname, lastname} = address;
@@ -70,6 +75,26 @@ export function enhancedVariablesAction() {
     return result;
   }
   debugConsole.writeln(sumValues(1, 2, 3, 4));
+
+  debugConsole.writeln("\nfor-loops and Object methods\n------------------------------------");
+  for (let x in address) {
+    debugConsole.writeln(x);
+  }
+  debugConsole.writeln("-------");
+
+  // for (let x of address) {   // NOT iterable!
+  //   debugConsole.writeln(x);
+  // }
+  // debugConsole.writeln("-------");
+  for (let x of Object.keys(address)) { // NOTE:Object.keys() returns an array, hence need to use "of" to get the array elements
+                                        // ("in" would iterate over the array keys which is 0, 1, 2, ...)
+    debugConsole.writeln(x);
+  }
+  debugConsole.writeln("-------");
+  for (let x of Object.getOwnPropertyNames(address)) {
+    debugConsole.writeln(x);
+  }
+  debugConsole.writeln("-------");
 }
 
 export function nonworking() {
