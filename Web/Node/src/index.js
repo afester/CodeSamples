@@ -8,7 +8,6 @@
 import {variablesAction, enhancedVariablesAction} from "./variables";
 import {debugConsole, initializeDebugConsole, clearProxy, dumpObject} from "./tools";
 import {asyncExample, functionalExamples, jquerySampleAction, promiseExample, initializeClock} from "./samples";
-import {reactMain} from "./reactSamples";
 
 var myPoint, value;
 
@@ -380,6 +379,10 @@ function arraySampleAction() {
     debugConsole.writeln('\narray.splice()\n=======================================================');
     array4.splice(2, 2, 'Moon');
     debugConsole.writeln('   array4: ' + array4);
+
+    debugConsole.writeln('\narray.destructuring()\n=======================================================');
+    const [,,destruct] = array4;
+    debugConsole.writeln('   destruct: ' + destruct);
 }
 
 
@@ -451,5 +454,4 @@ function _initializeSamples() {
     initializeClock();
 }
 
-// _initializeSamples();
-
+_initializeSamples();

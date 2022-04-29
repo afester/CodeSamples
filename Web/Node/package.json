@@ -4,7 +4,8 @@
   "description": "Sample Node project",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack -w"
   },
   "author": "Andreas",
   "license": "ISC",
@@ -12,9 +13,17 @@
     "express": "^4.17.3",
     "immutable": "^4.0.0",
     "jquery": "^3.6.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
+    "react-icons": "^4.3.1",
+    "serve": "^13.0.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.17.9",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-react": "^7.16.7",
+    "babel-loader": "^8.2.5",
     "webpack": "^5.72.0",
     "webpack-cli": "^4.9.2"
   }

@@ -58,7 +58,7 @@ function Receipe(props) {
     );
 }
 
-function main() {
+function reactSampleMain() {
     const receipeViews = getReceipes().map(r => React.createElement(Receipe, {receipe: r} ));
     ReactDOM.render(
         receipeViews,
@@ -66,4 +66,4 @@ function main() {
     );
 }
 
-main();
+// reactSampleMain();

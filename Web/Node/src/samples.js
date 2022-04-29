@@ -190,7 +190,7 @@ export function initializeClock() {
   const getCurrentTime = () => new Date();
   const serializeClockTime = date => ({
     hours: date.getHours(),
-    minutes: 4, // date.getMinutes(),
+    minutes: date.getMinutes(),
     seconds: date.getSeconds()
   });
 

@@ -1,4 +1,8 @@
 
+import React from "react";
+import {createRoot} from "react-dom/client";
+import StarRating from "./StarRating";
+
 function getReceipes() {
     return [
         {
@@ -17,7 +21,7 @@ function getReceipes() {
         {
         title: "Chicken Noodle Soup",
         ingredients: [
-            {amount: 2, unit: "lb", ingredient: "salmon"},
+            {amount: 2, unit: "lb", ingredient: "Salmon"},
             {amount: 5, unit: "sprigs", ingredient: "fresh rosemary"},
             {amount: 2, unit: "tablespoons", ingredient: "olive oil"},
             {amount: 2, unit: "small", ingredient: "Lemons"},
@@ -41,6 +45,11 @@ function IngredientsList(props) {
 function Receipe({receipe}) {
     return <div>
              <h1>{receipe.title}</h1>
+             <p>Rating:</p>
+             <StarRating totalStars={10}
+                         style={{// backgroundColor: 'gray',
+                                 selectedColor: 'orange',
+                                 unselectedColor: 'lightgray'}} />
              <IngredientsList items={receipe.ingredients} />
              <div>{receipe.instructions}</div>
            </div>;
@@ -53,10 +62,9 @@ function ReceipeList(props) {
 }
 
 function main() {
-    ReactDOM.render(
-        <ReceipeList items={getReceipes()} />,
-        document.getElementById("root")
-    );
+    const container = document.getElementById('root');
+    const root = createRoot(container);
+    root.render(<ReceipeList items={getReceipes()} />);
 }
 
 main();

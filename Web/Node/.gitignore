@@ -1,3 +1,4 @@
 .idea
 node_modules
-dist/samples-bundle.js
+dist/*.bundle.js
+dist/*.bundle.js.map
