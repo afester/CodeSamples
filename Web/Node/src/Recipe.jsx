@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, {useState} from "react";
 import {createRoot} from "react-dom/client";
 import StarRating from "./StarRating";
 import recipesData from "./recipes.json";
@@ -33,9 +32,16 @@ function Receipe({recipe, onRemove = f => f}) {
            </div>;
 }
 
-function ReceipeList({items, onRemove = f => f}) {
+function ReceipeList({items}) {
+    const  [receipes, setReceipes] = useState(items)
+
     return <div className="recipes">
-               {items.map((e, idx) => <Receipe key={idx} recipe={e} onRemove={onRemove}/>)}
+               {receipes.map((e, idx) => <Receipe key={idx} recipe={e} onRemove={rId =>
+                        {
+                            const newItems = receipes.filter(receipe => receipe.id !== rId);
+                            setReceipes(newItems);
+                        }
+                    }/>)}
            </div>;
 }
 
@@ -43,10 +49,14 @@ ReceipeList.propTypes = {
     xyz: PropTypes.string
 }
 
+
+
+
+
 function main() {
     const container = document.getElementById('root');
     const root = createRoot(container);
-    root.render(<ReceipeList items={recipesData} onRemove={id => alert("REMOVE: " + id)} />);
+    root.render(<ReceipeList items={recipesData} />);
 }
 
 main();
