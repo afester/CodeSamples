@@ -226,3 +226,19 @@ export function initializeClock() {
     spanElement.text(pipeline());
   }, 1000);
 }
+
+
+function* primeNumbers() {
+  const result = [1, 3, 5, 7, 11, 13, 17, 23];
+  for (let x of result) {
+    yield x;
+  }
+}
+
+export function yieldExample() {
+  debugConsole.writeln("Generator function Example\n=========================================");
+
+  for (let x of primeNumbers()) {
+    debugConsole.writeln(`Value: ${x}`);
+  }
+}

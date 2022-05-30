@@ -1,0 +1,30 @@
+[
+    {
+    "id": "R1",
+    "title": "Baked Salmon",
+    "rating": 4,
+    "ingredients": [
+        {"amount": 2, "unit": "lb", "ingredient": "Salmon"},
+        {"amount": 5, "unit": "sprigs", "ingredient": "fresh Rosemary"},
+        {"amount": 2, "unit": "tablespoons", "ingredient": "Olive oil"},
+        {"amount": 2, "unit": "small", "ingredient": "lemons"},
+        {"amount": 1, "unit": "teaspoon", "ingredient": "kosher salt"},
+        {"amount": 4, "unit": "cloves of", "ingredient": "chopped garlic"}
+    ],
+    "instructions": "Preheat the oven to 375 degrees. Lightly coat aluminum foil with oil. Place salmon on foil. Cover with rosemary, sliced lemons, chopped garlic. Bake for 15-20 minutes until cooked through. Remove from oven."
+    },
+    {
+    "id": "R2",
+    "title": "Chicken Noodle Soup",
+     "rating": 2,
+    "ingredients": [
+        {"amount": 2, "unit": "lb", "ingredient": "Salmon"},
+        {"amount": 5, "unit": "sprigs", "ingredient": "fresh rosemary"},
+        {"amount": 2, "unit": "tablespoons", "ingredient": "olive oil"},
+        {"amount": 2, "unit": "small", "ingredient": "Lemons"},
+        {"amount": 1, "unit": "teaspoon", "ingredient": "kosher Salt"},
+        {"amount": 4, "unit": "cloves of", "ingredient": "chopped garlic"}
+    ],
+    "instructions": "Chop and saute onion"
+    }
+]

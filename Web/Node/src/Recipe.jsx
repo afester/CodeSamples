@@ -2,36 +2,9 @@
 import React from "react";
 import {createRoot} from "react-dom/client";
 import StarRating from "./StarRating";
-
-function getReceipes() {
-    return [
-        {
-        title: "Baked Salmon",
-        ingredients: [
-            {amount: 2, unit: "lb", ingredient: "Salmon"},
-            {amount: 5, unit: "sprigs", ingredient: "fresh Rosemary"},
-            {amount: 2, unit: "tablespoons", ingredient: "Olive oil"},
-            {amount: 2, unit: "small", ingredient: "lemons"},
-            {amount: 1, unit: "teaspoon", ingredient: "kosher salt"},
-            {amount: 4, unit: "cloves of", ingredient: "chopped garlic"},
-        ],
-        instructions: "Preheat the oven to 375 degrees. Lightly coat aluminum foil with oil. Place salmon on foil. " +
-            "Cover with rosemary, sliced lemons, chopped garlic. Bake for 15-20 minutes until cooked through. Remove from oven.",
-        },
-        {
-        title: "Chicken Noodle Soup",
-        ingredients: [
-            {amount: 2, unit: "lb", ingredient: "Salmon"},
-            {amount: 5, unit: "sprigs", ingredient: "fresh rosemary"},
-            {amount: 2, unit: "tablespoons", ingredient: "olive oil"},
-            {amount: 2, unit: "small", ingredient: "Lemons"},
-            {amount: 1, unit: "teaspoon", ingredient: "kosher Salt"},
-            {amount: 4, unit: "cloves of", ingredient: "chopped garlic"},
-        ],
-        instructions: "Chop and saute onion",
-        },
-    ]
-}
+import recipesData from "./recipes.json";
+import { FaTrash } from "react-icons/fa";
+import PropTypes from 'prop-types';
 
 function IngredientsList(props) {
     return <>
@@ -42,29 +15,38 @@ function IngredientsList(props) {
            </>;
 }
 
-function Receipe({receipe}) {
+function Receipe({recipe, onRemove = f => f}) {
     return <div>
-             <h1>{receipe.title}</h1>
+             <h1>{recipe.title}
+             <button onClick={() => onRemove(recipe.id)}>
+                <FaTrash />
+             </button>
+             </h1>
              <p>Rating:</p>
-             <StarRating totalStars={10}
+              <StarRating rating={recipe.rating}
+                         totalStars={5}
                          style={{// backgroundColor: 'gray',
                                  selectedColor: 'orange',
                                  unselectedColor: 'lightgray'}} />
-             <IngredientsList items={receipe.ingredients} />
-             <div>{receipe.instructions}</div>
+             <IngredientsList items={recipe.ingredients} />
+             <div>{recipe.instructions}</div>
            </div>;
 }
 
-function ReceipeList(props) {
-    return <div className="receipes">
-               {props.items.map((e, idx) => <Receipe key={idx} receipe={e} />)}
+function ReceipeList({items, onRemove = f => f}) {
+    return <div className="recipes">
+               {items.map((e, idx) => <Receipe key={idx} recipe={e} onRemove={onRemove}/>)}
            </div>;
+}
+
+ReceipeList.propTypes = {
+    xyz: PropTypes.string
 }
 
 function main() {
     const container = document.getElementById('root');
     const root = createRoot(container);
-    root.render(<ReceipeList items={getReceipes()} />);
+    root.render(<ReceipeList items={recipesData} onRemove={id => alert("REMOVE: " + id)} />);
 }
 
 main();

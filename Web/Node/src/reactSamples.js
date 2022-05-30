@@ -48,13 +48,13 @@ function Receipe(props) {
 
         React.createElement(
         "h1",
-        null, props.receipe.title),
+        null, props.recipe.title),
 
-        React.createElement(IngredientsList, { items: props.receipe.ingredients }, null),
+        React.createElement(IngredientsList, { items: props.recipe.ingredients }, null),
 
         React.createElement(
         "div",
-        null, props.receipe.instructions),
+        null, props.recipe.instructions),
     );
 }
 

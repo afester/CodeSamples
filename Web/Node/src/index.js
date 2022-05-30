@@ -7,7 +7,8 @@
 
 import {variablesAction, enhancedVariablesAction} from "./variables";
 import {debugConsole, initializeDebugConsole, clearProxy, dumpObject} from "./tools";
-import {asyncExample, functionalExamples, jquerySampleAction, promiseExample, initializeClock} from "./samples";
+import {asyncExample, functionalExamples, jquerySampleAction, promiseExample, initializeClock,
+        yieldExample} from "./samples";
 
 var myPoint, value;
 
@@ -30,7 +31,7 @@ const Point = {
             }
     };
 
-export function dumpAction() {
+function dumpAction() {
     debugConsole.appendText("Hello World!!\n");
 
     myPoint = Object.create(Point);
@@ -52,6 +53,53 @@ export function dumpAction() {
     dumpObject('Object', Object);
     dumpObject('Number', Object);
     dumpObject('String', Object);
+}
+
+function objectAction() {
+    debugConsole.writeln("JavaScript objects\n====================");
+
+    const obj1 = {}
+    dumpObject('obj1', obj1);
+
+    const obj2 = { name: "John", age: 42}
+    dumpObject('obj2', obj2);
+
+    const myFunc = function(x) {return 2*x;}
+
+    const obj3_1 = {id: 1234, value: 'Hello'};
+    const obj3_2 = {id: 2345, value: 'World'};
+    const obj3_3 = [1, 3, 5, 7, 11, 13, 17, 23];
+    const obj3 = {
+        obj3_1,
+        obj3_2,
+        obj3_3,
+        myFunc
+    };
+    dumpObject('obj3', obj3);
+
+    const obj4 = {
+            first: {
+                name: "sun",
+                diameter: 1234567
+            },
+            second: {
+                name: "moon",
+                diameter: 3000
+            }
+    };
+    dumpObject('obj4', obj4);
+
+    const obj5 = {
+            1: {
+                "name": "sun",
+                diameter: 1234567
+            },
+            2: {
+                name: "moon",
+                "diameter": 3000
+            }
+    };
+    dumpObject('obj5', obj5);
 }
 
 
@@ -138,13 +186,14 @@ function functionAction() {
 
     /** The arguments parameter - allow access to all parameters */
     const calculateAvg = function() {
-        var sum = 0, idx;
+        debugConsole.writeln("Is arguments an array?" + Array.isArray(arguments));
+        let sum = 0, idx;
         for (idx = 0;  idx < arguments.length;  idx += 1) {
             sum += arguments[idx];
         }
         return sum / arguments.length;
     };
-    debugConsole.writeln("Average: " + calculateAvg(3, 4));
+    debugConsole.writeln("Average: " + calculateAvg(3, 4, 5, 6));
 
     /** ********************************************************* */
 
@@ -196,6 +245,25 @@ function functionAction() {
             last: lastname
         });
     debugConsole.writeln(arrowFunc2('Peter', 'Meier').first);
+
+    const values = [11, 13, 17];
+    function test (alfa, bravo, charlie) {
+        // debugConsole.writeln(alfa);
+        // debugConsole.writeln(bravo);
+        // debugConsole.writeln(charlie);
+
+        // [alfa, bravo, charlie].forEach(function (value) {
+        //     debugConsole.writeln(value);
+        // });
+
+        [alfa, bravo, charlie].forEach(value => debugConsole.writeln(value));
+    }
+    // test.apply(null, values);
+    test(...values);
+
+    const setValues = new Set([11, 13, 17]);
+    // test.apply(null, setValues);   // does not even work!
+    test(...setValues);
 }
 
 
@@ -426,11 +494,24 @@ class SampleClass {
 }
 
 
+// Constructor function
+function SampleClass2(name, age) {
+    this['name'] = name;
+    this['age'] = age;
+}
+
+SampleClass2.prototype.dumpAge = function() {
+    debugConsole.writeln(`Name: ${this.name}, Age: ${this.age}`);
+}
+
 function classSampleAction() {
     debugConsole.writeln("class Sample");
 
-	var p = new SampleClass(45, 98);
+	const p = new SampleClass(45, 98);
 	debugConsole.writeln("Point:" + p.toString());
+
+    const x = new SampleClass2('Peter', 43);
+    x.dumpAge();
 }
 
 function _initializeSamples() {
@@ -439,6 +520,7 @@ function _initializeSamples() {
     document.querySelector('#evads').addEventListener('click', enhancedVariablesAction);
     document.querySelector('#_clearButton').addEventListener('click', clearProxy);
     document.querySelector('#doa').addEventListener('click', dumpAction);
+    document.querySelector('#joa').addEventListener('click', objectAction);
     document.querySelector('#foa').addEventListener('click', functionAction);
     document.querySelector('#exa').addEventListener('click', exceptionAction);
     document.querySelector('#tda').addEventListener('click', traverseDOMAction);
@@ -450,6 +532,7 @@ function _initializeSamples() {
     document.querySelector('#promise').addEventListener('click', promiseExample);
     document.querySelector('#async').addEventListener('click', asyncExample);
     document.querySelector('#fpgm').addEventListener('click', functionalExamples);
+    document.querySelector('#yield').addEventListener('click', yieldExample);
 
     initializeClock();
 }
