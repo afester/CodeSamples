@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import { FaStar } from "react-icons/fa";
 import PropTypes from "prop-types";
 
@@ -7,8 +7,9 @@ const Star = ({ selected = false, selectedColor="red", unselectedColor="gray", o
 );
 
 function StarRating({ rating = 0,
-                                     totalStars = 5,
-                                     style={}}) {
+                      onChange = f => f,
+                      totalStars = 5,
+                      style={}}) {
   const [currentRating, setRating] = useState(rating);
 
   // Remember: useEffect is called for EACH DOM update - if we simply set the initial rating again here,
@@ -20,7 +21,8 @@ function StarRating({ rating = 0,
   for (let idx = 0; idx < totalStars; idx++) {
     result[idx] = <Star key={idx}
                         selected={currentRating > idx}
-                        onSelect={() => setRating(idx + 1)}
+                        onSelect={() => {setRating(idx + 1);
+                                         onChange(idx + 1); } }
                         selectedColor={style.selectedColor}
                         unselectedColor={style.unselectedColor}/>;
   }

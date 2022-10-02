@@ -7,7 +7,6 @@
 
 import {debugConsole, dumpObject} from "./tools";
 import $ from "jquery";
-import {setIn} from "immutable";
 
 export function jquerySampleAction() {
   debugConsole.clear();
@@ -69,25 +68,26 @@ function updateDOM(data) {
 
 export function promiseExample() {
   debugConsole.writeln("\nPromise REST Example");
-  fetch("getPerson?id=1")
+  fetch("/api/v1/person/1")
       .then(res => res.json())
       .then(updateDOM);
   debugConsole.writeln("REST Example DONE.");
 }
 
-function xyz(data) {
-  debugConsole.writeln(data);
-}
+// function xyz(data) {
+//   debugConsole.writeln(data);
+// }
 
 export function asyncExample() {
   debugConsole.writeln("\nAsync REST Example");
 
   const getPersonData = async () => {
-    const res = await fetch("getPerson?id=2");
+    const res = await fetch("/api/v1/person/2");
     // const { json } = res.json();   // Does not work
     const json = await res.json();  // Works
 
     updateDOM(json);
+    debugConsole.writeln("Update DOM DONE.");
   };
 
   getPersonData();
@@ -117,7 +117,7 @@ export function functionalExamples() {
   debugConsole.writeln(data + " => " + newData);
 
   debugConsole.writeln("\nreduce\n===========");
-  const reduced = data.reduce( (current, element, idx) => { current.unshift(element); return current; }, new Array());
+  const reduced = data.reduce( (current, element, idx) => { current.unshift(element); return current; }, []);
   debugConsole.writeln(data + " => " + reduced);
 
   debugConsole.writeln("\nrecursion\n===========");

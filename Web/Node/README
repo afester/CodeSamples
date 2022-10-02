@@ -1,0 +1,12 @@
+Prepare:
+$ npm install
+
+Run dev UI server:
+$ npm start
+
+Run backend server:
+$ npm run backend
+NOTE: DID NOT WORK RELIABLY ESPECIALLY WHEN RESTARTING!
+
+Build:
+$ npm build

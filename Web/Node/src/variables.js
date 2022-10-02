@@ -99,7 +99,7 @@ export function enhancedVariablesAction() {
 
 export function nonworking() {
   const string = "Restaurants in Hanalei";
-  const urlFriendly = "";
+  let urlFriendly = "";
 
   for (var i = 0; i < string.length; i++) {
     if (string[i] === " ") {
