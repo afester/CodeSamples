@@ -1,0 +1,49 @@
+@CHARSET "ISO-8859-1";
+
+/**
+ * This work is licensed under the Creative Commons Attribution 3.0 Unported
+ * License. To view a copy of this license, visit
+ * http://creativecommons.org/licenses/by/3.0/ or send a letter to Creative
+ * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
+ */
+
+body {
+	background-color: #ffe9cf;
+	font: 10pt sans-serif;
+}
+
+.buttonClass {
+	background-color: limegreen;
+	border-color: green;
+	border-radius: 6px;
+	border-width: 1px;
+	padding: 4px 8px 4px 8px;
+}
+
+.appContainer {
+	display: flex;
+	flex-direction: column;
+}
+
+.contentBlock {
+}
+
+.recipeDialog {
+	background-color: #bdbd83;
+	padding: 0 8px 8px 8px;
+}
+
+.errorPanel {
+	float: left;
+	background-color: #efadad;
+	color: darkred;
+	padding: 10px;
+	font-weight: bold;
+}
+
+.errorButtonClass {
+	background-color: #f35f5f;
+	color: darkred;
+	border-radius: 16px;
+	margin: 5px;
+}

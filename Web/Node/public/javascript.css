@@ -1,0 +1,82 @@
+@CHARSET "ISO-8859-1";
+
+/**
+ * This work is licensed under the Creative Commons Attribution 3.0 Unported
+ * License. To view a copy of this license, visit
+ * http://creativecommons.org/licenses/by/3.0/ or send a letter to Creative
+ * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
+ */
+
+body {
+	background-color: #303030;
+	font: 10pt sans-serif;
+    color: white;
+}
+
+h1 {
+    color: white;
+    font-size: 14pt;
+}
+
+noscript div {
+	background-color: #ff0000;
+	font: bold 12pt sans-serif;
+	color: white;
+	padding: 4px;
+}
+
+.float-container {
+    display: flex;              /* !!!!! */
+    /*border: 3px solid #fff;*/
+    /*padding: 20px;*/
+}
+
+.float-content {
+    /*width: 50%;*/
+    float: left;
+    padding: 20px;
+    /*border: 2px solid red;*/
+}
+
+.vbox-content {
+    padding: 20px;
+    /*border: 2px solid red;*/
+}
+
+textarea {
+    background-color: black;
+    color: green;
+
+    border-style: inset;
+    border-width: 3px;
+}
+
+button {
+    background-image: -webkit-linear-gradient(#fff3e2 0%, #ffac38 100%);
+    background-image: -moz-linear-gradient(#fff3e2 0%, #ffac38 100%);
+
+    border-style: solid;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    border-color: orange;
+    border-width: 1px;
+}
+
+button:HOVER {
+    background-image: none;
+    background-color: #fff3e2;
+}
+
+@font-face {
+  font-family: myFirstFont;
+  src: url("LCD2B.woff");
+}
+
+
+.lcd-clock {
+    font-family: myFirstFont, serif;
+    font-size: 32pt;
+    padding: 5px;
+    background-color: #bdbd83;
+    color: #2a2a2a;
+}
