@@ -12,8 +12,8 @@ function dumpObjectRec(indent, objName, obj) {
 
     debugConsole.writeln("\n" + prefix + "Properties of " + typeof obj + " " + objName + ":\n" + prefix + "----------------------------");
 
-    for (let name in obj) {
-        debugConsole.writeln(prefix + "  " + name + " (" + typeof name + ") own property: " + obj.hasOwnProperty(name) + " = " + obj[name]);
+    for (let aName in obj) {
+        debugConsole.writeln(prefix + "  " + aName + " (" + typeof aName + ") own property: " + obj.hasOwnProperty(aName) + " = " + obj[aName]);
     }
 
     const ownProperties = Object.getOwnPropertyNames(obj);
@@ -21,11 +21,11 @@ function dumpObjectRec(indent, objName, obj) {
         debugConsole.writeln("\n" + prefix + "  Own properties:\n" + prefix + "  -------------------------");
 
         for (let idx in ownProperties) {
-            name = ownProperties[idx];
-            debugConsole.writeln(prefix + "  " + name + " (" + typeof obj[name] + ") = " + obj[name]);
+            let aName = ownProperties[idx];
+            debugConsole.writeln(prefix + "  " + aName + " (" + typeof obj[aName] + ") = " + obj[aName]);
 
-            if (obj[name] !== null && typeof obj[name] === 'object') {
-                dumpObjectRec(indent + 2, name, obj[name]);
+            if (obj[aName] !== null && typeof obj[aName] === 'object') {
+                dumpObjectRec(indent + 2, aName, obj[aName]);
             }
         }
     }
@@ -39,13 +39,17 @@ export function dumpObject(objName, obj) {
 class DebugConsole {
     constructor() {
         this.textArea = document.getElementById("_textArea");
-        this.textNode = document.createTextNode("JavaScript console activated.\n");
-        this.textArea.appendChild(this.textNode);
+        if (this.textArea) {
+            this.textNode = document.createTextNode("JavaScript console activated.\n");
+            this.textArea.appendChild(this.textNode);
+        }
     }
 
     appendText(text) {
-        this.textNode.data = this.textNode.data + text;
-        this.textArea.scrollTop = this.textArea.scrollHeight;
+        if (this.textArea) {
+            this.textNode.data = this.textNode.data + text;
+            this.textArea.scrollTop = this.textArea.scrollHeight;
+        }
     }
 
     writeln(text) {
@@ -57,12 +61,16 @@ class DebugConsole {
     }
 
     dumpObjectFlat(obj) {
-        for (let propName of Object.getOwnPropertyNames(obj)) {
-            this.writeln(propName + " (" + typeof obj[propName] + ") = " + obj[propName]);
+        if (obj === undefined) {
+            this.writeln("undefined");
+        } else {
+            for (let propName of Object.getOwnPropertyNames(obj)) {
+                this.writeln(propName + " (" + typeof obj[propName] + "): " + obj[propName]);
 
-            // if (obj[name] !== null && typeof obj[name] === 'object') {
-            //     dumpObjectRec(indent + 2, name, obj[name]);
-            // }
+                // if (obj[name] !== null && typeof obj[name] === 'object') {
+                //     dumpObjectRec(indent + 2, name, obj[name]);
+                // }
+            }
         }
     }
 
@@ -71,11 +79,7 @@ class DebugConsole {
     }
 }
 
-let debugConsole = undefined;
-
-export function initializeDebugConsole() {
-    debugConsole = new DebugConsole();
-}
+const debugConsole = new DebugConsole();
 
 function clearProxy() {
     debugConsole.clear();
