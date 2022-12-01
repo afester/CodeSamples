@@ -16,7 +16,7 @@ import re
 
 from random import choice, sample as getSample
 
-from PySide.QtCore import Qt
+from PySide2.QtCore import Qt
 
 from html.parser import HTMLParser
 
