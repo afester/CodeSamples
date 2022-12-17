@@ -105,12 +105,8 @@ class MathFormulaObject(CustomTextObject):
 
     def renderFormula(self):
         # Render the formula into a png image
-        import matplotlib.mathtext as mathtext
-        parser = mathtext.MathTextParser("Bitmap")
-        
-        # Note: the baseline returned by to_png() is not completely accurate!
-        # baseline =
-        parser.to_png('math.png', r'${}$'.format(self.formula), color='black', fontsize=12, dpi=100)
+        import matplotlib.mathtext
+        matplotlib.mathtext.math_to_image(r'${}$'.format(self.formula), 'math.png')
         self.image = QImage('math.png')
         # percent = baseline / self.image.height()
         # print("Image: w={}, h={}, baseline={} ({}%)".format(self.image.width(), self.image.height(), baseline, percent))
