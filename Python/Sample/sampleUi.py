@@ -3,9 +3,9 @@
 import sys
 import traceback
 
-from PySide.QtCore import Qt, qVersion
-from PySide.QtGui import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget
-from PySide.QtGui import QVBoxLayout, QGridLayout, QPalette, QTextCursor
+from PySide2.QtCore import Qt, qVersion
+from PySide2.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QVBoxLayout, QGridLayout
+from PySide2.QtGui import QPalette, QTextCursor
 
 import samplePackage.SampleModule               # Import module "SampleModule" in package "samplePackage"
                                                 # Use like "x = samplePackage.sampleModule.Examples()"

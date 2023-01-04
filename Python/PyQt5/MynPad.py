@@ -23,7 +23,8 @@ import io
 
 def main():
     print(__name__)
-#    lx = ListCommand()
+
+#    lx = ListCommand("MynPad", "")
 #    lx.main(args=None)
 
     # Note: Need a TextIOWrapper since streams are essentially byte-based since Python 3
