@@ -8,4 +8,4 @@
  */
 
 rootProject.name = 'JavaFXminimal'
-include('app')
+include('JavaFXminimalApp')
