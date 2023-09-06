@@ -37,20 +37,20 @@ To run the project, make sure that gradle is in your `PATH` (the project does no
 * Validate the Gradle project structure - it should look like
 
      JavaFXminimal
-       +---- app
+       +---- JavaFXminimalApp
 
 * Click "Finish"
 
 Eclipse will now mark the `Main.java` file with compilation errors. To fix this:
 
-* Mark the "app" Project and choose "Build Path" => "Configure Build Path..." from the context menu
+* Mark the "JavaFXminimalApp" Project and choose "Build Path" => "Configure Build Path..." from the context menu
 * Move the "Project and External Dependencies" library from "Classpath" to "Modulepath"
 
 The build errors should now disappear since Eclipse can now find the compile time dependencies.
 
 To run the application:
 * Open the package containing the `Main.java` file, select it, and choose "Run" => "Java Application" from the context menu 
-* You will see the folliwing error:
+* You will see the following error:
 
     java.lang.module.FindException: Module javafx.graphics not found, required by javafxminimal
 
