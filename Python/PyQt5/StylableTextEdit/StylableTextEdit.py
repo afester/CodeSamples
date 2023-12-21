@@ -528,7 +528,7 @@ class StylableTextEdit(QTextEdit):
         curList = cursor.currentList()
         if curList:
             fmt = curList.format()
-            styleSelector = fmt.property(QTextFormat.ObjectTypes.UserProperty)
+            styleSelector = fmt.property(QTextFormat.Property.UserProperty)
             indent = int(styleSelector[2])
             if indent > 1:
                 indent -= 1

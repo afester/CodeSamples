@@ -7,6 +7,8 @@
 
 import {clearProxy, debugConsole, dumpObject} from "./tools";
 import {enhancedVariablesAction, variablesAction} from "./variables";
+import {immutableAction} from "./immutableSample";
+
 import {
     asyncExample,
     functionalExamples,
@@ -655,6 +657,7 @@ export function _initializeSamples() {
     document.querySelector('#mies').addEventListener('click', importExportExample);
     document.querySelector('#yield').addEventListener('click', yieldExample);
     document.querySelector('#bnde').addEventListener('click', bndeObject.myMethod);
+    document.querySelector('#isam').addEventListener('click', immutableAction);
 
     initializeClock();
 }

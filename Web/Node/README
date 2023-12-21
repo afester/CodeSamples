@@ -1,12 +1,14 @@
 Prepare:
 $ npm install
 
+Run backend server:
+If required: $ $PYTHON3_INST/Scripts/pip install pipenv
+$PYTHON3_INST/Scripts/pipenv shell
+$ cd src/backend
+$ python backend.py --port 4000
+
 Run dev UI server:
 $ npm start
-
-Run backend server:
-$ npm run backend
-NOTE: DID NOT WORK RELIABLY ESPECIALLY WHEN RESTARTING!
 
 Build:
 $ npm build
