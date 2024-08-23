@@ -13,7 +13,7 @@ import uuid
 from StylableTextEdit.StylableTextModel import Frame, Paragraph, TextFragment, DocumentFactory
 from model.XMLExporter import XMLExporter
 from model.XMLImporter import XMLImporter
-
+from git import Repo
 
 class LocalPage:
 
@@ -31,14 +31,18 @@ class LocalPage:
         self.links = []
         self.document = None
 
-    def getName(self):
-        """@return The page id (page name) of this page
+    def getName(self) -> str:
         """
+        :return: The page id (page name) of this page
+        """
+
         return self.pageId
 
     def getFilename(self):
-        """@return The file name for this page, like "Todo%20List.xml"
         """
+        :return: The file name for this page, like "Todo%20List.xml"
+        """
+
         return urllib.parse.quote(self.getName(), '') + '.xml'
 
     def getPageDir(self):
@@ -49,11 +53,20 @@ class LocalPage:
         pagePath = pagePath + '/' + pageIdx
         return pagePath
 
-    def getPagePath(self):
-        """@return The absolute path name to the page.xml file,
-                   like "c:\temp\testpad\T\Todo%20List.xml"
+    def get_page_path_relative(self) -> str:
         """
-        return self.getPageDir() + '/' + self.getFilename()
+        :return: The relative path name to the page.xml file, like `T\\Todo%20List.xml`
+        """
+
+        pageIdx = self.pageId[0].upper()
+        return os.path.join(pageIdx, self.getFilename())
+
+    def getPagePath(self) -> str:
+        """
+        :return: The absolute path name to the page.xml file, like `c:\\temp\\testpad\\T\\Todo%20List.xml`
+        """
+
+        return os.path.join(self.getPageDir(), self.getFilename())
 
     def load(self):
         pageFullPath = self.getPagePath()
@@ -110,6 +123,19 @@ class LocalPage:
 
     def getDocument(self):
         return self.document
+
+    def get_history(self) -> list[dict]:
+        repo_dir = self.notepad.getRootpath()
+        repo = Repo(repo_dir)
+
+        file_path = self.get_page_path_relative()
+        history = repo.iter_commits(all=True, paths=file_path)
+
+        page_history = [{"date": x.committed_datetime,
+                         "message": str(x.message).strip()}
+                        for x in history]
+
+        return page_history
 
 
 class DropboxPage(LocalPage):
