@@ -1,6 +1,8 @@
 cssutils
 cycler
 fonttools
+GitPython
+importlib_resources
 kiwisolver
 matplotlib
 numpy

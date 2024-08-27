@@ -8,7 +8,7 @@ import re
 
 import cssutils
 import data
-import pkg_resources
+import importlib_resources
 from PyQt6.QtCore import QVariant
 from PyQt6.QtGui import QTextFormat, QTextBlockFormat, QTextCharFormat, QTextListFormat, QFont, QColor
 
@@ -162,7 +162,9 @@ class FormatManager:
     def loadFormats(self):
         self.formats = {}
 
-        stylesCSS = pkg_resources.resource_string(data.__name__, 'styles.css')
+        ref = importlib_resources.files(data.__name__).joinpath('styles.css')
+        stylesCSS = ref.read_bytes()
+
         print("styles.css file: {}".format(stylesCSS))
         styleSheet = cssutils.parseString(stylesCSS)
 

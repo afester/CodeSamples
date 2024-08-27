@@ -46,7 +46,7 @@ class LocalPage:
         return urllib.parse.quote(self.getName(), '') + '.xml'
 
     def getPageDir(self):
-        """@return The directory for this page, like "c:\temp\testpad\T"
+        """@return The directory for this page, like "c:\\temp\\testpad\\T"
         """
         pagePath = self.notepad.getRootpath()
         pageIdx = self.pageId[0].upper()

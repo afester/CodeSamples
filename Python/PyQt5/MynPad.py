@@ -8,6 +8,9 @@ Created on Feb 13, 2015
 
 
 import sys
+
+import importlib_resources
+
 sys.path.insert(0, '/opt/pyqt53/site-packages')
 
 from PyQt6.QtWidgets import QApplication
@@ -18,7 +21,6 @@ import logging.config
 
 from ui.MainWindow import MainWindow
 import data
-import pkg_resources
 import io
 
 def main():
@@ -27,10 +29,7 @@ def main():
 #    lx = ListCommand("MynPad", "")
 #    lx.main(args=None)
 
-    # Note: Need a TextIOWrapper since streams are essentially byte-based since Python 3
-    # See also http://bugs.python.org/issue13518
-    loggingIni = pkg_resources.resource_stream(data.__name__, 'logging.ini')
-    loggingIni = io.TextIOWrapper(loggingIni, encoding='utf-8')
+    loggingIni = importlib_resources.files(data.__name__).joinpath('logging.ini')
     print("LOGGING ini file: {}".format(loggingIni))
 
     logging.config.fileConfig(loggingIni)
