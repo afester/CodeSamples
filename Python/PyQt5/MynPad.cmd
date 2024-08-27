@@ -1,4 +1,4 @@
 @echo off
 SETLOCAL
 
-Scripts\python -m MynPad
+runtime\Scripts\python -m MynPad
