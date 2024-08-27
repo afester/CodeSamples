@@ -153,6 +153,24 @@ class SearchWidget(QWidget):
             self.resultSelected.emit(pageId)
 
 
+class HistoryWidget(QListView):
+
+    def __init__(self, parent):
+        QListView.__init__(self, parent)
+
+        self.resultListModel = QStandardItemModel(self)
+        self.setModel(self.resultListModel)
+
+    def setContents(self, historyList : list[dict]):
+        self.resultListModel.clear()
+        for item in historyList:
+            commit_date = item['date'].strftime("%d.%m.%Y %H:%M:%S")
+            item_entry = f"{commit_date}: {item['message']}"
+            resultItem = QStandardItem(item_entry)
+            resultItem.setEditable(False)
+            self.resultListModel.appendRow(resultItem)
+
+
 class LinklistWidget(QListView):
     resultSelected = pyqtSignal(str)
 
@@ -250,10 +268,13 @@ class CentralWidget(QWidget):
         self.fromLinksWidget = LinklistWidget(self)
         self.fromLinksWidget.resultSelected.connect(self.navigateDirect)
 
+        self.historyWidget = HistoryWidget(self)
+
         self.listsWidget = QTabWidget(self)
         self.listsWidget.addTab(self.searchWidget, 'Search')
         self.listsWidget.addTab(self.toLinksWidget, 'Links to')
         self.listsWidget.addTab(self.fromLinksWidget, 'Links from')
+        self.listsWidget.addTab(self.historyWidget, 'History')
         ###############################################################################
 
         leftWidget = QSplitter(Qt.Orientation.Vertical, self)
@@ -307,6 +328,7 @@ class CentralWidget(QWidget):
         self.editorWidget.load(notepad, pageId)
 
         self.updateLinkLists(notepad, pageId)
+        self.updateHistoryList(notepad, pageId)
 
     def updateLinkLists(self, notepad, pageId):
 
@@ -315,6 +337,10 @@ class CentralWidget(QWidget):
 
         self.toLinksWidget.setContents(linksTo)
         self.fromLinksWidget.setContents(linksFrom)
+
+    def updateHistoryList(self, notepad, pageId):
+        pageHistory = notepad.get_page_history(pageId)
+        self.historyWidget.setContents(pageHistory)
 
     def tabSelected(self, index):
         if index == self.editTabIdx:

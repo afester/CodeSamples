@@ -24,17 +24,14 @@ class LocalNotepad:
         self.db = NotepadDB()
         self.db.openDatabase(self)
 
-
     def close(self):
         print('Closing {}'.format(self.name))
         self.db.closeDatabase()
-
 
     def getPage(self, pageId):
         result = LocalPage(self, pageId)
         result.load()
         return result
-
 
     def getAllPages(self):
         return self.db.getAllPages()
@@ -47,6 +44,10 @@ class LocalNotepad:
 
     def getParentPages(self, pageId):
         return self.db.getParentPages(pageId)
+
+    def get_page_history(self, pageId) -> list[dict]:
+        page = LocalPage(self, pageId)
+        return page.get_history()
 
     def getChildPagesWithHandle(self, pageId):
         return self.db.getChildPagesWithHandle(pageId)
@@ -65,10 +66,8 @@ class LocalNotepad:
     def getFormatManager(self):
         return self.formatManager
 
-
     def getRootpath(self):
         return self.rootPath
-
 
     def findPathToPage(self, pageId):
         '''Find the first path to a given page id.
@@ -76,7 +75,6 @@ class LocalNotepad:
         path = self.db.getPathToPage(pageId)
         path.insert(0, self.getName())
         return path
-
 
 
 class DropboxNotepad(LocalNotepad):

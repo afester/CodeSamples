@@ -196,31 +196,43 @@ INSERT INTO pageref VALUES(?, ?)'''
 
         self.conn.commit()
 
-    def _recFind(self, parentId, pageId):
+    def _recFind(self, parentId, pageId, result):
         childLinks = self.getChildPages(parentId)
         for link in childLinks:
-            self.path.append(link)
+            # If the child page is not yet in the path, continue with it as the parent page
+            # (Otherwise just continue with the next child)
+            if link not in result:
+                result.append(link)
 
-            if link == pageId:
-                self.found = True
-                return
+                if link == pageId:
+                    self.found = True
+                    return
 
-            self._recFind(link, pageId)
-            if self.found:
-                break
+                self._recFind(link, pageId, result)
 
-            self.path = self.path[:-1]
+                if self.found:
+                    break
+
+                result.pop()
+            else:
+                NotepadDB.LOG.info("NOTE: Recursion found ({} => {})".format(result, link))
 
     def getPathToPage(self, pageId):
+        """Returns a path to the given page. Multiple paths might exist, so this method
+           returns the first path found based on a depth first traversal.
+
+           :param pageId: The id of the page for which to find a path.
+           """
+
         # print('getPathToPage({})'.format(pageId))
 
-        self.path = []
+        result = []
         if pageId != 'Title page':
             self.found = False
-            self._recFind('Title page', pageId)
+            self._recFind('Title page', pageId, result)
 
-        # print('  => {}'.format(self.path))
-        return self.path
+        # print('  => {}'.format(result))
+        return result
 
 # TODO: move to unit tests #####################################################
 
