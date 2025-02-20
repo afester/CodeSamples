@@ -1,0 +1,12 @@
+[Unit]
+Description=Waits for the Apache Server startup complete
+Before=basic.target
+After=local-fs.target sysinit.target
+DefaultDependencies=no
+
+[Service]
+Type=simple
+ExecStart=/home/andreas/Projects/CodeSamples/Python/WaitService/wait4server.py
+
+[Install]
+WantedBy=basic.target
