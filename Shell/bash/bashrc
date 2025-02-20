@@ -40,29 +40,27 @@ export GRADLE_HOME=/opt/gradle-3.1
 
 export PATH=${JAVA_HOME}/bin:${GRADLE_HOME}/bin:${MVN_HOME}/bin:${ANDROID_SDK_HOME}/platform-tools:${PATH}
 
+locateTool() {
+    echo -n -e "$1:\t"
+    which $1
+    if [[ $? -ne 0 ]] ; then
+        echo "Not Found"
+    fi
+}
+
 echo
 echo ==========================================================================
-which mvn
-echo
-which java
-echo
-#which ant
-#echo
-#which bash
-#echo
-#which cmake
-#echo
-#which cl
-#echo
-#which qmake
-#echo
-which gradle
-echo
-#which nasm
-#echo
-#which hg
-#echo
-#which groovy
+locateTool mvn
+locateTool java
+locateTool ant
+locateTool bash
+locateTool cmake
+locateTool cl
+locateTool qmake
+locateTool gradle
+locateTool nasm
+locateTool hg
+locateTool groovy
 echo ==========================================================================
 
 alias hdump="hexdump -e '\"%08.8_ax: \" 8/1 \"%02X \" \"  \" 8/1 \"%02X \" \"  \" ' -e '\"|\" 16/1 \"%_p\"\"|\n\"'"
