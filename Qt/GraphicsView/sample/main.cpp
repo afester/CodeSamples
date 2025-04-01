@@ -6,6 +6,7 @@
  */
 
 #include <QAction>
+#include <QActionGroup>
 #include <QMenuBar>
 #include <QDockWidget>
 #include <QStatusBar>
@@ -343,7 +344,7 @@ for (int i = 0;  i < 10;  i++) {
 
 void MainWindow::doActionLoad(){
     GraphicsScene* scene = dynamic_cast<GraphicsScene*>(graphicsSheet->scene());
-    scene->loadFromFile("sample.drw");
+    scene->loadFromFile("C:\\Users\\afe\\Projects\\CodeSamples\\Qt\\GraphicsView\\sample.drw");
 }
 
 

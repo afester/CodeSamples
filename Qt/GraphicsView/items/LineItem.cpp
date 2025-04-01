@@ -14,7 +14,7 @@
 #include "Interactor.h"
 
 LineItem::LineItem() : QGraphicsLineItem(0) {
-    setAcceptHoverEvents(true); // TODO: Only necessary when the item is selected!
+    // setAcceptHoverEvents(true); // TODO: Only necessary when the item is selected!
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
     setFlag(QGraphicsItem::ItemClipsToShape, true);
@@ -26,7 +26,7 @@ LineItem::LineItem(const QPointF& pos1, const QPointF& pos2, QGraphicsItem * par
 
     setPos(pos1);
 
-    setAcceptHoverEvents(true); // TODO: Only necessary when the item is selected!
+    // setAcceptHoverEvents(true); // TODO: Only necessary when the item is selected!
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
     setFlag(QGraphicsItem::ItemClipsToShape, true);
@@ -119,6 +119,7 @@ void LineItem::moveHandle(AbstractEditHandle editHandle, const QPointF& scenePos
                     l.setP1(mapFromScene(P1));
                     l.setP2(mapFromScene(P2));
                     setLine(l);
+                    // setLine(scenePos.x(), scenePos.y(), 100, 100);
                 }
                 break;
 
@@ -200,7 +201,7 @@ void LineItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * styl
     // to avoid that QGraphicsLineItem::paint draws a strange border around the
     // line when it is selected (only on vertical and horizontal lines!)
     QStyleOptionGraphicsItem option2 = *style;
-    option2.state = 0;
+    option2.state = QStyle::State_None;
 
     QGraphicsLineItem::paint(painter, &option2, widget);
 }

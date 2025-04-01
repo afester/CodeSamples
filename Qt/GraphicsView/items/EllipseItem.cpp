@@ -567,7 +567,7 @@ void EllipseItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * s
     // reset the selected state when painting - this is a workaround
     // to avoid that QGraphicsEllipseItem::paint draws the selection rectangle
     QStyleOptionGraphicsItem option2 = *style;
-    option2.state = 0;
+    option2.state = QStyle::State_None;
     QGraphicsEllipseItem::paint(painter, &option2, widget);
 
 #if 0

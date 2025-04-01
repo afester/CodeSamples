@@ -254,7 +254,7 @@ void BezierItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * st
     // to avoid that QGraphicsBezierItem::paint draws a strange border around the
     // line when it is selected (only on vertical and horizontal lines!)
     QStyleOptionGraphicsItem option2 = *style;
-    option2.state = 0;
+    option2.state = QStyle::State_None;
 
     QGraphicsPathItem::paint(painter, &option2, widget);
 }

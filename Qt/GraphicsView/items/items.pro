@@ -48,5 +48,7 @@ win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../engine/release/ -le
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../engine/debug/ -lengine
 else:unix: LIBS += -L$$OUT_PWD/../engine/ -lengine
 
+DESTDIR = ..\sample\debug
+
 INCLUDEPATH += $$PWD/../engine
 DEPENDPATH += $$PWD/../engine

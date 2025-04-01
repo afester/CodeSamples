@@ -393,7 +393,7 @@ ObjectController::ObjectController(QWidget *parent)
     browser->setRootIsDecorated(false);
     d_ptr->m_browser = browser;
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setMargin(0);
+    layout->setContentsMargins(QMargins());
     layout->addWidget(d_ptr->m_browser);
 
     d_ptr->m_readOnlyManager = new QtVariantPropertyManager(this);

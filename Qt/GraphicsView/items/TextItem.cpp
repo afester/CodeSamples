@@ -28,7 +28,7 @@ public:
 
     void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = 0 ){
         QStyleOptionGraphicsItem option2 = *option;
-        option2.state = 0;
+        option2.state = QStyle::State_None;
         QGraphicsTextItem::paint(painter, &option2, widget);
     }
 

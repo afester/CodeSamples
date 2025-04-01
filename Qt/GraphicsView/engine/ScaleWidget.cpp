@@ -21,7 +21,7 @@ ScaleWidget::ScaleWidget(QWidget* parent, GraphicsSheet* view, Direction dir) :
     QPalette pal = palette();
     pal.setBrush(QPalette::Base, Qt::white);
     pal.setBrush(QPalette::Window, Qt::white);
-    pal.setColor(QPalette::Foreground, QColor(0x80, 0x80, 0x80));
+//    pal.setColor(QPalette::Foreground, QColor(0x80, 0x80, 0x80));
     setPalette(pal);
 }
 
@@ -49,7 +49,7 @@ qreal ScaleWidget::snapToTick(int pos) {
 
 void ScaleWidget::setPos(qreal pos) {
     positionIndicator = pos;
-    repaint();
+    // repaint();            // PERFORMANCE ISSUE!
 }
 
 

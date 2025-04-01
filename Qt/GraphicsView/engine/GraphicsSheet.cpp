@@ -262,7 +262,7 @@ void GraphicsSheet::setDirection(int idx) {
 
 QSize GraphicsSheet::sizeHint() const {
    // Default size calculation from QGraphicsSheet::sizeHint()
-   QSizeF baseSize = matrix().mapRect(sceneRect()).size();
+   QSizeF baseSize = transform().mapRect(sceneRect()).size();
    baseSize += QSizeF(frameWidth() * 2, frameWidth() * 2);
 
    // before rounding through toSize(), add 0.5 to make sure to round upwards

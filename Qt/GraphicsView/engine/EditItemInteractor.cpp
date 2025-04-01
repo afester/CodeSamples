@@ -101,13 +101,13 @@ void EditItemInteractor::mouseMoveEvent ( QMouseEvent * event ) {
 	    if (editHandle == 11) {  // TODO: enum/constant!!!
 	        event->ignore();
 	    } else {
-	        // Map the view mouse position into the corresponding scene coordinates
-	        QPointF scenePos = theView->mapToScene(event->pos());
+            // Map the view mouse position into the corresponding scene coordinates
+            QPointF scenePos = theView->mapToScene(event->pos());
 
-	        // consider the offset from the real drag point within the handle area
-	        scenePos += offset;
+            // consider the offset from the real drag point within the handle area
+            scenePos += offset;
 
-	        // snap the position to the defined snap points
+            // snap the position to the defined snap points
             QPointF snappedPos = theView->snap(scenePos);
 
             // move the handle to the new position

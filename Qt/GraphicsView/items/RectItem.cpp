@@ -601,6 +601,6 @@ void RectItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * styl
     // reset the selected state when painting - this is a workaround
     // to avoid that QGraphicsRectItem::paint draws the selection rectangle
     QStyleOptionGraphicsItem option2 = *style;
-    option2.state = 0;
+    option2.state = QStyle::State_None;
     QGraphicsRectItem::paint(painter, &option2, widget);
 }

@@ -5,13 +5,19 @@
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
 
-export default function DiagramArea() {
+import Box from "./Box";
+import Line from "./Line";
+
+export default function DiagramArea({width, height}) {
     return <div style={{"background": "white",
-                        "width": "800px",
-                        "height": "600px"}}>
-        <svg>
-            <rect x={20} y={20} width={50} height={50} fill={"green"}></rect>
-            <rect x={120} y={120} width={50} height={50} fill={"red"}></rect>
+                        "width": `${width}px`,
+                        "height": `${height}px`}}>
+        <svg width={width} height={height}>
+            <Box x={20} y={20} w={50} h={50} fillColor={"#fff1c1"} outlineColor={"#3d3d3d"}
+                 lines={["Hello", "World"]} />
+            <Box x={120} y={120} w={50} h={50} fillColor={"#fff1c1"} outlineColor={"#3d3d3d"}
+                 lines={["Hello", "World"]} />
+            <Line x1={70} y1={70} x2={120} y2={120} color={"blue"} />
         </svg>
     </div>;
 }
