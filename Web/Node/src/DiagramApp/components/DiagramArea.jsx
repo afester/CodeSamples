@@ -5,19 +5,48 @@
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
 
+import {FadeLoader} from "react-spinners";
 import Box from "./Box";
 import Line from "./Line";
+import { useDispatch } from "react-redux";
+import { loadDiagram } from "../actions";
 
-export default function DiagramArea({width, height}) {
-    return <div style={{"background": "white",
-                        "width": `${width}px`,
-                        "height": `${height}px`}}>
-        <svg width={width} height={height}>
-            <Box x={20} y={20} w={50} h={50} fillColor={"#fff1c1"} outlineColor={"#3d3d3d"}
-                 lines={["Hello", "World"]} />
-            <Box x={120} y={120} w={50} h={50} fillColor={"#fff1c1"} outlineColor={"#3d3d3d"}
-                 lines={["Hello", "World"]} />
-            <Line x1={70} y1={70} x2={120} y2={120} color={"blue"} />
-        </svg>
-    </div>;
+export default function DiagramArea({ width, height }) {
+    const dispatch = useDispatch();
+
+    dispatch(loadDiagram());
+
+    return (
+        <div
+            style={{
+                background: "white",
+                width: `${width}px`,
+                height: `${height}px`,
+            }}
+        >
+            <FadeLoader />
+
+    {/*//         <svg width={width} height={height}>*/}
+    {/*//             <Box*/}
+    {/*//                 x={20}*/}
+    {/*//                 y={20}*/}
+    {/*//                 w={50}*/}
+    {/*//                 h={50}*/}
+    {/*//                 fillColor={"#fff1c1"}*/}
+    {/*//                 outlineColor={"#3d3d3d"}*/}
+    {/*//                 lines={["Hello", "World"]}*/}
+    {/*//             />*/}
+    {/*//             <Box*/}
+    {/*//                 x={120}*/}
+    {/*//                 y={120}*/}
+    {/*//                 w={50}*/}
+    {/*//                 h={50}*/}
+    {/*//                 fillColor={"#fff1c1"}*/}
+    {/*//                 outlineColor={"#3d3d3d"}*/}
+    {/*//                 lines={["Hello", "World"]}*/}
+    {/*//             />*/}
+    {/*//             <Line x1={70} y1={70} x2={120} y2={120} color={"blue"} />*/}
+    {/*//         </svg>*/}
+        </div>
+    );
 }
