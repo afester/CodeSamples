@@ -9,3 +9,4 @@ Debug
 .objs
 hs_err_pid*.log
 .idea
+__pycache__
