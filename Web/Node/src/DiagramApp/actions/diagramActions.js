@@ -8,7 +8,13 @@
 import {ACTIONS} from '../constants';
 
 export function loadDiagram() {
-    return {type: ACTIONS.LOAD_DIAGRAM,
-            payload: {}
+    console.log("ACTION: loadDiagram()");
+    return {type: ACTIONS.LOAD_DIAGRAM};
+}
+
+export function selectNode(key, nodeData, selected, ctrlKey) {
+    console.log(`ACTION: selectNode(${key}, ${selected})`);
+    return {type: ACTIONS.SELECT_NODE,
+            payload: {key, nodeData, selected, ctrlKey}
     };
 }

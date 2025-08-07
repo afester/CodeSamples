@@ -6,7 +6,7 @@
  */
 import { useState } from "react";
 
-export default function Line({ x1, y1, x2, y2, color }) {
+export default function Line({ x1, y1, x2, y2, color, width }) {
     const [isSelected, setIsSelected] = useState(false);
 
     function lineClicked() {
@@ -19,7 +19,14 @@ export default function Line({ x1, y1, x2, y2, color }) {
     return (
         <>
             {/* Real (visible) line */}
-            <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} />
+            <line
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
+                stroke={color}
+                strokeWidth={width}
+            />
 
             {/* Selection Line to increase the selection area */}
             <line
