@@ -6,18 +6,28 @@
  */
 
 import React from "react";
-import { connect } from "react-redux";
-// TODO: Mode into separate file
+import {connect} from "react-redux";
+
+// TODO: Move into separate file
 const getSelectedNodes = (state) => {
     return state.rootReducer.get("diagramData").get("selectedNodes");
 };
 
-function PropertyPanel({fields, selectedNodes}) {
-    const fieldControls = selectedNodes && selectedNodes.size === 1 ? fields.map((v) => {
-        return <div>{JSON.stringify(v)}</div>
-    }) : null;
 
-    const nodeData = selectedNodes && selectedNodes.size === 1 ? selectedNodes : null;
+const getDiagramData = (state) => {
+    return state.rootReducer.get("diagramData");
+};
+
+function PropertyPanel({fields, selectedNodes, diagramData}) {
+
+    const fieldControls = selectedNodes && selectedNodes.size === 1 ?
+        fields.map((v) => {
+            return <div>{JSON.stringify(v)}</div>
+        }) : null;
+
+    const nodeData = selectedNodes && selectedNodes.size === 1
+        ? diagramData.get(selectedNodes.first())
+        : null;
 
     return (
         <div>
@@ -29,9 +39,9 @@ function PropertyPanel({fields, selectedNodes}) {
 }
 
 function mapStateToProps(state) {
-    const result = getSelectedNodes(state);
     return {
-        selectedNodes: result
+        selectedNodes: getSelectedNodes(state),
+        diagramData: getDiagramData(state)
     };
 }
 

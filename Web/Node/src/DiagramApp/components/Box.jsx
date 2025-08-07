@@ -5,8 +5,6 @@
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
 
-import { useState } from "react";
-
 export default function Box({
     x,
     y,
@@ -18,10 +16,7 @@ export default function Box({
     selectBox,
     isSelected
 }) {
-    // const [isSelected, setIsSelected] = useState(false);
-
     function boxClicked(e) {
-        // setIsSelected(!isSelected);
         selectBox(!isSelected, e.ctrlKey);
     }
 

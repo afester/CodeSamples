@@ -11,7 +11,7 @@ import PropertyPanel from "./PropertyPanel";
 import Immutable from "immutable";
 
 export default function DiagramApp() {
-    const values = Immutable.fromJS([
+    const fields = Immutable.fromJS([
         { type: "bool", label: "Checkbox", value: true },
         { type: "int", label: "Number", value: 4 },
         { type: "float", label: "Float", value: 3.14 },
@@ -24,7 +24,7 @@ export default function DiagramApp() {
                 <DiagramArea width={800} height={600} />
             </div>
             <div style={{ background: "lightgray" }}>
-                <PropertyPanel fields={values} />
+                <PropertyPanel fields={fields} />
             </div>
         </div>
     );

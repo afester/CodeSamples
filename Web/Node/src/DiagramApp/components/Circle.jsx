@@ -5,8 +5,6 @@
  * Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
  */
 
-import { useState } from "react";
-
 export default function Circle({
     x,
     y,
@@ -14,11 +12,11 @@ export default function Circle({
     fillColor,
     outlineColor,
     innerComponent,
+    selectBox,
+    isSelected
 }) {
-    const [isSelected, setIsSelected] = useState(false);
-
-    function boxClicked() {
-        setIsSelected(!isSelected);
+    function boxClicked(e) {
+        selectBox(!isSelected, e.ctrlKey);
     }
 
     if (isSelected) {

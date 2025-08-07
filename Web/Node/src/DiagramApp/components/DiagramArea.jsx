@@ -10,7 +10,7 @@ import Box from "./Box";
 import Circle from "./Circle";
 import TextBox from "./TextBox";
 import Line from "./Line";
-import { useDispatch, useSelector, connect } from "react-redux";
+import { useDispatch, connect } from "react-redux";
 import { loadDiagram } from "../actions";
 import { selectNode } from "../actions/diagramActions";
 
@@ -46,8 +46,8 @@ function DiagramArea({ width, height, diagramData, selectedNodes}) {
                         y={v.get("y")}
                         w={v.get("w")}
                         h={v.get("h")}
-                        fillColor={"#fff1c1"}
-                        outlineColor={"#3d3d3d"}
+                        fillColor={v.get("fillColor")}
+                        outlineColor={v.get("outlineColor")}
                         key={key}
                         selectBox={(selected, ctrlKey) => nodeSelected(key, v, selected, ctrlKey)}
                         isSelected={selectedNodes?.has(key)}
@@ -61,8 +61,8 @@ function DiagramArea({ width, height, diagramData, selectedNodes}) {
                         x={v.get("x")}
                         y={v.get("y")}
                         lines={v.get("lines")}
-                        fillColor={"#fff1c1"}
-                        outlineColor={"#3d3d3d"}
+                        fillColor={v.get("fillColor")}
+                        outlineColor={v.get("outlineColor")}
                         key={tkey}
                         selectBox={(selected, ctrlKey) => nodeSelected(tkey, v, selected, ctrlKey)}
                         isSelected={selectedNodes?.has(tkey)}
@@ -70,14 +70,17 @@ function DiagramArea({ width, height, diagramData, selectedNodes}) {
                 );
 
             case "Circle":
+                const ckey = `circle-${idx}`;
                 return (
                     <Circle
                         x={v.get("x")}
                         y={v.get("y")}
                         r={v.get("r")}
-                        fillColor={"#fff1c1"}
-                        outlineColor={"#3d3d3d"}
-                        key={`circle-${idx}`}
+                        fillColor={v.get("fillColor")}
+                        outlineColor={v.get("outlineColor")}
+                        key={ckey}
+                        selectBox={(selected, ctrlKey) => nodeSelected(ckey, v, selected, ctrlKey)}
+                        isSelected={selectedNodes?.has(ckey)}
                     />
                 );
 

@@ -13,12 +13,16 @@ export const diagramReducer = (state = Immutable.Map(), action) => {
                         type: "TextBox",
                         x: 20,
                         y: 20,
+                        fillColor: "#fff1c1",
+                        outlineColor: "#3d3d3d",
                         lines: ["This is a long line", "Hello Moon"],
                     },
                     {
                         type: "TextBox",
                         x: 120,
                         y: 120,
+                        fillColor: "#fff1c1",
+                        outlineColor: "#3d3d3d",
                         lines: ["Hello Mars", "and", "Moon"],
                     },
                     {
@@ -27,12 +31,16 @@ export const diagramReducer = (state = Immutable.Map(), action) => {
                         y: 220,
                         w: 100,
                         h: 50,
+                        fillColor: "#fff1c1",
+                        outlineColor: "#3d3d3d",
                     },
                     {
                         type: "Circle",
                         x: 220,
                         y: 50,
                         r: 30,
+                        fillColor: "#55ff55",
+                        outlineColor: "#3d3d3d",
                     },
                 ]),
                 edges: Immutable.fromJS([
@@ -51,9 +59,9 @@ export const diagramReducer = (state = Immutable.Map(), action) => {
         case ACTIONS.SELECT_NODE:
             const { key, nodeData, selected, ctrlKey } = payload;
             const selectedNodes = ctrlKey ?
-                selected ? state.getIn(["selectedNodes"], Immutable.Map()).set(key, nodeData)
-                         : state.getIn(["selectedNodes"], Immutable.Map()).delete(key)
-                : selected ? Immutable.Map({[key]: nodeData}) : Immutable.Map();
+                selected ? state.getIn(["selectedNodes"], Immutable.Set()).add(key)
+                         : state.getIn(["selectedNodes"], Immutable.Set()).delete(key)
+                : selected ? Immutable.Set().add(key) : Immutable.Set();
 
             const selectionData = Immutable.Map({
                 selectedNodes
