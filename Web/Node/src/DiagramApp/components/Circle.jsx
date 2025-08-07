@@ -7,22 +7,18 @@
 
 import { useState } from "react";
 
-export default function Box({
+export default function Circle({
     x,
     y,
-    w,
-    h,
+    r,
     fillColor,
     outlineColor,
     innerComponent,
-    selectBox,
-    isSelected
 }) {
-    // const [isSelected, setIsSelected] = useState(false);
+    const [isSelected, setIsSelected] = useState(false);
 
-    function boxClicked(e) {
-        // setIsSelected(!isSelected);
-        selectBox(!isSelected, e.ctrlKey);
+    function boxClicked() {
+        setIsSelected(!isSelected);
     }
 
     if (isSelected) {
@@ -31,15 +27,12 @@ export default function Box({
 
     return (
         <g onClick={boxClicked}>
-            <rect
-                x={x}
-                y={y}
-                width={w}
-                height={h}
+            <circle
+                cx={x}
+                cy={y}
+                r={r}
                 fill={fillColor}
                 stroke={outlineColor}
-                rx={3}
-                ry={3}
             />
             {innerComponent}
         </g>
