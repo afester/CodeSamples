@@ -35,7 +35,7 @@ public:
 
     void setOffset(int value);
 
-//    qreal snapToTick(int pos);
+    qreal snapToTick(int pos);
 
     void setPos(qreal pos);
 

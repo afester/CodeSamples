@@ -1,0 +1,6 @@
+#!/bin/bash
+
+export APP_HOME=${HOME}/Projects/CodeSamples/Qt/GraphicsView
+export LD_LIBRARY_PATH=${APP_HOME}/build/engine:/home/andreas/Projects/qt-solutions/qtpropertybrowser/build/lib
+cd ${APP_HOME}/build/sample
+QT_LOGGING_RULES="*.debug=true" > output.log ./sample 2>&1

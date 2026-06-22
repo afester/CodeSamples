@@ -419,9 +419,8 @@ int main(int argc, char ** argv) {
 
     QApplication app( argc, argv );
 
-    // TODO: fix plugin search path for final application!
-    QCoreApplication::addLibraryPath("../build-GraphicsView-Desktop_Qt_5_10_0_MSVC2017_64bit-Debug/items/debug");
-    QCoreApplication::addLibraryPath("../build-GraphicsView-Desktop_Qt_5_10_0_MSVC2017_64bit-Debug/frames/debug");
+    QCoreApplication::addLibraryPath(QCoreApplication::applicationDirPath() + "/../items");
+    QCoreApplication::addLibraryPath(QCoreApplication::applicationDirPath() + "/../frames");
 
     MainWindow win(0);
     win.show(); 

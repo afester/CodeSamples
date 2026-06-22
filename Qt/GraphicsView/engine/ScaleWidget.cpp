@@ -36,7 +36,6 @@ void ScaleWidget::setOffset(int value) {
     repaint();
 }
 
-#if 0
 qreal ScaleWidget::snapToTick(int pos) {
     qreal scale = theView->transform().m22() / theScale;
 
@@ -45,11 +44,9 @@ qreal ScaleWidget::snapToTick(int pos) {
     float result = tick / theScale;
     return result;
 }
-#endif
 
 void ScaleWidget::setPos(qreal pos) {
     positionIndicator = pos;
-    // repaint();            // PERFORMANCE ISSUE!
 }
 
 

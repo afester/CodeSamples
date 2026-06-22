@@ -419,15 +419,16 @@ void GraphicsSheet::mousePressEvent ( QMouseEvent * event ){
 
 
 void GraphicsSheet::mouseMoveEvent ( QMouseEvent * event ) {
-#if 0
     float xSnapped = xScale->snapToTick(event->x() + horizontalScrollBar()->value());
     float ySnapped = yScale->snapToTick(event->y() + verticalScrollBar()->value());
     // qDebug() << "Scene coords: " << QPointF(xSnapped, ySnapped);
 
     xScale->setPos(xSnapped);
     yScale->setPos(ySnapped);
-#endif
-    if (interactor) {
+    xScale->update();
+    yScale->update();
+
+	if (interactor) {
         interactor->mouseMoveEvent(event);
         if (!event->isAccepted()) {
             QGraphicsView::mouseMoveEvent(event);

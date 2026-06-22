@@ -27,7 +27,6 @@ SOURCES += \
         main.cpp \
     LabelledComboBox.cpp \
     Log.cpp \
-    main.cpp \
     objectcontroller.cpp
 
 HEADERS += \
